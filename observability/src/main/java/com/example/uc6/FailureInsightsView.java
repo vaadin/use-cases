@@ -1,10 +1,19 @@
 package com.example.uc6;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.example.acme.AppWindow;
+import com.example.acme.DemoRig;
+import com.example.acme.InsightCard;
+import com.example.acme.Insights;
+import com.example.acme.Investigation;
+import com.example.acme.Telemetry;
 import com.example.views.MainLayout;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.ObjectMapper;
 
@@ -13,104 +22,114 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.details.Details;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.ListItem;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.NativeTable;
+import com.vaadin.flow.component.html.NativeTableCell;
+import com.vaadin.flow.component.html.NativeTableHeaderCell;
+import com.vaadin.flow.component.html.NativeTableRow;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.ErrorHandler;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
 
 /**
- * UC6 — Keep an eye on failures.
+ * UC6 — some returns at Acme's returns desk blow up: how do you get from the
+ * clerk's "it said something went wrong" to the line of code?
  * <p>
- * Break something, then read what the developer would actually get: not a stack
- * trace in a log, but a grouped insight naming <em>where</em> the failure
- * happened — the route, the component the user interacted with, the event that
- * triggered it, and the first application stack frame. Interactions that
- * succeed but exceed the UX latency budget surface the same way.
+ * The view opens with the story: an {@link AppWindow} showing the returns
+ * desk, whose "Process return" handler fails for defective items (a missing
+ * inspection template), fails validation for a blank order number, and hangs
+ * on bank-transfer refunds (a slow lookup, its latency in the {@link DemoRig}).
+ * The {@link Investigation} reveals itself on the first return that fails or
+ * hangs, so it appears at the moment the reader has just seen the vague
+ * notification a clerk sees.
  * <p>
- * The data comes from Observability Kit's interaction insights. The kit hooks
- * Flow's RPC invocation listener, keeps a bounded buffer of the interesting
- * interactions (failed ones, and ones slower than its UX budget), and groups
- * them so that N users hitting the same broken button produce one insight with
- * an occurrence count.
+ * Its steps: <b>2)</b> the error counter, {@code vaadin.errors}, knows
+ * <em>that</em> something failed and which exception, even the route and
+ * component class — but not which handler, event or line; <b>3)</b> the
+ * kit's insights endpoint records every failed or over-budget interaction with
+ * the route, component, event and the first application stack frame, grouping
+ * repeats into one finding with an occurrence count; <b>4)</b> the same
+ * findings as the JSON payload of {@code GET /actuator/vaadin/observability},
+ * which is the contract an AI coding agent reads to jump to the offending
+ * line.
  * <p>
- * Rather than re-derive that data, this view injects the kit's Actuator
- * endpoint — {@link VaadinObservabilityEndpoint} is a Spring bean the kit's
- * auto-configuration registers — and renders exactly what
- * {@code GET /actuator/vaadin/observability} returns: a table of the insights,
- * and the payload itself, serialized with the application's own
- * {@link ObjectMapper}. That payload is the contract an AI coding agent reads
- * to jump straight to the offending line.
- * <p>
- * The readout is bound to a {@link ValueSignal} and refreshed once per click,
- * with no polling. The refresh cannot simply run at the end of the listener:
- * the kit records a failure from {@code invocationFailed} and an over-budget
- * interaction from {@code invocationEnded}, both of which happen after the
- * listener body — and a failing listener never reaches its own last line
- * anyway. Each action therefore schedules a {@code beforeClientResponse}
- * callback <em>before</em> doing its work, which runs after all invocation
- * handling and still lands in the same response.
- * <p>
- * The actions deliberately let their exception propagate: the kit records a
- * failed interaction only when the invocation actually fails, so catching it in
- * the listener would erase the very thing this use case demonstrates. A session
- * {@link ErrorHandler} installed while this view is attached turns the failure
- * into the notification a real application would show.
+ * The handler deliberately lets its exception propagate: the kit records a
+ * failed interaction only when the invocation actually fails, so catching it
+ * would erase the very thing this use case demonstrates. A session
+ * {@link ErrorHandler} installed while the view is attached turns the failure
+ * into the notification a real application would show. And the investigation
+ * is revealed <em>before</em> the work runs — a failing listener never reaches
+ * its own last line, and the kit records the failure after the listener body,
+ * which is what {@link Investigation#reveal()}'s deferred refresh is for.
  *
  * @see <a href=
  *      "https://github.com/vaadin/use-cases/blob/main/observability/API-GAPS.md">API-GAPS.md</a>
  */
-@Route(value = "uc6", layout = MainLayout.class)
+@Route(value = FailureInsightsView.ROUTE, layout = MainLayout.class)
+@RouteAlias(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Failure insights")
 @Menu(order = 6, title = "UC6 — Failure insights")
 public class FailureInsightsView extends VerticalLayout {
 
-    /** The endpoint's selector, i.e. {@code /actuator/vaadin/observability}. */
-    private static final String SECTION = "observability";
-
-    /** Above the kit's UX budget (1 s), so the interaction is retained. */
-    private static final long SLOW_MILLIS = 1500;
-
-    /** One insight, flattened for display. */
-    public record Row(String severity, String summary, String component,
-            String event, long occurrences, String where) {
-    }
+    /**
+     * The route template, which is also the {@code route} tag on the kit's
+     * error counter and the {@code route} evidence of its insights. Named after
+     * the Acme screen; the {@code uc6} alias keeps the numbered URL working
+     * without appearing in the telemetry.
+     */
+    static final String ROUTE = "returns";
 
     /**
-     * The readout at a point in time: the flattened rows plus the endpoint
-     * payload verbatim. {@code active} mirrors the payload's own
-     * {@code instrumentation} field: {@code false} means the kit registered no
-     * instrumentation, so there is nothing to report rather than nothing to
-     * find. In development mode that happens when no license key is present.
+     * Above the kit's UX budget (1 s), so a bank-transfer refund is retained
+     * as a slow interaction on the first try.
      */
-    public record Snapshot(List<Row> rows, String json, boolean active) {
-        static final Snapshot INACTIVE = new Snapshot(List.of(), "", false);
-    }
+    static final int DEFAULT_BANK_DELAY_MS = 1_500;
+
+    static final String REASON_DAMAGED = "Damaged in transit";
+    static final String REASON_WRONG_ITEM = "Wrong item";
+    static final String REASON_DEFECTIVE = "Defective";
+    static final String REFUND_STORE_CREDIT = "Store credit";
+    static final String REFUND_ORIGINAL = "Original payment";
+    static final String REFUND_BANK_TRANSFER = "Bank transfer";
+
+    /** The endpoint's selector, i.e. {@code /actuator/vaadin/observability}. */
+    private static final String SECTION = "observability";
+    private static final String ERRORS = "vaadin.errors";
+    private static final String TAG_ROUTE = "route";
+    private static final String TAG_EXCEPTION = "exception";
+    private static final String TAG_COMPONENT = "component";
 
     private final transient VaadinObservabilityEndpoint endpoint;
     private final transient ObjectMapper json;
-    private final ValueSignal<Snapshot> snapshot = new ValueSignal<>(
-            Snapshot.INACTIVE);
-    private final Grid<Row> grid = new Grid<>();
-    private final Span status = new Span();
+    private final transient MeterRegistry registry;
+    private final Investigation investigation = new Investigation(
+            "Saw \"something went wrong\"? That is all the clerk saw, too. "
+                    + "Here is how you get from that to the line of code — "
+                    + "the readout updates with every return.");
+    private final NativeTable returnsLog = new NativeTable();
+    private final Paragraph errorCounter = new Paragraph();
+    private final Div verdict = new Div();
     private final Pre payload = new Pre();
+    private final IntegerField bankDelay = new IntegerField(
+            "Bank lookup delay (ms)");
     private @Nullable ErrorHandler previousErrorHandler;
 
     /**
@@ -120,68 +139,279 @@ public class FailureInsightsView extends VerticalLayout {
      * @param json
      *            the application's own Jackson mapper, so the payload is
      *            serialized the way the endpoint serializes it
+     * @param registry
+     *            the meter registry, for the error counter of step 2
      */
     public FailureInsightsView(VaadinObservabilityEndpoint endpoint,
-            ObjectMapper json) {
+            ObjectMapper json, MeterRegistry registry) {
         this.endpoint = endpoint;
         this.json = json;
+        this.registry = registry;
 
-        add(new H1("UC6 — Keep an eye on failures"));
-        add(new Paragraph("Trigger a failure, or an interaction that is merely "
-                + "too slow, and watch it show up below as an insight that names "
-                + "the component, the event and the line of application code "
-                + "responsible. Repeat a failure and it groups into one entry "
-                + "with an occurrence count instead of a wall of stack traces. "
-                + "Both the table and the raw payload come from the kit's "
-                + "Actuator endpoint, injected here as a Spring bean."));
+        add(new H1("UC6 — Why do some returns blow up?"));
+        add(new Paragraph(
+                "Acme's returns desk has a reputation. Clerks say returns for "
+                        + "defective items fail with \"something went wrong\", "
+                        + "and refunds by bank transfer hang — and that is all "
+                        + "they can tell you. Reproduce it below, then follow "
+                        + "how the kit turns \"it broke\" into the line of "
+                        + "code."));
 
-        // Colour-coded by the severity each action produces: red buttons yield
-        // an "error" insight, the amber one a "warning", green none at all.
-        add(new HorizontalLayout(
-                action("Fail now", ButtonVariant.ERROR, () -> {
-                    throw new IllegalStateException(
-                            "Report template 'summary' not found");
-                }), action("Fail differently", ButtonVariant.ERROR, () -> {
-                    throw new IllegalArgumentException(
-                            "Customer id must not be blank");
-                }),
-                action("Slow call (1.5 s)", ButtonVariant.WARNING,
-                        () -> sleep(SLOW_MILLIS)),
-                action("Succeed", ButtonVariant.SUCCESS,
-                        () -> Notification.show("Done"))));
+        add(new H3("1 — Process a few returns"));
+        add(new Paragraph(
+                "Register a return for a damaged item — it goes through. Then "
+                        + "one for a defective item, and one refunded by bank "
+                        + "transfer. The clerks are right."));
 
-        status.getStyle().set("font-style", "italic");
-        add(status);
+        add(buildReturnsDesk());
+        add(buildDemoRig());
+        add(buildInvestigation());
 
-        grid.addColumn(Row::severity).setHeader("Severity").setAutoWidth(true);
-        grid.addColumn(Row::summary).setHeader("Insight").setFlexGrow(1);
-        grid.addColumn(Row::component).setHeader("Component")
-                .setAutoWidth(true);
-        grid.addColumn(Row::event).setHeader("Event").setAutoWidth(true);
-        grid.addColumn(Row::occurrences).setHeader("Count").setAutoWidth(true);
-        // Both text columns flex, so the summary is not squeezed out by the
-        // (much longer) stack frame.
-        grid.addColumn(Row::where).setHeader("Application frame")
-                .setFlexGrow(1);
-        grid.setAllRowsVisible(true);
-        add(grid);
-
-        // The primary signal-bound container: re-runs whenever the snapshot is
-        // set, on each poll. Grid, status line and raw payload all repaint from
-        // the same snapshot, so the JSON stays in step with the table.
-        Signal.effect(grid, () -> {
-            Snapshot current = snapshot.get();
-            grid.setItems(current.rows());
-            status.setText(statusText(current));
-            payload.setText(current.json().isEmpty() ? "// nothing recorded yet"
-                    : current.json());
-        });
-
-        add(callout());
-        add(payloadPanel());
-
-        recompute();
+        investigation.refreshNow();
     }
+
+    // ---------- the Acme returns desk and its demo rig ----------
+
+    private AppWindow buildReturnsDesk() {
+        TextField orderNumber = new TextField("Order number");
+        orderNumber.setValue("AC-10482");
+        orderNumber.setWidth("10em");
+        orderNumber.setId("order-number");
+
+        Select<String> reason = new Select<>();
+        reason.setLabel("Reason");
+        reason.setItems(REASON_DAMAGED, REASON_WRONG_ITEM, REASON_DEFECTIVE);
+        reason.setValue(REASON_DAMAGED);
+        reason.setWidth("12em");
+        reason.setId("return-reason");
+
+        Select<String> refund = new Select<>();
+        refund.setLabel("Refund");
+        refund.setItems(REFUND_STORE_CREDIT, REFUND_ORIGINAL,
+                REFUND_BANK_TRANSFER);
+        refund.setValue(REFUND_STORE_CREDIT);
+        refund.setWidth("12em");
+        refund.setId("refund-method");
+
+        NativeTableCell noReturnsCell = new NativeTableCell(
+                "No returns processed yet.");
+        noReturnsCell.getElement().setAttribute("colspan", "3");
+        NativeTableRow noReturns = new NativeTableRow(noReturnsCell);
+        noReturns.addClassName("order-empty");
+
+        Button process = new Button("Process return", event -> {
+            String order = orderNumber.getValue().trim();
+            String why = reason.getValue();
+            String how = refund.getValue();
+
+            // Before the work, not after: a failing handler never reaches its
+            // own last line, and the kit records the failure after the handler
+            // body — the deferred refresh inside reveal() catches it.
+            if (order.isEmpty() || REASON_DEFECTIVE.equals(why)
+                    || REFUND_BANK_TRANSFER.equals(how)) {
+                investigation.reveal();
+            } else {
+                investigation.refreshSoon();
+            }
+
+            if (order.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Order number must not be blank");
+            }
+            if (REASON_DEFECTIVE.equals(why)) {
+                throw new IllegalStateException(
+                        "Inspection template 'defective' not found");
+            }
+            if (REFUND_BANK_TRANSFER.equals(how)) {
+                lookUpBankAccount();
+            }
+
+            noReturns.removeFromParent();
+            returnsLog.getBody()
+                    .add(new NativeTableRow(new NativeTableCell(order),
+                            new NativeTableCell(why),
+                            new NativeTableCell(how)));
+            Notification.show("Return registered for " + order);
+        });
+        process.addThemeVariants(ButtonVariant.PRIMARY);
+
+        returnsLog.setId("returns-log");
+        returnsLog.addClassName("order-lines");
+        returnsLog.setWidthFull();
+        NativeTableRow header = returnsLog.getHead().addRow();
+        header.add(new NativeTableHeaderCell("Order"));
+        header.add(new NativeTableHeaderCell("Reason"));
+        header.add(new NativeTableHeaderCell("Refund"));
+        returnsLog.getBody().add(noReturns);
+
+        return new AppWindow("Acme Supply — Returns Desk", ROUTE,
+                new HorizontalLayout(Alignment.END, orderNumber, reason,
+                        refund, process),
+                returnsLog);
+    }
+
+    /** The knob that fakes the slow bank lookup behind bank-transfer refunds. */
+    private DemoRig buildDemoRig() {
+        bankDelay.setValue(DEFAULT_BANK_DELAY_MS);
+        bankDelay.setWidth("14em");
+        bankDelay.setStepButtonsVisible(true);
+        bankDelay.setMin(0);
+        bankDelay.setMax(5_000);
+        bankDelay.setId("bank-delay");
+
+        DemoRig rig = new DemoRig(bankDelay);
+        rig.setId("simulation-rig");
+        return rig;
+    }
+
+    private void lookUpBankAccount() {
+        Integer ms = bankDelay.getValue();
+        if (ms == null || ms <= 0) {
+            return;
+        }
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    // ---------- the investigation, revealed by the first bad return --------
+
+    private Investigation buildInvestigation() {
+        investigation.setId("investigation");
+        investigation.onRefresh(this::refreshReadout);
+
+        errorCounter.setId("error-counter");
+        investigation.step("2 — The usual suspects know that, not where", true,
+                errorCounter);
+
+        verdict.setId("verdict");
+        verdict.setWidthFull();
+        investigation.step("3 — The kit's verdict", false, new Paragraph(
+                "The insights endpoint records every failed or over-budget "
+                        + "interaction with its route, component, event and "
+                        + "the first application stack frame, and groups "
+                        + "repeats — one finding however many clerks hit it."),
+                verdict);
+
+        payload.addClassName("payload");
+        Div scroller = new Div(payload);
+        scroller.addClassName("payload-scroller");
+        Paragraph payloadLead = new Paragraph();
+        payloadLead.add(new Span("The same findings as JSON from "),
+                new Anchor("/actuator/vaadin/observability",
+                        "GET /actuator/vaadin/observability"),
+                new Span(" — the contract an AI coding agent reads to jump "
+                        + "straight to the offending line."));
+        investigation.step("4 — The payload an agent reads", false,
+                payloadLead, scroller);
+
+        return investigation;
+    }
+
+    private void refreshReadout() {
+        Map<String, Object> current = endpoint.section(SECTION);
+        refreshErrorCounter();
+        refreshVerdict(current);
+        refreshPayload(current);
+    }
+
+    /**
+     * Step 2: the counter a dashboard would alert on. It carries the exception
+     * type, the route and the component class — enough to know something is
+     * wrong on the returns desk, not enough to know which handler or line.
+     */
+    private void refreshErrorCounter() {
+        errorCounter.removeAll();
+        Map<String, Double> byException = new LinkedHashMap<>();
+        double total = 0;
+        for (Counter counter : registry.find(ERRORS).tag(TAG_ROUTE, ROUTE)
+                .counters()) {
+            String key = Insights.simpleName(
+                    Insights.text(counter.getId().getTag(TAG_EXCEPTION)))
+                    + " on " + Insights.simpleName(Insights
+                            .text(counter.getId().getTag(TAG_COMPONENT)));
+            byException.merge(key, counter.count(), Double::sum);
+            total += counter.count();
+        }
+        if (total == 0) {
+            errorCounter.add(new Span(
+                    "No failures counted on this route yet — process a return "
+                            + "for a defective item above."));
+            return;
+        }
+        errorCounter.add(Telemetry.chip(ERRORS), new Span(" — "),
+                Telemetry.timing("%.0f failure(s)".formatted(total)),
+                new Span(" on " + TAG_ROUTE + "=" + ROUTE + ": "));
+        byException.forEach((key, count) -> errorCounter.add(
+                Telemetry.chip(key), new Span(" "),
+                Telemetry.timing("×%.0f".formatted(count)), new Span("  ")));
+        errorCounter.add(new Span(
+                "The counter and the server log know an exception happened, "
+                        + "and which type — not which handler, which event, "
+                        + "or which line."));
+    }
+
+    /**
+     * Step 3: the {@code user-interaction-error} and
+     * {@code slow-user-interaction} findings for this route, each with the
+     * application frame the kit attributes it to.
+     */
+    private void refreshVerdict(@Nullable Map<String, Object> current) {
+        verdict.removeAll();
+        List<Map<String, Object>> findings = Insights.of(current).stream()
+                .filter(insight -> {
+                    Object type = insight.get("type");
+                    return "user-interaction-error".equals(type)
+                            || "slow-user-interaction".equals(type);
+                })
+                .filter(insight -> ROUTE
+                        .equals(Insights.evidenceOf(insight).get("route")))
+                .toList();
+        if (findings.isEmpty()) {
+            Paragraph empty = new Paragraph(
+                    "No findings yet — the kit records an interaction once it "
+                            + "fails or exceeds the 1 s UX budget. Process a "
+                            + "return for a defective item, or a bank-transfer "
+                            + "refund.");
+            empty.addClassName("verdict-empty");
+            verdict.add(empty);
+            return;
+        }
+        findings.forEach(insight -> {
+            Map<String, Object> evidence = Insights.evidenceOf(insight);
+            Object frame = evidence.get("applicationFrame");
+            Object exception = evidence.get("exception");
+            List<String> chips = new ArrayList<>(List.of(
+                    TAG_ROUTE + "=" + Insights.text(evidence.get("route")),
+                    Insights.simpleName(
+                            Insights.text(evidence.get("component"))),
+                    "event " + Insights.text(evidence.get("event"))));
+            if (exception != null) {
+                chips.add(Insights.simpleName(exception.toString()));
+            }
+            chips.add(Insights.text(evidence.get("occurrences")) + "×");
+            verdict.add(new InsightCard(insight,
+                    frame == null ? null : "at " + frame, chips));
+        });
+    }
+
+    /** Step 4: the payload verbatim, as the endpoint serves it. */
+    private void refreshPayload(@Nullable Map<String, Object> current) {
+        if (current == null || current.isEmpty()) {
+            payload.setText("// nothing recorded yet");
+            return;
+        }
+        try {
+            payload.setText(json.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(current));
+        } catch (RuntimeException e) {
+            payload.setText("// could not serialize the payload: " + e);
+        }
+    }
+
+    // ---------- what the clerk sees when it breaks ----------
 
     @Override
     protected void onAttach(AttachEvent event) {
@@ -196,7 +426,7 @@ public class FailureInsightsView extends VerticalLayout {
             previousErrorHandler = session.getErrorHandler();
             session.setErrorHandler(errorEvent -> ui.access(() -> {
                 Notification notification = Notification.show(
-                        "Something went wrong. It is now in the insights below.");
+                        "Something went wrong. The return was not processed.");
                 notification.setPosition(Notification.Position.MIDDLE);
                 notification.addThemeVariants(NotificationVariant.ERROR);
             }));
@@ -212,172 +442,5 @@ public class FailureInsightsView extends VerticalLayout {
             previousErrorHandler = null;
         }
         super.onDetach(event);
-    }
-
-    private void recompute() {
-        Map<String, Object> current = endpoint.section(SECTION);
-        if (current == null) {
-            current = Map.of();
-        }
-        List<Row> rows = new ArrayList<>();
-        for (Map<String, Object> insight : insightsOf(current)) {
-            Map<String, Object> evidence = evidenceOf(insight);
-            rows.add(new Row(text(insight.get("severity")),
-                    text(insight.get("summary")),
-                    simpleName(text(evidence.get("component"))),
-                    text(evidence.get("event")),
-                    count(evidence.get("occurrences")),
-                    text(evidence.get("applicationFrame"))));
-        }
-        // The endpoint states this itself now, so the view no longer has to
-        // reach into the kit's statics to tell "no failures" from "nothing was
-        // watching".
-        snapshot.set(new Snapshot(rows, pretty(current),
-                "active".equals(current.get("instrumentation"))));
-    }
-
-    /**
-     * Builds one action button. The refresh is scheduled <em>before</em> the
-     * work runs, so it happens even when the work throws and the listener never
-     * returns.
-     */
-    private Button action(String label, ButtonVariant variant, Runnable work) {
-        Button button = new Button(label, e -> {
-            refreshWithThisResponse();
-            work.run();
-        });
-        button.addThemeVariants(variant, ButtonVariant.PRIMARY);
-        return button;
-    }
-
-    /**
-     * Recomputes the readout while this request's response is being written.
-     * <p>
-     * That timing matters. The kit records a failed interaction from
-     * {@code invocationFailed} and an over-budget one from
-     * {@code invocationEnded}, both of which run after the click listener body
-     * — so refreshing inside the listener would miss the very insight the click
-     * just produced. A {@code beforeClientResponse} callback runs after all
-     * invocation handling, and still lands in the same response, which is why
-     * this view needs no polling.
-     */
-    private void refreshWithThisResponse() {
-        UI ui = UI.getCurrent();
-        if (ui != null) {
-            ui.beforeClientResponse(this, context -> recompute());
-        }
-    }
-
-    /**
-     * Shows the endpoint payload verbatim, refreshed by the same poll as the
-     * grid: this is what {@code curl /actuator/vaadin/observability} returns
-     * and what an agent consumes.
-     */
-    private Details payloadPanel() {
-        payload.getStyle().set("margin", "0").set("font-size", "0.7rem")
-                .set("line-height", "1.35").set("white-space", "pre-wrap")
-                .set("word-break", "break-word");
-        // A viewport-relative cap keeps the payload scrolling inside its own
-        // box: a flex height would not propagate through the Details shadow
-        // DOM, and the panel would overflow onto what follows it.
-        Div scroller = new Div(payload);
-        scroller.getStyle().set("max-height", "55vh").set("overflow", "auto")
-                .set("background", "var(--vaadin-background-container)")
-                .set("border-radius", "var(--vaadin-radius-m)")
-                .set("padding", "var(--vaadin-padding-s)").set("width", "100%");
-        Details details = new Details(
-                "Endpoint payload — GET /actuator/vaadin/observability",
-                scroller);
-        details.setOpened(true);
-        details.setWidthFull();
-        return details;
-    }
-
-    private String pretty(Map<String, Object> current) {
-        if (current.isEmpty()) {
-            return "";
-        }
-        try {
-            return json.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(current);
-        } catch (RuntimeException e) {
-            return "// could not serialize the payload: " + e;
-        }
-    }
-
-    private static String statusText(Snapshot snapshot) {
-        if (!snapshot.active()) {
-            return "Observability Kit registered no instrumentation, so there "
-                    + "is nothing to report. In development mode this means no "
-                    + "license key was found.";
-        }
-        return snapshot.rows().isEmpty()
-                ? "No failed or over-budget interactions recorded yet."
-                : snapshot.rows().size() + " insight(s) recorded.";
-    }
-
-    private static Details callout() {
-        UnorderedList list = new UnorderedList(new ListItem(
-                "An insight names the component and event, plus the first "
-                        + "non-framework stack frame — the likely bug location. "
-                        + "That closes gap #8, which asked for interaction "
-                        + "attribution beyond the RPC type."),
-                new ListItem("The attribution lives on insights and spans, not "
-                        + "on meter tags: latency and error metrics are still "
-                        + "tagged by RPC type and exception only, so a "
-                        + "dashboard cannot group by component."),
-                new ListItem("The session id, exception message and stack "
-                        + "frames are opt-in: the payload is meant to travel, "
-                        + "so they are withheld unless "
-                        + "vaadin.observability.insights-details is set. This "
-                        + "demo enables it; with it off the session id is a "
-                        + "short hash and the payload says the message was "
-                        + "withheld rather than absent."),
-                new ListItem("Capture happens on the RPC invocation hook, "
-                        + "which only fires for a real UIDL request. Browserless "
-                        + "tests call listeners directly, so they cannot "
-                        + "exercise the capture — this view's insights need a "
-                        + "browser."));
-        Details details = new Details(
-                "How this works, and what it still can't do", list);
-        details.add(new Anchor("/actuator/vaadin/observability",
-                "GET /actuator/vaadin/observability"));
-        return details;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static List<Map<String, Object>> insightsOf(
-            Map<String, Object> payload) {
-        return payload.get("insights") instanceof List<?> list
-                ? (List<Map<String, Object>>) list
-                : List.of();
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, Object> evidenceOf(Map<String, Object> insight) {
-        return insight.get("evidence") instanceof Map<?, ?> map
-                ? (Map<String, Object>) map
-                : Map.of();
-    }
-
-    private static String text(@Nullable Object value) {
-        return value == null ? "—" : value.toString();
-    }
-
-    private static long count(@Nullable Object value) {
-        return value instanceof Number number ? number.longValue() : 0;
-    }
-
-    private static String simpleName(String className) {
-        int lastDot = className.lastIndexOf('.');
-        return lastDot >= 0 ? className.substring(lastDot + 1) : className;
-    }
-
-    private static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 }
