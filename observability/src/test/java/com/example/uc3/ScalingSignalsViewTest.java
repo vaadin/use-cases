@@ -47,10 +47,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 // A fresh context per test. The kit's binder is created by the Vaadin service
 // init listener and registers gauges that hold it; re-initialising the Vaadin
 // environment between tests builds a second binder while the shared registry
-// still serves the first one's gauges, which then report zero because the UIs
-// they knew about are gone. Reloading the context keeps registry and binder in
-// step, so a gauge reading means what it says.
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+// still serves the first one's gauges, which then report zero — or NaN, once
+// that binder is collected out of the weak reference the gauge holds it by —
+// because the UIs they knew about are gone. Reloading the context keeps
+// registry and binder in step, so a gauge reading means what it says.
+//
+// Dirtied *before* each method rather than after, because the hazard is the
+// context this class is handed, not the one it leaves behind: the first method
+// inherits whatever context an earlier @SpringBootTest class already built and
+// initialised a Vaadin environment against, and the binder behind that
+// registry's gauges is dead before this class starts. Dirtying afterwards left
+// exactly that one method unprotected, so whichever test ran first read a dead
+// gauge and failed depending on the order the classes happened to run in.
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ScalingSignalsViewTest extends SpringBrowserlessTest {
 
     @Autowired
