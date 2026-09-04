@@ -257,8 +257,9 @@
         var(--vaadin-border-color));
 }
 
-.order-lines th:last-child,
-.order-lines td:last-child {
+/* A trailing quantity column (UC8's Qty) reads as a number: narrow, right-aligned. */
+.order-lines-numeric th:last-child,
+.order-lines-numeric td:last-child {
     text-align: end;
     width: 4em;
     font-variant-numeric: tabular-nums;
@@ -282,4 +283,41 @@
         transparent);
     border-radius: 999px;
     padding: 0.125rem 0.5625rem;
+}
+
+/* A finding's detail line: the stack frame or message the kit attributes it
+   to. Long, so it wraps anywhere rather than overflowing the card. */
+.verdict-detail {
+    display: block;
+    font-family: var(--vaadin-font-family-monospace, ui-monospace, monospace);
+    font-size: 0.75rem;
+    color: var(--vaadin-text-color-secondary);
+    overflow-wrap: anywhere;
+    margin-block-end: 0.5rem;
+}
+
+/* The insights endpoint payload, verbatim. Capped to the viewport so it
+   scrolls inside its own box instead of pushing the page. */
+.payload-scroller {
+    width: 100%;
+    max-height: 55vh;
+    overflow: auto;
+    background: var(--vaadin-background-container-strong,
+        var(--vaadin-background-container));
+    border-radius: var(--vaadin-radius-m, 8px);
+    padding: var(--vaadin-padding-s, 0.5rem);
+    box-sizing: border-box;
+}
+
+.payload {
+    margin: 0;
+    font-size: 0.7rem;
+    line-height: 1.35;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* The inventory page's one-line catalog summary next to its refresh button. */
+.catalog-summary {
+    color: var(--vaadin-text-color-secondary);
 }

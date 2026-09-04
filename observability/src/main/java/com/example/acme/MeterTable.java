@@ -28,7 +28,8 @@ public class MeterTable extends NativeTable {
      * @param tags
      *            the tags the meter is read by, e.g. {@code filtered=true}
      * @param count
-     *            how many recordings the reading aggregates
+     *            how many recordings the reading aggregates, or {@code -1}
+     *            when that has no meaning (a gauge)
      * @param value
      *            the formatted value, empty when there are no recordings
      * @param reads
@@ -73,7 +74,8 @@ public class MeterTable extends NativeTable {
             value.add(Telemetry.timing(row.value()));
         }
         return new NativeTableRow(meter, tags,
-                new NativeTableCell(Long.toString(row.count())), value,
-                new NativeTableCell(row.reads()));
+                new NativeTableCell(
+                        row.count() < 0 ? "—" : Long.toString(row.count())),
+                value, new NativeTableCell(row.reads()));
     }
 }

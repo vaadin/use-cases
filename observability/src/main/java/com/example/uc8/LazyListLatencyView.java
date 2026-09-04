@@ -195,7 +195,7 @@ public class LazyListLatencyView extends VerticalLayout {
         });
 
         orderLines.setId("order-lines");
-        orderLines.addClassName("order-lines");
+        orderLines.addClassNames("order-lines", "order-lines-numeric");
         orderLines.setWidthFull();
         NativeTableRow header = orderLines.getHead().addRow();
         header.add(new NativeTableHeaderCell("Product"));

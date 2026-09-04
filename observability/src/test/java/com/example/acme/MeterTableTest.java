@@ -50,6 +50,15 @@ class MeterTableTest {
     }
 
     @Test
+    void aGaugeHasNoRecordingCountToShow() {
+        MeterTable table = new MeterTable("Samples");
+        table.setRows(List.of(new MeterTable.Row("vaadin.sessions.active", "—",
+                -1, "3", "signed-in users")));
+
+        assertEquals("—", cell(table.getBody().getRows().get(0), 2));
+    }
+
+    @Test
     void setRowsReplacesRatherThanAppends() {
         MeterTable table = new MeterTable("Queries");
         table.setRows(List.of(new MeterTable.Row("a", "t", 1, "v", "r"),

@@ -146,11 +146,11 @@ class LazyListLatencyViewTest extends SpringBrowserlessTest {
     void addToOrderAppendsALineAndClearsTheSearch() {
         navigate(LazyListLatencyView.class);
 
-        ComboBox<String> product = findInView(ComboBox.class).first();
+        ComboBox<?> product = findInView(ComboBox.class).first();
         IntegerField quantity = findInView(IntegerField.class)
                 .id("order-quantity");
         quickenTheCatalog();
-        test(product).selectItem("Brass hex bolt M8 × 40");
+        test(product, String.class).selectItem("Brass hex bolt M8 × 40");
         quantity.setValue(3);
 
         test(findInView(Button.class).withText("Add to order").single())
@@ -283,10 +283,9 @@ class LazyListLatencyViewTest extends SpringBrowserlessTest {
      * simulated latency is zeroed first so the suite is not paced by
      * {@code Thread.sleep}.
      */
-    @SuppressWarnings("unchecked")
     private void searchTheCatalog() {
         quickenTheCatalog();
-        test((ComboBox<String>) findInView(ComboBox.class).first())
+        test(findInView(ComboBox.class).first(), String.class)
                 .selectItem("Brass hex bolt M8 × 40");
     }
 
