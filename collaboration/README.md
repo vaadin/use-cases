@@ -76,3 +76,8 @@ Open <http://localhost:8080/>.
   the sampler, so nothing here needs a login.
 - **`vaadin` rather than `vaadin-core`**, because UC9 mirrors the sampler's
   Grid Pro sample and the field highlighter ships in the same artifact.
+- **Collaboration Engine is excluded from the build**, on all three paths that
+  bring it in: the common module, the platform artifact and the Spring
+  starter. It ships with the platform, and a module whose claim is "here is
+  what shared signals can do without Collaboration Kit" should have the
+  compiler enforce that rather than the reader trusting it.

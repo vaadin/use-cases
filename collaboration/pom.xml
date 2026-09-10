@@ -16,16 +16,38 @@
             <groupId>com.example</groupId>
             <artifactId>use-cases-common</artifactId>
             <version>${project.version}</version>
+            <!-- Same reason as below. Collaboration Engine reaches this
+                 module by three routes - the common module, the platform
+                 artifact and the Spring starter - and one exclusion left out
+                 is enough to put it back on the classpath. -->
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>collaboration-engine</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--
           The full platform artifact rather than vaadin-core: UC9 mirrors the
           CE sampler's Grid Pro sample, and the field highlighter that UC5-UC7
           drive (vaadin-field-highlighter-flow) also ships here. Nothing else
           in the module needs a Pro key.
+
+          Collaboration Engine is excluded rather than merely left unused. It
+          comes with the platform artifact, and the whole point of this module
+          is what shared signals can do without it — an accidental import
+          would make a view prove the opposite of what it claims. With the
+          exclusion in place, the compiler enforces it.
         -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>collaboration-engine</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -35,6 +57,12 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>collaboration-engine</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
