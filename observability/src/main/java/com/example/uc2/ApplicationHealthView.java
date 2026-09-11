@@ -77,9 +77,9 @@ import com.vaadin.flow.shared.Registration;
  * ticks arrive on schedule, red after a late one. The push mode and transport
  * come from the public {@link PushConfiguration}.
  * <p>
- * There is no {@code vaadin.client.rpc.duration}: the kit measures the
- * per-request round-trip server-side only; the client collector emits load-
- * and paint-oriented meters.
+ * The browser's per-interaction timers, {@code vaadin.client.request.duration}
+ * and {@code vaadin.client.render.duration}, are UC1's subject; this view keeps
+ * to the load- and paint-oriented client meters.
  */
 @Route(value = ApplicationHealthView.ROUTE, layout = MainLayout.class)
 @RouteAlias(value = "uc2", layout = MainLayout.class)
