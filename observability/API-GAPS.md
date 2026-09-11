@@ -38,54 +38,48 @@ meters — a Flow view can inject the `MeterRegistry` and read them today. The g
 below are therefore about **what the client measures, granularity, correlation, and
 completeness**, not about getting client data to the server.
 
-> **Watch out:** `MeterNames.CLIENT_RPC_DURATION` (`vaadin.client.rpc.duration`)
-> is a *defined constant but is intentionally never collected* — it is excluded
-> from `ClientMetricNames.ALLOWED`, and the collector never emits it, because RPC
-> timing is measured server-side only. Application code that reads
-> `vaadin.client.rpc.duration` expecting a browser round-trip will always find an
-> empty meter. (UC1 originally made this mistake; it now reads the client meters
-> that actually populate — see gap #2.)
+> **Note:** the kit once declared a `vaadin.client.rpc.duration` constant that was
+> never emitted. It is gone. The browser's per-interaction timers are
+> `vaadin.client.request.duration` and `vaadin.client.render.duration` (see gap #2,
+> now closed); UC1 reads both.
 
 ## 1. No public client-side request-lifecycle hook
 
-**Where it bites:** UC1 (end-to-end responsiveness); the whole client collector.
+**Where it bites:** UC1 (attributing one click end to end); the whole client collector.
 **Symptom:** there is no supported way for application/add-on code to learn when a
-UIDL request starts and ends in the browser. The internal `RequestResponseTracker`
-fires `RequestStartingEvent` / `ResponseHandlingEndedEvent`, but on a GWT-internal
-`EventBus` with Java-only handlers and no `@JsExport` — invisible to JS. Lacking
-such a hook, the kit's `VaadinMetricsClient.js` does **not** instrument UIDL
-requests at all: it sidesteps the problem by measuring SPA navigation through the
-History API (wrapping `history.pushState` / `replaceState` and listening for
-`popstate`) and page quality through `PerformanceObserver` (LCP/FCP) — never the
-request/response of an in-place interaction. (The earlier prototype monkey-patched
-`XMLHttpRequest.prototype.send` and string-matched `v-r=uidl`; the kit dropped that
-rather than rely on an implementation detail.)
-**Workaround used:** none clean; the kit measures navigation + vitals instead of requests.
-**Suggested API:** a first-class client hook, e.g.
-`window.Vaadin.Flow.addRequestListener({ onRequestStart, onResponseReceived, onRendered })`,
-emitting per-request timestamps, request/response sizes, transport, outcome, and a
-correlation id — surfacing the events `RequestResponseTracker` already fires.
+UIDL request starts and ends in the browser. The `RequestResponseTracker` fires
+`RequestStartingEvent` / `ResponseHandlingEndedEvent`, now in TypeScript
+([flow#24951](https://github.com/vaadin/flow/pull/24951)), but they are not
+published on `window.Vaadin.Flow.clients`. The kit's collector no longer needs the
+hook for *timing*: it reads each UIDL `POST`'s Resource Timing entry for the round
+trip and Flow's published `getProfilingData()` for the render time (gap #2). What
+it still cannot do without the hook is tell *which* request a timing belongs to, or
+attribute a request to the click that started it.
+**Workaround used:** Resource Timing for the wire, `getProfilingData()` for the render,
+the connection store's loading transitions as the "a request ended" signal.
+**Suggested API:** publish the tracker's events, as
+[flow#7369](https://github.com/vaadin/flow/issues/7369) has asked since 2020:
+`window.Vaadin.Flow.addRequestListener({ onRequestStart, onResponseReceived, onRendered })`
+with a correlation id, so a click can be followed from the browser to the server.
 
-## 2. No per-interaction client timing — only navigation and web vitals
+## 2. Per-interaction client timing — closed
 
-**Where it bites:** UC1 (the browser segment of perceived latency).
-**Symptom:** the kit deliberately emits **no client round-trip meter**
-(`vaadin.client.rpc.duration` is excluded from the ingest allowlist — see the note
-above). So an in-place interaction such as a button click produces no client-side
-timing whatsoever; only a *route navigation* (a History change) yields
-`vaadin.client.navigation.duration`, and even that is measured to the next
-animation frame after the URL changes, not to the moment Flow finishes applying the
-UIDL diff and painting. "Click-to-rendered" — the number the user actually feels for
-a non-navigating interaction — is therefore not measurable on the client at all. The
-engine *does* measure render time (TestBench reads `timeSpentRenderingLastRequest()`),
-but it is not on any public JS surface.
-**Workaround used:** UC1 reads the meters that do populate — `vaadin.request.duration`
-and the new server-side `vaadin.rpc.duration` for the server share, plus
-`vaadin.client.navigation.duration` and the web-vitals timers for page-load quality.
-The per-click browser/network share is simply absent.
-**Suggested API:** an `onRendered` timestamp on the hook from gap #1 (fired after the
-UIDL response has been applied), and/or exposing the engine's existing render timing to
-production client code, so a per-interaction client duration can exist.
+**Where it bit:** UC1 (the browser segment of perceived latency).
+**Status: closed by Observability Kit 5.0**
+([observability-kit#396](https://github.com/vaadin/observability-kit/pull/396)).
+The collector times each UIDL request from the browser's end as
+`vaadin.client.request.duration`, read off the Resource Timing entry every UIDL `POST`
+leaves behind, and the time Flow's client spent applying the response as
+`vaadin.client.render.duration`, read from the profiling data Flow publishes on
+`window.Vaadin.Flow.clients[id].getProfilingData()`. Both are tagged by `route`. The
+render figure exists only when Flow's `requestTiming` setting is on — the default
+outside production mode; a production deployment sets `vaadin.requestTiming=true`, as
+this module does. Subtracting `vaadin.request.duration{vaadin_request_type="uidl"}`
+from the browser's round trip gives the network's share, which UC1 shows.
+**What remains:** the render figure is Flow's processing time, not "click to painted";
+and the three segments are aggregates that cannot be stitched per click (gap #3). The
+request meter needs the default transport: with `@Push(transport = WEBSOCKET)` the UIDL
+rides the websocket and leaves no Resource Timing entry.
 
 ## 3. Client samples are aggregated and uncorrelated — no per-interaction value
 
@@ -231,8 +225,8 @@ only by exception type — deliberately, to bound cardinality. So a Prometheus/G
 dashboard still cannot group latency or errors by component or view; only the in-process
 insights (or a tracing backend) carry that. A *business* action name ("save order", as
 opposed to the `click` that carried it) also remains the application's own to record.
-**Workaround used:** UC1 keeps its own `uc1.interaction` timer for per-action metric
-granularity; UC6 uses the insights for per-component attribution.
+**Workaround used:** UC1 keeps its own `acme.invoice.action{action=…}` timer for
+per-action metric granularity; UC6 uses the insights for per-component attribution.
 **Suggested API:** an opt-in, cardinality-bounded resolver the application supplies (e.g.
 route plus a logical action name) that the kit may apply as *meter* tags, so dashboards
 can group by view/action without unbounded cardinality.

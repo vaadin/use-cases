@@ -5,7 +5,9 @@ import java.util.Optional;
 
 import com.example.acme.AppWindow;
 import com.example.home.HomeView;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
@@ -24,6 +26,8 @@ import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.router.RouteConfiguration;
 
+import java.time.Duration;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -39,6 +43,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ViewPackages(classes = { InteractionLatencyView.class, HomeView.class })
 class InteractionLatencyViewTest extends SpringBrowserlessTest {
+
+    @Autowired
+    MeterRegistry registry;
 
     @Test
     void opensWithTheInvoicingDeskAndTheInvestigationHidden() {
@@ -120,6 +127,8 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
         List<String> meters = findInView(Table.class).id("framework-timers")
                 .getBodyRows().stream().map(row -> cell(row, 0)).toList();
         assertEquals(List.of("vaadin.request.duration", "vaadin.rpc.duration",
+                "vaadin.client.request.duration",
+                "vaadin.client.render.duration",
                 "vaadin.client.navigation.duration",
                 "vaadin.client.web_vitals.lcp",
                 "vaadin.client.web_vitals.fcp"), meters,
@@ -128,7 +137,66 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
     }
 
     @Test
+    void theBrowserRowsReadThisRouteOnly() {
+        navigate(InteractionLatencyView.class);
+        click("Save draft");
+
+        List<TableRow> rows = findInView(Table.class).id("framework-timers")
+                .getBodyRows();
+        assertEquals("route=invoices", tagsOf(rows,
+                "vaadin.client.request.duration"),
+                "the browser's round trip is read for this route, the tag "
+                        + "the kit puts on it");
+        assertEquals("route=invoices",
+                tagsOf(rows, "vaadin.client.render.duration"));
+        assertEquals("vaadin.request.type=uidl",
+                tagsOf(rows, "vaadin.request.duration"),
+                "the server row is scoped to the same requests the browser "
+                        + "times, so the two describe one population");
+    }
+
+    @Test
+    void theRenderRowSaysWhyItIsEmptyWhenRoundTripsAreThere() {
+        // The browserless harness has no browser collector, so the sample is
+        // recorded the way the kit's binder would record it.
+        registry.timer("vaadin.client.request.duration", "route", "invoices")
+                .record(Duration.ofMillis(180));
+        navigate(InteractionLatencyView.class);
+        click("Save draft");
+
+        List<TableRow> rows = findInView(Table.class).id("framework-timers")
+                .getBodyRows();
+        assertTrue(readsOf(rows, "vaadin.client.render.duration")
+                .contains("vaadin.requestTiming=true"),
+                "round trips without render figures can only mean Flow's "
+                        + "request timing is off, and the row should say so");
+    }
+
+    @Test
+    void theNetworkShareIsWorkedOutFromBothEnds() {
+        registry.timer("vaadin.request.duration", "vaadin.request.type",
+                "uidl", "http.method", "POST", "outcome", "success",
+                "vaadin.interaction", "rpc", "error", "none")
+                .record(Duration.ofMillis(120));
+        registry.timer("vaadin.client.request.duration", "route", "invoices")
+                .record(Duration.ofMillis(180));
+        navigate(InteractionLatencyView.class);
+        click("Save draft");
+
+        String share = findInView(Div.class).id("wire-share").getElement()
+                .getTextRecursively();
+        assertTrue(share.contains("60.0 ms"),
+                "the network's share is the browser's round trip less the "
+                        + "server's handling of the same requests: " + share);
+    }
+
+    @Test
     void eachActionGetsItsOwnRowInTheAppsTimer() {
+        // The timer lives in the registry every test in this class shares,
+        // so the counts are read as the difference this test makes, not as
+        // absolute values that depend on which tests ran before it.
+        long savesBefore = clicks(InteractionLatencyView.ACTION_SAVE);
+        long issuesBefore = clicks(InteractionLatencyView.ACTION_ISSUE);
         navigate(InteractionLatencyView.class);
         findInView(IntegerField.class).id("tax-delay").setValue(0);
 
@@ -139,12 +207,10 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
 
         List<TableRow> rows = findInView(Table.class).id("action-timers")
                 .getBodyRows();
-        assertTrue(rows.stream().anyMatch(row -> cell(row, 1)
-                .equals("action=" + InteractionLatencyView.ACTION_SAVE)
-                && cell(row, 2).equals("1")));
-        assertTrue(rows.stream().anyMatch(row -> cell(row, 1)
-                .equals("action=" + InteractionLatencyView.ACTION_ISSUE)
-                && cell(row, 2).equals("2")),
+        assertEquals(String.valueOf(savesBefore + 1), countOf(rows,
+                "action=" + InteractionLatencyView.ACTION_SAVE));
+        assertEquals(String.valueOf(issuesBefore + 2), countOf(rows,
+                "action=" + InteractionLatencyView.ACTION_ISSUE),
                 "the business action timer counts the clicks per action — "
                         + "the granularity the kit's meters do not carry");
         assertEquals("Invoice INV-24312 issued",
@@ -203,6 +269,30 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
     private void openAllSteps() {
         findInView(Details.class).all()
                 .forEach(step -> step.setOpened(true));
+    }
+
+    private long clicks(String action) {
+        return registry.find(InteractionLatencyView.ACTION_TIMER)
+                .tag(InteractionLatencyView.TAG_ACTION, action).timers()
+                .stream().mapToLong(t -> t.count()).sum();
+    }
+
+    private static String countOf(List<TableRow> rows, String tags) {
+        return rows.stream().filter(row -> cell(row, 1).equals(tags))
+                .map(row -> cell(row, 2)).findFirst()
+                .orElseThrow(() -> new AssertionError("no row " + tags));
+    }
+
+    private static String tagsOf(List<TableRow> rows, String meter) {
+        return rows.stream().filter(row -> cell(row, 0).equals(meter))
+                .map(row -> cell(row, 1)).findFirst()
+                .orElseThrow(() -> new AssertionError("no row " + meter));
+    }
+
+    private static String readsOf(List<TableRow> rows, String meter) {
+        return rows.stream().filter(row -> cell(row, 0).equals(meter))
+                .map(row -> cell(row, 4)).findFirst()
+                .orElseThrow(() -> new AssertionError("no row " + meter));
     }
 
     private static String cell(TableRow row, int index) {

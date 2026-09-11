@@ -57,20 +57,26 @@ import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
  * samples, which the collector only flushes every few seconds, show up without
  * another click.
  * <p>
- * Its steps: <b>2)</b> what the framework times — {@code vaadin.request
- * .duration} and {@code vaadin.rpc.duration}, tagged only by type and outcome
- * (so they say <em>something</em> took over a second, not what), plus the
- * browser's own {@code vaadin.client.*} navigation and paint signals; <b>3)</b>
- * the kit's verdict — the insights endpoint's {@code slow-user-interaction}
+ * Its steps: <b>2)</b> what the framework times — the three segments of a
+ * click: the server's {@code vaadin.request.duration} and
+ * {@code vaadin.rpc.duration}, tagged only by type and outcome (so they say
+ * <em>something</em> took over a second, not what); the browser's own round
+ * trip, {@code vaadin.client.request.duration}, from which the server's figure
+ * is subtracted to show the network's share; and the time the browser spent
+ * applying the response, {@code vaadin.client.render.duration}; plus the
+ * browser's navigation and paint signals for page-load quality; <b>3)</b> the
+ * kit's verdict — the insights endpoint's {@code slow-user-interaction}
  * findings for this route, naming the component and the event that crossed the
  * budget; <b>4)</b> per action — the business-level timer the application
  * records itself, because meter tags are cardinality-bounded on purpose and a
  * business action name is the application's own to record (see
  * {@code API-GAPS.md} #8).
  * <p>
- * There is deliberately no client round-trip row: the browser collector emits
- * navigation timing, web vitals and errors, but no per-RPC duration, so a
- * single click's client/network share cannot be read (gap #2).
+ * The two browser-side interaction timers are tagged by route, so the rows read
+ * them for {@code route=invoices} only. The render timer exists only when
+ * Flow's {@code requestTiming} setting is on — the default outside production
+ * mode, and {@code vaadin.requestTiming=true} in production — so its row says
+ * so when the round trips are there and the render figures are not.
  */
 @Route(value = InteractionLatencyView.ROUTE, layout = MainLayout.class)
 @RouteAlias(value = "uc1", layout = MainLayout.class)
@@ -108,10 +114,15 @@ public class InteractionLatencyView extends VerticalLayout {
     private static final String INSIGHTS_SECTION = "observability";
     private static final String SERVER_REQUEST = "vaadin.request.duration";
     private static final String SERVER_RPC = "vaadin.rpc.duration";
+    private static final String CLIENT_REQUEST = "vaadin.client.request.duration";
+    private static final String CLIENT_RENDER = "vaadin.client.render.duration";
     private static final String CLIENT_NAVIGATION = "vaadin.client.navigation.duration";
     private static final String CLIENT_LCP = "vaadin.client.web_vitals.lcp";
     private static final String CLIENT_FCP = "vaadin.client.web_vitals.fcp";
     private static final String TAG_ROUTE = "route";
+    /** The server request timer's type tag; {@code uidl} is one interaction. */
+    private static final String TAG_REQUEST_TYPE = "vaadin.request.type";
+    private static final String REQUEST_TYPE_UIDL = "uidl";
     private static final int POLL_MILLIS = 2000;
 
     private final transient MeterRegistry registry;
@@ -121,6 +132,7 @@ public class InteractionLatencyView extends VerticalLayout {
                     + "The readout is live: it refreshes as you work and every "
                     + (POLL_MILLIS / 1000) + " s on its own.");
     private final MeterTable frameworkTimers = new MeterTable("Samples");
+    private final Div wireShare = new Div();
     private final Div verdict = new Div();
     private final MeterTable actionTimers = new MeterTable("Clicks");
     private final IntegerField taxDelay = new IntegerField(
@@ -237,15 +249,20 @@ public class InteractionLatencyView extends VerticalLayout {
         investigation.onRefresh(this::refreshReadout);
 
         frameworkTimers.setId("framework-timers");
+        wireShare.setId("wire-share");
         investigation.step("2 — What the framework times", true,
                 new Paragraph(
-                        "The kit times every request and every RPC invocation, "
-                                + "and the browser reports its own navigation "
-                                + "and paint timings into the same registry. "
-                                + "These are tagged by type and outcome only: "
-                                + "they say something took over a second, not "
-                                + "which button."),
-                frameworkTimers);
+                        "A click has three segments, and the kit times each "
+                                + "from where it can be seen. The server times "
+                                + "its handling of the request and of the RPC "
+                                + "inside it. The browser times the same round "
+                                + "trip from its end, so the difference is the "
+                                + "network, and then how long it took to apply "
+                                + "the response to the page. All of these are "
+                                + "tagged by type, outcome or route only: they "
+                                + "say something on this page took over a "
+                                + "second, not which button."),
+                frameworkTimers, wireShare);
 
         verdict.setId("verdict");
         verdict.setWidthFull();
@@ -306,16 +323,77 @@ public class InteractionLatencyView extends VerticalLayout {
         refreshActionTimers();
     }
 
-    /** Step 2: the timers the kit and the browser keep, app-wide. */
+    /**
+     * Step 2: the three segments of a click, then the page-load signals. The
+     * server request row is scoped to UIDL requests so that it and the
+     * browser's round trip describe the same population; the two browser
+     * interaction timers are scoped to this route, which is the tag the kit
+     * puts on them.
+     */
     private void refreshFrameworkTimers() {
+        Stats serverRequests = stats(registry.find(SERVER_REQUEST)
+                .tag(TAG_REQUEST_TYPE, REQUEST_TYPE_UIDL).timers());
+        Stats clientRequests = stats(
+                registry.find(CLIENT_REQUEST).tag(TAG_ROUTE, ROUTE).timers());
+        Stats clientRenders = stats(
+                registry.find(CLIENT_RENDER).tag(TAG_ROUTE, ROUTE).timers());
         frameworkTimers.setRows(List.of(
-                aggregate(SERVER_REQUEST, "Server-side request handling"),
+                row(SERVER_REQUEST, TAG_REQUEST_TYPE + "=" + REQUEST_TYPE_UIDL,
+                        serverRequests,
+                        "Server-side handling of one interaction's request"),
                 aggregate(SERVER_RPC,
                         "Server-side handling of one click or keystroke"),
+                row(CLIENT_REQUEST, TAG_ROUTE + "=" + ROUTE, clientRequests,
+                        "The same round trip as the browser saw it, from "
+                                + "sending the request to the last byte of "
+                                + "the response"),
+                row(CLIENT_RENDER, TAG_ROUTE + "=" + ROUTE, clientRenders,
+                        renderReads(clientRequests, clientRenders)),
                 aggregate(CLIENT_NAVIGATION,
                         "Client-side navigation, as the browser saw it"),
                 aggregate(CLIENT_LCP, "Largest Contentful Paint"),
                 aggregate(CLIENT_FCP, "First Contentful Paint")));
+        refreshWireShare(serverRequests, clientRequests);
+    }
+
+    /**
+     * The render row's explanation. The one way it can have no samples while
+     * the round trips do is Flow's {@code requestTiming} being off, which is
+     * its default in production mode, so that is what the row says then.
+     */
+    private static String renderReads(Stats clientRequests,
+            Stats clientRenders) {
+        if (clientRequests.count > 0 && clientRenders.count == 0) {
+            return "Applying the response in the browser. No samples: Flow "
+                    + "publishes this figure only when its requestTiming "
+                    + "setting is on, which it is not in production mode "
+                    + "unless vaadin.requestTiming=true is set.";
+        }
+        return "Applying the response in the browser: the segment neither "
+                + "the server nor the network can see";
+    }
+
+    /**
+     * The network's share of a click, which no single meter records: the
+     * browser's mean round trip less the server's mean handling of the same
+     * requests.
+     */
+    private void refreshWireShare(Stats serverRequests, Stats clientRequests) {
+        wireShare.removeAll();
+        if (clientRequests.count == 0 || serverRequests.count == 0) {
+            wireShare.add(new Paragraph(
+                    "Once the browser has reported a round trip on this page, "
+                            + "the network's share of it appears here."));
+            return;
+        }
+        double wire = Math.max(0,
+                clientRequests.mean() - serverRequests.mean());
+        wireShare.add(Telemetry.highlightDurations(
+                ("Of the browser's mean %.1f ms round trip on this page, the "
+                        + "server accounted for %.1f ms. The remaining %.1f ms "
+                        + "were the network and the browser's request queue.")
+                        .formatted(clientRequests.mean(),
+                                serverRequests.mean(), wire)));
     }
 
     /**
@@ -353,11 +431,15 @@ public class InteractionLatencyView extends VerticalLayout {
         }
         findings.forEach(insight -> {
             Map<String, Object> evidence = Insights.evidenceOf(insight);
-            verdict.add(new InsightCard(insight,
-                    "median %s ms, worst %s ms, budget %s ms".formatted(
+            // A slow-interaction finding need not carry all three figures;
+            // without them the card has no detail line rather than "null ms".
+            String detail = evidence.get("medianDurationMs") != null
+                    ? "median %s ms, worst %s ms, budget %s ms".formatted(
                             evidence.get("medianDurationMs"),
                             evidence.get("maxDurationMs"),
-                            evidence.get("thresholdMs")),
+                            evidence.get("thresholdMs"))
+                    : null;
+            verdict.add(new InsightCard(insight, detail,
                     List.of(TAG_ROUTE + "=" + Insights.text(evidence.get("route")),
                             Insights.simpleName(Insights
                                     .text(evidence.get("component"))),
@@ -401,8 +483,19 @@ public class InteractionLatencyView extends VerticalLayout {
         return "";
     }
 
-    private MeterTable.Row aggregate(String meter, String reads) {
-        Collection<Timer> timers = registry.find(meter).timers();
+    /** Count, total and max over a set of timers, whatever their tags. */
+    private record Stats(long count, double totalMs, double maxMs) {
+        double mean() {
+            return count == 0 ? 0 : totalMs / count;
+        }
+
+        String value() {
+            return count == 0 ? ""
+                    : "mean %.1f ms, max %.1f ms".formatted(mean(), maxMs);
+        }
+    }
+
+    private static Stats stats(Collection<Timer> timers) {
         long count = 0;
         double total = 0;
         double max = 0;
@@ -411,9 +504,17 @@ public class InteractionLatencyView extends VerticalLayout {
             total += t.totalTime(TimeUnit.MILLISECONDS);
             max = Math.max(max, t.max(TimeUnit.MILLISECONDS));
         }
-        String value = count == 0 ? ""
-                : "mean %.1f ms, max %.1f ms".formatted(total / count, max);
-        return new MeterTable.Row(meter, "—", count, value, reads);
+        return new Stats(count, total, max);
+    }
+
+    private static MeterTable.Row row(String meter, String tags, Stats stats,
+            String reads) {
+        return new MeterTable.Row(meter, tags, stats.count, stats.value(),
+                reads);
+    }
+
+    private MeterTable.Row aggregate(String meter, String reads) {
+        return row(meter, "—", stats(registry.find(meter).timers()), reads);
     }
 
     private static void sleep(@Nullable Integer millis) {
