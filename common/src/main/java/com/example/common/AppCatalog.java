@@ -14,6 +14,8 @@ public final class AppCatalog {
     public static final List<App> APPS = List.of(
             new App("clipboard", "Clipboard API",
                     "https://clipboard-cases.fly.dev/"),
+            new App("collaboration", "Collaboration (Signals)",
+                    "https://collaboration-cases.fly.dev/"),
             new App("fullscreen", "Fullscreen API",
                     "https://fullscreen-cases.fly.dev/"),
             new App("geolocation", "Geolocation API",
