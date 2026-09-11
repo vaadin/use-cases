@@ -316,3 +316,8 @@
     white-space: pre-wrap;
     word-break: break-word;
 }
+
+/* The inventory page's one-line catalog summary next to its refresh button. */
+.catalog-summary {
+    color: var(--vaadin-text-color-secondary);
+}
