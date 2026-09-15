@@ -1,0 +1,18 @@
+# Prometheus configuration for the hosted stack (see fly.toml next to it).
+#
+# The Vaadin app is a sibling Fly app in the same organisation, so it is
+# reachable over Fly's private 6PN network as <app>.internal. That name
+# resolves to one AAAA record per running machine, which is why this uses DNS
+# service discovery rather than a static target: a redeploy that briefly runs
+# two machines is followed without a config change.
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: vaadin
+    metrics_path: /actuator/prometheus
+    dns_sd_configs:
+      - names:
+          - observability-cases.internal
+        type: AAAA
+        port: 8080

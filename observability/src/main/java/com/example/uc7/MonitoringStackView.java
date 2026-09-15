@@ -13,6 +13,7 @@ import java.util.List;
 import com.example.views.MainLayout;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import org.jspecify.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Value;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -46,7 +47,11 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * team actually uses: the registry is exposed in Prometheus format at
  * {@code /actuator/prometheus}, Prometheus scrapes it, and Grafana charts what
  * Prometheus stored. {@code compose.yaml} next to this module runs that stack
- * locally.
+ * locally; the hosted demo runs the same two services as sibling Fly apps
+ * ({@code prometheus/} and {@code grafana/} in the module), reached over Fly's
+ * private network, with the public hostnames handed to this view through the
+ * {@code uc7.prometheus.url}, {@code uc7.prometheus.api-url} and
+ * {@code uc7.grafana.url} properties.
  * <p>
  * The view is deliberately a check of each hop, because each one can fail on
  * its own:
@@ -64,8 +69,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * <p>
  * Nothing here requires the stack: with no Prometheus running, the export
  * column still works and the scrape and query rows say what is missing and how
- * to start it. That is also how the hosted demo behaves, since the module
- * deploys as a single container with no stack beside it.
+ * to start it.
  * <p>
  * Percentiles are the one configuration subtlety worth noticing:
  * {@code histogram_quantile} needs bucket series, so
@@ -81,8 +85,6 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Menu(order = 7, title = "UC7 — Monitoring stack")
 public class MonitoringStackView extends VerticalLayout {
 
-    private static final String PROMETHEUS = "http://localhost:9090";
-    private static final String GRAFANA = "http://localhost:3000";
     private static final Duration TIMEOUT = Duration.ofSeconds(1);
 
     /** The PromQL the Grafana dashboard uses, so both tell the same story. */
@@ -121,6 +123,11 @@ public class MonitoringStackView extends VerticalLayout {
 
     private final transient PrometheusMeterRegistry registry;
     private final transient ObjectMapper json;
+    /** Prometheus as the browser reaches it: the links. */
+    private final String prometheusUrl;
+    /** Prometheus as this server reaches it: the targets and query calls. */
+    private final String prometheusApiUrl;
+    private final String grafanaUrl;
     private final transient HttpClient http = HttpClient.newBuilder()
             .connectTimeout(TIMEOUT).build();
     private final ValueSignal<Status> status = new ValueSignal<>(
@@ -128,10 +135,26 @@ public class MonitoringStackView extends VerticalLayout {
     private final Span summary = new Span();
     private final Grid<Row> grid = new Grid<>();
 
+    /**
+     * @param prometheusUrl
+     *            Prometheus as the browser reaches it, for the links
+     * @param prometheusApiUrl
+     *            Prometheus as this server reaches it, for the API calls; the
+     *            same as {@code prometheusUrl} locally, the private hostname on
+     *            Fly
+     * @param grafanaUrl
+     *            Grafana as the browser reaches it
+     */
     public MonitoringStackView(PrometheusMeterRegistry registry,
-            ObjectMapper json) {
+            ObjectMapper json,
+            @Value("${uc7.prometheus.url}") String prometheusUrl,
+            @Value("${uc7.prometheus.api-url}") String prometheusApiUrl,
+            @Value("${uc7.grafana.url}") String grafanaUrl) {
         this.registry = registry;
         this.json = json;
+        this.prometheusUrl = prometheusUrl;
+        this.prometheusApiUrl = prometheusApiUrl;
+        this.grafanaUrl = grafanaUrl;
 
         add(new H1("UC7 — Ship the metrics to Prometheus and Grafana"));
         add(new Paragraph(
@@ -139,8 +162,7 @@ public class MonitoringStackView extends VerticalLayout {
                         + "followed outward: exported at /actuator/prometheus, scraped "
                         + "by Prometheus, charted by Grafana. Each hop is checked "
                         + "separately below, so an empty dashboard panel can be told "
-                        + "apart from a metric that was never exported. Start the stack "
-                        + "with docker compose up -d in the observability module."));
+                        + "apart from a metric that was never exported."));
 
         summary.getElement().getThemeList().add("badge");
         add(summary);
@@ -149,9 +171,9 @@ public class MonitoringStackView extends VerticalLayout {
                 button("Refresh", ButtonVariant.PRIMARY, e -> refresh()),
                 button("Generate traffic", ButtonVariant.SUCCESS,
                         e -> generateTraffic()),
-                link("Prometheus targets", PROMETHEUS + "/targets"),
-                link("Prometheus graph", PROMETHEUS + "/graph"),
-                link("Grafana dashboard", GRAFANA + "/d/vaadin-app")));
+                link("Prometheus targets", prometheusUrl + "/targets"),
+                link("Prometheus graph", prometheusUrl + "/graph"),
+                link("Grafana dashboard", grafanaUrl + "/d/vaadin-app")));
 
         grid.addColumn(Row::signal).setHeader("Signal").setAutoWidth(true);
         grid.addColumn(Row::value).setHeader("Value").setFlexGrow(1);
@@ -195,7 +217,7 @@ public class MonitoringStackView extends VerticalLayout {
         // Hop 2: does Prometheus consider this app a healthy target?
         String scrapeState = scrapeState();
         rows.add(new Row("Prometheus scrape target", scrapeState,
-                PROMETHEUS + "/api/v1/targets"));
+                prometheusApiUrl + "/api/v1/targets"));
         boolean reachable = !scrapeState.startsWith("Prometheus not reachable");
 
         // Hop 3: the dashboard's own queries, asked directly.
@@ -234,10 +256,10 @@ public class MonitoringStackView extends VerticalLayout {
 
     /** Reads this app's health as a Prometheus scrape target. */
     private String scrapeState() {
-        JsonNode response = get(PROMETHEUS + "/api/v1/targets?state=any");
+        JsonNode response = get(prometheusApiUrl + "/api/v1/targets?state=any");
         if (response == null) {
-            return "Prometheus not reachable at " + PROMETHEUS
-                    + " — start it with docker compose up -d";
+            return "Prometheus not reachable at " + prometheusApiUrl
+                    + " — locally, start it with docker compose up -d";
         }
         JsonNode targets = response.path("data").path("activeTargets");
         List<String> states = new ArrayList<>();
@@ -255,7 +277,7 @@ public class MonitoringStackView extends VerticalLayout {
 
     /** Runs one PromQL instant query and formats the first sample. */
     private String queryValue(String promQl) {
-        JsonNode response = get(PROMETHEUS + "/api/v1/query?query="
+        JsonNode response = get(prometheusApiUrl + "/api/v1/query?query="
                 + URLEncoder.encode(promQl, StandardCharsets.UTF_8));
         if (response == null) {
             return "query failed";
@@ -285,10 +307,10 @@ public class MonitoringStackView extends VerticalLayout {
         }
     }
 
-    private static String describe(Status status) {
+    private String describe(Status status) {
         if (!status.reachable()) {
             return "Exporting " + status.exportedSeries()
-                    + " vaadin_* series — no Prometheus at " + PROMETHEUS
+                    + " vaadin_* series — no Prometheus at " + prometheusApiUrl
                     + " yet";
         }
         return "Exporting " + status.exportedSeries()
@@ -312,16 +334,24 @@ public class MonitoringStackView extends VerticalLayout {
     private static VerticalLayout stackSection() {
         VerticalLayout section = new VerticalLayout(new H2("Running the stack"),
                 new Paragraph(
-                        "From the observability module: docker compose up "
-                                + "-d starts Prometheus on :9090 and Grafana on :3000 "
-                                + "(anonymous admin, dashboard provisioned). Prometheus "
-                                + "scrapes host.docker.internal on ports 8080 and 8082, "
-                                + "so it finds the app on either; the unused one shows "
-                                + "as a down target. docker compose down stops it. The "
-                                + "stack is developer tooling: the module deploys as a "
-                                + "single container, so the hosted demo has no stack "
-                                + "beside it and this view degrades to the export "
-                                + "column only."));
+                        "Locally, from the observability module: docker compose "
+                                + "up -d starts Prometheus on :9090 and Grafana on "
+                                + ":3000 (anonymous admin, dashboard provisioned). "
+                                + "Prometheus scrapes host.docker.internal on ports "
+                                + "8080 and 8082, so it finds the app on either; the "
+                                + "unused one shows as a down target. docker compose "
+                                + "down stops it."),
+                new Paragraph(
+                        "Hosted, the same two services run as sibling Fly apps "
+                                + "(prometheus/ and grafana/ in the module), built "
+                                + "from the same Grafana provisioning and dashboard. "
+                                + "Prometheus finds the app by DNS on Fly's private "
+                                + "network, Grafana reads Prometheus over that "
+                                + "network too, and both are public read-only: "
+                                + "Grafana grants anonymous viewers, with no login "
+                                + "at all, and Prometheus runs with its admin API "
+                                + "off. This view learns their public hostnames "
+                                + "from uc7.prometheus.url and uc7.grafana.url."));
         section.setPadding(false);
         section.setSpacing(false);
         return section;
