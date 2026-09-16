@@ -190,8 +190,12 @@ never belonged in application code:
    showing client-collected data has to poll or be refreshed by hand. For UC5 polling is
    not an option — a poll is a UIDL request, and one that gets through ends the outage as
    far as the browser is concerned, so a polling tab under-reports the downtime it is
-   displaying. Hence a refresh button. A `ClientSamplesRecorded`-style service event
-   would let an in-app readout be live without probing the connection it measures.
+   displaying. So the readout is recomputed from the picking screen's own interactions,
+   and the script that simulates the recovery calls a `@ClientCallable` on the view once
+   the browser has the server back — an application-side stand-in for the event the kit
+   does not raise, and one a real outage would not make. A `ClientSamplesRecorded`-style
+   service event would let an in-app readout be live without probing the connection it
+   measures.
 3. **The payload is still an untyped map in process** (gap #9), and UC5 now casts through
    it the same way UC6 does.
 
@@ -299,7 +303,7 @@ can group by view/action without unbounded cardinality.
 
 ## 9. Insights are consumable in-process only as an untyped JSON map
 
-**Where it bites:** UC6, and now UC5.
+**Where it bites:** UC6, UC8 and UC5.
 **Symptom:** the kit's insights are shaped for the Actuator endpoint:
 `InsightsService.payload()` returns a `Map<String, Object>` of nested maps and lists. An
 application that wants to render insights in its own UI — as UC6 does, rather than have
@@ -308,14 +312,16 @@ the app call its own HTTP endpoint — has to cast its way through that map
 `(Map<String, Object>) insight.get("evidence")`), with unchecked casts, string keys and
 no compile-time contract. The JSON shape is a good published contract for *agents*; it is
 a poor one for Java callers.
-**And it now bites twice.** Since the kit retains browser errors, UC5 reads the same
-payload for the `client-error` insights and repeats the same two casts and the same
-null-tolerant accessors. A second consumer also surfaces what the untyped shape costs
-beyond the casts: `type` is a string constant each view has to know, the presence of
-`message` versus `detail` encodes whether collection was on, and a field the browser
-never supplied is a null in a map rather than an empty `Optional`.
-**Workaround used:** UC6 and UC5 each flatten the map into a view-local record, with
-`@SuppressWarnings("unchecked")`.
+**And it now bites three times.** Since the kit retains browser errors, UC5 reads the same
+payload for the `client-error` insights, and UC8 reads it for the data-query ones — the
+same two casts and the same null-tolerant accessors each time. More consumers also
+surface what the untyped shape costs beyond the casts: `type` is a string constant each
+view has to know, the presence of `message` versus `detail` encodes whether collection
+was on, and a field the browser never supplied is a null in a map rather than an empty
+`Optional`.
+**Workaround used:** the casts and the accessors are written once, in this module's own
+`com.example.acme.Insights`, with `@SuppressWarnings("unchecked")` — which is to say
+every application consuming insights has to write this helper.
 **Suggested API:** typed insight objects (e.g. `List<Insight>` exposing id, severity,
 summary, evidence and examples) alongside the JSON rendering, so in-app consumers get a
 compile-checked contract and JSON stays a serialization concern.
