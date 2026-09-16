@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
 
@@ -43,6 +44,39 @@ class MonitoringStackViewHostedUrlsTest extends SpringBrowserlessTest {
     }
 
     @Test
+    void querySourcesOpenPrefilledInPrometheus() {
+        navigate(MonitoringStackView.class);
+        runPendingSignalsTasks();
+
+        Grid<Row> grid = findInView(Grid.class).single();
+        Row p95 = grid.getListDataView().getItems()
+                .filter(r -> r.signal().startsWith("Request p95")).findFirst()
+                .orElseThrow();
+        assertTrue(p95.href() != null && p95.href().startsWith(
+                "https://prometheus.example.test/graph?g0.expr=histogram_quantile"),
+                "a dashboard query should open in Prometheus: " + p95.href());
+        assertTrue(p95.href().contains("&g0.tab=graph"),
+                "the graph tab should be selected: " + p95.href());
+
+        // The scrape row's source is the API the server called, but it opens
+        // the human-readable targets page on the public hostname.
+        Row scrape = grid.getListDataView().getItems()
+                .filter(r -> "Prometheus scrape target".equals(r.signal()))
+                .findFirst().orElseThrow();
+        assertEquals("https://prometheus.example.test/targets", scrape.href());
+
+        // And the example queries follow the same public hostname. (Grid cells
+        // are rendered on demand, so the anchors found here are the example
+        // section's; the grid rows are covered through Row.href above.)
+        long examples = findInView(Anchor.class).all().stream()
+                .filter(a -> a.getHref().startsWith(
+                        "https://prometheus.example.test/graph?g0.expr="))
+                .count();
+        assertEquals(6, examples,
+                "the six example queries should link to the public Prometheus");
+    }
+
+    @Test
     void apiCallsFollowTheApiUrl() {
         navigate(MonitoringStackView.class);
         runPendingSignalsTasks();
@@ -57,9 +91,12 @@ class MonitoringStackViewHostedUrlsTest extends SpringBrowserlessTest {
                         + scrape.value());
     }
 
+    /** The action links are anchors wrapping a tertiary button as their face. */
     private String href(String label) {
         return findInView(Anchor.class).all().stream()
-                .filter(a -> label.equals(a.getText())).findFirst()
+                .filter(a -> a.getChildren().anyMatch(c -> c instanceof Button b
+                        && label.equals(b.getText())))
+                .findFirst()
                 .orElseThrow(() -> new AssertionError("no link " + label))
                 .getHref();
     }

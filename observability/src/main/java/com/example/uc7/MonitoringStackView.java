@@ -7,6 +7,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -30,6 +33,8 @@ import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.UnorderedList;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
@@ -102,22 +107,86 @@ public class MonitoringStackView extends VerticalLayout {
     }
 
     /**
-     * One row of the readout: a hop, what it reports, and where it came from.
+     * Queries worth trying by hand in Prometheus, each opened pre-filled in its
+     * graph page. They go past the dashboard's summary numbers to the
+     * breakdowns the kit's meter tags allow.
      */
-    public record Row(String signal, String value, String source) {
+    private static final List<Query> EXAMPLES = List.of(
+            new Query("Requests per second by outcome",
+                    "sum by (outcome) (rate(vaadin_request_duration_seconds_count[1m]))"),
+            new Query("RPC p95 by type",
+                    "histogram_quantile(0.95, sum by (le, type) (rate(vaadin_rpc_duration_seconds_bucket[5m])))"),
+            new Query("Slow requests share (over 1 s)",
+                    "1 - sum(rate(vaadin_request_duration_seconds_bucket{le=\"1.0\"}[5m])) / sum(rate(vaadin_request_duration_seconds_count[5m]))"),
+            new Query("Session lock wait p99",
+                    "histogram_quantile(0.99, sum by (le) (rate(vaadin_session_lock_wait_seconds_bucket[5m])))"),
+            new Query("UI state per active UI",
+                    "sum(vaadin_ui_state_size_bytes) / sum(vaadin_ui_active)"),
+            new Query("Rows fetched from the database per query",
+                    "rate(vaadin_db_fetch_rows_sum[5m]) / rate(vaadin_db_fetch_rows_count[5m])"));
+
+    /** How a readout row should be dressed: a plain fact, good news or a warning. */
+    public enum Level {
+        NEUTRAL, GOOD, WARNING
+    }
+
+    /**
+     * One row of the readout: a hop, what it reports, and where it came from.
+     *
+     * @param href
+     *            where the source opens when clicked: the Prometheus page that
+     *            shows the same thing, or {@code null} for an in-process source
+     * @param level
+     *            how to dress the value; warnings carry the detail that is
+     *            deliberately kept out of the summary badge
+     */
+    public record Row(String signal, String value, String source,
+            @Nullable String href, Level level) {
+        public Row(String signal, String value, String source) {
+            this(signal, value, source, null, Level.NEUTRAL);
+        }
+
+        public Row(String signal, String value, String source,
+                @Nullable String href) {
+            this(signal, value, source, href, Level.NEUTRAL);
+        }
+    }
+
+    /** Prometheus's view of this app, reduced to what the badge can say. */
+    public enum Health {
+        /** Prometheus did not answer at all. */
+        UNREACHABLE,
+        /** Prometheus answered but scrapes nothing on this app's port. */
+        NO_TARGET,
+        /** Prometheus scrapes this app and the last scrape failed. */
+        DOWN,
+        /** Prometheus scrapes this app successfully. */
+        UP
+    }
+
+    /**
+     * Prometheus's targets, split into this app and everything else. Locally
+     * the compose config lists two ports so the stack works whichever the app
+     * is on; whatever answers on the other port (or nothing) is not this app
+     * and must not colour the verdict, only be reported.
+     *
+     * @param detail
+     *            this app's target state in words, or why there is none
+     * @param others
+     *            one line per target that is not this app, empty in the normal
+     *            single-target case
+     */
+    record Scrape(Health health, String detail, List<String> others) {
     }
 
     /**
      * @param exportedSeries
      *            how many {@code vaadin_*} series the app currently exposes
-     * @param scrapeState
+     * @param health
      *            what Prometheus says about this app as a scrape target
-     * @param reachable
-     *            whether Prometheus answered at all
      */
-    public record Status(int exportedSeries, String scrapeState,
-            boolean reachable, List<Row> rows) {
-        static final Status UNKNOWN = new Status(0, "not checked yet", false,
+    public record Status(int exportedSeries, Health health, List<Row> rows) {
+        static final Status UNKNOWN = new Status(0, Health.UNREACHABLE,
                 List.of());
     }
 
@@ -128,6 +197,8 @@ public class MonitoringStackView extends VerticalLayout {
     /** Prometheus as this server reaches it: the targets and query calls. */
     private final String prometheusApiUrl;
     private final String grafanaUrl;
+    /** This app's port: what tells its own scrape target from any other. */
+    private final int serverPort;
     private final transient HttpClient http = HttpClient.newBuilder()
             .connectTimeout(TIMEOUT).build();
     private final ValueSignal<Status> status = new ValueSignal<>(
@@ -144,17 +215,22 @@ public class MonitoringStackView extends VerticalLayout {
      *            Fly
      * @param grafanaUrl
      *            Grafana as the browser reaches it
+     * @param serverPort
+     *            the port this app listens on, to pick its own target out of
+     *            Prometheus's list
      */
     public MonitoringStackView(PrometheusMeterRegistry registry,
             ObjectMapper json,
             @Value("${uc7.prometheus.url}") String prometheusUrl,
             @Value("${uc7.prometheus.api-url}") String prometheusApiUrl,
-            @Value("${uc7.grafana.url}") String grafanaUrl) {
+            @Value("${uc7.grafana.url}") String grafanaUrl,
+            @Value("${server.port:8080}") int serverPort) {
         this.registry = registry;
         this.json = json;
         this.prometheusUrl = prometheusUrl;
         this.prometheusApiUrl = prometheusApiUrl;
         this.grafanaUrl = grafanaUrl;
+        this.serverPort = serverPort;
 
         add(new H1("UC7 — Ship the metrics to Prometheus and Grafana"));
         add(new Paragraph(
@@ -167,17 +243,32 @@ public class MonitoringStackView extends VerticalLayout {
         summary.getElement().getThemeList().add("badge");
         add(summary);
 
-        add(new HorizontalLayout(
+        HorizontalLayout actions = new HorizontalLayout(
                 button("Refresh", ButtonVariant.PRIMARY, e -> refresh()),
                 button("Generate traffic", ButtonVariant.SUCCESS,
                         e -> generateTraffic()),
                 link("Prometheus targets", prometheusUrl + "/targets"),
                 link("Prometheus graph", prometheusUrl + "/graph"),
-                link("Grafana dashboard", grafanaUrl + "/d/vaadin-app")));
+                link("Grafana dashboard", grafanaUrl + "/d/vaadin-app"));
+        actions.setAlignItems(Alignment.CENTER);
+        actions.setWrap(true);
+        add(actions);
 
         grid.addColumn(Row::signal).setHeader("Signal").setAutoWidth(true);
-        grid.addColumn(Row::value).setHeader("Value").setFlexGrow(1);
-        grid.addColumn(Row::source).setHeader("Source").setFlexGrow(1);
+        grid.addColumn(new ComponentRenderer<>(MonitoringStackView::value))
+                .setHeader("Value").setFlexGrow(1);
+        grid.addColumn(new ComponentRenderer<>(row -> {
+            Span source = new Span(row.source());
+            source.getStyle().set("font-family", "monospace")
+                    .set("font-size", "var(--lumo-font-size-s, 0.875em)");
+            if (row.href() == null) {
+                return source;
+            }
+            Anchor anchor = new Anchor(row.href(), source);
+            anchor.setTarget("_blank");
+            anchor.setTitle("Open in Prometheus");
+            return anchor;
+        })).setHeader("Source").setFlexGrow(1);
         grid.setAllRowsVisible(true);
         add(grid);
 
@@ -187,12 +278,16 @@ public class MonitoringStackView extends VerticalLayout {
             Status current = status.get();
             summary.setText(describe(current));
             summary.getElement().getThemeList().set("success",
-                    current.reachable());
+                    current.health() == Health.UP);
+            summary.getElement().getThemeList().set("error",
+                    current.health() == Health.DOWN
+                            || current.health() == Health.NO_TARGET);
             summary.getElement().getThemeList().set("contrast",
-                    !current.reachable());
+                    current.health() == Health.UNREACHABLE);
         });
         Signal.effect(grid, () -> grid.setItems(status.get().rows()));
 
+        add(examplesSection());
         add(stackSection());
         add(gapsCallout());
 
@@ -214,21 +309,31 @@ public class MonitoringStackView extends VerticalLayout {
                         : "no — set percentiles-histogram to chart p95/p99",
                 "vaadin_request_duration_seconds_bucket"));
 
-        // Hop 2: does Prometheus consider this app a healthy target?
-        String scrapeState = scrapeState();
-        rows.add(new Row("Prometheus scrape target", scrapeState,
-                prometheusApiUrl + "/api/v1/targets"));
-        boolean reachable = !scrapeState.startsWith("Prometheus not reachable");
+        // Hop 2: does Prometheus consider this app a healthy target? The
+        // detail (and any scrape error) lives here, not in the badge.
+        Scrape scrape = scrape();
+        rows.add(new Row("Prometheus scrape target", scrape.detail(),
+                prometheusApiUrl + "/api/v1/targets",
+                prometheusUrl + "/targets",
+                scrape.health() == Health.UP ? Level.GOOD : Level.WARNING));
+        if (!scrape.others().isEmpty()) {
+            rows.add(new Row("Other scrape targets (not this app)",
+                    String.join("; ", scrape.others()),
+                    "prometheus/local.yaml lists both ports the app may use",
+                    prometheusUrl + "/targets", Level.NEUTRAL));
+        }
+        boolean reachable = scrape.health() != Health.UNREACHABLE;
 
-        // Hop 3: the dashboard's own queries, asked directly.
+        // Hop 3: the dashboard's own queries, asked directly. The source opens
+        // the same query in Prometheus, so a surprising number can be graphed.
         for (Query query : QUERIES) {
             rows.add(new Row(query.label(),
                     reachable ? queryValue(query.promQl())
                             : "— (stack not running)",
-                    query.promQl()));
+                    query.promQl(), graphUrl(query.promQl())));
         }
 
-        status.set(new Status(series, scrapeState, reachable, rows));
+        status.set(new Status(series, scrape.health(), rows));
     }
 
     /**
@@ -254,25 +359,86 @@ public class MonitoringStackView extends VerticalLayout {
         return count;
     }
 
-    /** Reads this app's health as a Prometheus scrape target. */
-    private String scrapeState() {
+    /** Asks Prometheus for its targets and reads this app's out of them. */
+    private Scrape scrape() {
         JsonNode response = get(prometheusApiUrl + "/api/v1/targets?state=any");
         if (response == null) {
-            return "Prometheus not reachable at " + prometheusApiUrl
-                    + " — locally, start it with docker compose up -d";
+            return new Scrape(Health.UNREACHABLE,
+                    "Prometheus not reachable at " + prometheusApiUrl
+                            + " — locally, start it with docker compose up -d",
+                    List.of());
         }
-        JsonNode targets = response.path("data").path("activeTargets");
-        List<String> states = new ArrayList<>();
-        for (JsonNode target : targets) {
-            String url = target.path("scrapeUrl").asString("");
-            String health = target.path("health").asString("unknown");
-            if (url.contains("/actuator/prometheus")) {
-                states.add(health + " (" + url + ")");
+        return readTargets(response, serverPort);
+    }
+
+    /**
+     * Splits a {@code /api/v1/targets} response into this app's target, found
+     * by {@code port}, and the rest. Package-private for the unit test.
+     */
+    static Scrape readTargets(JsonNode response, int port) {
+        JsonNode own = null;
+        List<String> others = new ArrayList<>();
+        for (JsonNode target : response.path("data").path("activeTargets")) {
+            String scrapeUrl = target.path("scrapeUrl").asString("");
+            if (!scrapeUrl.contains("/actuator/prometheus")) {
+                continue;
+            }
+            if (own == null && portOf(scrapeUrl) == port) {
+                own = target;
+            } else {
+                String instance = target.path("labels").path("instance")
+                        .asString(scrapeUrl);
+                others.add(instance + " is "
+                        + target.path("health").asString("unknown")
+                        + errorSuffix(target));
             }
         }
-        return states.isEmpty()
-                ? "Prometheus is up but scrapes no Vaadin target"
-                : String.join(", ", states);
+        if (own == null) {
+            return new Scrape(Health.NO_TARGET,
+                    "Prometheus scrapes no target on this app's port " + port,
+                    others);
+        }
+        // The target's own address is an implementation detail (on Fly, a
+        // private IPv6 literal), so the detail is its health and freshness.
+        boolean up = "up".equals(own.path("health").asString(""));
+        String detail = up ? "up" + scrapedAgo(own)
+                : own.path("health").asString("unknown") + errorSuffix(own);
+        return new Scrape(up ? Health.UP : Health.DOWN, detail, others);
+    }
+
+    private static int portOf(String url) {
+        try {
+            return URI.create(url).getPort();
+        } catch (IllegalArgumentException e) {
+            return -1;
+        }
+    }
+
+    /** ": <lastError>" when the target reports one, otherwise nothing. */
+    private static String errorSuffix(JsonNode target) {
+        String error = target.path("lastError").asString("");
+        return error.isEmpty() ? "" : ": " + error;
+    }
+
+    /** ", scraped 3 s ago", or nothing if the timestamp is missing. */
+    private static String scrapedAgo(JsonNode target) {
+        try {
+            long age = Duration
+                    .between(Instant.parse(
+                            target.path("lastScrape").asString("")),
+                            Instant.now())
+                    .toSeconds();
+            return ", scraped " + Math.max(age, 0) + " s ago";
+        } catch (RuntimeException e) {
+            return "";
+        }
+    }
+
+    /** The Prometheus graph page with {@code promQl} filled in and run. */
+    private String graphUrl(String promQl) {
+        return prometheusUrl + "/graph?g0.expr="
+                + URLEncoder.encode(promQl, StandardCharsets.UTF_8)
+                + "&g0.tab=graph&g0.range_input=15m";
     }
 
     /** Runs one PromQL instant query and formats the first sample. */
@@ -307,15 +473,37 @@ public class MonitoringStackView extends VerticalLayout {
         }
     }
 
-    private String describe(Status status) {
-        if (!status.reachable()) {
-            return "Exporting " + status.exportedSeries()
-                    + " vaadin_* series — no Prometheus at " + prometheusApiUrl
-                    + " yet";
+    /**
+     * The badge: one short verdict per hop. Any detail, and above all any
+     * scrape error text, belongs in the readout rows, not up here.
+     */
+    private static String describe(Status status) {
+        String export = "Exporting " + status.exportedSeries()
+                + " vaadin_* series · ";
+        return export + switch (status.health()) {
+        case UP -> "Prometheus is scraping this app";
+        case DOWN -> "Prometheus scrape failing, see below";
+        case NO_TARGET -> "Prometheus does not scrape this app, see below";
+        case UNREACHABLE -> "Prometheus not reachable";
+        };
+    }
+
+    /** The value cell: plain text, or a coloured icon and text by level. */
+    private static Span value(Row row) {
+        Span text = new Span(row.value());
+        if (row.level() == Level.NEUTRAL) {
+            return text;
         }
-        return "Exporting " + status.exportedSeries()
-                + " vaadin_* series — Prometheus target: "
-                + status.scrapeState();
+        boolean good = row.level() == Level.GOOD;
+        Icon icon = (good ? VaadinIcon.CHECK_CIRCLE : VaadinIcon.WARNING)
+                .create();
+        icon.setSize("1em");
+        icon.getStyle().set("margin-inline-end", "0.4em")
+                .set("vertical-align", "-0.15em");
+        Span cell = new Span(icon, text);
+        cell.getStyle().set("color", good ? "var(--lumo-success-text-color)"
+                : "var(--lumo-error-text-color)");
+        return cell;
     }
 
     private static Button button(String label, ButtonVariant variant,
@@ -325,10 +513,43 @@ public class MonitoringStackView extends VerticalLayout {
         return button;
     }
 
+    /**
+     * An external link dressed as a tertiary button, so it lines up with the
+     * real buttons beside it. The anchor carries the navigation; the button is
+     * only its face.
+     */
     private static Anchor link(String label, String href) {
-        Anchor anchor = new Anchor(href, label);
+        Button face = new Button(label, VaadinIcon.EXTERNAL_LINK.create());
+        face.setIconAfterText(true);
+        face.addThemeVariants(ButtonVariant.TERTIARY);
+        Anchor anchor = new Anchor(href, face);
         anchor.setTarget("_blank");
         return anchor;
+    }
+
+    /** Example queries, each a link that opens pre-filled in Prometheus. */
+    private VerticalLayout examplesSection() {
+        UnorderedList list = new UnorderedList();
+        for (Query query : EXAMPLES) {
+            Span promQl = new Span(query.promQl());
+            promQl.getStyle().set("font-family", "monospace")
+                    .set("font-size", "var(--lumo-font-size-s, 0.875em)");
+            Anchor anchor = new Anchor(graphUrl(query.promQl()),
+                    query.label());
+            anchor.setTarget("_blank");
+            ListItem item = new ListItem(anchor, new Span(" — "), promQl);
+            list.add(item);
+        }
+        VerticalLayout section = new VerticalLayout(
+                new H2("Try in Prometheus"),
+                new Paragraph("Each link opens the Prometheus graph page with "
+                        + "the query filled in and run over the last 15 "
+                        + "minutes. Generate traffic first, or the rate() "
+                        + "queries have nothing to work on."),
+                list);
+        section.setPadding(false);
+        section.setSpacing(false);
+        return section;
     }
 
     private static VerticalLayout stackSection() {
