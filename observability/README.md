@@ -79,9 +79,50 @@ tracks `vaadin.ui.state.sample.age.max` — how stale the oldest per-UI
 measurement in the aggregate is, since a UI is measured on its own session's
 thread.
 
-Prometheus scrapes `host.docker.internal` on ports 8080 and 8082, so it finds
-the app on either; the unused one shows as a down target. Stop it with
-`docker compose down`.
+Prometheus scrapes `host.docker.internal` on ports 8080 and 8082
+(`prometheus/local.yaml`), so it finds the app on either; the unused one shows
+as a down target. Stop it with `docker compose down`.
 
-This stack is developer tooling: the module deploys as a single container, so the
-hosted demo runs without it and UC7 degrades to its export column.
+### Hosted
+
+The hosted demo runs the same two services as sibling Fly apps in the same
+organisation as `observability-cases`, so the three talk over Fly's private
+network:
+
+| App | Directory | Public | Reads |
+|---|---|---|---|
+| `observability-cases-prometheus` | `prometheus/` | <https://observability-cases-prometheus.fly.dev> | `observability-cases.internal:8080` by DNS service discovery (`prometheus/fly.yaml`) |
+| `observability-cases-grafana` | `grafana/` | <https://observability-cases-grafana.fly.dev> | `observability-cases-prometheus.internal:9090` |
+
+Both are built from the small Dockerfiles in those directories, from the
+repository root like the module itself, and share the Grafana provisioning and
+dashboard with the local stack; only the datasource URL differs, via the
+`PROMETHEUS_URL` environment variable. The Fly Deploy workflow picks any
+directory holding a `fly.toml` up to one level below a module, so the two
+deploy like any other module and redeploy when their directory changes.
+The apps have to exist once before the first deploy:
+
+```
+fly apps create observability-cases-prometheus
+fly apps create observability-cases-grafana
+```
+
+Both are public and read-only: Grafana grants anonymous viewers with the login
+form and basic auth off, so the default admin account is unreachable and the
+dashboard is edited here and redeployed rather than in the UI; Prometheus runs
+with its admin and lifecycle APIs off (its defaults). Prometheus keeps two days
+of samples on the machine's ephemeral disk, so a redeploy starts it empty.
+
+The UC7 view learns where the stack is from three properties, defaulting to the
+compose services: `uc7.prometheus.url` and `uc7.grafana.url` are what the
+browser follows, `uc7.prometheus.api-url` is what the server calls for the
+scrape-target and query rows. `fly.toml` sets the first two to the public
+hostnames and the third to the private one.
+
+Why sibling apps rather than [Fly's multi-container
+Machines](https://fly.io/docs/machines/guides-examples/multi-container-machines/),
+which can run a Compose file in one Machine: that mode drops `volumes:`, which
+is how this compose file feeds Prometheus its scrape config and Grafana its
+provisioning, allows exactly one service to `build:` (the app), so the other
+two would need pre-built config-bearing images anyway, and routes the Fly proxy
+to a single container, so visitors could never open Grafana or Prometheus.
