@@ -24,7 +24,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * tests pin down is that the view degrades honestly instead of failing, which
  * is also how it behaves in the hosted demo.
  */
-@SpringBootTest
+// The API address is pinned to a port nothing listens on, so the tests see "no
+// Prometheus" even on a developer machine where the compose stack is running.
+@SpringBootTest(properties = "uc7.prometheus.api-url=http://127.0.0.1:1")
 @ViewPackages(classes = { MonitoringStackView.class, HomeView.class })
 class MonitoringStackViewTest extends SpringBrowserlessTest {
 
@@ -79,6 +81,9 @@ class MonitoringStackViewTest extends SpringBrowserlessTest {
         Span summary = findInView(Span.class).first();
         assertTrue(summary.getText().contains("vaadin_* series"),
                 "summary should report the export count: " + summary.getText());
+        assertTrue(summary.getText().endsWith("Prometheus not reachable"),
+                "the badge should carry a short verdict only, not the detail: "
+                        + summary.getText());
 
         Grid<Row> grid = findInView(Grid.class).single();
         Row scrape = grid.getListDataView().getItems()
