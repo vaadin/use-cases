@@ -22,6 +22,8 @@ public final class AppCatalog {
                     "https://observability-cases.fly.dev/"),
             new App("page-visibility", "Page Visibility API",
                     "https://page-visibility-cases.fly.dev/"),
+            new App("printing", "Printing",
+                    "https://printing-cases.fly.dev/"),
             new App("route-hierarchy", "Route Hierarchy & Menu",
                     "https://route-hierarchy-cases.fly.dev/"),
             new App("screen-orientation", "Screen Orientation API",

@@ -37,7 +37,7 @@ class PrintDashboardViewTest extends SpringBrowserlessTest {
 
     @Test
     void chartsAreReflowedWhenTheBrowserStartsPrinting() {
-        navigate(PrintDashboardView.class);
+        PrintDashboardView view = navigate(PrintDashboardView.class);
         // Element-level executeJs is only queued when the response is
         // written, unlike Page#executeJs.
         roundTrip();
@@ -45,6 +45,10 @@ class PrintDashboardViewTest extends SpringBrowserlessTest {
         assertTrue(PrintTestSupport.pendingJsContains("beforeprint"),
                 "A chart keeps its screen width unless it is told to reflow");
         assertTrue(PrintTestSupport.pendingJsContains("reflow"));
+
+        view.getElement().removeFromParent();
+        assertTrue(PrintTestSupport.pendingJsContains("delete registry"),
+                "and they have to go away again when the report does");
     }
 
     @Test

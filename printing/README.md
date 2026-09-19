@@ -9,7 +9,8 @@ Vaadin has **no printing API**. No `Page#print()`, no print lifecycle event, no
 way to mark a component as chrome rather than content, nothing for the CSS page
 box, and nothing that makes a `Grid` or a `Chart` printable. Every view here is
 built on `src/main/resources/META-INF/resources/print.css` and a handful of
-JavaScript shims in `com.example.MissingAPI` and `com.example.print`. That is
+JavaScript shims in `com.example.MissingAPI` and `com.example.print`
+(`PrintEvents`, `ChartPrintReflow`). That is
 the point of the module: the use cases are all achievable today, and
 [API-GAPS.md](API-GAPS.md) records what each one had to work around to get
 there.

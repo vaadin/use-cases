@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.example.MissingAPI;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.DetachEvent;
@@ -22,13 +24,15 @@ import com.vaadin.flow.shared.Registration;
  * while the page is being paginated.
  * <p>
  * The listeners are registered against an {@code AbortController} kept on
- * {@code window}, keyed by this component's id, so that navigating away really
- * removes them — a plain {@code window.addEventListener} in {@code onAttach}
- * leaks one listener per visit for the lifetime of the single-page application.
+ * {@code window} under this component's own key, and
+ * {@link MissingAPI#abortPrintListeners} cancels it on detach, so that
+ * navigating away really removes them — a plain
+ * {@code window.addEventListener} in {@code onAttach} leaks one listener per
+ * visit for the lifetime of the single-page application.
  * <p>
  * Note what the events can and cannot tell you: {@code afterprint} fires when
- * the print dialog closes, whether the user printed, saved a PDF or cancelled.
- * The browser exposes no outcome, so neither does this class.
+ * the print dialog closes, whether the user printed, saved a PDF or
+ * cancelled. The browser exposes no outcome, so neither does this class.
  */
 public class PrintEvents extends Div {
 
@@ -88,32 +92,17 @@ public class PrintEvents extends Div {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        getElement().executeJs(
-                """
-                        const self = this;
-                        const registry = (window.__printEventRegistry ??= {});
-                        registry[$0]?.abort();
-                        const controller = new AbortController();
-                        registry[$0] = controller;
-                        window.addEventListener('beforeprint',
-                                () => self.$server.beforePrint(), { signal: controller.signal });
-                        window.addEventListener('afterprint',
-                                () => self.$server.afterPrint(), { signal: controller.signal });
-                        """,
-                key);
+        getElement().executeJs(MissingAPI.withPrintListenerRegistry("""
+                window.addEventListener('beforeprint',
+                        () => self.$server.beforePrint(), { signal });
+                window.addEventListener('afterprint',
+                        () => self.$server.afterPrint(), { signal });
+                """), key);
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
-        // Must go through Page: JavaScript scheduled on an element that is
-        // being removed is dropped before it reaches the browser.
-        detachEvent.getUI().getPage().executeJs("""
-                const registry = window.__printEventRegistry;
-                if (registry && registry[$0]) {
-                    registry[$0].abort();
-                    delete registry[$0];
-                }
-                """, key);
+        MissingAPI.abortPrintListeners(detachEvent.getUI(), key);
         super.onDetach(detachEvent);
     }
 }

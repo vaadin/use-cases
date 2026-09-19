@@ -38,13 +38,4 @@ public record PageSetup(Paper paper, boolean landscape, int marginMm) {
         return landscape ? paper.widthMm() : paper.heightMm();
     }
 
-    /** The width left for content once the margins are taken off. */
-    public int contentWidthMm() {
-        return sheetWidthMm() - 2 * marginMm;
-    }
-
-    /** The height left for content once the margins are taken off. */
-    public int contentHeightMm() {
-        return sheetHeightMm() - 2 * marginMm;
-    }
 }

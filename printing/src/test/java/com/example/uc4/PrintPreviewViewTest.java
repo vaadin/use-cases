@@ -53,8 +53,23 @@ class PrintPreviewViewTest extends SpringBrowserlessTest {
 
         test(findInView(Button.class).id("print-button")).click();
 
-        assertTrue(PrintTestSupport.pendingJsContains("use-case-page-rule"),
+        assertTrue(PrintTestSupport.pendingJsContains("style.textContent"),
                 "@page can only be applied through a style element");
         assertTrue(PrintTestSupport.printRequested());
+    }
+
+    @Test
+    void thePageRuleIsWrittenOnArrivalAndRemovedOnLeaving() {
+        PrintPreviewView view = navigate(PrintPreviewView.class);
+
+        assertTrue(PrintTestSupport.pendingJsContains("style.textContent"),
+                "The document must carry the rule the preview advertises, "
+                        + "not just show it");
+
+        view.getElement().removeFromParent();
+
+        assertTrue(PrintTestSupport.pendingJsContains("?.remove()"),
+                "@page belongs to the document, so it must not follow the "
+                        + "user to the next view");
     }
 }

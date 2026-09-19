@@ -35,27 +35,15 @@ public class OrderDocument extends Div {
             .ofPattern("d MMM yyyy", Locale.ENGLISH);
 
     /**
-     * The whole document: all of the order's lines, with a total row.
+     * The whole document: letterhead, addressee, every line of the order and
+     * the total. A use case that paginates the order itself builds its sheets
+     * from {@link #letterhead(Order)} and
+     * {@link PrintColumns#asTable(List, List)} instead.
      *
      * @param order
      *            the order to print
      */
     public OrderDocument(Order order) {
-        this(order, order.lines(), true);
-    }
-
-    /**
-     * A slice of the document, for use cases that paginate it themselves.
-     *
-     * @param order
-     *            the order to print
-     * @param lines
-     *            the lines to render on this sheet
-     * @param withTotal
-     *            whether to close the table with the order's total
-     */
-    public OrderDocument(Order order, List<OrderLine> lines,
-            boolean withTotal) {
         addClassNames("document");
 
         add(letterhead(order));
@@ -65,12 +53,10 @@ public class OrderDocument extends Div {
         order.address().forEach(line -> addressee.add(new Div(line)));
         add(addressee);
 
-        Table table = PrintColumns.asTable(LINE_COLUMNS, lines);
-        if (withTotal) {
-            TableRow total = table.addFooterRow();
-            total.addColumnHeaderCell("Total").setColspan(4);
-            total.addDataCell(money(order.total())).addClassName("numeric");
-        }
+        Table table = PrintColumns.asTable(LINE_COLUMNS, order.lines());
+        TableRow total = table.addFooterRow();
+        total.addColumnHeaderCell("Total").setColspan(4);
+        total.addDataCell(money(order.total())).addClassName("numeric");
         add(table);
     }
 

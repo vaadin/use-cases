@@ -46,9 +46,12 @@ from `onAttach` outlives the view, so every visit to the view leaks one more
 listener, and JavaScript scheduled on an element that is being detached is
 dropped before it reaches the browser.
 **Workaround used:** `PrintEvents`, an invisible component that registers the
-two listeners against an `AbortController` stored on `window` under a key, maps
-them to `@ClientCallable` methods, and aborts that controller from `onDetach`
-through `Page#executeJs` (not `Element#executeJs`, which would never be sent).
+two listeners against an `AbortController` stored in a registry on `window`
+under a key of its own, maps them to `@ClientCallable` methods, and aborts that
+controller from `onDetach` through `Page#executeJs` (not `Element#executeJs`,
+which would never be sent). `MissingAPI#withPrintListenerRegistry` and
+`#abortPrintListeners` hold that pattern, because the chart reflow below needs
+exactly the same bookkeeping.
 **Suggested API:** `Page#addBeforePrintListener` / `addAfterPrintListener`
 returning a `Registration`, in the shape of the existing
 `Page#addBrowserWindowResizeListener`. A `printStateSignal()` in the shape of
@@ -133,7 +136,11 @@ so an in-app preview can only ever be a guess.
 **Workaround used:** `MissingAPI#setPageRule(UI, String)` writes a `<style>`
 element into the head and replaces its content on every change;
 `com.example.print.PageSetup` builds the rule and the matching preview
-dimensions from one record.
+dimensions from one record. Because the rule belongs to the document rather
+than to the view that set it, UC4 also has to push it from `onAttach` (the
+constructor has no UI yet) and drop it again from `onDetach`
+(`MissingAPI#clearPageRule`) — otherwise every later view in the application
+prints on the paper somebody chose here.
 **Suggested API:** `Page#setPageSetup(PageSetup)` with paper size, orientation
 and margins, mapping to `@page` — and, if the browser ever reports it, the
 chosen setup back.
@@ -168,9 +175,11 @@ This is the shape of
 cannot help: printing is synchronous on the client, so by the time a
 `beforeprint` round trip reached the server the page would already be
 rasterised.
-**Workaround used:** `MissingAPI#reflowChartsWhenPrinting(Component)` registers
-a `beforeprint`/`afterprint` listener that calls
-`chart.configuration.reflow()` on every `vaadin-chart` in the subtree.
+**Workaround used:** `com.example.print.ChartPrintReflow`, an invisible
+component in the same shape as `PrintEvents`: it registers a
+`beforeprint`/`afterprint` pair that calls `chart.configuration.reflow()` on
+every `vaadin-chart` in the subtree, and aborts them on detach so that
+revisiting the view does not pile up another pair.
 **Suggested API:** `Chart#setReflowOnPrint(true)`, or simply making that the
 default — a chart that prints wrong by default is a bug, not a setting.
 

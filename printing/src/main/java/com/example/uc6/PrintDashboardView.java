@@ -9,12 +9,12 @@ import java.util.stream.Collectors;
 import com.example.MissingAPI;
 import com.example.data.Order;
 import com.example.data.Orders;
+import com.example.print.ChartPrintReflow;
 import com.example.print.OrderDocument;
 import com.example.print.PrintColumn;
 import com.example.print.PrintColumns;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -99,13 +99,7 @@ public class PrintDashboardView extends VerticalLayout {
                 widget("Orders per week", volumeChart(orders)),
                 widget("Largest orders", topOrders(orders)));
 
-        add(intro, print, dashboard);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        MissingAPI.reflowChartsWhenPrinting(this);
+        add(intro, print, dashboard, new ChartPrintReflow(dashboard));
     }
 
     private static DashboardWidget widget(String title, Component content) {

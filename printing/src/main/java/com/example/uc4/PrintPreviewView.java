@@ -9,6 +9,8 @@ import com.example.print.PageSetup;
 import com.example.print.Paper;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -118,6 +120,23 @@ public class PrintPreviewView extends VerticalLayout {
     public PageSetup currentSetup() {
         return new PageSetup(paper.getValue(),
                 Boolean.TRUE.equals(landscape.getValue()), margin.getValue());
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        // The constructor runs before there is a UI, so the rule the preview
+        // already shows has to be pushed to the document now.
+        MissingAPI.setPageRule(attachEvent.getUI(),
+                currentSetup().toPageRule());
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        // @page belongs to the document, not to this view: without this, every
+        // other view in the application would print on the paper chosen here.
+        MissingAPI.clearPageRule(detachEvent.getUI());
+        super.onDetach(detachEvent);
     }
 
     private void updatePreview() {

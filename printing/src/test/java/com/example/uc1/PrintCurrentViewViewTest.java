@@ -1,5 +1,7 @@
 package com.example.uc1;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.example.PrintTestSupport;
 import com.example.print.PrintEvents;
 import org.junit.jupiter.api.Test;
@@ -12,7 +14,9 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.shared.Registration;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -75,5 +79,36 @@ class PrintCurrentViewViewTest extends SpringBrowserlessTest {
         events.afterPrint();
         assertTrue(status.getText().contains("closed 2 times"),
                 "Actual: " + status.getText());
+    }
+
+    @Test
+    void aRemovedListenerStopsBeingNotified() {
+        navigate(PrintCurrentViewView.class);
+        PrintEvents events = findInView(PrintEvents.class).single();
+
+        AtomicInteger calls = new AtomicInteger();
+        Registration registration = events
+                .addAfterPrintListener(calls::incrementAndGet);
+
+        events.afterPrint();
+        assertEquals(1, calls.get());
+
+        registration.remove();
+        events.afterPrint();
+        assertEquals(1, calls.get(),
+                "A removed listener must not be notified again");
+    }
+
+    @Test
+    void leavingTheViewTakesTheWindowListenersWithIt() {
+        PrintCurrentViewView view = navigate(PrintCurrentViewView.class);
+        PrintEvents events = findInView(PrintEvents.class).single();
+        roundTrip();
+
+        view.remove(events);
+
+        assertTrue(PrintTestSupport.pendingJsContains("delete registry"),
+                "Detaching must abort the window listeners, or every visit "
+                        + "leaks another beforeprint/afterprint pair");
     }
 }
