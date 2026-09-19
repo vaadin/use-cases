@@ -1,0 +1,5 @@
+/* The print-only route has no application shell, so it styles its own page. */
+.slip-view {
+    align-items: center;
+    padding: 2rem 1rem;
+}

@@ -1,0 +1,123 @@
+/*
+ * The print rules for every view in this module.
+ *
+ * Vaadin has no printing API, so this file is the module's infrastructure:
+ * it decides what is content and what is chrome, how documents break across
+ * sheets, and what a table does when it runs off the bottom of a page.
+ *
+ * Two class names make up the contract:
+ *   .printable  — the one subtree that should reach the paper
+ *   .no-print   — anything inside it that should not
+ *   .print-only — the opposite: shown on paper, hidden on screen
+ */
+
+.print-only {
+    display: none;
+}
+
+@media print {
+    /*
+     * Print only the marked document. `visibility` is used rather than
+     * `display` on purpose: it is inherited, and inheritance crosses shadow
+     * roots. Hiding <vaadin-app-layout> therefore also hides the navbar and
+     * the drawer inside its shadow DOM, which no selector in this file could
+     * otherwise reach. The document is then pulled out of the page flow so
+     * that the space its hidden ancestors occupy does not print as an empty
+     * first sheet.
+     */
+    body * {
+        visibility: hidden;
+    }
+
+    .printable,
+    .printable * {
+        visibility: visible;
+    }
+
+    .printable {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border: none;
+    }
+
+    .no-print,
+    .no-print * {
+        display: none !important;
+    }
+
+    .print-only {
+        display: revert;
+    }
+
+    /*
+     * Sheets: one piece of paper each, the last one without a trailing
+     * blank. The screen preview sizes a sheet in millimetres with an inline
+     * style, so the paper-side reset has to outrank it: the @page rule
+     * already decides how big the paper is.
+     */
+    .sheet {
+        break-after: page;
+        width: auto !important;
+        max-width: none !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none;
+        box-shadow: none;
+    }
+
+    /* The document fills the paper; its screen frame is not part of it. */
+    .document {
+        max-width: none;
+        border: none;
+        padding: 0;
+        background: none;
+    }
+
+    /* Development-mode tooling is not part of the application. */
+    vaadin-dev-tools,
+    vaadin-devmode-gizmo,
+    copilot-main {
+        display: none !important;
+    }
+
+    .sheet:last-of-type {
+        break-after: auto;
+    }
+
+    /*
+     * Tables are the only construct the browser paginates well: thead repeats
+     * on every sheet, tfoot lands under the last chunk, and a row can be kept
+     * whole. This is why the printable rendering of a Grid is a table.
+     */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tfoot {
+        display: table-footer-group;
+    }
+
+    tr,
+    .avoid-break {
+        break-inside: avoid;
+    }
+
+    /* Ink is expensive and grey backgrounds rarely survive the printer. */
+    .doc-table th,
+    .doc-table td {
+        border-bottom: 1px solid #999;
+        background: none;
+        color: #000;
+    }
+}

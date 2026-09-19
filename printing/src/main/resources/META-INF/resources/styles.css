@@ -1,0 +1,104 @@
+/* Printing use cases — screen styling. What happens on paper is print.css. */
+
+.app-title {
+    font-size: var(--aura-font-size-l);
+    margin: 0;
+}
+
+.home-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    max-width: 960px;
+}
+
+.home-card .home-card-tag {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary);
+    letter-spacing: 0.05em;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    background: color-mix(in srgb, var(--aura-blue) 15%, transparent);
+    color: var(--aura-blue-text);
+    border: 1px solid color-mix(in srgb, var(--aura-blue) 35%, transparent);
+}
+
+/* A document as it looks on screen: a sheet of paper on a desk. */
+.document {
+    background: var(--vaadin-background-color);
+    border: 1px solid var(--vaadin-border-color);
+    border-radius: 4px;
+    padding: 2rem;
+    max-width: 48rem;
+}
+
+.doc-letterhead h2 {
+    margin: 0;
+}
+
+.doc-letterhead p {
+    margin: 0.25rem 0 0;
+    color: var(--vaadin-text-color-secondary);
+    font-size: var(--aura-font-size-s);
+}
+
+.doc-meta {
+    display: flex;
+    gap: 1.5rem;
+    font-size: var(--aura-font-size-s);
+    color: var(--vaadin-text-color-secondary);
+}
+
+.doc-address {
+    margin: 1.5rem 0;
+    line-height: 1.4;
+}
+
+.doc-table {
+    margin-top: 1rem;
+    border-collapse: collapse;
+}
+
+.doc-table th,
+.doc-table td {
+    text-align: start;
+    padding: 0.35rem 0.5rem;
+    border-bottom: 1px solid var(--vaadin-border-color);
+    font-size: var(--aura-font-size-s);
+}
+
+.doc-table th.numeric,
+.doc-table td.numeric {
+    text-align: end;
+}
+
+.doc-total {
+    margin-top: 0.75rem;
+    text-align: end;
+    font-weight: 600;
+}
+
+.doc-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--vaadin-border-color);
+    font-size: var(--aura-font-size-xs);
+    color: var(--vaadin-text-color-secondary);
+}
+
+/* A preview of one sheet of paper, drawn at its real size. */
+.sheet {
+    background: #fff;
+    color: #000;
+    border: 1px solid var(--vaadin-border-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    margin-bottom: 1.5rem;
+}

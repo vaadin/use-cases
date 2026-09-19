@@ -1,0 +1,17 @@
+.uc1-view {
+    .internal-note {
+        margin-top: 1.5rem;
+        padding: 0.5rem 0.75rem;
+        border-left: 3px solid var(--aura-orange);
+        background: color-mix(in srgb, var(--aura-orange) 8%, transparent);
+        font-size: var(--aura-font-size-s);
+    }
+}
+
+@media print {
+    /* The note keeps its marker on paper, but not the screen background. */
+    .internal-note {
+        background: none;
+        border-left: 2px solid #000;
+    }
+}
