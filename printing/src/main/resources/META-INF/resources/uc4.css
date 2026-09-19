@@ -1,0 +1,15 @@
+.preview-area {
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem;
+    background: var(--vaadin-background-container);
+    overflow: auto;
+}
+
+.page-rule {
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    background: var(--vaadin-background-container);
+    border-radius: 4px;
+    font-size: var(--aura-font-size-s);
+}

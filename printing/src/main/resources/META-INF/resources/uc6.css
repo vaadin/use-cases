@@ -1,0 +1,26 @@
+.report-dashboard {
+    --vaadin-dashboard-col-min-width: 20rem;
+}
+
+@media print {
+    /*
+     * One column on paper: the screen layout's columns are too narrow to be
+     * read at A4 width. The column count has to be forced with !important,
+     * because Dashboard#setMaximumColumnCount writes the same custom property
+     * as an inline style, which a stylesheet cannot otherwise outrank.
+     */
+    vaadin-dashboard {
+        --vaadin-dashboard-col-min-width: 100% !important;
+        --vaadin-dashboard-col-max-count: 1 !important;
+        --vaadin-dashboard-gap: 0 !important;
+        --vaadin-dashboard-padding: 0 !important;
+    }
+
+    vaadin-dashboard-widget {
+        break-inside: avoid;
+    }
+
+    vaadin-dashboard-widget::part(content) {
+        height: auto;
+    }
+}
