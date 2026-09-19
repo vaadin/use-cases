@@ -13,6 +13,7 @@
 
     <properties>
         <poi.version>5.5.1</poi.version>
+        <pdfbox.version>3.0.7</pdfbox.version>
     </properties>
 
     <dependencies>
@@ -40,6 +41,13 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>${poi.version}</version>
+        </dependency>
+        <!-- UC8 paginates the same report into a PDF, repeating the header
+             rows on every page. -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>${pdfbox.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

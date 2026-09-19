@@ -8,6 +8,7 @@ import com.example.uc4.RenderedValuesView;
 import com.example.uc5.ExcelReportView;
 import com.example.uc6.RedactedExportView;
 import com.example.uc7.LargeDatasetExportView;
+import com.example.uc8.MultiPagePdfView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.html.Div;
@@ -52,6 +53,9 @@ public class HomeView extends BaseHomeView {
         cards.add(homeCard("UC7", "Large lazy data set",
                 "24 500 rows, streamed a page at a time.",
                 LargeDatasetExportView.class));
+        cards.add(homeCard("UC8", "Multi-page PDF",
+                "Headers repeated on every page of the report.",
+                MultiPagePdfView.class));
         add(cards);
     }
 }

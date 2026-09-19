@@ -9,9 +9,8 @@ The reference point is
 which is still a draft acceptance-criteria issue: **nothing of it is
 implemented**. There is no `GridExporter`, no `grid.createExporter()`, no
 `Column#getCellContent(item)`. So the honest summary of this module is that all
-seven use cases are buildable today, and all seven need the same 300 lines of
-undocumented plumbing first — of which one line is reflection into a private
-field of a Flow class.
+eight use cases are buildable today, and all eight need the same plumbing
+first — of which one line is reflection into a private field of a Flow class.
 
 That plumbing lives in two places in this module, and both are workarounds:
 
@@ -19,7 +18,7 @@ That plumbing lives in two places in this module, and both are workarounds:
   on `Grid` and `Grid.Column`: the rows in view order, the text of a cell, a
   text alternative for a rendered component.
 - `src/main/java/com/example/export/GridExport.java` — the facade the issue
-  sketches, hand-written, plus `CsvWriter` / `XlsxWriter` as the two
+  sketches, hand-written, plus `CsvWriter`, `XlsxWriter` and `PdfWriter` as the
   "production-ready examples" acceptance criterion 0 asks Vaadin to ship.
 
 ---
@@ -253,6 +252,59 @@ time.
 **Suggested API:** a paged/streaming export — `exporter.streamRows(pageSize)`
 returning a lazy `Stream<Row>` — and, independently, a generically typed
 `DataCommunicator#buildQuery`.
+
+## A paginating writer needs the static parts over and over, and the rows twice
+
+**Where it bit us:** uc8 / MultiPagePdfView.java
+**Symptom:** CSV and `.xlsx` are forgiving formats: write the headers once,
+stream the rows past them, done. A printed report is not. The header rows —
+grouped cells included — have to be drawn again at the top of **every** page, so
+the writer needs them as re-readable data for the whole run, not as something it
+consumed at the start. And before it can place the first row it has to walk all
+of them twice: once to measure the text and size the columns, once to lay them
+out. Even "Page 1 of 6" cannot be printed until the row count is known.
+
+The API sketch in #7196 does not support that shape. It exposes the report as
+`List<Row> getRows()` alongside `getHeaderRows()` / `getFooterRows()`, which
+works — but it is the opposite of the streaming shape UC7 needs, and an
+exporter has to serve both. Any real API needs a lazy
+`Stream<Row>` *and* a materialised snapshot, and has to be explicit about which
+of the two a given accessor hands back.
+
+**Workaround used:** `GridExport` deliberately exposes the two shapes as
+separate entry points — `export()` for a materialised `ExportedGrid` and
+`streamRows()` for the lazy walk — and `PdfWriter` takes the materialised one,
+measures it, then paginates it.
+**Suggested API:** keep the static parts (`getHeaderRows`, `getFooterRows`,
+`getColumns`, `getEmptyStateText`) on the exporter itself, independent of the
+rows, and offer the rows both ways: `getRows()` for a snapshot and
+`streamRows(pageSize)` for a lazy walk.
+
+## Column widths are CSS strings, so a report cannot size its columns
+
+**Where it bit us:** uc8 / MultiPagePdfView.java
+**Symptom:** a PDF table has to decide how wide each column is, in points. The
+grid cannot say. `Column#getWidth()` returns a CSS string — `"120px"`, `"8em"`,
+or `null` — and for the common `setAutoWidth(true)` case the real width is
+computed by the browser from the rendered content and never exists on the
+server. `getFlexGrow()` gives a ratio with no absolute anchor. So a report
+writer has to re-measure every cell in its own font to get numbers it can use,
+which is the second of UC8's two passes over the data.
+
+What *does* survive is alignment: `ColumnBase#getTextAlign()` is public and
+returns a real `ColumnTextAlign`, so the money columns of UC8 come out
+right-aligned in the PDF exactly as they are on screen. It is the one piece of
+the "export the styling" acceptance criterion that works today, which is worth
+saying out loud next to everything in the styling entry below that does not.
+
+**Workaround used:** `PdfWriter` measures every cell with
+`PDFont#getStringWidth`, sums the per-column maxima and scales them to the page
+width. `ExportedGrid` carries an `Alignment` per column, mapped from
+`getTextAlign()` so the writers stay free of Grid types.
+**Suggested API:** a resolved width per column in the export data — even an
+approximate character count would beat a CSS string — or an explicit statement
+in the export API that widths are the report writer's problem, so nobody looks
+for them.
 
 ## No styling information to export
 

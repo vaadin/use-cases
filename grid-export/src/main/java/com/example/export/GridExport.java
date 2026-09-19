@@ -9,10 +9,12 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import com.example.MissingAPI;
+import com.example.export.ExportedGrid.Alignment;
 import com.example.export.ExportedGrid.HeaderCell;
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -188,9 +190,22 @@ public final class GridExport<T> {
         return new ExportedGrid(title,
                 includeHeaders ? headerRows(columns) : List.of(),
                 columns.stream().map(MissingAPI::headerText).toList(),
+                columns.stream().map(GridExport::alignmentOf).toList(),
                 streamRows().toList(),
                 includeFooters ? footerRows(columns) : List.of(),
                 emptyStateText());
+    }
+
+    private static Alignment alignmentOf(Grid.Column<?> column) {
+        ColumnTextAlign align = column.getTextAlign();
+        if (align == null) {
+            return Alignment.START;
+        }
+        return switch (align) {
+        case END -> Alignment.END;
+        case CENTER -> Alignment.CENTER;
+        default -> Alignment.START;
+        };
     }
 
     private List<String> row(List<Grid.Column<T>> columns, T item) {

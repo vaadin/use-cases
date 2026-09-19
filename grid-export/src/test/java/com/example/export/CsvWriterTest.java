@@ -2,6 +2,7 @@ package com.example.export;
 
 import java.util.List;
 
+import com.example.export.ExportedGrid.Alignment;
 import com.example.export.ExportedGrid.HeaderCell;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,8 @@ class CsvWriterTest {
                 List.of(List.of(new HeaderCell("Employee", 2),
                         new HeaderCell("Compensation", 2))),
                 List.of("Name", "Department", "Salary", "Bonus"),
+                List.of(Alignment.START, Alignment.START, Alignment.END,
+                        Alignment.END),
                 List.of(List.of("Ada", "Engineering", "1", "2")), List.of(),
                 "No rows.");
 
@@ -42,7 +45,8 @@ class CsvWriterTest {
     @Test
     void anEmptyReportCarriesTheEmptyStateText() {
         ExportedGrid report = new ExportedGrid("", List.of(), List.of("Name"),
-                List.of(), List.of(), "Nothing to report.");
+                List.of(Alignment.START), List.of(), List.of(),
+                "Nothing to report.");
 
         assertEquals(List.of("Nothing to report."),
                 CsvWriter.toCsv(report).lines().toList());
