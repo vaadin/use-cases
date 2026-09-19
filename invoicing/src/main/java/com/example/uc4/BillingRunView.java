@@ -2,16 +2,13 @@ package com.example.uc4;
 
 import java.io.ByteArrayInputStream;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.example.data.Invoice;
 import com.example.data.Invoices;
 import com.example.pdf.InvoicePdf;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -41,9 +38,11 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  * streamed: its cross-reference table is written last, so the entire batch
  * exists in memory before the browser sees a byte — the opposite of a CSV
  * export, which can be written row by row. And the progress callbacks
- * ({@code onProgress}, {@code whenComplete}) run on the request thread while
- * the response is being written, so anything they touch in the UI has to go
- * through {@code UI#access}.
+ * ({@code onProgress}, {@code whenComplete}) are delivered while the response
+ * is being written, i.e. outside any client round trip: Flow wraps them in
+ * {@code UI#access} for you, but the resulting changes only reach the browser
+ * if the application has {@code @Push} enabled — which nothing enforces or
+ * warns about.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — The monthly billing run")
@@ -54,7 +53,8 @@ public class BillingRunView extends VerticalLayout {
     private static final int INVOICE_COUNT = 12;
 
     private final Grid<Invoice> grid = new Grid<>();
-    private final Span status = new Span("Nothing generated yet");
+    private final Anchor download;
+    private final Span status = new Span();
     private final ProgressBar progress = new ProgressBar();
 
     public BillingRunView() {
@@ -63,6 +63,8 @@ public class BillingRunView extends VerticalLayout {
                 + "document. Page numbering runs across the whole "
                 + "batch, so \"Page 7 of 12\" means the same thing to "
                 + "the reader as it does to the printer."));
+
+        List<Invoice> invoices = Invoices.sample(INVOICE_COUNT);
 
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
         grid.addThemeVariants(GridVariant.NO_BORDER);
@@ -73,12 +75,12 @@ public class BillingRunView extends VerticalLayout {
                 .setHeader("Issued").setAutoWidth(true);
         grid.addColumn(invoice -> InvoicePdf.money(invoice.gross()))
                 .setHeader("Total").setAutoWidth(true);
-        grid.setItems(Invoices.sample(INVOICE_COUNT));
+        grid.setItems(invoices);
         grid.setAllRowsVisible(true);
-        grid.asMultiSelect().addValueChangeListener(
-                event -> status.setText(selection().size() + " selected"));
+        grid.asMultiSelect()
+                .addValueChangeListener(event -> selectionChanged());
 
-        Anchor download = new Anchor(batchHandler(), "Download the batch");
+        download = new Anchor(batchHandler(), "Download the batch");
         download.setId("batch-link");
 
         progress.setId("batch-progress");
@@ -92,7 +94,7 @@ public class BillingRunView extends VerticalLayout {
         actions.setAlignItems(Alignment.CENTER);
 
         add(grid, actions);
-        grid.select(Invoices.sample(INVOICE_COUNT).getFirst());
+        grid.select(invoices.getFirst());
     }
 
     /**
@@ -102,42 +104,38 @@ public class BillingRunView extends VerticalLayout {
      * @return the selected invoices
      */
     public List<Invoice> selection() {
-        Set<Invoice> selected = new LinkedHashSet<>(grid.getSelectedItems());
-        return selected.stream().sorted(Comparator.comparing(Invoice::number))
-                .toList();
+        return grid.getSelectedItems().stream()
+                .sorted(Comparator.comparing(Invoice::number)).toList();
+    }
+
+    private void selectionChanged() {
+        int selected = selection().size();
+        // A PDF with no pages is a file no viewer will open, so an empty run
+        // is not offered at all.
+        download.setVisible(selected > 0);
+        status.setText(
+                selected == 0 ? "Nothing selected" : selected + " selected");
     }
 
     private DownloadHandler batchHandler() {
         return DownloadHandler.fromInputStream(event -> {
-            List<Invoice> invoices = selection();
-            byte[] pdf = InvoicePdf.render(invoices);
+            byte[] pdf = InvoicePdf.render(selection());
             return new DownloadResponse(new ByteArrayInputStream(pdf),
                     "billing-run.pdf", InvoicePdf.CONTENT_TYPE, pdf.length);
-        }).onProgress(
-                (transferred, total) -> updateProgress(transferred, total))
-                .whenComplete(success -> completed(success));
+        }, "billing-run.pdf").onProgress(this::updateProgress)
+                .whenComplete(this::completed);
     }
 
     private void updateProgress(long transferred, long total) {
-        UI ui = getUI().orElse(null);
-        if (ui == null || total <= 0) {
-            return;
+        if (total > 0) {
+            progress.setValue((double) transferred / total);
         }
-        // The callback runs while the response is being written, on the
-        // request thread and without the UI lock.
-        ui.access(() -> progress.setValue((double) transferred / total));
     }
 
     private void completed(boolean success) {
-        UI ui = getUI().orElse(null);
-        if (ui == null) {
-            return;
-        }
-        ui.access(() -> {
-            progress.setValue(success ? 1 : 0);
-            status.setText(success
-                    ? "Sent " + selection().size() + " invoices as one file"
-                    : "The transfer failed");
-        });
+        progress.setValue(success ? 1 : 0);
+        status.setText(
+                success ? "Sent " + selection().size() + " invoices as one file"
+                        : "The transfer failed");
     }
 }

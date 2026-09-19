@@ -8,9 +8,7 @@ import com.vaadin.flow.component.html.Anchor;
  * Flow 25's {@code DownloadHandler} covers generating a file and sending it to
  * the browser well. What it does not cover is everything around that: the
  * server cannot learn the URL a handler ended up on, so it cannot open the
- * document in a new tab, hand it to an {@code <embed>}, or put it in a mail;
- * and the completion callback arrives on the request thread, outside the UI
- * lock.
+ * document in a new tab, hand it to an {@code <embed>}, or put it in a mail.
  * <p>
  * See {@code API-GAPS.md} for what the missing API should look like.
  */

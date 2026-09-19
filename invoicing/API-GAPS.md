@@ -81,22 +81,29 @@ carry the distinction: a `DownloadHandler` that reports "preparing" as well as
 "transferring", so an application can show the user the part that actually
 takes the time.
 
-## The completion callback is outside the UI
+## A download that updates the UI silently needs `@Push`
 
 **Where it bit us:** uc4 / BillingRunView.java, uc5 / DeliveryReceiptView.java
 **Symptom:** "mark the invoice as sent" must happen when the transfer
 completed, not when the link was clicked, and `whenComplete` is the only place
-that knows. It runs on the request thread that wrote the response, without the
-UI lock, so every line of application code in it has to remember `UI#access`
-— and a listener that forgets does nothing, silently, until the next
-interaction. `onProgress` has the same shape.
+that knows. The threading is handled for you —
+`TransferProgressAwareHandler` wraps both `whenComplete` and `onProgress` in
+`UI#access`, so application code in them may touch components freely. What is
+not handled is getting the result to the browser: the callback runs while the
+response to a *file* request is being written, so there is no client round
+trip to piggyback on, and without `@Push` the progress bar stays at zero and
+the badge stays "Not sent" until some unrelated interaction happens to flush
+the queue. Nothing fails, nothing is logged, and the use case simply does not
+work. The requirement is in the javadoc of the two methods and nowhere the
+developer is looking.
 [vaadin/flow-components#10075](https://github.com/vaadin/flow-components/issues/10075)
-reports the same class of problem for `withResponseListener`.
-**Workaround used:** both callbacks do their state change on the shared
-service and then hop through `UI#access` for the repaint.
-**Suggested API:** document the threading on `TransferProgressAwareHandler`,
-and offer a variant that is delivered with the session locked — or at least
-fail loudly when a callback touches a component without the lock.
+reports a related hole in the same area for `withResponseListener`.
+**Workaround used:** `@Push` on `Application`, which is easy once you know —
+and the reason this module has it while nothing in the code would have
+suggested it.
+**Suggested API:** warn when a transfer callback modifies a UI that has no
+push enabled, the way Flow already warns about other lost updates; or state
+the dependency where an application meets it, on `DownloadHandler` itself.
 
 ## Nothing simulates a download in tests
 

@@ -81,7 +81,7 @@ public final class InvoicePdf {
      * @param out
      *            the stream to write the document to
      */
-    public static void write(List<Invoice> invoices, OutputStream out) {
+    private static void write(List<Invoice> invoices, OutputStream out) {
         try (PDDocument document = new PDDocument()) {
             for (Invoice invoice : invoices) {
                 renderInvoice(document, invoice);

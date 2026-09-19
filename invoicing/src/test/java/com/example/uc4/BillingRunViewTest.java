@@ -65,17 +65,16 @@ class BillingRunViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void anEmptySelectionStillProducesAReadableDocument() throws IOException {
+    void anEmptyRunIsNotOfferedAtAll() {
         navigate(BillingRunView.class);
+        assertTrue(findInView(Anchor.class).withId("batch-link").exists());
+
         test(findInView(Grid.class).single()).deselectAll();
 
-        byte[] pdf = InvoicePdf.render(List.<Invoice> of());
-
-        try (PDDocument document = Loader.loadPDF(pdf)) {
-            assertEquals(0, document.getNumberOfPages(),
-                    "No invoices, no pages — and no exception either");
-        }
-        assertEquals("0 selected",
+        assertFalse(findInView(Anchor.class).withId("batch-link").exists(),
+                "A PDF with no pages is a file no viewer opens, so the link "
+                        + "has to go away with the selection");
+        assertEquals("Nothing selected",
                 findInView(Span.class).id("batch-status").getText());
     }
 }

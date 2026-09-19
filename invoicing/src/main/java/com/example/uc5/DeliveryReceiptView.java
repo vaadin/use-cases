@@ -1,7 +1,6 @@
 package com.example.uc5;
 
 import java.io.ByteArrayInputStream;
-import java.util.List;
 
 import com.example.data.Invoice;
 import com.example.data.InvoiceBook;
@@ -10,7 +9,6 @@ import com.example.pdf.InvoicePdf;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.Grid;
@@ -34,12 +32,13 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  * worth using: the book below is only written when the last byte has left, and
  * it remembers how many bytes those were.
  * <p>
- * Two things make this harder than it looks. The callback runs on the request
- * thread, outside the UI lock, so the badge can only be refreshed through
- * {@code UI#access} — and because the state is shared between users, a second
- * browser has to be told too, which is why {@link InvoiceBook} is
- * application-scoped and this view re-reads it on every attach rather than
- * caching it.
+ * Two things make this harder than it looks. The callback is delivered while
+ * the response is being written, outside any client round trip: Flow runs it
+ * through {@code UI#access} already, but the repainted badge only reaches the
+ * browser because the application enables {@code @Push}. And because the state
+ * is shared between users, a second browser has to be told too, which is why
+ * {@link InvoiceBook} is application-scoped and this view re-reads it on every
+ * attach rather than caching it.
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Know that it arrived")
@@ -122,18 +121,8 @@ public class DeliveryReceiptView extends VerticalLayout {
 
     private void recordDelivery(Invoice invoice, long bytes) {
         book.markSent(invoice.number(), bytes);
-        UI ui = getUI().orElse(null);
-        if (ui != null) {
-            ui.access(this::refresh);
-        }
-    }
-
-    /**
-     * The invoices the demo offers, for tests that need one by name.
-     *
-     * @return the sample invoices
-     */
-    public static List<Invoice> invoices() {
-        return Invoices.sample(INVOICE_COUNT);
+        // Flow delivers this callback with the UI lock held; pushing the
+        // repaint to the browser is what @Push on the application is for.
+        refresh();
     }
 }

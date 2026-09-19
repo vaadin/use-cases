@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 /**
@@ -59,20 +58,6 @@ public final class Invoices {
      */
     public static Invoice sampleInvoice() {
         return sample(1).getFirst();
-    }
-
-    /**
-     * Looks an invoice up by its number.
-     *
-     * @param number
-     *            the invoice number
-     * @param count
-     *            how many invoices to look through
-     * @return the invoice, if there is one with that number
-     */
-    public static Optional<Invoice> byNumber(String number, int count) {
-        return sample(count).stream()
-                .filter(invoice -> invoice.number().equals(number)).findFirst();
     }
 
     private static List<InvoiceLine> lines(Random random, int lineCount) {
