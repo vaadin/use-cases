@@ -52,6 +52,15 @@ public final class PdfWriter {
 
     private static final float MARGIN = 32;
 
+    /** Space between the title and the header rows below it. */
+    private static final float TITLE_GAP = 10;
+
+    /** Space taken by the rule drawn under the last header row. */
+    private static final float HEADER_RULE_GAP = 3;
+
+    /** Space between the last data row and the footer rule above the totals. */
+    private static final float FOOTER_GAP = 2;
+
     /** Padding between a cell's text and the next column. */
     private static final float CELL_PADDING = 6;
 
@@ -108,9 +117,39 @@ public final class PdfWriter {
         }
     }
 
+    /** What a single line of the table is, and how tall it is. */
+    private enum LineKind {
+
+        /** An ordinary data row. */
+        DATA(ROW_HEIGHT),
+
+        /** A footer row: bold, with a rule and a gap above it. */
+        FOOTER(ROW_HEIGHT + FOOTER_GAP),
+
+        /**
+         * The empty-state text, in place of the rows the report has none of.
+         */
+        NOTE(ROW_HEIGHT);
+
+        private final float height;
+
+        LineKind(float height) {
+            this.height = height;
+        }
+    }
+
+    private record Line(List<String> cells, LineKind kind) {
+    }
+
     /**
-     * One report's worth of layout state: the page geometry, the measured
-     * column widths, and a cursor that walks down the current page.
+     * One report's worth of layout: the page geometry, the measured column
+     * widths, and the lines split into pages.
+     * <p>
+     * The split happens <em>before</em> anything is drawn, in
+     * {@link #paginate()}, and rendering then just walks the result. That is
+     * what keeps "Page 1 of 6" honest: there is only one place that decides
+     * where a page breaks, so the stamped total cannot disagree with the number
+     * of pages actually produced.
      */
     private static final class Layout {
 
@@ -122,13 +161,11 @@ public final class PdfWriter {
 
         private final float[] columnOffsets;
 
-        private final int totalPages;
+        private final List<List<Line>> pages;
 
         private @Nullable PDPageContentStream content;
 
         private float cursorY;
-
-        private int pageNumber;
 
         private Layout(ExportedGrid exported) {
             this.exported = exported;
@@ -142,66 +179,86 @@ public final class PdfWriter {
                 columnOffsets[i] = offset;
                 offset += columnWidths[i];
             }
-            this.totalPages = countPages();
+            this.pages = paginate();
         }
 
-        private void write(PDDocument document) throws IOException {
-            startPage(document);
-            for (List<String> row : exported.rows()) {
-                if (!fits(ROW_HEIGHT)) {
-                    endPage();
-                    startPage(document);
-                }
-                drawRow(row, BODY_FONT);
-            }
+        /** Every line of the table, in the order it is printed. */
+        private List<Line> lines() {
+            List<Line> lines = new ArrayList<>();
             if (exported.rows().isEmpty()) {
-                drawText(exported.emptyStateText(), MARGIN,
-                        cursorY - ROW_HEIGHT, BODY_FONT, FONT_SIZE);
-                cursorY -= ROW_HEIGHT;
+                lines.add(new Line(List.of(exported.emptyStateText()),
+                        LineKind.NOTE));
             }
-            for (List<String> footer : exported.footerRows()) {
-                if (!fits(ROW_HEIGHT * 2)) {
-                    endPage();
-                    startPage(document);
-                }
-                cursorY -= 2;
-                drawLine(cursorY + ROW_HEIGHT - 3);
-                drawRow(footer, BOLD_FONT);
-            }
-            endPage();
-        }
-
-        /** Begins a page and lays down the title and the repeated headers. */
-        private void startPage(PDDocument document) throws IOException {
-            PDPage page = new PDPage(pageSize);
-            document.addPage(page);
-            content = new PDPageContentStream(document, page);
-            pageNumber++;
-            cursorY = pageSize.getHeight() - MARGIN;
-
-            if (pageNumber == 1 && !exported.title().isEmpty()) {
-                drawText(exported.title(), MARGIN, cursorY - TITLE_SIZE,
-                        BOLD_FONT, TITLE_SIZE);
-                cursorY -= TITLE_SIZE + 10;
-            }
-            drawHeaderRows();
-            drawPageNumber();
+            exported.rows()
+                    .forEach(row -> lines.add(new Line(row, LineKind.DATA)));
+            exported.footerRows().forEach(
+                    footer -> lines.add(new Line(footer, LineKind.FOOTER)));
+            return lines;
         }
 
         /**
-         * The stream of the page being written. Non-null between
-         * {@link #startPage} and {@link #endPage}.
+         * Splits the lines into pages. The title only costs height on the first
+         * page; the header rows cost it on every one.
          */
-        private PDPageContentStream content() {
-            PDPageContentStream stream = content;
-            if (stream == null) {
-                throw new IllegalStateException("No page has been started");
+        private List<List<Line>> paginate() {
+            List<List<Line>> split = new ArrayList<>();
+            List<Line> current = new ArrayList<>();
+            float y = contentTop(0);
+            for (Line line : lines()) {
+                if (y - line.kind().height < MARGIN && !current.isEmpty()) {
+                    split.add(List.copyOf(current));
+                    current.clear();
+                    y = contentTop(split.size());
+                }
+                current.add(line);
+                y -= line.kind().height;
             }
-            return stream;
+            // Always at least one page, even for a report with no lines at all.
+            split.add(List.copyOf(current));
+            return List.copyOf(split);
         }
 
-        private void endPage() throws IOException {
-            content().close();
+        /**
+         * Where the first line of a page starts, below the title (first page
+         * only) and the repeated header rows. Both {@link #paginate()} and the
+         * renderer use this, so they cannot drift apart.
+         */
+        private float contentTop(int pageIndex) {
+            float top = pageSize.getHeight() - MARGIN;
+            if (pageIndex == 0 && !exported.title().isEmpty()) {
+                top -= TITLE_SIZE + TITLE_GAP;
+            }
+            top -= exported.headerRows().size() * ROW_HEIGHT;
+            return top - HEADER_RULE_GAP;
+        }
+
+        private void write(PDDocument document) throws IOException {
+            for (int pageIndex = 0; pageIndex < pages.size(); pageIndex++) {
+                startPage(document, pageIndex);
+                for (Line line : pages.get(pageIndex)) {
+                    drawLine(line);
+                }
+                content().close();
+            }
+        }
+
+        /** Begins a page and lays down the title and the repeated headers. */
+        private void startPage(PDDocument document, int pageIndex)
+                throws IOException {
+            PDPage page = new PDPage(pageSize);
+            document.addPage(page);
+            content = new PDPageContentStream(document, page);
+            cursorY = pageSize.getHeight() - MARGIN;
+
+            if (pageIndex == 0 && !exported.title().isEmpty()) {
+                drawText(exported.title(), MARGIN, cursorY - TITLE_SIZE,
+                        BOLD_FONT, TITLE_SIZE);
+                cursorY -= TITLE_SIZE + TITLE_GAP;
+            }
+            drawHeaderRows();
+            drawText("Page " + (pageIndex + 1) + " of " + pages.size(), MARGIN,
+                    MARGIN - 12, BODY_FONT, FONT_SIZE);
+            cursorY = contentTop(pageIndex);
         }
 
         /**
@@ -228,30 +285,45 @@ public final class PdfWriter {
                 }
                 cursorY -= ROW_HEIGHT;
             }
-            drawLine(cursorY + 3);
-            cursorY -= 3;
+            drawRule(cursorY + HEADER_RULE_GAP);
         }
 
-        private void drawRow(List<String> row, PDFont font) throws IOException {
-            for (int column = 0; column < row.size()
+        private void drawLine(Line line) throws IOException {
+            switch (line.kind()) {
+            case NOTE -> {
+                drawText(line.cells().getFirst(), MARGIN,
+                        cursorY - ROW_HEIGHT + 4, BODY_FONT, FONT_SIZE);
+                cursorY -= LineKind.NOTE.height;
+            }
+            case FOOTER -> {
+                cursorY -= FOOTER_GAP;
+                drawRule(cursorY + FOOTER_GAP);
+                drawCells(line.cells(), BOLD_FONT);
+                cursorY -= ROW_HEIGHT;
+            }
+            default -> {
+                drawCells(line.cells(), BODY_FONT);
+                cursorY -= ROW_HEIGHT;
+            }
+            }
+        }
+
+        private void drawCells(List<String> cells, PDFont font)
+                throws IOException {
+            for (int column = 0; column < cells.size()
                     && column < columnWidths.length; column++) {
-                drawCell(row.get(column), columnOffsets[column],
+                drawCell(cells.get(column), columnOffsets[column],
                         columnWidths[column], cursorY - ROW_HEIGHT + 4, font,
                         exported.alignment(column));
             }
-            cursorY -= ROW_HEIGHT;
         }
 
         private void drawCell(String text, float left, float width, float y,
                 PDFont font, Alignment alignment) throws IOException {
             float available = Math.max(0, width - CELL_PADDING);
             String clipped = clip(text, font, available);
-            float textWidth = textWidth(clipped, font, FONT_SIZE);
-            float x = switch (alignment) {
-            case END -> left + available - textWidth;
-            case CENTER -> left + (available - textWidth) / 2;
-            default -> left;
-            };
+            float x = cellTextX(left, available,
+                    textWidth(clipped, font, FONT_SIZE), alignment);
             drawText(clipped, x, y, font, FONT_SIZE);
         }
 
@@ -267,20 +339,23 @@ public final class PdfWriter {
             content().endText();
         }
 
-        private void drawLine(float y) throws IOException {
+        private void drawRule(float y) throws IOException {
             content().setLineWidth(0.5f);
             content().moveTo(MARGIN, y);
             content().lineTo(pageSize.getWidth() - MARGIN, y);
             content().stroke();
         }
 
-        private void drawPageNumber() throws IOException {
-            drawText("Page " + pageNumber + " of " + totalPages, MARGIN,
-                    MARGIN - 12, BODY_FONT, FONT_SIZE);
-        }
-
-        private boolean fits(float height) {
-            return cursorY - height > MARGIN;
+        /**
+         * The stream of the page being written. Non-null between
+         * {@link #startPage} and the matching close.
+         */
+        private PDPageContentStream content() {
+            PDPageContentStream stream = content;
+            if (stream == null) {
+                throw new IllegalStateException("No page has been started");
+            }
+            return stream;
         }
 
         /**
@@ -296,7 +371,9 @@ public final class PdfWriter {
                 widths[column] = textWidth(exported.columnHeaders().get(column),
                         BOLD_FONT, FONT_SIZE);
             }
-            for (List<String> row : exported.rows()) {
+            List<List<String>> measured = new ArrayList<>(exported.rows());
+            measured.addAll(exported.footerRows());
+            for (List<String> row : measured) {
                 for (int column = 0; column < count
                         && column < row.size(); column++) {
                     widths[column] = Math.max(widths[column],
@@ -317,35 +394,24 @@ public final class PdfWriter {
             }
             return widths;
         }
-
-        /**
-         * How many pages the report needs. Known up front because the row
-         * height is fixed — which is also why the rows have to be counted
-         * before the first one can be drawn, so that "Page 1 of 12" is
-         * truthful.
-         */
-        private int countPages() {
-            float firstPageTop = pageSize.getHeight() - MARGIN
-                    - (exported.title().isEmpty() ? 0 : TITLE_SIZE + 10);
-            float headerHeight = exported.headerRows().size() * ROW_HEIGHT + 3;
-            int rows = Math.max(1, exported.rows().size())
-                    + exported.footerRows().size();
-            int firstPageRows = rowsThatFit(firstPageTop - headerHeight);
-            if (rows <= firstPageRows) {
-                return 1;
-            }
-            int perPage = rowsThatFit(
-                    pageSize.getHeight() - MARGIN - headerHeight);
-            return 1 + (int) Math
-                    .ceil((rows - firstPageRows) / (double) perPage);
-        }
-
-        private int rowsThatFit(float top) {
-            return Math.max(1, (int) ((top - MARGIN) / ROW_HEIGHT));
-        }
     }
 
-    private static String clip(String text, PDFont font, float available) {
+    /** Where a cell's text starts, given the alignment of its column. */
+    static float cellTextX(float left, float available, float textWidth,
+            Alignment alignment) {
+        return switch (alignment) {
+        case END -> left + available - textWidth;
+        case CENTER -> left + (available - textWidth) / 2;
+        case START -> left;
+        };
+    }
+
+    /**
+     * Shortens {@code text} until it fits {@code available} points, marking the
+     * cut with an ellipsis. A report cannot reflow a table cell, so the
+     * alternative would be text running into the next column.
+     */
+    static String clip(String text, PDFont font, float available) {
         String sanitized = sanitize(text);
         if (textWidth(sanitized, font, FONT_SIZE) <= available) {
             return sanitized;
@@ -368,15 +434,15 @@ public final class PdfWriter {
     }
 
     /**
-     * The standard 14 fonts encode WinAnsi only, so anything outside it — a
-     * bullet from a masked card number, a CJK name — has to be replaced rather
-     * than thrown at {@code showText}.
+     * The standard 14 fonts encode WinAnsi only, so anything outside it — the
+     * bullets of a masked card number, a CJK name — has to be replaced rather
+     * than thrown at {@code showText}, which would fail the whole export.
      */
-    private static String sanitize(String text) {
+    static String sanitize(String text) {
         StringBuilder out = new StringBuilder(text.length());
         for (char character : text.toCharArray()) {
             if (character == '…') {
-                out.append("...");
+                out.append(ELLIPSIS);
             } else if (character >= 0x20 && character <= 0x7E) {
                 out.append(character);
             } else if (character >= 0xA0 && character <= 0xFF) {
