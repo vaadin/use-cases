@@ -20,6 +20,7 @@
         <module>geolocation</module>
         <module>clipboard</module>
         <module>page-visibility</module>
+        <module>invoicing</module>
         <module>printing</module>
         <module>route-hierarchy</module>
         <module>text-selection</module>

@@ -1,0 +1,36 @@
+/* Invoicing use cases — screen styling. */
+
+.app-title {
+    font-size: var(--aura-font-size-l);
+    margin: 0;
+}
+
+.home-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    max-width: 960px;
+}
+
+.home-card .home-card-tag {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary);
+    letter-spacing: 0.05em;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    background: color-mix(in srgb, var(--aura-orange) 15%, transparent);
+    color: var(--aura-orange-text);
+    border: 1px solid color-mix(in srgb, var(--aura-orange) 35%, transparent);
+}
+
+.status-badge.sent {
+    background: color-mix(in srgb, var(--aura-green) 15%, transparent);
+    color: var(--aura-green-text);
+    border-color: color-mix(in srgb, var(--aura-green) 35%, transparent);
+}
