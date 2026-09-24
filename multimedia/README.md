@@ -30,10 +30,14 @@ switch back to the mainline snapshot once that pull request is merged.
 
 ## Sample media
 
-All media is generated, so it can be committed without licensing questions.
-[`generate-media.sh`](generate-media.sh) rebuilds every file with `ffmpeg`
-(narration comes from its `flite` filter). Files the application serves itself
-live in `src/main/resources/media`; public files served as static resources
-live in `src/main/resources/META-INF/resources/media`. The subtitle files in
-`src/main/resources/media/subtitles` are written by hand to match the
-narration.
+All media is generated. [`generate-media.sh`](generate-media.sh) rebuilds
+every file with `ffmpeg`; the narration is spoken by
+[ElevenLabs](https://elevenlabs.io) text to speech through
+[`tts.mjs`](tts.mjs), which needs `ELEVENLABS_API_KEY` and caches its
+responses. The subtitles are timed from the character timings ElevenLabs
+returns, so they stay in sync when the narration changes; the German and
+Finnish translations live in the script.
+
+Files the application serves itself live in `src/main/resources/media`;
+public files served as static resources live in
+`src/main/resources/META-INF/resources/media`.
