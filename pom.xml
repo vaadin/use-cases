@@ -21,6 +21,7 @@
         <module>clipboard</module>
         <module>page-visibility</module>
         <module>route-hierarchy</module>
+        <module>scopes</module>
         <module>text-selection</module>
         <module>web-share</module>
         <module>screen-orientation</module>
