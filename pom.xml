@@ -28,6 +28,7 @@
         <module>signals</module>
         <module>triggers</module>
         <module>wake-lock</module>
+        <module>web-notifications</module>
     </modules>
 
     <properties>

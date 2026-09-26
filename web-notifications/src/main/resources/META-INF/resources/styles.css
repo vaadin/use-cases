@@ -1,0 +1,87 @@
+/* Web Notifications API use cases — small visual polish */
+
+.app-title {
+    font-size: var(--aura-font-size-l);
+    margin: 0;
+}
+
+.home-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    max-width: 960px;
+}
+
+.home-card .home-card-tag {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary);
+    letter-spacing: 0.05em;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    background: color-mix(in srgb, var(--aura-blue) 15%, transparent);
+    color: var(--aura-blue-text);
+    border: 1px solid color-mix(in srgb, var(--aura-blue) 35%, transparent);
+}
+
+.status-badge.paused {
+    background: color-mix(in srgb, var(--aura-orange) 18%, transparent);
+    color: var(--aura-orange-text);
+    border-color: color-mix(in srgb, var(--aura-orange) 35%, transparent);
+}
+
+.status-badge.hidden {
+    background: color-mix(in srgb, var(--aura-red) 15%, transparent);
+    color: var(--aura-red-text);
+    border-color: color-mix(in srgb, var(--aura-red) 35%, transparent);
+}
+
+.notification-log {
+    font-family: monospace;
+    font-size: 0.85rem;
+    background: var(--vaadin-background-container);
+    border: 1px solid var(--vaadin-border-color);
+    border-radius: var(--vaadin-radius-m);
+    padding: 0.5rem 0.75rem;
+    max-height: 220px;
+    overflow-y: auto;
+    align-self: stretch;
+    max-width: 960px;
+
+    > div {
+        padding: 0.1rem 0;
+        border-bottom: 1px dashed var(--vaadin-border-color);
+    }
+
+    > div:last-child {
+        border-bottom: none;
+    }
+}
+
+.help-panel {
+    max-width: 720px;
+    padding: 0.75rem 1rem;
+    border-radius: var(--vaadin-radius-m);
+    background: color-mix(in srgb, var(--aura-orange) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--aura-orange) 35%, transparent);
+}
+
+.ticket-list > div {
+    padding: 0.35rem 0.6rem;
+    border-radius: var(--vaadin-radius-m);
+}
+
+.ticket-list > div.selected {
+    background: color-mix(in srgb, var(--aura-blue) 15%, transparent);
+    font-weight: 600;
+}
+
+.big-counter {
+    font-size: 2rem;
+    font-weight: 600;
+}
