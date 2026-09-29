@@ -22,7 +22,10 @@ jobs:
           BEFORE_SHA: ${{ github.event.before }}
           AFTER_SHA: ${{ github.event.after }}
         run: |
-          all_modules=$(find . -mindepth 2 -maxdepth 2 -name fly.toml -printf '%h\n' \
+          # A deployable is any directory holding a fly.toml: the top-level Maven
+          # modules, and the sidecar apps a module ships one level below it
+          # (observability/prometheus, observability/grafana).
+          all_modules=$(find . -mindepth 2 -maxdepth 3 -name fly.toml -printf '%h\n' \
             | sed 's|^\./||' \
             | sort)
           all_json=$(printf '%s\n' "$all_modules" | jq -R -s -c 'split("\n") | map(select(length > 0))')
@@ -54,10 +57,17 @@ jobs:
             select_all "shared file changed"
           fi
 
-          # Otherwise deploy only modules whose top-level directory changed.
-          changed_top=$(echo "$changed" | awk -F/ 'NF>1 {print $1}' | sort -u)
-          selected=$(comm -12 <(printf '%s\n' "$all_modules") <(printf '%s\n' "$changed_top"))
-          modules=$(printf '%s\n' "$selected" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          # Otherwise deploy only the deployables with a changed file under
+          # their directory. A nested app's change also matches its parent
+          # module, which redeploys too; that is cheap and keeps the two in
+          # step.
+          selected=""
+          for module in $all_modules; do
+            if echo "$changed" | grep -q "^$module/"; then
+              selected="$selected$module"$'\n'
+            fi
+          done
+          modules=$(printf '%s' "$selected" | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "Selected modules: $modules"
           echo "modules=$modules" >> "$GITHUB_OUTPUT"
   deploy:
@@ -88,8 +98,8 @@ jobs:
           tags: registry.fly.io/${{ steps.app.outputs.name }}:${{ github.sha }}
           secrets: |
             proKey=${{ secrets.VAADIN_PRO_KEY }}
-          cache-from: type=gha,scope=${{ matrix.module }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.module }}
+          cache-from: type=gha,scope=${{ steps.app.outputs.name }}
+          cache-to: type=gha,mode=max,scope=${{ steps.app.outputs.name }}
       - run: flyctl deploy --image registry.fly.io/${{ steps.app.outputs.name }}:${{ github.sha }} --config ${{ matrix.module }}/fly.toml --ha=false
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

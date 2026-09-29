@@ -35,7 +35,7 @@
         <vaadin.version>25.3-SNAPSHOT</vaadin.version>
         <flow.version>25.3-SNAPSHOT</flow.version>
         <flow-components.version>25.3-SNAPSHOT</flow-components.version>
-        <browserless-test.version>1.2-SNAPSHOT</browserless-test.version>
+        <browserless-test.version>25.3-SNAPSHOT</browserless-test.version>
         <observability-kit.version>5.0-SNAPSHOT</observability-kit.version>
         <jspecify.version>1.0.1</jspecify.version>
         <spotless.plugin.version>3.10.0</spotless.plugin.version>

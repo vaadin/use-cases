@@ -23,8 +23,8 @@ blocks), `Telemetry` and `Insights` (formatting and payload helpers), and
 | # | View | What it shows |
 | - | ---- | ------------- |
 | — | Home | Landing page and auto-generated index of the use cases. |
-| 1 | Interaction latency | Where an interaction's time goes: server request handling, the per-RPC server invocation (`vaadin.rpc.duration`), a per-action timer, and the browser's page-load signals (navigation timing, web vitals) — all read from the app's `MeterRegistry`. See [`API-GAPS.md`](API-GAPS.md). |
-| 2 | Application health | A live readout of the app's own signals (sessions, UIs, memory, timings, connection), plus a database-health demo: a button that loads a product catalog and surfaces the classic N+1 join-table fetch — N products cost N+1 single-row fetches — through the Observability Kit's own `vaadin.db.fetch.rows` meter (`vaadin.observability.database=true`). Adding `@BatchSize` to `Product.category` collapses it, exactly as in the bookstore-example. See [`API-GAPS.md`](API-GAPS.md). |
+| 1 | Interaction latency | "Working an invoice feels sluggish — which step, and where does the time go?" The view opens with a window showing Acme's invoicing desk with three actions of different server cost: saving a draft (nothing), applying discounts (a pricing lookup), issuing the invoice (the tax service, its latency in the demo rig, above the kit's UX budget by default). The first action reveals the investigation, live via a short poll so the browser-collected samples appear on their own: **2)** what the framework times — the three segments of a click: the server's `vaadin.request.duration` and `vaadin.rpc.duration`, the browser's own round trip `vaadin.client.request.duration` (the difference being the network's share, which the view works out) and the time the browser spent applying the response, `vaadin.client.render.duration`, plus the browser's navigation and paint signals — all tagged by type, outcome or route only, so they say *something* took over a second, not which button; **3)** the kit's verdict — the insights endpoint's `slow-user-interaction` findings for `route=invoices`, naming the component and the event with the timing against the budget; **4)** per action — the business-level timer the application records itself (`acme.invoice.action{action=…}`), because a business action name would make meter tags unbounded and is the application's to record. See [`API-GAPS.md`](API-GAPS.md) #8. |
+| 2 | Application health | "Every morning someone opens the catalog page and the whole app hiccups — is the app healthy, and what is it doing?" The view opens with a window showing Acme's inventory page; refreshing the catalog runs the classic N+1 join-table fetch (eager, unbatched `Product.category`). The first load reveals the investigation, which is live and refreshes every 2 s: **2)** the vital signs look fine — sessions, UIs, heap, server timings, the browser's own load and paint signals, error counters, all read from the application's `MeterRegistry`, plus the connection badge derived from the poll cadence (the server cannot see the browser's connection state, see [`API-GAPS.md`](API-GAPS.md)); **3)** the database gives it away — the kit's `vaadin.db.fetch.rows` summary (`vaadin.observability.database=true`), scoped to `route=inventory` and bracketed around the load, shows N+1 result-set fetches for N products; **4)** the fix, verified — a demo-rig switch join-fetches the categories with the products, and the load history shows the fetch count drop to one. The "flush client metrics" control also lives in the rig. |
 | 3 | Capacity & scaling | How much state the server is holding for live users, and which signals actually predict needing another instance. Reads the kit's counts (`vaadin.sessions.active`, `vaadin.ui.active`, session creation rate and lifetime, session-lock contention) together with its UI-state gauges (`vaadin.ui.state.nodes`, `.nodes.max`, `.components`, `.views`, `vaadin.session.state.nodes.max`, `vaadin.session.uis.max`, `vaadin.ui.state.sample.age.max`), which the kit publishes once `vaadin.observability.ui-state=true` — this used to be [`API-GAPS.md`](API-GAPS.md) #6 and the view had to measure it itself. What remains local is the byte conversion: the kit counts nodes and will not guess what one weighs, so a probe measures it and the view reports whether the configured `ui-state-bytes-per-node` still holds. |
 | 5 | Connection & client problems | "The pickers say the app freezes on the floor, and that the stock chart never comes up — where do I even look?" The view opens with a window showing the picking screen Acme's warehouse crew works from on tablets: confirming a pick works, *Show stock levels* throws in the browser and *Sync stock from the API* leaves a promise rejected, and the demo rig takes the connection away the way the dead zone by the loading dock does. The first freeze or failed script reveals the investigation: **2)** the server-side suspects see nothing — a browser error never reaches `vaadin.errors`, and an unreachable tablet is a session that just goes quiet, with `vaadin.resync` (the messages a client re-sent and the state rebuilds it asked for, which Flow handles internally) the only trace; **3)** the kit's verdict — the `client-error` insights, *not* filtered to this route, since an error on any screen is one nobody is watching and the route is part of the grouping key; **4)** the raw client meters fleet-wide; **5)** what the numbers still cannot tell you. The problems that never reach a server log: a browser losing the connection and getting it back, and a script failing in a tab nobody is watching. The connection half is the kit's — its in-browser collector subscribes to Flow's `window.Vaadin.connectionState` and records `vaadin.client.connection` per transition and `vaadin.client.connection.downtime` for the time spent unreachable, so this view only reads them. What it makes visible is what those tags mean: downtime is tagged *per state*, because Flow enters `reconnecting` on the first failed request and `connection-lost` only after giving up retrying, so a short outage never leaves `reconnecting` and the whole outage is the two summed — which the readout does. Alongside them, `vaadin.resync` (the server side of a lost message, which Flow handles internally) and `vaadin.client.throttled`, which matters because one outage flushes as one batch. The errors are the kit's too: `vaadin.client.errors` only counts — a message on a tag would be one time series per message — so what identifies one is retained as a `client-error` *insight*, and this view reads those out of the endpoint payload UC6 renders in full. The kit parses the location out of the stack line and keeps it only when it is actually a location, groups by route, kind, source and frame with an occurrence count, gates the message and the function name behind `insights-details`, and reports `maxBufferedMs` — the offline time a report waited before it could be delivered. UC5 previously carried a shim for each half; both are deleted ([`API-GAPS.md`](API-GAPS.md) #5). Deliberately does not poll — a poll is a UIDL request, and one that gets through ends the outage as far as the browser is concerned — and since nothing signals that client samples have arrived, the readout is recomputed from the interactions themselves, plus a `@ClientCallable` the simulated recovery calls once the browser has the server back. |
 | 6 | Failure insights | "Some returns blow up on the clerks — how do I get from 'something went wrong' to the line of code?" The view opens with a window showing Acme's returns desk, whose *Process return* handler fails for defective items (a missing inspection template), fails validation for a blank order number, and hangs on bank-transfer refunds (a slow lookup, its latency in the demo rig). The first bad return reveals the investigation: **2)** the error counter `vaadin.errors` knows *that* something failed and which exception, even the route and component class — not which handler, event or line; **3)** the kit's verdict — the insights endpoint's `user-interaction-error` and `slow-user-interaction` findings for this route, each naming the component and the event — a failure also the first application stack frame, a slow interaction its timing against the budget — with repeats grouped into one finding with an occurrence count; **4)** the whole payload of `GET /actuator/vaadin/observability` (this route's findings among every other route's), the contract an AI coding agent reads to jump to the offending line. The handler lets its exception propagate (the kit records a failure only when the invocation actually fails) and a session error handler shows the vague notification a clerk would see. See [`API-GAPS.md`](API-GAPS.md). |
@@ -80,9 +80,50 @@ tracks `vaadin.ui.state.sample.age.max` — how stale the oldest per-UI
 measurement in the aggregate is, since a UI is measured on its own session's
 thread.
 
-Prometheus scrapes `host.docker.internal` on ports 8080 and 8082, so it finds
-the app on either; the unused one shows as a down target. Stop it with
-`docker compose down`.
+Prometheus scrapes `host.docker.internal` on ports 8080 and 8082
+(`prometheus/local.yaml`), so it finds the app on either; the unused one shows
+as a down target. Stop it with `docker compose down`.
 
-This stack is developer tooling: the module deploys as a single container, so the
-hosted demo runs without it and UC7 degrades to its export column.
+### Hosted
+
+The hosted demo runs the same two services as sibling Fly apps in the same
+organisation as `observability-cases`, so the three talk over Fly's private
+network:
+
+| App | Directory | Public | Reads |
+|---|---|---|---|
+| `observability-cases-prometheus` | `prometheus/` | <https://observability-cases-prometheus.fly.dev> | `observability-cases.internal:8080` by DNS service discovery (`prometheus/fly.yaml`) |
+| `observability-cases-grafana` | `grafana/` | <https://observability-cases-grafana.fly.dev> | `observability-cases-prometheus.internal:9090` |
+
+Both are built from the small Dockerfiles in those directories, from the
+repository root like the module itself, and share the Grafana provisioning and
+dashboard with the local stack; only the datasource URL differs, via the
+`PROMETHEUS_URL` environment variable. The Fly Deploy workflow picks any
+directory holding a `fly.toml` up to one level below a module, so the two
+deploy like any other module and redeploy when their directory changes.
+The apps have to exist once before the first deploy:
+
+```
+fly apps create observability-cases-prometheus
+fly apps create observability-cases-grafana
+```
+
+Both are public and read-only: Grafana grants anonymous viewers with the login
+form and basic auth off, so the default admin account is unreachable and the
+dashboard is edited here and redeployed rather than in the UI; Prometheus runs
+with its admin and lifecycle APIs off (its defaults). Prometheus keeps two days
+of samples on the machine's ephemeral disk, so a redeploy starts it empty.
+
+The UC7 view learns where the stack is from three properties, defaulting to the
+compose services: `uc7.prometheus.url` and `uc7.grafana.url` are what the
+browser follows, `uc7.prometheus.api-url` is what the server calls for the
+scrape-target and query rows. `fly.toml` sets the first two to the public
+hostnames and the third to the private one.
+
+Why sibling apps rather than [Fly's multi-container
+Machines](https://fly.io/docs/machines/guides-examples/multi-container-machines/),
+which can run a Compose file in one Machine: that mode drops `volumes:`, which
+is how this compose file feeds Prometheus its scrape config and Grafana its
+provisioning, allows exactly one service to `build:` (the app), so the other
+two would need pre-built config-bearing images anyway, and routes the Fly proxy
+to a single container, so visitors could never open Grafana or Prometheus.

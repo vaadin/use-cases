@@ -1,0 +1,43 @@
+# fly.toml app configuration file for observability-cases-grafana
+#
+# Grafana for UC7 of the observability module. Reads from
+# observability-cases-prometheus over Fly's private network and serves the
+# provisioned dashboard publicly to anonymous viewers.
+#
+# There is deliberately no way to log in: the login form and basic auth are
+# both off, so the default admin account is unreachable and nothing needs a
+# secret. The dashboard is edited in the repository (grafana/dashboards) and
+# redeployed, not in the UI. To administer it instead, set
+# GF_AUTH_BASIC_ENABLED to 'true' here and
+# `fly secrets set GF_SECURITY_ADMIN_PASSWORD=...` on the app.
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'observability-cases-grafana'
+primary_region = 'iad'
+
+[build]
+
+[env]
+  PROMETHEUS_URL = 'http://observability-cases-prometheus.internal:9090'
+  GF_AUTH_ANONYMOUS_ENABLED = 'true'
+  GF_AUTH_ANONYMOUS_ORG_ROLE = 'Viewer'
+  GF_AUTH_DISABLE_LOGIN_FORM = 'true'
+  GF_AUTH_BASIC_ENABLED = 'false'
+  GF_USERS_ALLOW_SIGN_UP = 'false'
+  GF_ANALYTICS_REPORTING_ENABLED = 'false'
+  GF_ANALYTICS_CHECK_FOR_UPDATES = 'false'
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = 'off'
+  auto_start_machines = true
+  min_machines_running = 1
+  max_machines_running = 1
+
+[[vm]]
+  memory = '512mb'
+  cpu_kind = 'shared'
+  cpus = 1
