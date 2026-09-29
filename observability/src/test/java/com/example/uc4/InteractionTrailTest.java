@@ -124,13 +124,13 @@ class InteractionTrailTest {
     }
 
     @Test
-    void theNewestFollowedInteractionIsTheOneTheViewShows() {
+    void followedInteractionsAreListedNewestFirst() {
         String first = inOneTrace("acme.test.first", () -> {
         });
         String second = inOneTrace("acme.test.second", () -> {
         });
 
-        assertEquals(second, trail.newest().orElseThrow());
+        assertEquals(second, trail.followed().get(0));
         assertTrue(trail.followed().indexOf(second) < trail.followed()
                 .indexOf(first), "newest first");
     }

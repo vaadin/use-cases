@@ -16,6 +16,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.Table;
 import com.vaadin.flow.component.html.TableRow;
+import com.vaadin.observability.micrometer.trace.ObservationNames;
 
 /**
  * One interaction's trail, drawn the way a trace UI draws it: the spans nested
@@ -32,8 +33,18 @@ public class TrailTable extends Table {
     /** Attributes not worth a chip: shown by the row's own styling instead. */
     private static final Set<String> REDUNDANT = Set.of("error");
 
+    /**
+     * Attributes whose value is a credential: the session id is the value of
+     * the session cookie, and the trails are readable from every session.
+     */
+    private static final Set<String> SECRET = Set
+            .of(ObservationNames.KEY_SESSION_ID);
+
     /** Long attribute values (a SQL statement) are cut to this. */
     private static final int MAX_VALUE = 60;
+
+    /** How much of a secret value is shown: enough to tell two apart. */
+    private static final int SECRET_PREFIX = 4;
 
     public TrailTable() {
         addClassName("trail-table");
@@ -144,16 +155,27 @@ public class TrailTable extends Table {
         return track;
     }
 
-    /** The span's attributes as chips, the long ones cut to fit. */
+    /**
+     * The span's attributes as chips, the long ones cut to fit and the secret
+     * ones masked.
+     */
     private static Div attributes(InteractionTrail.Span span) {
         Div chips = new Div();
         chips.addClassName("trail-attributes");
         List<String> keys = new ArrayList<>(span.tags().keySet());
         keys.sort(Comparator.naturalOrder());
-        keys.stream().filter(key -> !REDUNDANT.contains(key))
-                .forEach(key -> chips.add(Telemetry.chip(key + "="
-                        + abbreviate(span.tags().getOrDefault(key, "")))));
+        keys.stream().filter(key -> !REDUNDANT.contains(key)).forEach(key -> {
+            String value = span.tags().getOrDefault(key, "");
+            chips.add(Telemetry
+                    .chip(key + "=" + (SECRET.contains(key) ? mask(value)
+                            : abbreviate(value))));
+        });
         return chips;
+    }
+
+    static String mask(String value) {
+        return value.length() <= SECRET_PREFIX ? "…"
+                : value.substring(0, SECRET_PREFIX) + "…";
     }
 
     private static String abbreviate(String value) {

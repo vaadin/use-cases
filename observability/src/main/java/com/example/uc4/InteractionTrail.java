@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import io.micrometer.tracing.exporter.FinishedSpan;
 import io.micrometer.tracing.exporter.SpanReporter;
@@ -166,10 +165,5 @@ public class InteractionTrail implements SpanReporter {
             Collections.reverse(ids);
             return ids;
         }
-    }
-
-    /** The newest followed trace id, if any interaction has been followed. */
-    public Optional<String> newest() {
-        return followed().stream().findFirst();
     }
 }

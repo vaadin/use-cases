@@ -329,35 +329,31 @@ scoped accessor for the fetches recorded during the current RPC invocation (the
 correlation id from gap #3 would carry it), or a per-request `vaadin.db.fetch.count`
 exposed alongside `vaadin.rpc.duration`.
 
-## 14. `traces-session-id` is a declared switch that nothing applies
+## 14. Session id on the trail — closed
 
-**Where it bites:** UC4 (following *this user's* interaction).
-**Symptom:** the kit publishes a `vaadin.observability.traces-session-id` property
-(default `false`) and an `ObservationNames.KEY_SESSION_ID` (`vaadin.session.id`)
-attribute key for it, and `ObservabilitySettings` carries it through to
-`isTracesSessionId()`. Nothing reads either. In the 5.0 build this module compiles
-against, `vaadin.session.id` appears in exactly one class file — the constants class
-that declares it — so no observation, span or meter ever carries a session id, and
-turning the property on changes nothing at all. The one place a session identifier
-*does* surface is the insights payload, and only behind `insights-details` (UC6).
-**Consequence:** a trail cannot be tied to a user or a session. "Show me what that
-clerk did" is a question the traces cannot answer, and the correlation an operator
-actually starts from — a support ticket naming a person — has no way into the trace
-backend. It is also the switch whose existence suggests otherwise, which is worse
-than its absence: an application can configure it, see no error, and conclude the
-attribution is there.
-**Workaround used:** none in UC4. An application can add the attribute itself —
-`observation.highCardinalityKeyValue("vaadin.session.id", …)` on its own spans — but
-only for the spans it opens, never for the kit's request and RPC spans above them,
-which is where a backend would look for it.
-**Suggested API:** either apply the setting the kit already declares (add the
-session id as a span-only attribute on the request observation when it is on,
-hashed the way the insights payload hashes it by default), or drop the property and
-the constant so the contract does not promise what it does not deliver.
+**Where it bit:** UC4 (following *this user's* interaction).
+**Status: closed by Observability Kit 5.0**
+([observability-kit#405](https://github.com/vaadin/observability-kit/pull/405)).
+The kit used to declare `vaadin.observability.traces-session-id` and an
+`ObservationNames.KEY_SESSION_ID` (`vaadin.session.id`) attribute key without
+anything reading either, so turning the property on changed nothing. Now, with it
+on, `RequestMetricsBinder` adds the HTTP session id to the `vaadin.request.*` span as
+a high-cardinality key-value — span-only, never a Timer tag — resolved at request end
+so the page load that creates the session is attributed too. UC4 turns it on, and
+its list of followed dispatches says which of them came from the reader's own
+session: "show me what that clerk did" becomes a filter in the trace backend.
+**What remains:** only the request span carries it. The RPC span and the
+application's own spans below it do not, so a backend query for a session finds the
+trail's root and reaches the rest by trace id. And the span carries the raw id —
+unlike the insights payload, which reduces it to a short one-way hash unless
+`insights-details` is on — so a trace backend with this switch on holds live session
+cookies' values and needs the access controls that implies. UC4's trail is readable
+from every session, so it masks the value rather than print it.
 
 ## 15. The route template the kit lifts into the HTTP observation is a class name
 
 **Where it bites:** UC4 (the trail's root span), UC7 (a dashboard that groups by URI).
+**Tracked in:** [observability-kit#417](https://github.com/vaadin/observability-kit/issues/417).
 **Symptom:** `RequestMetricsBinder#requestEnd` lifts the active view's route template
 into the framework's HTTP observation, so that `http.server.requests` reads
 `/orders/:id` rather than the protocol-level `/vaadin/uidl` — a good idea, and the

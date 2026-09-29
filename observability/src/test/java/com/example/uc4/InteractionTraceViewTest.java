@@ -1,11 +1,14 @@
 package com.example.uc4;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.example.acme.AppWindow;
 import com.example.home.HomeView;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
@@ -27,6 +30,8 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.observability.micrometer.ObservabilitySettings;
+import com.vaadin.observability.micrometer.trace.ObservationNames;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -52,6 +57,9 @@ class InteractionTraceViewTest extends SpringBrowserlessTest {
     private static final int SPAN = 0;
     private static final int DURATION = 2;
     private static final int ATTRIBUTES = 3;
+
+    @Autowired
+    ObservabilitySettings settings;
 
     @Test
     void opensWithTheShippingDeskAndTheInvestigationHidden() {
@@ -316,6 +324,44 @@ class InteractionTraceViewTest extends SpringBrowserlessTest {
     }
 
     @Test
+    void moduleTurnsOnTheKitsSessionAttribution() {
+        // Off by default in the kit; without it the Session column of the
+        // followed dispatches can only ever show a dash.
+        assertTrue(settings.isTracesSessionId());
+    }
+
+    @Test
+    void aTrailIsAttributedToTheSessionOnItsRequestSpan() {
+        // The kit's request span is the one that carries the session, and it
+        // only exists behind a real UIDL request, so the attribution is
+        // asserted on hand-built spans rather than on a browserless click.
+        List<InteractionTrail.Span> mine = List
+                .of(span(Map.of(ObservationNames.KEY_SESSION_ID, "ABCD1234")));
+        List<InteractionTrail.Span> theirs = List
+                .of(span(Map.of(ObservationNames.KEY_SESSION_ID, "WXYZ9876")));
+        List<InteractionTrail.Span> unfinished = List.of(span(Map.of()));
+
+        assertEquals("this session",
+                InteractionTraceView.sessionOf(mine, "ABCD1234"));
+        assertEquals("another session",
+                InteractionTraceView.sessionOf(theirs, "ABCD1234"));
+        assertEquals("—",
+                InteractionTraceView.sessionOf(unfinished, "ABCD1234"),
+                "the request span finishes after the response, so a fresh "
+                        + "trail has no session yet");
+        assertEquals("another session",
+                InteractionTraceView.sessionOf(theirs, null));
+    }
+
+    @Test
+    void theSessionIdIsNeverPrintedWhole() {
+        // The trails are readable from every session, and the value is the
+        // session cookie's: enough to tell two apart, not enough to reuse.
+        assertEquals("ABCD…", TrailTable.mask("ABCD1234EFGH5678"));
+        assertEquals("…", TrailTable.mask("ABC"));
+    }
+
+    @Test
     void theTrailIsNotAGrid() {
         // The kit instruments every DataCommunicator, in-memory ones
         // included, and with tracing on a Grid rendering the trail would open
@@ -366,6 +412,12 @@ class InteractionTraceViewTest extends SpringBrowserlessTest {
 
     private void openAllSteps() {
         findInView(Details.class).all().forEach(step -> step.setOpened(true));
+    }
+
+    private static InteractionTrail.Span span(Map<String, String> tags) {
+        Instant now = Instant.now();
+        return new InteractionTrail.Span("trace", "span", null,
+                "vaadin.request.uidl", now, now, tags, null);
     }
 
     private List<TableRow> recentTrails() {

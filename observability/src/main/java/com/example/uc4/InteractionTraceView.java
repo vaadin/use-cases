@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -52,7 +53,10 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.WrappedSession;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.observability.micrometer.trace.ObservationNames;
 
 /**
  * UC4 — dispatching a shipment at Acme sometimes takes a second and sometimes
@@ -80,8 +84,9 @@ import com.vaadin.flow.shared.Registration;
  * meters know about the same interaction, which is that it succeeded; <b>4)</b>
  * where the trail begins and ends — it starts on the server rather than at the
  * click, its root span calls this screen by its class name rather than its
- * route, it carries no session, and the application has to name its own hops
- * (see {@code API-GAPS.md} #3, #14 and #15).
+ * route, only the kit's request span says which session it came from, and the
+ * application has to name its own hops (see {@code API-GAPS.md} #3, #14 and
+ * #15).
  * <p>
  * Nothing here reads a tracing backend: {@link InteractionTrail} is a
  * {@code SpanReporter}, the same SPI Zipkin, Tempo and OTLP exporters
@@ -353,15 +358,16 @@ public class InteractionTraceView extends VerticalLayout {
         recentTrails.setId("recent-trails");
         recentTrails.addClassName("meter-table");
         recentTrails.setWidthFull();
-        recentTrails.addHeaderRow("Trace", "Carrier", "Outcome", "Wall time",
-                "Spans");
+        recentTrails.addHeaderRow("Trace", "Session", "Carrier", "Outcome",
+                "Wall time", "Spans");
         Paragraph recentLead = new Paragraph(
-                "The dispatches followed so far, the way a trace UI's search "
-                        + "results list them. A real exporter keeps every "
-                        + "trace and lets the backend do the filtering; this "
-                        + "one keeps only the interactions the desk asked it "
-                        + "to follow, so the page never accumulates traffic "
-                        + "it is not explaining.");
+                "The dispatches followed so far, from every session, the way "
+                        + "a trace UI's search results list them. A real "
+                        + "exporter keeps every trace and lets the backend do "
+                        + "the filtering; this one keeps only the "
+                        + "interactions the desk asked it to follow, so the "
+                        + "page never accumulates traffic it is not "
+                        + "explaining.");
         investigation.step("2 — The trail of one dispatch", true,
                 new Paragraph(
                         "One click, one trace id, and every span that carried "
@@ -441,16 +447,26 @@ public class InteractionTraceView extends VerticalLayout {
                         "https://github.com/vaadin/use-cases/blob/main/"
                                 + "observability/API-GAPS.md",
                         "API-GAPS.md #15"),
+                new Span(", tracked in "),
+                new Anchor("https://github.com/vaadin/observability-kit/"
+                        + "issues/417", "observability-kit#417"),
                 new Span(")."));
 
         Paragraph session = new Paragraph();
-        session.add(new Span("No span carries a session, so \"show me this "
-                + "user's interaction\" is not a question the trail answers. "
-                + "The kit declares the switch for it — "),
-                Telemetry.chip("vaadin.observability.traces-session-id"),
-                new Span(" and a "), Telemetry.chip("vaadin.session.id"),
-                new Span(" attribute key — but nothing applies either, so "
-                        + "turning it on changes nothing ("),
+        session.add(new Span("The trail does know whose it is. With "),
+                Telemetry.chip("vaadin.observability.traces-session-id=true"),
+                new Span(", as this module has it, the kit puts the HTTP "
+                        + "session id on its request span as "),
+                Telemetry.chip(ObservationNames.KEY_SESSION_ID),
+                new Span(" — which is how the list above tells your "
+                        + "dispatches from another tab's, and how a trace "
+                        + "backend answers \"show me what this clerk did\". "
+                        + "Only the request span carries it, so a query "
+                        + "finds the trail's root and reaches the rest by "
+                        + "trace id. And it is the raw id, the session "
+                        + "cookie's own value: this page is readable from "
+                        + "every session, so it shows only the first few "
+                        + "characters ("),
                 new Anchor(
                         "https://github.com/vaadin/use-cases/blob/main/"
                                 + "observability/API-GAPS.md",
@@ -571,14 +587,16 @@ public class InteractionTraceView extends VerticalLayout {
         List<String> followed = trail.followed();
         if (followed.isEmpty()) {
             TableRow empty = recentTrails.getBody().addRow();
-            empty.addDataCell("No dispatches followed yet.").setColspan(5);
+            empty.addDataCell("No dispatches followed yet.").setColspan(6);
             empty.addClassName("order-empty");
             return;
         }
+        String currentSession = currentSessionId();
         followed.forEach(traceId -> {
             List<InteractionTrail.Span> spans = trail.spans(traceId);
             TableRow row = recentTrails.getBody().addRow();
             row.addDataCell(Telemetry.chip(shorten(traceId)));
+            row.addDataCell(sessionOf(spans, currentSession));
             row.addDataCell(attributeOf(spans, DISPATCH, "acme.carrier"));
             boolean failed = spans.stream()
                     .anyMatch(InteractionTrail.Span::failed);
@@ -738,6 +756,33 @@ public class InteractionTraceView extends VerticalLayout {
         return spans.stream().filter(span -> spanName.equals(span.name()))
                 .map(span -> span.tags().getOrDefault(attribute, "—"))
                 .findFirst().orElse("—");
+    }
+
+    /**
+     * Whose dispatch a trail was, read off the session id the kit puts on its
+     * request span. A dash until that span has finished — it ends after the
+     * response is written — or when {@code traces-session-id} is off.
+     *
+     * @param spans
+     *            the trail's spans
+     * @param currentSession
+     *            the reading session's id, or {@code null} when unknown
+     * @return {@code "this session"}, {@code "another session"} or a dash
+     */
+    static String sessionOf(List<InteractionTrail.Span> spans,
+            @Nullable String currentSession) {
+        return spans.stream()
+                .map(span -> span.tags().get(ObservationNames.KEY_SESSION_ID))
+                .filter(Objects::nonNull).findFirst()
+                .map(id -> id.equals(currentSession) ? "this session"
+                        : "another session")
+                .orElse("—");
+    }
+
+    private static @Nullable String currentSessionId() {
+        VaadinSession session = VaadinSession.getCurrent();
+        WrappedSession wrapped = session == null ? null : session.getSession();
+        return wrapped == null ? null : wrapped.getId();
     }
 
     /** A trace id is 32 hex characters; a trace UI shows the first few. */
