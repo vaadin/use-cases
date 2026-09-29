@@ -100,8 +100,17 @@ rides the websocket and leaves no Resource Timing entry.
    aggregates exist. The collector also sends no W3C `traceparent` on the UIDL request
    (`recordSamples` carries only name/tags/value/ts), so the server-side trace
    (`vaadin.request` observation) doesn't descend from a browser-rooted span — the trace
-   effectively starts on the server, not at the click.
-**Workaround used:** aggregates only; no per-interaction stitch.
+   effectively starts on the server, not at the click. Boot's propagation would
+   *accept* one — `management.tracing.propagation.consume` includes W3C out of the box
+   — so the missing half is entirely on the client side.
+**Workaround used:** aggregates only; no per-interaction stitch. UC4 shows how far the
+server-side half does reach once a tracing bridge is on the classpath: the kit's
+request and RPC observations, the application's own hops and every `vaadin.db.query`
+do stitch into one trace, and the trail simply begins at the HTTP span instead of at
+the click. Worth noting for anyone reading the kit's feature list: the Observation
+path emits *nothing* until the application adds a bridge (UC4 adds
+`spring-boot-micrometer-tracing-brave` plus `micrometer-tracing-bridge-brave`), and
+without one the observations exist but produce no spans, silently.
 **Suggested API:** a per-UIDL-request correlation id exposed to both the client hook
 (gap #1) and the server request interceptor, ideally as a W3C `traceparent` the client
 injects and the server continues, so browser → server → backend is one trace.
@@ -392,6 +401,57 @@ scoped accessor for the fetches recorded during the current RPC invocation (the
 correlation id from gap #3 would carry it), or a per-request `vaadin.db.fetch.count`
 exposed alongside `vaadin.rpc.duration`.
 
+## 14. Session id on the trail — closed
+
+**Where it bit:** UC4 (following *this user's* interaction).
+**Status: closed by Observability Kit 5.0**
+([observability-kit#405](https://github.com/vaadin/observability-kit/pull/405)).
+The kit used to declare `vaadin.observability.traces-session-id` and an
+`ObservationNames.KEY_SESSION_ID` (`vaadin.session.id`) attribute key without
+anything reading either, so turning the property on changed nothing. Now, with it
+on, `RequestMetricsBinder` adds the HTTP session id to the `vaadin.request.*` span as
+a high-cardinality key-value — span-only, never a Timer tag — resolved at request end
+so the page load that creates the session is attributed too. UC4 turns it on, and
+its list of followed dispatches says which of them came from the reader's own
+session: "show me what that clerk did" becomes a filter in the trace backend.
+**What remains:** only the request span carries it. The RPC span and the
+application's own spans below it do not, so a backend query for a session finds the
+trail's root and reaches the rest by trace id. And the span carries the raw id —
+unlike the insights payload, which reduces it to a short one-way hash unless
+`insights-details` is on — so a trace backend with this switch on holds live session
+cookies' values and needs the access controls that implies. UC4's trail is readable
+from every session, so it masks the value rather than print it.
+
+## 15. The route template the kit lifts into the HTTP observation is a class name
+
+**Where it bites:** UC4 (the trail's root span), UC7 (a dashboard that groups by URI).
+**Tracked in:** [observability-kit#417](https://github.com/vaadin/observability-kit/issues/417).
+**Symptom:** `RequestMetricsBinder#requestEnd` lifts the active view's route template
+into the framework's HTTP observation, so that `http.server.requests` reads
+`/orders/:id` rather than the protocol-level `/vaadin/uidl` — a good idea, and the
+javadoc says as much. In this Spring Boot application it resolves to the *view class
+simple name* instead. Measured on the running module: clicking on `/shipping`
+produces `http_server_requests_seconds_count{uri="/InteractionTraceView"}`, on
+`/invoices` `uri="/InteractionLatencyView"`, and on `/uc3` `uri="/ScalingSignalsView"`
+— while every kit meter and span for the same interactions is tagged
+`route=shipping`, `route=invoices`, `route=uc3`. It is not the `@RouteAlias`: UC3 has
+none and behaves the same.
+**Cause:** `RouteTagResolver#tagForUi` resolves against the registry it reads off the
+UI's router (`RouteConfiguration.forRegistry(registry).getTemplate(target)`) and falls
+back to `Class#getSimpleName` when that returns empty, which is what happens here.
+The `tagFor(Class)` path, which goes through `RouteConfiguration.forSessionScope()`,
+resolves the same views correctly — that is why the kit's own `route` tags are right
+and only the lifted `uri` is wrong. The class's javadoc anticipates the registry
+difference for session-scoped routes; the effect here is broader than that.
+**Consequence:** the two halves of one dashboard disagree about what to call a
+screen, and the fallback is silent — the value looks like a route (`/SomeView`), so
+nothing signals that the template was not found.
+**Workaround used:** none. UC4's readout says so rather than hiding it, since the
+root span is the first row of its trail.
+**Suggested API:** resolve the template the way `tagFor(Class)` does when a session
+is bound (the request thread always has one), or make the fallback legible — an
+explicit `_unknown` rather than a class name that impersonates a route.
+
 ## Test-simulator note
 
 Most client-side gaps are where the repo's browserless tests cannot exercise the JS
@@ -428,6 +488,18 @@ and nothing is captured. UC6's test therefore covers rendering, wiring (the fail
 action must let its exception propagate) and lifecycle, while the capture itself needs a
 browser. A `SpringBrowserlessTest` hook to drive an invocation through the RPC pipeline
 would close this.
+
+**Tracing is the exception**, and it is worth knowing why. Everything driven through the
+Observation API from ordinary application code — UC4's `acme.shipment.dispatch`,
+`acme.warehouse.reserve` and `acme.carrier.book` spans, and the kit's `vaadin.db.query`
+span per JDBC statement, since the `DataSource` proxy does not care how the call
+arrived — is created on the calling thread, so a browserless click produces a real,
+correctly nested trail. What a browserless test cannot produce is its *top*: the
+`vaadin.request` and `vaadin.rpc` spans need a UIDL request, and Spring's HTTP span
+needs a servlet one. So `InteractionTraceViewTest` asserts the trail's shape, its trace
+id, the failing hop and the ranking for real, and only the framework's two outermost
+spans are covered by using the running application (which is also where gaps #14 and
+#15 were measured).
 
 Two specifics for the UI-state binder (#6), learned writing UC3's tests. Its UI-init and
 after-navigation hooks do fire browserlessly, so `navigate(...)` after growing a tree is

@@ -57,6 +57,24 @@
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
         <!--
+          UC4 follows one interaction as a trace. The kit already drives its
+          request, RPC, navigation, data-query and JDBC instrumentation through
+          Micrometer's Observation API; what turns those observations into
+          spans with a shared trace id is a tracing bridge, and there is none on
+          the classpath by default. These two are that bridge: Boot's Brave
+          auto-configuration and the Micrometer/Brave implementation it needs.
+          Add them and every use case in this module starts producing spans —
+          UC4 is only the view that reads them.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-micrometer-tracing-brave</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-brave</artifactId>
+        </dependency>
+        <!--
           UC2's join-table fetch demo needs a JPA layer and a database. H2 in
           memory is enough: the point is to make Hibernate's per-collection
           "1 row" fetches (the N+1) observable, not to ship a real datastore.
