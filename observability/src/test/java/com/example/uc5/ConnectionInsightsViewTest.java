@@ -400,6 +400,37 @@ class ConnectionInsightsViewTest extends SpringBrowserlessTest {
     }
 
     @Test
+    void aFrameFromTheProductionBundleIsMappedBackToItsSource() {
+        ConnectionInsightsView view = navigate(ConnectionInsightsView.class);
+        click("show-stock");
+        openAllSteps();
+
+        // What a production build reports for the stock chart: a column on the
+        // only line of a minified chunk. The chunk's map is on the test
+        // classpath where the build packages it (see SourceMapsTest).
+        capture("uncaught", ConnectionInsightsView.ROUTE,
+                Map.of(ClientErrorCollector.DETAIL_ROUTE, "/picking",
+                        ClientErrorCollector.DETAIL_MESSAGE,
+                        "Cannot read properties of undefined (reading 'map')",
+                        ClientErrorCollector.DETAIL_SOURCE,
+                        "https://acme.example/VAADIN/build/"
+                                + "stock-chart-fixture.js:1",
+                        ClientErrorCollector.DETAIL_FRAME,
+                        "at S (https://acme.example/VAADIN/build/"
+                                + "stock-chart-fixture.js:1:496)"),
+                0);
+        view.connectionRestored();
+
+        String card = verdictText();
+        assertTrue(card.contains("stock-chart-fixture.js:1:496"),
+                "the kit's own minified frame stays in its summary: " + card);
+        assertTrue(card.contains("src/main/frontend/acme/stock-chart.ts:43:"),
+                "and the view maps it back to the file and line: " + card);
+        assertTrue(card.contains("...response.bins.map("),
+                "quoting the line that failed: " + card);
+    }
+
+    @Test
     void repeatsOfTheSameErrorAreOneFindingWithACount() {
         ConnectionInsightsView view = navigate(ConnectionInsightsView.class);
         click("show-stock");
