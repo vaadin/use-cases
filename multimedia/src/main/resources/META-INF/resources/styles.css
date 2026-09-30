@@ -1,0 +1,51 @@
+/* Video & Audio use cases — small visual polish */
+
+.app-title {
+    font-size: var(--aura-font-size-l);
+    margin: 0;
+}
+
+.home-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    max-width: 960px;
+}
+
+.home-card .home-card-tag {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary);
+    letter-spacing: 0.05em;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    background: color-mix(in srgb, var(--aura-neutral) 18%, transparent);
+    color: var(--vaadin-text-color-secondary);
+    border: 1px solid color-mix(in srgb, var(--aura-neutral) 35%, transparent);
+}
+
+.status-badge.active {
+    background: color-mix(in srgb, var(--aura-green) 18%, transparent);
+    color: var(--aura-green-text);
+    border-color: color-mix(in srgb, var(--aura-green) 40%, transparent);
+}
+
+.side-by-side {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1100px;
+}
+
+.player-slot video,
+.side-by-side video {
+    display: block;
+    border-radius: var(--vaadin-radius-m);
+    background: black;
+}
