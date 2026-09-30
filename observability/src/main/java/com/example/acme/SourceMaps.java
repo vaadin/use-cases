@@ -54,10 +54,11 @@ public final class SourceMaps {
 
     /**
      * Parsed maps by chunk name. Chunk names carry a content hash, so an entry
-     * never goes stale, and only chunks that exist on the classpath can be
-     * entries, so the cache is bounded by the build output.
+     * never goes stale. Only maps that were found are kept — the chunk name
+     * comes from a browser's report, so caching misses would let any client
+     * grow this without bound — which bounds it by the build output.
      */
-    private static final Map<String, Optional<JsonNode>> MAPS = new ConcurrentHashMap<>();
+    static final Map<String, JsonNode> MAPS = new ConcurrentHashMap<>();
 
     private SourceMaps() {
     }
@@ -111,17 +112,19 @@ public final class SourceMaps {
         } catch (NumberFormatException e) {
             return Optional.empty();
         }
-        return MAPS.computeIfAbsent(matcher.group(1), SourceMaps::load)
+        // A null from load leaves no entry, so a miss is looked up again.
+        return Optional
+                .ofNullable(MAPS.computeIfAbsent(matcher.group(1),
+                        SourceMaps::load))
                 .flatMap(map -> find(map, line - 1, column - 1));
     }
 
-    private static Optional<JsonNode> load(String chunk) {
+    private static @Nullable JsonNode load(String chunk) {
         try (InputStream in = SourceMaps.class.getClassLoader()
                 .getResourceAsStream(BUILD_ON_CLASSPATH + chunk + ".map")) {
-            return in == null ? Optional.empty()
-                    : Optional.of(JSON.readTree(in));
+            return in == null ? null : JSON.readTree(in);
         } catch (IOException | RuntimeException e) {
-            return Optional.empty();
+            return null;
         }
     }
 

@@ -69,6 +69,23 @@ class SourceMapsTest {
     }
 
     @Test
+    void chunkNamesWithoutAMapAreNotRemembered() {
+        // The chunk name comes from a browser's report, so a client inventing
+        // names must not be able to grow the cache.
+        for (int i = 0; i < 100; i++) {
+            SourceMaps.resolve("/VAADIN/build/invented-" + i + ".js:1:1");
+        }
+        SourceMaps.resolve(CHUNK + ":1:496");
+
+        assertTrue(SourceMaps.MAPS.keySet().stream()
+                .noneMatch(name -> name.startsWith("invented-")),
+                "misses are looked up again rather than cached: "
+                        + SourceMaps.MAPS.keySet());
+        assertTrue(SourceMaps.MAPS.containsKey("stock-chart-fixture.js"),
+                "a map that was found is kept");
+    }
+
+    @Test
     void aPositionPastTheMappedCodeHasNoOriginal() {
         assertTrue(SourceMaps.resolve(CHUNK + ":2:1").isEmpty(),
                 "the chunk is one line; there is no line 2 to map");
