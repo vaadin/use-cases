@@ -18,6 +18,7 @@
         <module>common</module>
         <module>fullscreen</module>
         <module>geolocation</module>
+        <module>grid-export</module>
         <module>clipboard</module>
         <module>page-visibility</module>
         <module>route-hierarchy</module>
