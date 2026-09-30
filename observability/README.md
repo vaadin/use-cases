@@ -156,3 +156,30 @@ is how this compose file feeds Prometheus its scrape config and Grafana its
 provisioning, allows exactly one service to `build:` (the app), so the other
 two would need pre-built config-bearing images anyway, and routes the Fly proxy
 to a single container, so visitors could never open Grafana or Prometheus.
+
+## Error reporting (Sentry)
+
+The module can forward its errors to [Sentry](https://sentry.io). It is off
+until a DSN is configured, so local runs and CI send nothing:
+
+```
+SENTRY_DSN=https://…@….ingest.sentry.io/… mvn spring-boot:run -pl :observability-use-cases
+```
+
+The hosted demo reads it from a Fly secret:
+
+```
+fly secrets set SENTRY_DSN=https://… -a observability-cases
+```
+
+What gets reported is every ERROR log line, through Sentry's Logback appender,
+with the WARN and INFO lines before it as breadcrumbs. That is deliberate: a
+failing Vaadin interaction still answers its RPC with 200, so Spring MVC's
+exception handling (which the starter also hooks into) never sees it, but
+Vaadin's default error handler logs it at ERROR. UC6's broken returns therefore
+show up in Sentry as `IllegalStateException` and `IllegalArgumentException`
+issues with their stack traces. `sentry.send-default-pii` stays off, because this module turns on
+`insights-details` and `traces-session-id` and Sentry is a third party. Metrics
+stay with Prometheus and Grafana (UC7), since Sentry does not ingest Micrometer
+meters, and traces stay in-process (UC4) until the tracing bridge is switched
+from Brave to OpenTelemetry, which is what Sentry's tracing integrates with.
