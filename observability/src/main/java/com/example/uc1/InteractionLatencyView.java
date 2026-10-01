@@ -80,8 +80,8 @@ import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
  */
 @Route(value = InteractionLatencyView.ROUTE, layout = MainLayout.class)
 @RouteAlias(value = "uc1", layout = MainLayout.class)
-@PageTitle("UC1 — Interaction latency")
-@Menu(order = 1, title = "UC1 — Interaction latency")
+@PageTitle("UC1 — Finding which action is slow and where its time goes")
+@Menu(order = 1, title = "UC1 — Finding which action is slow and where its time goes")
 public class InteractionLatencyView extends VerticalLayout {
 
     /**

@@ -140,9 +140,9 @@ import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
  */
 @Route(value = ConnectionInsightsView.ROUTE, layout = MainLayout.class)
 @RouteAlias(value = "uc5", layout = MainLayout.class)
-@PageTitle("UC5 — Connection & client problems")
+@PageTitle("UC5 — Catching lost connections and browser errors")
 @JsModule("./acme/stock-chart.ts")
-@Menu(order = 5, title = "UC5 — Connection & client problems")
+@Menu(order = 5, title = "UC5 — Catching lost connections and browser errors")
 public class ConnectionInsightsView extends VerticalLayout {
 
     /**

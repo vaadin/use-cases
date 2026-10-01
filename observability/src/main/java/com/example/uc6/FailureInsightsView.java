@@ -82,8 +82,8 @@ import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
  */
 @Route(value = FailureInsightsView.ROUTE, layout = MainLayout.class)
 @RouteAlias(value = "uc6", layout = MainLayout.class)
-@PageTitle("UC6 — Failure insights")
-@Menu(order = 6, title = "UC6 — Failure insights")
+@PageTitle("UC6 — Tracing a failed action to the line of code")
+@Menu(order = 6, title = "UC6 — Tracing a failed action to the line of code")
 public class FailureInsightsView extends VerticalLayout {
 
     /**

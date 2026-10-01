@@ -94,8 +94,8 @@ import com.vaadin.observability.micrometer.trace.ObservationNames;
  */
 @Route(value = InteractionTraceView.ROUTE, layout = MainLayout.class)
 @RouteAlias(value = "uc4", layout = MainLayout.class)
-@PageTitle("UC4 — Interaction tracing")
-@Menu(order = 4, title = "UC4 — Interaction tracing")
+@PageTitle("UC4 — Finding the cause of a slow interaction")
+@Menu(order = 4, title = "UC4 — Finding the cause of a slow interaction")
 public class InteractionTraceView extends VerticalLayout {
 
     /**

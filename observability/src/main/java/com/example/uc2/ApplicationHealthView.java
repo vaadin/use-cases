@@ -83,8 +83,8 @@ import com.vaadin.flow.shared.Registration;
  */
 @Route(value = ApplicationHealthView.ROUTE, layout = MainLayout.class)
 @RouteAlias(value = "uc2", layout = MainLayout.class)
-@PageTitle("UC2 — Application health")
-@Menu(order = 2, title = "UC2 — Application health")
+@PageTitle("UC2 — Finding the query behind an app-wide hiccup")
+@Menu(order = 2, title = "UC2 — Finding the query behind an app-wide hiccup")
 public class ApplicationHealthView extends VerticalLayout {
 
     /**
