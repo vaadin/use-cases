@@ -2,11 +2,6 @@ package com.example.acme;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,9 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.debugging.sourcemap.SourceMapConsumerV3;
-import com.google.debugging.sourcemap.SourceMapParseException;
-import com.google.debugging.sourcemap.proto.Mapping.OriginalMapping;
+import com.atlassian.sourcemap.Mapping;
+import com.atlassian.sourcemap.ReadableSourceMap;
+import com.atlassian.sourcemap.ReadableSourceMapImpl;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -34,12 +29,12 @@ import org.jspecify.annotations.Nullable;
  * {@value #BUILD_ON_CLASSPATH}, so the server that received the report can
  * resolve it without the browser's help.
  * <p>
- * The maps are read with Closure Compiler's Source Map v3 consumer; the line of
- * code comes from the map's {@code sourcesContent}, when the build embeds it,
- * which Vite does by default. A location outside the bundle — a
- * development-mode module served by Vite, an executeJs frame, a third-party
- * script — resolves to nothing, and so does one whose map is not on the
- * classpath, which is the case whenever the frontend was not built with maps.
+ * The maps are read with Atlassian's Source Map v3 reader; the line of code
+ * comes from the map's {@code sourcesContent}, when the build embeds it, which
+ * Vite does by default. A location outside the bundle — a development-mode
+ * module served by Vite, an executeJs frame, a third-party script — resolves to
+ * nothing, and so does one whose map is not on the classpath, which is the case
+ * whenever the frontend was not built with maps.
  */
 public final class SourceMaps {
 
@@ -123,72 +118,46 @@ public final class SourceMaps {
     private static @Nullable Chunk load(String name) {
         try (InputStream in = SourceMaps.class.getClassLoader()
                 .getResourceAsStream(BUILD_ON_CLASSPATH + name + ".map")) {
-            if (in == null) {
-                return null;
-            }
-            SourceMapConsumerV3 consumer = new SourceMapConsumerV3();
-            consumer.parse(
-                    new String(in.readAllBytes(), StandardCharsets.UTF_8));
-            return new Chunk(consumer);
-        } catch (IOException | SourceMapParseException | RuntimeException e) {
+            return in == null ? null
+                    : new Chunk(ReadableSourceMapImpl.fromSource(in));
+        } catch (IOException | RuntimeException e) {
             return null;
         }
     }
 
-    /** One chunk's parsed map, with its sources lined up with their content. */
+    /** One chunk's parsed map. */
     static final class Chunk {
 
-        private final SourceMapConsumerV3 consumer;
-        private final List<String> sources;
-        private final List<@Nullable String> contents;
+        private final ReadableSourceMap map;
 
-        /**
-         * The first mapped generated column of each generated line, both
-         * 0-based. Closure answers a position before a line's first mapping —
-         * or on a line with none — with the last mapping of an earlier line,
-         * which for a chunk with a banner or a line of imports above the code
-         * would be a confident, wrong answer; this is what tells that case
-         * apart.
-         */
-        private final Map<Integer, Integer> firstColumns = new HashMap<>();
-
-        Chunk(SourceMapConsumerV3 consumer) {
-            this.consumer = consumer;
-            this.sources = List.copyOf(consumer.getOriginalSources());
-            Collection<String> embedded = consumer.getOriginalSourcesContent();
-            // A source the build did not embed is a null entry, which
-            // List.copyOf would reject.
-            List<@Nullable String> copy = embedded == null ? new ArrayList<>()
-                    : new ArrayList<@Nullable String>(embedded);
-            this.contents = Collections.unmodifiableList(copy);
-            consumer.visitMappings(
-                    (source, name, from, start, end) -> firstColumns.merge(
-                            start.getLine(), start.getColumn(), Math::min));
+        Chunk(ReadableSourceMap map) {
+            this.map = map;
         }
 
         Optional<Original> resolve(int line, int column) {
-            Integer first = firstColumns.get(line - 1);
-            if (first == null || column - 1 < first) {
-                return Optional.empty();
-            }
-            OriginalMapping mapping;
+            Mapping mapping;
             try {
-                mapping = consumer.getMappingForLine(line, column);
+                mapping = map.getMapping(line - 1, column - 1);
             } catch (RuntimeException e) {
                 return Optional.empty();
             }
-            if (mapping == null) {
+            // The reader answers a column before a line's first mapping, or
+            // a line with none, with the last mapping of an earlier line. For
+            // a chunk with a banner or a line of imports above the code that
+            // would be a confident, wrong answer, so only the requested
+            // line's own mappings count.
+            if (mapping == null || mapping.getGeneratedLine() != line - 1) {
                 return Optional.empty();
             }
-            String file = mapping.getOriginalFile();
-            int index = sources.indexOf(file);
-            String content = index >= 0 && index < contents.size()
-                    ? contents.get(index)
-                    : null;
+            String file = mapping.getSourceFileName();
+            int index = map.getSources().indexOf(file);
+            List<String> contents = map.getSourcesContent();
+            String content = index >= 0 && contents != null
+                    && index < contents.size() ? contents.get(index) : null;
             return Optional.of(new Original(sourcePath(file),
-                    mapping.getLineNumber(), mapping.getColumnPosition(),
+                    mapping.getSourceLine() + 1, mapping.getSourceColumn() + 1,
                     content == null ? null
-                            : lineOf(content, mapping.getLineNumber() - 1)));
+                            : lineOf(content, mapping.getSourceLine())));
         }
     }
 
