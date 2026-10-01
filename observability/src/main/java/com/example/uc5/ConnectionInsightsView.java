@@ -12,6 +12,7 @@ import com.example.acme.InsightCard;
 import com.example.acme.Insights;
 import com.example.acme.Investigation;
 import com.example.acme.MeterTable;
+import com.example.acme.SourceMaps;
 import com.example.acme.Telemetry;
 import com.example.views.MainLayout;
 import io.micrometer.core.instrument.Counter;
@@ -64,7 +65,9 @@ import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
  * never reaches {@code vaadin.errors}, and an unreachable browser is a session
  * that simply goes quiet; <b>3)</b> the kit's insights endpoint retains the
  * errors themselves, grouped, with the location parsed out of the stack and
- * the offline time a report waited; <b>4)</b> the raw client meters, which are
+ * the offline time a report waited, and the view maps a frame from the
+ * production bundle back to its source line through the build's hidden
+ * sourcemaps ({@link SourceMaps}); <b>4)</b> the raw client meters, which are
  * what an outage looks like fleet-wide; <b>5)</b> what the numbers still cannot
  * tell you.
  * <p>
@@ -194,10 +197,10 @@ public class ConnectionInsightsView extends VerticalLayout {
 
     /**
      * The two broken features of the screen, in {@code acme/stock-chart.ts}.
-     * They are application code rather than executeJs strings, so the frame
-     * the kit retains for them names a real file; each fails asynchronously,
-     * so the error goes uncaught rather than coming back as a failed executeJs
-     * result.
+     * They are bundled code rather than executeJs strings, so the frame the kit
+     * retains for them is in a chunk the production sourcemaps cover; each
+     * fails asynchronously, so the error goes uncaught rather than coming back
+     * as a failed executeJs result.
      */
     private static final String SHOW_STOCK = "window.acmeStock.showStockLevels();";
 
@@ -565,8 +568,27 @@ public class ConnectionInsightsView extends VerticalLayout {
             if (buffered > 0) {
                 chips.add("held %.1f s offline".formatted(buffered / 1000d));
             }
-            verdict.add(new InsightCard(insight, detailOf(evidence), chips));
+            List<String> details = new ArrayList<>();
+            details.add(detailOf(evidence));
+            SourceMaps.resolve(evidence.get("frame") instanceof String frame
+                    ? frame : null)
+                    .ifPresent(original -> details.addAll(sourceOf(original)));
+            verdict.add(new InsightCard(insight, details, chips));
         });
+    }
+
+    /**
+     * Where the frame came from, when it is in the production bundle. The kit
+     * retains the frame as the browser wrote it, which in a production build is
+     * a column on the first line of a minified chunk. The build's hidden
+     * sourcemaps are on the server's classpath, so the view maps the frame back
+     * to a file and line and quotes the line (gap #16: nothing the kit does
+     * yet).
+     */
+    private static List<String> sourceOf(SourceMaps.Original original) {
+        String at = "↳ " + original.location();
+        return original.code() != null ? List.of(at, original.code())
+                : List.of(at);
     }
 
     /**
@@ -777,6 +799,13 @@ public class ConnectionInsightsView extends VerticalLayout {
                         + "The payload is a good published contract for an "
                         + "agent; for a Java caller it means unchecked casts "
                         + "and string keys (gap #9)."),
+                new ListItem("The kit reports a browser error where the "
+                        + "production bundle has it: a column on the first "
+                        + "line of a minified chunk. The source line under each "
+                        + "card is this application's doing, from the build's "
+                        + "hidden sourcemaps on its classpath, and the kit "
+                        + "still groups by the minified frame, so a redeploy "
+                        + "starts a new finding (gap #16)."),
                 new ListItem("Push transport is still not instrumented on the "
                         + "client, so an app using @Push has no client-side "
                         + "view of its own delivery (gap #4)."));

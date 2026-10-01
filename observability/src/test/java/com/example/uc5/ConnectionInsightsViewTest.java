@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import com.example.acme.AcmeCatalog;
 import com.example.acme.AppWindow;
+import com.example.acme.TestSourceMaps;
 import com.example.home.HomeView;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -397,6 +398,39 @@ class ConnectionInsightsViewTest extends SpringBrowserlessTest {
         assertTrue(card.contains("in renderChart"), card);
         assertTrue(card.contains("route=picking"), card);
         assertTrue(card.contains("1×"), card);
+    }
+
+    @Test
+    void aFrameFromTheProductionBundleIsMappedBackToItsSource() {
+        ConnectionInsightsView view = navigate(ConnectionInsightsView.class);
+        click("show-stock");
+        openAllSteps();
+
+        // What a production build reports for the stock chart: a column on the
+        // only line of a minified chunk, whose map is on the classpath where
+        // the build packages it.
+        String chunk = "https://acme.example"
+                + TestSourceMaps.write("stock-chart-test.js");
+        String frame = chunk + ":1:" + TestSourceMaps.CHART_FROM;
+        capture("uncaught", ConnectionInsightsView.ROUTE,
+                Map.of(ClientErrorCollector.DETAIL_ROUTE, "/picking",
+                        ClientErrorCollector.DETAIL_MESSAGE,
+                        "Cannot read properties of undefined (reading 'map')",
+                        ClientErrorCollector.DETAIL_SOURCE,
+                        chunk + ":1",
+                        ClientErrorCollector.DETAIL_FRAME,
+                        "at S (" + frame + ")"),
+                0);
+        view.connectionRestored();
+
+        String card = verdictText();
+        assertTrue(card.contains("stock-chart-test.js:1:"
+                + TestSourceMaps.CHART_FROM),
+                "the kit's own minified frame stays in its summary: " + card);
+        assertTrue(card.contains(TestSourceMaps.SOURCE + ":2:31"),
+                "and the view maps it back to the file and line: " + card);
+        assertTrue(card.contains("...response.bins.map("),
+                "quoting the line that failed: " + card);
     }
 
     @Test
