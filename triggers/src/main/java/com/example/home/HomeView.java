@@ -17,6 +17,7 @@ import com.example.uc20.DoubleClickOpenView;
 import com.example.uc21.ShortcutDownloadView;
 import com.example.uc22.KeyEventLogView;
 import com.example.uc23.KonamiCodeView;
+import com.example.uc24.DisableButtonGroupView;
 import com.example.uc3.LiveSignalCounterView;
 import com.example.uc4.JsTriggerView;
 import com.example.uc5.IdleWarningView;
@@ -119,6 +120,9 @@ public class HomeView extends BaseHomeView {
         cards.add(homeCard("UC23", "Konami code",
                 "Local SequenceTrigger fires only on the complete sequence; partial state stays client-side.",
                 KonamiCodeView.class));
+        cards.add(homeCard("UC24", "Disable button group",
+                "setDisableOnClick covers the clicked button; a ClickTrigger fans SetPropertyAction(disabled) out to its siblings in the same event.",
+                DisableButtonGroupView.class));
         add(cards);
     }
 }

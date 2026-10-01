@@ -21,6 +21,7 @@ PR has a feedback trail.
 | Server-side feature detection | **Open** | — |
 | Public introspection of trigger wiring | **Open** | all tests |
 | Client-side test simulator | **Open** | all tests |
+| Action-written properties are invisible to the server | **Open** — manual server-side mirror | UC24 |
 
 ## No public `ShortcutTrigger`
 
@@ -158,3 +159,25 @@ Playwright is the source of truth for behaviour.
 `Element` exposing the installed expressions (for assertions on the
 generated JS), or a higher-level `TriggerTestKit` that mocks the
 gesture path so actions can be fired headlessly.
+
+## Action-written properties are invisible to the server
+
+**Where it bit us:** UC24 (click one of Approve / Reject / Escalate →
+disable all three before the round-trip).
+**Symptom:** `SetPropertyAction(sibling, "disabled", true)` disables the
+siblings instantly, but the server never learns about it: the property
+isn't synced back and `sibling.isEnabled()` stays `true`. When the slow
+work finishes, `sibling.setEnabled(true)` is then a no-op (no state
+change, nothing sent), so the siblings would stay disabled in the
+browser forever. `Button#setDisableOnClick` doesn't have this problem
+because the framework updates the server-side enabled state itself, but
+it only covers the clicked button.
+**Workaround used:** The click listener mirrors the client state by
+calling `setEnabled(false)` on the whole group before starting the
+background work, so the later `setEnabled(true)` is a real change that
+reaches the browser via Push. The clicked button itself keeps using
+`setDisableOnClick(true)`.
+**Suggested API:** Either a `SetEnabledAction(HasEnabled...)` that
+disables client-side and marks the components disabled server-side when
+the event arrives (the group equivalent of `setDisableOnClick`), or a
+`Button#setDisableOnClick(HasEnabled... alsoDisable)` overload.
