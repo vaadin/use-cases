@@ -94,6 +94,18 @@
             <version>${sentry.version}</version>
         </dependency>
         <!--
+          UC5 maps a client error's minified frame back to source with the
+          build's sourcemaps (SourceMaps). Closure Compiler's sourcemap consumer
+          is the maintained Source Map v3 reader on Maven Central; the shaded
+          artifact relocates its Guava and protobuf, so nothing it carries can
+          clash with the application's own.
+        -->
+        <dependency>
+            <groupId>com.google.javascript</groupId>
+            <artifactId>closure-compiler</artifactId>
+            <version>${closure-compiler.version}</version>
+        </dependency>
+        <!--
           UC2's join-table fetch demo needs a JPA layer and a database. H2 in
           memory is enough: the point is to make Hibernate's per-collection
           "1 row" fetches (the N+1) observable, not to ship a real datastore.

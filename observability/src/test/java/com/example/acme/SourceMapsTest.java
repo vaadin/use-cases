@@ -1,53 +1,47 @@
 package com.example.acme;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Resolves against {@code stock-chart-fixture.js.map}, which is the map a
- * production build of this module wrote for the chunk holding
- * {@code acme/stock-chart.ts}, copied verbatim into the test classpath under
- * the path the build packages it at. Frozen on purpose: the columns below are
- * positions in the minified chunk that map was written for, and a map that
- * followed the source would move them on every edit.
+ * Resolves against a map {@link TestSourceMaps} writes onto the test classpath
+ * where the build packages them, so the lookup is the one production uses.
  */
 class SourceMapsTest {
 
-    private static final String CHUNK = "https://observability-cases.fly.dev"
-            + "/VAADIN/build/stock-chart-fixture.js";
+    private static String chunk;
+
+    @BeforeAll
+    static void writeTheMap() {
+        chunk = "https://observability-cases.fly.dev"
+                + TestSourceMaps.write("stock-chart-test.js");
+    }
 
     @Test
-    void aMinifiedFrameResolvesToTheFileLineAndFunctionItWasBuiltFrom() {
-        // "function S(e){let t=Math.max(...e.bins.map(" — the chart's broken
-        // read, at column 496 of the chunk's only line.
-        SourceMaps.Original original = SourceMaps.resolve(CHUNK + ":1:496")
+    void aMinifiedFrameResolvesToTheFileAndLineItWasBuiltFrom() {
+        SourceMaps.Original original = SourceMaps
+                .resolve(chunk + ":1:" + TestSourceMaps.CHART_FROM)
                 .orElseThrow();
 
-        assertEquals("src/main/frontend/acme/stock-chart.ts", original.source(),
+        assertEquals(TestSourceMaps.SOURCE + ":2:31", original.location(),
                 "the path the build writes relative to the map, read from the "
-                        + "module root");
-        assertEquals(43, original.line());
+                        + "module root, with 1-based line and column");
         assertEquals(
                 "const tallest = Math.max(...response.bins.map((level) "
                         + "=> level.onHand));",
                 original.code(), "the line itself, quoted from sourcesContent");
-        assertTrue(
-                original.location().startsWith(
-                        "src/main/frontend/acme/stock-chart.ts:43:"),
-                original.location());
     }
 
     @Test
-    void aColumnBetweenTwoMappingsBelongsToTheOneBeforeIt() {
-        // "throw Error(`GET …": the map has a segment where Error starts, at
-        // 641, and 644 is inside the name, which that segment still covers.
-        SourceMaps.Original original = SourceMaps.resolve(CHUNK + ":1:644")
+    void aColumnInsideAMappingBelongsToTheSegmentThatStartsIt() {
+        SourceMaps.Original original = SourceMaps
+                .resolve(chunk + ":1:" + (TestSourceMaps.FETCH_FROM + 7))
                 .orElseThrow();
 
-        assertEquals("src/main/frontend/acme/stock-chart.ts:58:13",
-                original.location(), "where `Error` starts in the source");
+        assertEquals(TestSourceMaps.SOURCE + ":5:3", original.location());
         assertTrue(original.code().startsWith("throw new Error("),
                 original.code());
     }
@@ -61,7 +55,7 @@ class SourceMapsTest {
                 "http://localhost:8080/VAADIN/@fs/src/main/frontend/acme/"
                         + "stock-chart.ts:43:40")
                 .isEmpty(), "a development-mode module is already the source");
-        assertTrue(SourceMaps.resolve(CHUNK + ":1").isEmpty(),
+        assertTrue(SourceMaps.resolve(chunk + ":1").isEmpty(),
                 "a source without a column is not a frame");
         assertTrue(SourceMaps
                 .resolve("/VAADIN/build/../../../application.properties:1:1")
@@ -75,19 +69,22 @@ class SourceMapsTest {
         for (int i = 0; i < 100; i++) {
             SourceMaps.resolve("/VAADIN/build/invented-" + i + ".js:1:1");
         }
-        SourceMaps.resolve(CHUNK + ":1:496");
+        SourceMaps.resolve(chunk + ":1:" + TestSourceMaps.CHART_FROM);
 
-        assertTrue(SourceMaps.MAPS.keySet().stream()
-                .noneMatch(name -> name.startsWith("invented-")),
+        assertTrue(
+                SourceMaps.MAPS.keySet().stream()
+                        .noneMatch(name -> name.startsWith("invented-")),
                 "misses are looked up again rather than cached: "
                         + SourceMaps.MAPS.keySet());
-        assertTrue(SourceMaps.MAPS.containsKey("stock-chart-fixture.js"),
+        assertTrue(SourceMaps.MAPS.containsKey("stock-chart-test.js"),
                 "a map that was found is kept");
     }
 
     @Test
-    void aPositionPastTheMappedCodeHasNoOriginal() {
-        assertTrue(SourceMaps.resolve(CHUNK + ":2:1").isEmpty(),
+    void aPositionOutsideTheMappedCodeHasNoOriginal() {
+        assertTrue(SourceMaps.resolve(chunk + ":1:10").isEmpty(),
+                "before the first mapping there is nothing to map to");
+        assertTrue(SourceMaps.resolve(chunk + ":2:1").isEmpty(),
                 "the chunk is one line; there is no line 2 to map");
     }
 }

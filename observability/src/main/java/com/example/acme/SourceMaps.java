@@ -2,15 +2,20 @@ package com.example.acme;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.debugging.sourcemap.SourceMapConsumerV3;
+import com.google.debugging.sourcemap.SourceMapParseException;
+import com.google.debugging.sourcemap.proto.Mapping.OriginalMapping;
 import org.jspecify.annotations.Nullable;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Maps a location in the production frontend bundle back to the source it was
@@ -27,12 +32,12 @@ import tools.jackson.databind.ObjectMapper;
  * {@value #BUILD_ON_CLASSPATH}, so the server that received the report can
  * resolve it without the browser's help.
  * <p>
- * Only the Source Map v3 fields this needs are read: {@code sources},
- * {@code mappings} and, when present, {@code sourcesContent}, for the line of
- * code itself. A location outside the bundle — a development-mode module served
- * by Vite, an executeJs frame, a third-party script — resolves to nothing, and
- * so does one whose map is not on the classpath, which is the case whenever the
- * frontend was not built with maps.
+ * The maps are read with Closure Compiler's Source Map v3 consumer; the line of
+ * code comes from the map's {@code sourcesContent}, when the build embeds it,
+ * which Vite does by default. A location outside the bundle — a
+ * development-mode module served by Vite, an executeJs frame, a third-party
+ * script — resolves to nothing, and so does one whose map is not on the
+ * classpath, which is the case whenever the frontend was not built with maps.
  */
 public final class SourceMaps {
 
@@ -48,17 +53,13 @@ public final class SourceMaps {
     private static final Pattern CHUNK_LOCATION = Pattern
             .compile("/VAADIN/build/([\\w.-]+\\.js):(\\d+):(\\d+)$");
 
-    private static final String BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-    private static final ObjectMapper JSON = new ObjectMapper();
-
     /**
      * Parsed maps by chunk name. Chunk names carry a content hash, so an entry
      * never goes stale. Only maps that were found are kept — the chunk name
      * comes from a browser's report, so caching misses would let any client
      * grow this without bound — which bounds it by the build output.
      */
-    static final Map<String, JsonNode> MAPS = new ConcurrentHashMap<>();
+    static final Map<String, Chunk> MAPS = new ConcurrentHashMap<>();
 
     private SourceMaps() {
     }
@@ -113,102 +114,65 @@ public final class SourceMaps {
             return Optional.empty();
         }
         // A null from load leaves no entry, so a miss is looked up again.
-        return Optional
-                .ofNullable(MAPS.computeIfAbsent(matcher.group(1),
-                        SourceMaps::load))
-                .flatMap(map -> find(map, line - 1, column - 1));
+        Chunk chunk = MAPS.computeIfAbsent(matcher.group(1), SourceMaps::load);
+        return chunk == null ? Optional.empty() : chunk.resolve(line, column);
     }
 
-    private static @Nullable JsonNode load(String chunk) {
+    private static @Nullable Chunk load(String name) {
         try (InputStream in = SourceMaps.class.getClassLoader()
-                .getResourceAsStream(BUILD_ON_CLASSPATH + chunk + ".map")) {
-            return in == null ? null : JSON.readTree(in);
-        } catch (IOException | RuntimeException e) {
+                .getResourceAsStream(BUILD_ON_CLASSPATH + name + ".map")) {
+            if (in == null) {
+                return null;
+            }
+            SourceMapConsumerV3 consumer = new SourceMapConsumerV3();
+            consumer.parse(
+                    new String(in.readAllBytes(), StandardCharsets.UTF_8));
+            return new Chunk(consumer);
+        } catch (IOException | SourceMapParseException | RuntimeException e) {
             return null;
         }
     }
 
-    /**
-     * Walks the {@code mappings} of a map to the segment covering a generated
-     * position. Segments are Base64 VLQ, each field relative to the same field
-     * of the previous segment — the generated column only within its line, the
-     * rest across the whole map — so a line cannot be decoded without the ones
-     * before it. The walk decodes up to the target line and stops there, which
-     * for a minified chunk, one very long line, is most of the string;
-     * resolving a handful of insight frames on a readout refresh is well within
-     * that.
-     */
-    private static Optional<Original> find(JsonNode map, int targetLine,
-            int targetColumn) {
-        String mappings = map.path("mappings").asString("");
-        int[] segment = new int[4];
-        int generatedLine = 0;
-        int generatedColumn = 0;
-        int source = 0;
-        int sourceLine = 0;
-        int sourceColumn = 0;
-        int[] best = null;
-        int i = 0;
-        while (i < mappings.length() && generatedLine <= targetLine) {
-            char c = mappings.charAt(i);
-            if (c == ';') {
-                generatedLine++;
-                generatedColumn = 0;
-                i++;
-                continue;
-            }
-            if (c == ',') {
-                i++;
-                continue;
-            }
-            int fields = 0;
-            while (i < mappings.length() && mappings.charAt(i) != ','
-                    && mappings.charAt(i) != ';') {
-                int value = 0;
-                int shift = 0;
-                int digit;
-                do {
-                    digit = BASE64.indexOf(mappings.charAt(i++));
-                    if (digit < 0) {
-                        return Optional.empty();
-                    }
-                    value += (digit & 31) << shift;
-                    shift += 5;
-                } while ((digit & 32) != 0);
-                int decoded = (value & 1) == 0 ? value >>> 1 : -(value >>> 1);
-                if (fields < segment.length) {
-                    segment[fields] = decoded;
-                }
-                fields++;
-            }
-            generatedColumn += segment[0];
-            if (fields >= 4) {
-                source += segment[1];
-                sourceLine += segment[2];
-                sourceColumn += segment[3];
-            }
-            if (generatedLine == targetLine) {
-                if (generatedColumn > targetColumn) {
-                    break;
-                }
-                best = fields >= 4
-                        ? new int[] { source, sourceLine, sourceColumn }
-                        : null;
-            }
-        }
-        return best == null ? Optional.empty()
-                : Optional.of(original(map, best[0], best[1], best[2]));
-    }
+    /** One chunk's parsed map, with its sources lined up with their content. */
+    record Chunk(SourceMapConsumerV3 consumer, List<String> sources,
+            List<@Nullable String> contents) {
 
-    private static Original original(JsonNode map, int source, int line,
-            int column) {
-        String code = map.path("sourcesContent").path(source).isString()
-                ? lineOf(map.path("sourcesContent").path(source).asString(),
-                        line)
-                : null;
-        return new Original(
-                sourcePath(map.path("sources").path(source).asString("")),
-                line + 1, column + 1, code);
+        Chunk(SourceMapConsumerV3 consumer) {
+            this(consumer, List.copyOf(consumer.getOriginalSources()),
+                    contentsOf(consumer));
+        }
+
+        /**
+         * The embedded sources, in the order of {@code sources}; a source the
+         * build did not embed is a null entry, and a map without any has none.
+         */
+        private static List<@Nullable String> contentsOf(
+                SourceMapConsumerV3 consumer) {
+            Collection<String> contents = consumer.getOriginalSourcesContent();
+            return contents == null ? new ArrayList<>()
+                    : new ArrayList<@Nullable String>(contents);
+        }
+
+        Optional<Original> resolve(int line, int column) {
+            OriginalMapping mapping;
+            try {
+                mapping = consumer.getMappingForLine(line, column);
+            } catch (RuntimeException e) {
+                return Optional.empty();
+            }
+            if (mapping == null) {
+                return Optional.empty();
+            }
+            String file = mapping.getOriginalFile();
+            int index = sources.indexOf(file);
+            String content = index >= 0 && index < contents.size()
+                    ? contents.get(index)
+                    : null;
+            return Optional.of(new Original(sourcePath(file),
+                    mapping.getLineNumber(), mapping.getColumnPosition(),
+                    content == null ? null
+                            : lineOf(content, mapping.getLineNumber() - 1)));
+        }
     }
 
     /**
@@ -226,6 +190,6 @@ public final class SourceMaps {
 
     private static @Nullable String lineOf(String content, int line) {
         String[] lines = content.split("\r?\n", -1);
-        return line < lines.length ? lines[line].strip() : null;
+        return line >= 0 && line < lines.length ? lines[line].strip() : null;
     }
 }
