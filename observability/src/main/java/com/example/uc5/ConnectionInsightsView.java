@@ -22,6 +22,7 @@ import org.jspecify.annotations.Nullable;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -140,6 +141,7 @@ import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
 @Route(value = ConnectionInsightsView.ROUTE, layout = MainLayout.class)
 @RouteAlias(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Connection & client problems")
+@JsModule("./acme/stock-chart.ts")
 @Menu(order = 5, title = "UC5 — Connection & client problems")
 public class ConnectionInsightsView extends VerticalLayout {
 
@@ -190,14 +192,16 @@ public class ConnectionInsightsView extends VerticalLayout {
             }, 300);
             """;
 
-    /** Thrown asynchronously, so it reaches window.onerror uncaught. */
-    private static final String THROW = """
-            setTimeout(function () {
-                throw new Error($0);
-            }, 0);
-            """;
+    /**
+     * The two broken features of the screen, in {@code acme/stock-chart.ts}.
+     * They are application code rather than executeJs strings, so the frame
+     * the kit retains for them names a real file; each fails asynchronously,
+     * so the error goes uncaught rather than coming back as a failed executeJs
+     * result.
+     */
+    private static final String SHOW_STOCK = "window.acmeStock.showStockLevels();";
 
-    private static final String REJECT = "Promise.reject(new Error($0));";
+    private static final String SYNC_STOCK = "window.acmeStock.syncStock();";
 
     /**
      * Asks the collector to send what it is holding, so the meters move without
@@ -318,11 +322,11 @@ public class ConnectionInsightsView extends VerticalLayout {
         // browser. Nothing about either failure is server-side, which is the
         // whole point of the story.
         Button stock = new Button("Show stock levels",
-                event -> raise(THROW, "Rendering the stock chart failed"));
+                event -> raise(SHOW_STOCK, "Rendering the stock chart failed"));
         stock.setId("show-stock");
 
         Button sync = new Button("Sync stock from the API", event -> raise(
-                REJECT, "GET /api/warehouse/stock failed"));
+                SYNC_STOCK, "GET /api/warehouse/stock failed"));
         sync.setId("sync-stock");
 
         return new AppWindow("Acme Supply — Warehouse Picking", ROUTE, order,
@@ -408,7 +412,7 @@ public class ConnectionInsightsView extends VerticalLayout {
      */
     private void raise(String script, String message) {
         investigation.reveal();
-        getElement().executeJs(script, message)
+        getElement().executeJs(script)
                 .then(thrown -> getElement().executeJs(FLUSH)
                         .then(flushed -> investigation.refreshNow()));
         Notification.show(message + " — in the browser. Nothing was thrown on "
