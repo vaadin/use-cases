@@ -20,6 +20,7 @@
         <module>geolocation</module>
         <module>multimedia</module>
         <module>clipboard</module>
+        <module>collaboration</module>
         <module>page-visibility</module>
         <module>route-hierarchy</module>
         <module>text-selection</module>
