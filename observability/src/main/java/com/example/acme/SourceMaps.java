@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -134,26 +136,41 @@ public final class SourceMaps {
     }
 
     /** One chunk's parsed map, with its sources lined up with their content. */
-    record Chunk(SourceMapConsumerV3 consumer, List<String> sources,
-            List<@Nullable String> contents) {
+    static final class Chunk {
 
-        Chunk(SourceMapConsumerV3 consumer) {
-            this(consumer, List.copyOf(consumer.getOriginalSources()),
-                    contentsOf(consumer));
-        }
+        private final SourceMapConsumerV3 consumer;
+        private final List<String> sources;
+        private final List<@Nullable String> contents;
 
         /**
-         * The embedded sources, in the order of {@code sources}; a source the
-         * build did not embed is a null entry, and a map without any has none.
+         * The first mapped generated column of each generated line, both
+         * 0-based. Closure answers a position before a line's first mapping —
+         * or on a line with none — with the last mapping of an earlier line,
+         * which for a chunk with a banner or a line of imports above the code
+         * would be a confident, wrong answer; this is what tells that case
+         * apart.
          */
-        private static List<@Nullable String> contentsOf(
-                SourceMapConsumerV3 consumer) {
-            Collection<String> contents = consumer.getOriginalSourcesContent();
-            return contents == null ? new ArrayList<>()
-                    : new ArrayList<@Nullable String>(contents);
+        private final Map<Integer, Integer> firstColumns = new HashMap<>();
+
+        Chunk(SourceMapConsumerV3 consumer) {
+            this.consumer = consumer;
+            this.sources = List.copyOf(consumer.getOriginalSources());
+            Collection<String> embedded = consumer.getOriginalSourcesContent();
+            // A source the build did not embed is a null entry, which
+            // List.copyOf would reject.
+            List<@Nullable String> copy = embedded == null ? new ArrayList<>()
+                    : new ArrayList<@Nullable String>(embedded);
+            this.contents = Collections.unmodifiableList(copy);
+            consumer.visitMappings(
+                    (source, name, from, start, end) -> firstColumns.merge(
+                            start.getLine(), start.getColumn(), Math::min));
         }
 
         Optional<Original> resolve(int line, int column) {
+            Integer first = firstColumns.get(line - 1);
+            if (first == null || column - 1 < first) {
+                return Optional.empty();
+            }
             OriginalMapping mapping;
             try {
                 mapping = consumer.getMappingForLine(line, column);

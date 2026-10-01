@@ -87,4 +87,26 @@ class SourceMapsTest {
         assertTrue(SourceMaps.resolve(chunk + ":2:1").isEmpty(),
                 "the chunk is one line; there is no line 2 to map");
     }
+
+    @Test
+    void aColumnBeforeALinesFirstMappingIsNotTheLineAbove() {
+        // Two lines, as Vite writes them: no segment closing a mapping. Line
+        // 1 maps from column 11 to source line 5, line 2 only from column 51
+        // to source line 1. Closure's reader answers a column before line 2's
+        // first mapping with the last mapping of line 1, which here would be
+        // a confident, wrong "line 5".
+        String twoLines = "https://observability-cases.fly.dev"
+                + TestSourceMaps.write("two-lines-test.js",
+                        "{\"version\":3,\"file\":\"two-lines-test.js\","
+                                + "\"sources\":[\"stock-chart.ts\"],"
+                                + "\"names\":[],\"mappings\":\"UAIE;kDAJF\"}");
+
+        assertTrue(SourceMaps.resolve(twoLines + ":2:50").isEmpty(),
+                "line 2 has no mapping before column 51");
+        assertEquals("stock-chart.ts:1:1",
+                SourceMaps.resolve(twoLines + ":2:51").orElseThrow().location(),
+                "while line 2's own mapping still resolves");
+        assertEquals("stock-chart.ts:5:3", SourceMaps
+                .resolve(twoLines + ":1:20").orElseThrow().location());
+    }
 }

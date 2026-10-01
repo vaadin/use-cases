@@ -96,9 +96,12 @@
         <!--
           UC5 maps a client error's minified frame back to source with the
           build's sourcemaps (SourceMaps). Closure Compiler's sourcemap consumer
-          is the maintained Source Map v3 reader on Maven Central; the shaded
-          artifact relocates its Guava and protobuf, so nothing it carries can
-          clash with the application's own.
+          is the maintained Source Map v3 reader on Maven Central. It comes as
+          the whole compiler, about 15 MB in the jar, which is a deliberate
+          trade: a maintained reader over a hand-written VLQ decoder, and no
+          lighter reader is published. The shaded artifact relocates its Guava
+          and protobuf, so nothing it carries can clash with the application's
+          own.
         -->
         <dependency>
             <groupId>com.google.javascript</groupId>

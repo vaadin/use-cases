@@ -17,10 +17,11 @@ import com.google.debugging.sourcemap.SourceMapGeneratorV3;
  * maps are not there yet, and a map frozen from an earlier build would go stale
  * with the source it describes.
  * <p>
- * The map describes a made-up minified chunk, one line long, with two mappings
- * into {@link #SOURCE}: columns {@value #CHART_FROM}–{@value #CHART_TO} to the
- * chart's broken read on line 2, columns
- * {@value #FETCH_FROM}–{@value #FETCH_TO} to the rejected fetch on line 5.
+ * The map describes a made-up minified chunk with mappings into
+ * {@link #SOURCE}. The chunk is one line long; columns
+ * {@value #CHART_FROM}–{@value #CHART_TO} map to the chart's broken read on
+ * line 2 and columns {@value #FETCH_FROM}–{@value #FETCH_TO} to the rejected
+ * fetch on line 5.
  */
 public final class TestSourceMaps {
 
@@ -49,7 +50,8 @@ public final class TestSourceMaps {
     }
 
     /**
-     * Writes the map for a chunk, unless a test already has.
+     * Writes the map for a chunk, replacing whatever an earlier run left in the
+     * output folder, so the map always matches the constants above.
      *
      * @param chunk
      *            the chunk's file name, e.g. {@code stock-chart-test.js}
@@ -68,15 +70,30 @@ public final class TestSourceMaps {
                 new FilePosition(0, FETCH_FROM - 1),
                 new FilePosition(0, FETCH_TO));
         generator.addSourcesContent(source, CONTENT);
+        StringBuilder json = new StringBuilder();
+        try {
+            generator.appendTo(json, chunk);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return write(chunk, json.toString());
+    }
+
+    /**
+     * Writes a map given as JSON, for a shape the generator does not produce.
+     *
+     * @param chunk
+     *            the chunk's file name
+     * @param json
+     *            the map
+     * @return the chunk's path, to which a frame appends {@code :line:column}
+     */
+    public static String write(String chunk, String json) {
         try {
             Path map = Path.of(TestSourceMaps.class.getResource("/").toURI())
                     .resolve(SourceMaps.BUILD_ON_CLASSPATH + chunk + ".map");
-            if (!Files.exists(map)) {
-                StringBuilder json = new StringBuilder();
-                generator.appendTo(json, chunk);
-                Files.createDirectories(map.getParent());
-                Files.writeString(map, json, StandardCharsets.UTF_8);
-            }
+            Files.createDirectories(map.getParent());
+            Files.writeString(map, json, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } catch (URISyntaxException e) {
