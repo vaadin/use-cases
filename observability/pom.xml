@@ -75,6 +75,25 @@
             <artifactId>micrometer-tracing-bridge-brave</artifactId>
         </dependency>
         <!--
+          Forwards the application's errors to Sentry. The starter switches on
+          only once a DSN is configured (SENTRY_DSN, see application.properties),
+          so without one it stays out of the way. sentry-logback is what does
+          the capturing: a failing Vaadin interaction still answers the RPC with
+          200, so Spring MVC's exception handling, which the starter hooks into,
+          never sees it, but Vaadin's default error handler logs it at ERROR and
+          the Logback appender turns that log line into a Sentry event.
+        -->
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-spring-boot-4-starter</artifactId>
+            <version>${sentry.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-logback</artifactId>
+            <version>${sentry.version}</version>
+        </dependency>
+        <!--
           UC2's join-table fetch demo needs a JPA layer and a database. H2 in
           memory is enough: the point is to make Hibernate's per-collection
           "1 row" fetches (the N+1) observable, not to ship a real datastore.

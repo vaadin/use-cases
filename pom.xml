@@ -18,6 +18,7 @@
         <module>common</module>
         <module>fullscreen</module>
         <module>geolocation</module>
+        <module>multimedia</module>
         <module>clipboard</module>
         <module>page-visibility</module>
         <module>route-hierarchy</module>
@@ -41,6 +42,7 @@
         <spotless.plugin.version>3.10.0</spotless.plugin.version>
         <nullability.plugin.version>0.4.0</nullability.plugin.version>
         <spring-ai.version>2.0.1</spring-ai.version>
+        <sentry.version>8.58.0</sentry.version>
     </properties>
 
     <dependencyManagement>

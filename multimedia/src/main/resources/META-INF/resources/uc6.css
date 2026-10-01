@@ -1,0 +1,24 @@
+.uc6-view {
+    .episodes {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+        max-width: 640px;
+    }
+
+    .episode {
+        justify-content: flex-start;
+    }
+
+    .episode.current {
+        background: color-mix(in srgb, var(--aura-blue) 14%, transparent);
+        font-weight: 600;
+    }
+
+    .now-playing {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+}
