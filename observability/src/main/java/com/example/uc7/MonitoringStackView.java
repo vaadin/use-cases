@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import org.jspecify.annotations.Nullable;
@@ -86,8 +87,9 @@ import com.vaadin.flow.signals.local.ValueSignal;
  *      "https://github.com/vaadin/use-cases/blob/main/observability/API-GAPS.md">API-GAPS.md</a>
  */
 @Route(value = "uc7", layout = MainLayout.class)
-@PageTitle("UC7 — Getting the metrics into Prometheus and Grafana")
-@Menu(order = 7, title = "UC7 — Getting the metrics into Prometheus and Grafana")
+@PageTitle("UC7 — Monitoring stack")
+@UseCaseDescription("Getting the metrics into Prometheus and Grafana")
+@Menu(order = 7, title = "UC7 — Monitoring stack")
 public class MonitoringStackView extends VerticalLayout {
 
     private static final Duration TIMEOUT = Duration.ofSeconds(1);

@@ -10,6 +10,7 @@ import com.example.acme.DemoRig;
 import com.example.acme.Investigation;
 import com.example.acme.MeterTable;
 import com.example.acme.Telemetry;
+import com.example.common.UseCaseDescription;
 import com.example.uc2.ProductCatalogService.CatalogLoad;
 import com.example.uc2.ProductCatalogService.Line;
 import com.example.views.MainLayout;
@@ -83,8 +84,9 @@ import com.vaadin.flow.shared.Registration;
  */
 @Route(value = ApplicationHealthView.ROUTE, layout = MainLayout.class)
 @RouteAlias(value = "uc2", layout = MainLayout.class)
-@PageTitle("UC2 — Finding the query behind an app-wide hiccup")
-@Menu(order = 2, title = "UC2 — Finding the query behind an app-wide hiccup")
+@PageTitle("UC2 — Application health")
+@UseCaseDescription("Finding the query behind an app-wide hiccup")
+@Menu(order = 2, title = "UC2 — Application health")
 public class ApplicationHealthView extends VerticalLayout {
 
     /**

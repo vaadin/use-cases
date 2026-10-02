@@ -13,6 +13,7 @@ import com.example.acme.Insights;
 import com.example.acme.Investigation;
 import com.example.acme.MeterTable;
 import com.example.acme.Telemetry;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -140,9 +141,10 @@ import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
  */
 @Route(value = ConnectionInsightsView.ROUTE, layout = MainLayout.class)
 @RouteAlias(value = "uc5", layout = MainLayout.class)
-@PageTitle("UC5 — Catching lost connections and browser errors")
+@PageTitle("UC5 — Connection & client problems")
 @JsModule("./acme/stock-chart.ts")
-@Menu(order = 5, title = "UC5 — Catching lost connections and browser errors")
+@UseCaseDescription("Catching lost connections and browser errors")
+@Menu(order = 5, title = "UC5 — Connection & client problems")
 public class ConnectionInsightsView extends VerticalLayout {
 
     /**
