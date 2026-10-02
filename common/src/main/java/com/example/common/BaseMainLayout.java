@@ -1,5 +1,7 @@
 package com.example.common;
 
+import java.util.List;
+
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.Anchor;
@@ -14,6 +16,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.server.menu.MenuConfiguration;
+import com.vaadin.flow.server.menu.MenuEntry;
 
 /**
  * Shared {@link AppLayout} for the use-case demo apps. Renders a navbar with
@@ -45,9 +48,19 @@ public abstract class BaseMainLayout extends AppLayout
         addToDrawer(AppCatalog.createSelector(moduleId));
 
         SideNav nav = new SideNav();
-        MenuConfiguration.getMenuEntries().forEach(entry -> nav
+        mainNavEntries().forEach(entry -> nav
                 .addItem(new SideNavItem(entry.title(), entry.path())));
         addToDrawer(nav);
+    }
+
+    /**
+     * The menu entries listed in the main side navigation, in order. The
+     * default is the flat {@link MenuConfiguration#getMenuEntries()}; a module
+     * whose menu nests routes can override this to keep the deeper entries out
+     * of the flat nav.
+     */
+    protected List<MenuEntry> mainNavEntries() {
+        return MenuConfiguration.getMenuEntries();
     }
 
     private static Element buildSourceCodeOverlay(Anchor link) {

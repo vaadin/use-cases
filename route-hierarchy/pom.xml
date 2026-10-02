@@ -11,6 +11,23 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <properties>
+        <!--
+          The hierarchical menu (#24556: MenuConfiguration.getMenuEntriesTree +
+          MenuEntry.children for UC8, and @Menu(parent) for UC9) has not landed
+          in 25.3-SNAPSHOT yet,
+          so this module pins flow-server to the feature snapshot while the rest
+          of the repo stays on the baseline 25.3-SNAPSHOT. The rest of the
+          route-hierarchy API this module builds on (@RouteParent and the
+          RouteUtil walker, @DynamicPageTitle / PageTitleGenerator) is in the
+          baseline. flow-bom is imported first in the parent's
+          dependencyManagement, so this Flow build wins over the version
+          transitively pulled by the components/vaadin BOMs. The
+          flow-maven-plugin version follows the same property.
+        -->
+        <flow.version>25.3.hierarchical-menu-SNAPSHOT</flow.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.example</groupId>

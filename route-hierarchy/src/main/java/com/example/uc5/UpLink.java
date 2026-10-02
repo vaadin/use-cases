@@ -7,13 +7,11 @@ import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.internal.menu.MenuRegistry;
+import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteReference;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.router.RouterState;
-import com.vaadin.flow.router.internal.RouteUtil;
-import com.vaadin.flow.server.RouteRegistry;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.signals.Signal;
 
@@ -22,8 +20,8 @@ import com.vaadin.flow.signals.Signal;
  * helper the route-hierarchy PR names as a target consumer.
  * <p>
  * Unlike a full breadcrumb it only needs the <em>immediate</em> parent, so it
- * calls {@code RouteUtil.getRouteParent(class, parameters)} rather than the
- * whole hierarchy. When the current view is already a hierarchy root, that
+ * calls {@link RouteConfiguration#getRouteParent(Class, RouteParameters)}
+ * rather than the whole hierarchy. When the current view is already a hierarchy root, that
  * returns {@link Optional#empty()} and the control renders a plain "top level"
  * note instead of a link.
  * <p>
@@ -49,14 +47,14 @@ public class UpLink extends Div {
         if (!(leaf instanceof Component leafView)) {
             return;
         }
-        RouteRegistry registry = VaadinService.getCurrent().getRouter()
-                .getRegistry();
-        Optional<RouteReference> parent = RouteUtil.getRouteParent(registry,
-                leafView.getClass(), state.routeParameters());
+        Optional<RouteReference> parent = RouteConfiguration.forSessionScope()
+                .getRouteParent(leafView.getClass(), state.routeParameters());
         if (parent.isPresent()) {
             RouteReference ref = parent.get();
-            String label = "↑ Up to " + MenuRegistry
-                    .getTitle(ref.navigationTarget(), ref.routeParameters());
+            String label = "↑ Up to " + VaadinService.getCurrent().getRouter()
+                    .resolvePageTitle(ref.navigationTarget(),
+                            ref.routeParameters())
+                    .orElseGet(ref.navigationTarget()::getSimpleName);
             RouteParameters parameters = ref.routeParameters();
             RouterLink link = parameters.getParameterNames().isEmpty()
                     ? new RouterLink(label, ref.navigationTarget())
