@@ -22,6 +22,8 @@ import com.vaadin.flow.server.menu.MenuEntry;
  * <li>{@link #addMenuLinkList()} — append a simple bulleted list of links
  * auto-generated from {@link MenuConfiguration#getMenuEntries()}, suitable for
  * modules that haven't hand-curated their home page.</li>
+ * <li>{@link #addMenuCards()} — the same entries as cards, each described by
+ * its view's {@link UseCaseDescription}.</li>
  * <li>{@link #homeCard(String, String, String, Class)} — build a single feature
  * card with a tag, title, description and "Open →" CTA, for modules that
  * hand-curate their home page.</li>
@@ -43,6 +45,31 @@ public abstract class BaseHomeView extends VerticalLayout {
                     list.add(li);
                 });
         add(list);
+    }
+
+    /**
+     * Appends one {@link #homeCard(String, String, String, Class) card} per
+     * menu entry. A title of the form {@code "UC1 — Short name"} is split into
+     * the card's tag and title, and the view's {@link UseCaseDescription}
+     * becomes the description.
+     */
+    protected void addMenuCards() {
+        Div cards = new Div();
+        cards.addClassName("home-cards");
+        MenuConfiguration.getMenuEntries().stream()
+                .filter(entry -> entry.menuClass() != null
+                        && entry.menuClass() != getClass())
+                .forEach(entry -> {
+                    String[] tagAndTitle = entry.title().split(" — ", 2);
+                    UseCaseDescription description = BaseMainLayout
+                            .descriptionOf(entry);
+                    cards.add(homeCard(
+                            tagAndTitle.length == 2 ? tagAndTitle[0] : "",
+                            tagAndTitle[tagAndTitle.length - 1],
+                            description == null ? "" : description.value(),
+                            entry.menuClass()));
+                });
+        add(cards);
     }
 
     private static Component menuLink(MenuEntry entry) {

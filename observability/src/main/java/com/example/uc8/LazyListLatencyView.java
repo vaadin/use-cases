@@ -14,6 +14,7 @@ import com.example.acme.Insights;
 import com.example.acme.Investigation;
 import com.example.acme.MeterTable;
 import com.example.acme.Telemetry;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -80,6 +81,7 @@ import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
 @Route(value = LazyListLatencyView.ROUTE, layout = MainLayout.class)
 @RouteAlias(value = "uc8", layout = MainLayout.class)
 @PageTitle("UC8 — Data query insights")
+@UseCaseDescription("Finding why a lazy list is slow")
 @Menu(order = 8, title = "UC8 — Data query insights")
 public class LazyListLatencyView extends VerticalLayout {
 

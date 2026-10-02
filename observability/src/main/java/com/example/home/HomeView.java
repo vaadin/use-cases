@@ -14,7 +14,7 @@ public class HomeView extends BaseHomeView {
 
     public HomeView() {
         super("Observability — use cases",
-                "Each link below exercises one observability use case of a Vaadin Flow application.");
-        addMenuLinkList();
+                "Each card below exercises one observability use case of a Vaadin Flow application.");
+        addMenuCards();
     }
 }

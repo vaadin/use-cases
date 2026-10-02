@@ -14,6 +14,7 @@ import com.example.acme.AppWindow;
 import com.example.acme.DemoRig;
 import com.example.acme.Investigation;
 import com.example.acme.Telemetry;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -95,6 +96,7 @@ import com.vaadin.observability.micrometer.trace.ObservationNames;
 @Route(value = InteractionTraceView.ROUTE, layout = MainLayout.class)
 @RouteAlias(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Interaction tracing")
+@UseCaseDescription("Finding the cause of a slow interaction")
 @Menu(order = 4, title = "UC4 — Interaction tracing")
 public class InteractionTraceView extends VerticalLayout {
 

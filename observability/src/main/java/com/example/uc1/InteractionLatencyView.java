@@ -14,6 +14,7 @@ import com.example.acme.Insights;
 import com.example.acme.Investigation;
 import com.example.acme.MeterTable;
 import com.example.acme.Telemetry;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -81,6 +82,7 @@ import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
 @Route(value = InteractionLatencyView.ROUTE, layout = MainLayout.class)
 @RouteAlias(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Interaction latency")
+@UseCaseDescription("Finding which action is slow and where its time goes")
 @Menu(order = 1, title = "UC1 — Interaction latency")
 public class InteractionLatencyView extends VerticalLayout {
 

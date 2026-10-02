@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.example.common.UseCaseDescription;
 import com.example.uc3.HeapCostProbe.HeapCost;
 import com.example.views.MainLayout;
 import io.micrometer.core.instrument.Counter;
@@ -93,6 +94,7 @@ import com.vaadin.observability.micrometer.ObservabilitySettings;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Capacity & scaling")
+@UseCaseDescription("Knowing when to add another server")
 @Menu(order = 3, title = "UC3 — Capacity & scaling")
 public class ScalingSignalsView extends VerticalLayout {
 
