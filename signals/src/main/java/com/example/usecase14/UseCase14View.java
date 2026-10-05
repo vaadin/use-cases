@@ -1,7 +1,5 @@
 package com.example.usecase14;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.service.AnalyticsService;
 import com.example.service.AnalyticsService.AnalyticsReport;
 import com.example.views.MainLayout;
@@ -25,6 +23,7 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -47,7 +46,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 14: Async Data Loading")
 @Menu(order = 14, title = "UC 14: Async Data Loading")
 @StyleSheet("usecase14.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase14View extends VerticalLayout {
     private enum LoadingState {
         IDLE, LOADING, GENERATING, SUCCESS, ERROR

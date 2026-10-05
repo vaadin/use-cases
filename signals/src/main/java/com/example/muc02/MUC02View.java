@@ -1,7 +1,5 @@
 package com.example.muc02;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
@@ -22,6 +20,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 
@@ -40,7 +39,7 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @PageTitle("Multi-User Case 2: Collaborative Cursors")
 @Menu(order = 51, title = "MUC 2: Collaborative Cursors")
 @StyleSheet("muc02.css")
-@PermitAll
+@AnonymousAllowed
 public class MUC02View extends VerticalLayout {
 
     private final String currentUser;
@@ -53,13 +52,8 @@ public class MUC02View extends VerticalLayout {
     public MUC02View(CurrentUserSignal currentUserSignal,
             MUC02Signals muc02Signals,
             UserSessionRegistry userSessionRegistry) {
-        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .peek();
-        if (userInfo == null || !userInfo.isAuthenticated()) {
-            throw new IllegalStateException(
-                    "User must be authenticated to access this view");
-        }
-        this.currentUser = userInfo.getUsername();
+        this.currentUser = currentUserSignal.getUserSignal().peek()
+                .getUsername();
         this.muc02Signals = muc02Signals;
         this.userSessionRegistry = userSessionRegistry;
 

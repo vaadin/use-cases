@@ -1,6 +1,7 @@
 package com.example.security;
 
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -10,9 +11,13 @@ import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 
 /**
- * Session-scoped signal holding the current authenticated user information.
- * This signal is reactive to authentication changes including login, logout,
- * and impersonation. Each user session has its own instance.
+ * Session-scoped signal holding the current user information. This signal is
+ * reactive to authentication changes including login, logout, and
+ * impersonation. Each user session has its own instance.
+ * <p>
+ * Visitors who have not logged in are represented by a guest user with a
+ * generated username that stays the same for the whole session, so that
+ * multi-user views can tell anonymous sessions apart.
  */
 @Component
 @VaadinSessionScope
@@ -30,8 +35,8 @@ public class CurrentUserSignal {
             this.authenticated = authenticated;
         }
 
-        public static UserInfo anonymous() {
-            return new UserInfo("", Set.of(), false);
+        public static UserInfo anonymous(String guestName) {
+            return new UserInfo(guestName, Set.of(), false);
         }
 
         public static UserInfo authenticated(String username,
@@ -67,7 +72,7 @@ public class CurrentUserSignal {
         @Override
         public String toString() {
             if (!authenticated) {
-                return "Anonymous";
+                return username + " [anonymous]";
             }
             return username + " [" + String.join(", ", roles) + "]";
         }
@@ -75,6 +80,8 @@ public class CurrentUserSignal {
 
     private final ValueSignal<UserInfo> userSignal;
     private final AuthenticationContext authenticationContext;
+    private final String guestName = "guest-"
+            + ThreadLocalRandom.current().nextInt(1000, 10000);
 
     public CurrentUserSignal(AuthenticationContext authenticationContext) {
         this.authenticationContext = authenticationContext;
@@ -103,6 +110,6 @@ public class CurrentUserSignal {
                     Set<String> roles = new java.util.HashSet<>(
                             authenticationContext.getGrantedRoles());
                     return UserInfo.authenticated(user.getUsername(), roles);
-                }).orElse(UserInfo.anonymous());
+                }).orElse(UserInfo.anonymous(guestName));
     }
 }

@@ -1,7 +1,5 @@
 package com.example.views;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.Locale;
 import java.util.Map;
 
@@ -35,11 +33,12 @@ import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.signals.Signal;
 
 @PageTitle("Signal API Use Cases")
-@PermitAll
+@AnonymousAllowed
 public class MainLayout extends AppLayout {
 
     private final CurrentUserSignal currentUserSignal;
@@ -57,12 +56,11 @@ public class MainLayout extends AppLayout {
         this.userSessionRegistry = userSessionRegistry;
         this.userPreferences = userPreferences;
 
-        // Get current user info
-        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .peek();
-        if (userInfo != null && userInfo.isAuthenticated()) {
-            this.currentUser = userInfo.getUsername();
-        }
+        // The session-scoped signal outlives a login, so re-read the
+        // authentication state on every page load
+        currentUserSignal.refresh();
+        this.currentUser = currentUserSignal.getUserSignal().peek()
+                .getUsername();
 
         DrawerToggle toggle = new DrawerToggle();
 
@@ -148,8 +146,7 @@ public class MainLayout extends AppLayout {
 
         Avatar userAvatar = new Avatar();
         userAvatar.getElement().bindProperty("name", currentUserSignal
-                .getUserSignal()
-                .map(user -> user.isAuthenticated() ? user.getUsername() : ""),
+                .getUserSignal().map(CurrentUserSignal.UserInfo::getUsername),
                 null);
         userAvatar.getElement().bindProperty("img",
                 currentUserSignal.getUserSignal()
@@ -157,11 +154,9 @@ public class MainLayout extends AppLayout {
                                 ? getProfilePicturePath(user.getUsername())
                                 : ""),
                 null);
-        userAvatar.bindVisible(currentUserSignal.getUserSignal()
-                .map(user -> user.isAuthenticated()));
 
         Span userName = new Span(currentUserSignal.getUserSignal()
-                .map(user -> user.isAuthenticated() ? user.getUsername() : ""));
+                .map(CurrentUserSignal.UserInfo::getUsername));
         userName.getStyle().set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-size", "var(--aura-font-size-s)");
 
@@ -174,12 +169,21 @@ public class MainLayout extends AppLayout {
             logoutHandler.logout(
                     VaadinServletRequest.getCurrent().getHttpServletRequest(),
                     null, null);
-            getUI().ifPresent(ui -> ui.getPage().setLocation("/login"));
+            getUI().ifPresent(ui -> ui.getPage().setLocation("/"));
         });
         logoutButton.addThemeVariants(ButtonVariant.TERTIARY);
+        logoutButton.bindVisible(currentUserSignal.getUserSignal()
+                .map(CurrentUserSignal.UserInfo::isAuthenticated));
+
+        // Logging in is optional; guests can switch to a demo user any time
+        Button loginButton = new Button("Log in",
+                event -> getUI().ifPresent(ui -> ui.navigate(LoginView.class)));
+        loginButton.addThemeVariants(ButtonVariant.TERTIARY);
+        loginButton.bindVisible(currentUserSignal.getUserSignal()
+                .map(user -> !user.isAuthenticated()));
 
         addToNavbar(toggle, title, activeUsersDisplay, nicknameField,
-                localeSelector, userDisplay, logoutButton);
+                localeSelector, userDisplay, logoutButton, loginButton);
 
         // Fixed-position source code link overlay
         Div sourceCodeContainer = new Div();

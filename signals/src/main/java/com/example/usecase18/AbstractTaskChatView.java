@@ -110,13 +110,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
     }
 
     private String getCurrentDisplayName() {
-        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .get();
-        if (userInfo == null || !userInfo.isAuthenticated()) {
-            return "Anonymous";
-        }
-
-        String username = userInfo.getUsername();
+        String username = currentUserSignal.getUserSignal().get().getUsername();
         if (sessionId == null) {
             return username;
         }
@@ -406,8 +400,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
                                     : msg.content(),
                             msg.timestamp(), msg.role());
 
-                    if (msg.role().equals("You") && userInfo != null
-                            && userInfo.isAuthenticated()) {
+                    if (msg.role().equals("You") && userInfo != null) {
                         item.setUserColorIndex(0);
                         String displayName = getCurrentDisplayName();
                         String username = userInfo.getUsername();

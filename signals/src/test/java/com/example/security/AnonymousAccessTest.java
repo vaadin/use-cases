@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * The demo app must be explorable without logging in first: an anonymous
- * visitor opening a use case is served the page instead of being redirected
- * to the login view.
+ * visitor opening a use case is served the page instead of being redirected to
+ * the login view.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AnonymousAccessTest {
@@ -36,7 +36,6 @@ class AnonymousAccessTest {
         assertEquals(200, response.statusCode(),
                 () -> "Expected " + path + " to be served, got "
                         + response.statusCode() + " → "
-                        + response.headers().firstValue("Location")
-                                .orElse(""));
+                        + response.headers().firstValue("Location").orElse(""));
     }
 }

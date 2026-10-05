@@ -1,7 +1,5 @@
 package com.example.usecase18;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -13,13 +11,14 @@ import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.shared.SharedListSignal;
 
 @Route(value = "use-case-18", layout = MainLayout.class)
 @PageTitle("Use Case 18: LLM-Powered Task List")
 @Menu(order = 18, title = "UC 18: LLM Task List")
 @StyleSheet("usecase18.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase18View extends AbstractTaskChatView {
 
     public UseCase18View(TaskLLMService taskLLMService,
