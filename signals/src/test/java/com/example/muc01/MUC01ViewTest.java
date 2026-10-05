@@ -70,7 +70,7 @@ class MUC01ViewTest extends SpringBrowserlessTest {
 
         MUC01Signals.Message message = muc01Signals.getMessagesSignal().peek()
                 .getFirst().peek();
-        assertTrue(message.username().matches("guest-\\d{4}"),
+        assertTrue(message.username().matches("guest-\\d+"),
                 () -> "Unexpected guest username " + message.username());
     }
 

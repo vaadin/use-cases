@@ -1,7 +1,7 @@
 package com.example.security;
 
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -78,10 +78,12 @@ public class CurrentUserSignal {
         }
     }
 
+    private static final AtomicInteger GUEST_COUNTER = new AtomicInteger();
+
     private final ValueSignal<UserInfo> userSignal;
     private final AuthenticationContext authenticationContext;
     private final String guestName = "guest-"
-            + ThreadLocalRandom.current().nextInt(1000, 10000);
+            + GUEST_COUNTER.incrementAndGet();
 
     public CurrentUserSignal(AuthenticationContext authenticationContext) {
         this.authenticationContext = authenticationContext;

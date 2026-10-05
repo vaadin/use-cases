@@ -82,7 +82,7 @@ src/main/java/com/example/
 ### Login Credentials
 
 Logging in is optional: anonymous visitors can open every use case and are
-shown as a generated `guest-NNNN` user. Use **Log in** in the navbar to switch
+shown as a generated `guest-N` user. Use **Log in** in the navbar to switch
 to one of the demo users:
 
 - `viewer` / `password` (VIEWER role)
