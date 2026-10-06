@@ -1,9 +1,9 @@
-# fly.toml app configuration file for invoicing-cases
+# fly.toml app configuration file for reporting-cases
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'invoicing-cases'
+app = 'reporting-cases'
 primary_region = 'iad'
 
 [build]

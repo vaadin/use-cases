@@ -23,8 +23,8 @@ RUN --mount=type=cache,target=/root/.m2 \
     --mount=type=secret,id=offlineKey \
     sh -c 'PRO_KEY=$(jq -r ".proKey // empty" /run/secrets/proKey 2>/dev/null || cat /run/secrets/proKey 2>/dev/null || echo "") && \
     OFFLINE_KEY=$(cat /run/secrets/offlineKey 2>/dev/null || echo "") && \
-    ./mvnw -U -pl invoicing -am clean package -DskipTests -Dvaadin.proKey=${PRO_KEY} -Dvaadin.offlineKey=${OFFLINE_KEY}'
+    ./mvnw -U -pl reporting -am clean package -DskipTests -Dvaadin.proKey=${PRO_KEY} -Dvaadin.offlineKey=${OFFLINE_KEY}'
 
 FROM eclipse-temurin:25-jre-alpine
-COPY --from=build /app/invoicing/target/*.jar app.jar
+COPY --from=build /app/reporting/target/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar", "--spring.profiles.active=prod"]

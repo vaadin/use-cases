@@ -1,9 +1,10 @@
-# Invoicing — use cases
+# Reporting — use cases
 
-A standalone Spring Boot demo of the invoicing side of a business
+A standalone Spring Boot demo of the reporting side of a business
 application: turning data into a document, handing that document to the
 customer's browser, checking it first, running a month of them at once, and
-knowing that it arrived.
+knowing that it arrived. The use cases so far are built around the most common
+business document, the invoice; other reports belong here too.
 
 Flow 25's `DownloadHandler` does the delivery well, so this module is mostly
 about what surrounds it. The invoice PDF itself is application code
@@ -28,7 +29,7 @@ browser is the `printing` module; exporting a Grid to CSV or Excel is
 ## Run
 
 ```
-cd invoicing
+cd reporting
 mvn spring-boot:run
 ```
 
@@ -37,7 +38,7 @@ Open <http://localhost:8080/>.
 ## Tests
 
 ```
-./mvnw -pl invoicing -am test -DskipFrontend=true
+./mvnw -pl reporting -am test -DskipFrontend=true
 ```
 
 One browserless test per use case, plus `InvoicePdfTest`, which renders the

@@ -17,7 +17,7 @@ import com.vaadin.flow.router.Route;
 public class HomeView extends BaseHomeView {
 
     public HomeView() {
-        super("Invoicing — use cases",
+        super("Reporting — use cases",
                 "Turning application data into a business document and "
                         + "getting it to the customer: generate the PDF, hand "
                         + "it to the browser, show it before it goes out, run "

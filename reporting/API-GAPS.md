@@ -1,6 +1,6 @@
-# Invoicing — API gaps discovered while building the demos
+# Reporting — API gaps discovered while building the demos
 
-Places where Vaadin has no API for a genuine invoicing use case, or makes one
+Places where Vaadin has no API for a genuine reporting use case, or makes one
 awkward enough to need a workaround. Each entry names the use case that
 surfaced it.
 
