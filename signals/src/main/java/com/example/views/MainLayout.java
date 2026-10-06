@@ -267,9 +267,9 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         Location location = ui.getActiveViewLocation();
         QueryParameters parameters = location.getQueryParameters()
                 .merging(SecurityConfiguration.LOGIN_PARAMETER, "");
-        ui.getPage()
-                .setLocation("/" + new Location(location.getPath(), parameters)
-                        .getPathWithQueryParameters());
+        // Relative to the document base, so a context path is preserved
+        ui.getPage().setLocation(new Location(location.getPath(), parameters)
+                .getPathWithQueryParameters());
     }
 
     @Override
