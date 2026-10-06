@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
 # Regenerates every sample media file used by the multimedia use cases.
-# Needs ffmpeg built with libx264, libvpx-vp9, libopus, libmp3lame and
+# Needs ffmpeg built with libx264, libsvtav1, libmp3lame and
 # drawtext, plus jq and Node.js. Narration is spoken by the ElevenLabs API
 # through tts.mjs, so ELEVENLABS_API_KEY must be set (responses are cached,
-# see tts.mjs); the quarterly review is a HeyGen recording instead, see
-# REVIEW_SOURCE below. The generated files are committed, so running this is
+# see tts.mjs); the quarterly review and the product trailer are HeyGen
+# recordings instead, see REVIEW_SOURCE and TRAILER_SOURCE below. The generated files are committed, so running this is
 # only needed when the samples change.
 #
 # Private media (served through DownloadHandlers) goes to
@@ -173,17 +173,20 @@ for recording in "sprint-41|#0f766e|Sprint 41 review|Sprint forty-one review. Se
     $FF -ss 1 -i "$PRIVATE/$id.mp4" -frames:v 1 -q:v 4 "$PRIVATE/$id-poster.jpg"
 done
 
-# --- Same clip in two formats, the format burnt in (UC4) ---
-$FF -f lavfi -i "gradients=s=640x360:r=25:d=10:speed=0.02" \
-    -f lavfi -i "sine=frequency=330:duration=10" -vf "\
-drawtext=fontfile=$FONT_BOLD:text='WebM · VP9':fontcolor=white:fontsize=48:x=(w-tw)/2:y=(h-th)/2" \
-    -c:v libvpx-vp9 -b:v 0 -crf 40 -row-mt 1 -c:a libopus -b:a 32k -t 10 \
-    "$PUBLIC/trailer.webm"
-$FF -f lavfi -i "gradients=s=640x360:r=25:d=10:speed=0.02" \
-    -f lavfi -i "sine=frequency=330:duration=10" -vf "\
-drawtext=fontfile=$FONT_BOLD:text='MP4 · H.264':fontcolor=white:fontsize=48:x=(w-tw)/2:y=(h-th)/2" \
-    $X264 -crf 30 -c:a aac -b:a 48k -t 10 -movflags +faststart \
-    "$PUBLIC/trailer.mp4"
+# --- The product trailer with two codecs, the codec burnt in (UC4) ---
+# An avatar video recorded with HeyGen. Pass the HeyGen export (1080p) as
+# TRAILER_SOURCE to re-encode it; without it the committed files are kept.
+# Both are 720p; the codecs attributes in FormatFallbackView match the
+# profiles and levels below (AV1 Main 3.1, H.264 High 3.1).
+TRAILER_SOURCE=${TRAILER_SOURCE:-}
+if [[ -n $TRAILER_SOURCE ]]; then
+    $FF -i "$TRAILER_SOURCE" -vf "$(label AV1 1280:720)" \
+        -c:v libsvtav1 -preset 4 -crf 50 -pix_fmt yuv420p -g 50 \
+        -c:a aac -b:a 64k -ac 1 -movflags +faststart "$PUBLIC/trailer-av1.mp4"
+    $FF -i "$TRAILER_SOURCE" -vf "$(label H.264 1280:720)" \
+        $X264 -crf 30 -level 3.1 \
+        -c:a aac -b:a 64k -ac 1 -movflags +faststart "$PUBLIC/trailer.mp4"
+fi
 
 # --- Silent background loop (UC5) ---
 $FF -f lavfi -i "gradients=s=960x540:r=25:d=8:speed=0.01:c0=0x1d4ed8:c1=0x7c3aed:c2=0x0f766e:nb_colors=3" \

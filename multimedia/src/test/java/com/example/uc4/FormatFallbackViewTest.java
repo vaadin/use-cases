@@ -20,14 +20,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class FormatFallbackViewTest extends SpringBrowserlessTest {
 
     @Test
-    void listsWebmBeforeMp4() {
+    void listsAv1BeforeH264() {
         navigate(FormatFallbackView.class);
 
         Video video = findInView(Video.class).single();
-        assertEquals(List.of(FormatFallbackView.WEBM, FormatFallbackView.MP4),
+        assertEquals(List.of(FormatFallbackView.AV1, FormatFallbackView.H264),
                 video.getSources().stream().map(Source::getSrc).toList());
         assertTrue(video.getSources().get(0).getType().orElseThrow()
-                .startsWith("video/webm"));
+                .contains("av01"));
     }
 
     @Test
@@ -36,12 +36,16 @@ class FormatFallbackViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
         assertBadge("Browser chose: not loaded yet");
 
-        new MediaTester(findInView(Video.class).single()).fire("loadedmetadata",
-                "element.currentSrc",
+        MediaTester media = new MediaTester(findInView(Video.class).single());
+        media.fire("loadedmetadata", "element.currentSrc",
+                "http://localhost:8080/media/trailer-av1.mp4");
+        runPendingSignalsTasks();
+        assertBadge("Browser chose: AV1");
+
+        media.fire("loadedmetadata", "element.currentSrc",
                 "http://localhost:8080/media/trailer.mp4");
         runPendingSignalsTasks();
-
-        assertBadge("Browser chose: MP4 (H.264)");
+        assertBadge("Browser chose: H.264");
     }
 
     private void assertBadge(String text) {

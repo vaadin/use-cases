@@ -40,7 +40,7 @@ public class HomeView extends BaseHomeView {
                 "HLS with three renditions from a single handler.",
                 AdaptiveStreamingView.class));
         cards.add(homeCard("UC4", "Format fallback",
-                "WebM first, MP4 for browsers that cannot play it.",
+                "AV1 first, H.264 for browsers that cannot play it.",
                 FormatFallbackView.class));
         cards.add(homeCard("UC5", "Background video",
                 "Muted, looping hero clip with a pause button.",
