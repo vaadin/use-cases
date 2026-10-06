@@ -1,6 +1,7 @@
 package com.example.uc7;
 
 import java.util.List;
+import java.util.Map;
 
 import com.example.PrintTestSupport;
 import com.example.data.Orders;
@@ -14,6 +15,7 @@ import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Table;
+import com.vaadin.flow.dom.Element;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -50,10 +52,19 @@ class ExpandForPrintViewTest extends SpringBrowserlessTest {
         // Trigger listeners are only queued when the response is written.
         roundTrip();
 
-        // The state the user left each section in is kept on the element
-        // and put back when the dialog closes, without a round trip.
-        assertTrue(PrintTestSupport.queuedJsMentions("beforeprint",
-                "afterprint", "opened", "openedOnScreen"));
+        Map<Element, List<List<Object>>> listeners = PrintTestSupport
+                .queuedListeners();
+        for (Details section : findInView(Details.class).all()) {
+            // Remember the state the user left the section in, open it for
+            // the paper, and put that state back when the dialog closes —
+            // all in the browser, in this order.
+            assertEquals(
+                    List.of(List.of("openedOnScreen", "opened", "beforeprint"),
+                            List.of("opened", true, "beforeprint"),
+                            List.of("opened", "openedOnScreen", "afterprint")),
+                    listeners.get(section.getElement()),
+                    section.getSummaryText());
+        }
     }
 
     @Test

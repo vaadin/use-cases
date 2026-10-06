@@ -43,8 +43,9 @@ class PrintDashboardViewTest extends SpringBrowserlessTest {
 
         assertTrue(
                 PrintTestSupport.queuedJsMentions("beforeprint", "afterprint",
-                        "reflow()"),
-                "A chart keeps its screen width unless it is told to reflow");
+                        "reflow()", "removeEventListener"),
+                "A chart keeps its screen width unless it is told to reflow, "
+                        + "and the listeners must go away with the view");
     }
 
     @Test

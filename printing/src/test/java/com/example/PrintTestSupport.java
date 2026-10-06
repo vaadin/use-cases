@@ -1,10 +1,15 @@
 package com.example;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
 
 /**
@@ -58,6 +63,41 @@ public final class PrintTestSupport {
                                 .flatMap(PrintTestSupport::text)))
                 .reduce("", String::concat);
         return Arrays.stream(fragments).allMatch(queued::contains);
+    }
+
+    /**
+     * The listeners about to be installed in the browser, by the element that
+     * owns them. Each listener is given as the plain values it carries, depth
+     * first and in order — property names, literals and the event name, but
+     * neither elements nor function bodies — so a test can tell which property
+     * a listener reads, which it writes, and on which event.
+     * <p>
+     * Takes the queue the way writing the response would, so call it once per
+     * round trip.
+     *
+     * @return the values of each queued listener, keyed by its owner
+     */
+    public static Map<Element, List<List<Object>>> queuedListeners() {
+        return Objects.requireNonNull(UI.getCurrent()).getInternals()
+                .dumpPendingJavaScriptInvocations().stream()
+                .filter(pending -> pending.getInvocation().getParameters()
+                        .stream().anyMatch(JsFunction.class::isInstance))
+                .collect(Collectors.groupingBy(
+                        pending -> Element.get(pending.getOwner()),
+                        LinkedHashMap::new,
+                        Collectors.mapping(pending -> pending.getInvocation()
+                                .getParameters().stream()
+                                .filter(JsFunction.class::isInstance)
+                                .flatMap(PrintTestSupport::values).toList(),
+                                Collectors.toList())));
+    }
+
+    private static Stream<Object> values(Object value) {
+        if (value instanceof JsFunction function) {
+            return function.getCaptures().stream()
+                    .flatMap(PrintTestSupport::values);
+        }
+        return value instanceof Element ? Stream.empty() : Stream.of(value);
     }
 
     private static Stream<String> text(Object value) {
