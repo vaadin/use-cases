@@ -11,6 +11,7 @@ import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridSingleSelectionModel;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -71,6 +72,10 @@ public class DownloadInvoiceView extends VerticalLayout {
                 .setHeader("PDF").setAutoWidth(true);
         grid.setItems(invoices);
         grid.setAllRowsVisible(true);
+        // The panel always shows an invoice; clicking the selected row again
+        // would otherwise clear it.
+        ((GridSingleSelectionModel<Invoice>) grid.getSelectionModel())
+                .setDeselectAllowed(false);
         grid.asSingleSelect().addValueChangeListener(event -> {
             selected.removeAll();
             if (event.getValue() != null) {

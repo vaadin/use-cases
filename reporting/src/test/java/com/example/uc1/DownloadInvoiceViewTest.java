@@ -66,6 +66,11 @@ class DownloadInvoiceViewTest extends SpringBrowserlessTest {
         test(grid).select(2);
         assertEquals("Invoice " + test(grid).getCellText(2, 0),
                 heading(selected));
+
+        // Clicking the selected row again must not leave the panel empty.
+        test(grid).deselect(2);
+        assertEquals("Invoice " + test(grid).getCellText(2, 0),
+                heading(selected));
     }
 
     private String heading(Div panel) {
