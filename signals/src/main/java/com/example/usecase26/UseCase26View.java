@@ -1,7 +1,5 @@
 package com.example.usecase26;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.List;
 
 import com.example.views.MainLayout;
@@ -20,6 +18,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -28,7 +27,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 26: Lazy Component Creation")
 @Menu(order = 26, title = "UC 26: Lazy Creation")
 @StyleSheet("usecase26.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase26View extends VerticalLayout {
 
     private final ValueSignal<@Nullable Country> countrySignal = new ValueSignal<@Nullable Country>(

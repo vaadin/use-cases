@@ -1,7 +1,5 @@
 package com.example.usecase24;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -25,6 +23,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -33,7 +32,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 24: VirtualList with Signal Data Source")
 @Menu(order = 24, title = "UC 24: VirtualList Notifications")
 @StyleSheet("usecase24.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase24View extends VerticalLayout {
 
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter

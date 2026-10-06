@@ -1,7 +1,5 @@
 package com.example.usecase16;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +24,7 @@ import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -45,7 +44,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 16: URL State Integration")
 @Menu(order = 16, title = "UC 16: URL State Integration")
 @StyleSheet("usecase16.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase16View extends VerticalLayout
         implements BeforeEnterObserver {
 

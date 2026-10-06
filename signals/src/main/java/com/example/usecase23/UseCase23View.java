@@ -1,7 +1,5 @@
 package com.example.usecase23;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +38,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -48,7 +47,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-23", layout = MainLayout.class)
 @Menu(order = 23, title = "UC 23: Real-time Dashboard")
 @StyleSheet("usecase23.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase23View extends Main {
 
     private static final int TIMELINE_POINTS = 12;
