@@ -10,7 +10,8 @@ import java.lang.annotation.Target;
  * The problem a use-case view helps solve, phrased from the developer's point
  * of view. Keeps the {@code @Menu} title short enough for the side navigation
  * while still saying what the view shows: {@link BaseMainLayout} uses it as the
- * nav item's tooltip and {@link BaseHomeView#addMenuCards()} as the home card's
+ * nav item's tooltip and
+ * {@link BaseHomeView#addMenuCards(java.util.Collection)} as the home card's
  * description, so both read the same text.
  */
 @Documented

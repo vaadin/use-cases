@@ -1,5 +1,6 @@
 package com.example.home;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -19,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.card.Card;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 
@@ -35,51 +37,74 @@ class HomeViewTest extends SpringBrowserlessTest {
     private record UseCase(String tag, String title, String problem) {
     }
 
-    private static final List<UseCase> USE_CASES = List.of(
-            new UseCase("UC1", "Interaction latency",
-                    "Finding which action is slow and where its time goes"),
-            new UseCase("UC2", "Application health",
-                    "Finding the query behind an app-wide hiccup"),
-            new UseCase("UC3", "Capacity & scaling",
-                    "Knowing when to add another server"),
-            new UseCase("UC4", "Interaction tracing",
-                    "Finding the cause of a slow interaction"),
-            new UseCase("UC5", "Connection & client problems",
-                    "Catching lost connections and browser errors"),
-            new UseCase("UC6", "Failure insights",
-                    "Tracing a failed action to the line of code"),
-            new UseCase("UC7", "Monitoring stack",
-                    "Getting the metrics into Prometheus and Grafana"),
-            new UseCase("UC8", "Data query insights",
-                    "Finding why a lazy list is slow"));
+    private record Group(String heading, List<UseCase> useCases) {
+    }
+
+    private static final UseCase UC1 = new UseCase("UC1", "Slow user actions",
+            "Finding which action is slow and where its time goes");
+    private static final UseCase UC2 = new UseCase("UC2", "App-wide hiccups",
+            "Finding the query behind an app-wide hiccup");
+    private static final UseCase UC3 = new UseCase("UC3", "When to scale out",
+            "Knowing when to add another server");
+    private static final UseCase UC4 = new UseCase("UC4", "Tracing one click",
+            "Finding the cause of a slow interaction");
+    private static final UseCase UC5 = new UseCase("UC5",
+            "Browser-side failures",
+            "Catching lost connections and browser errors");
+    private static final UseCase UC6 = new UseCase("UC6",
+            "From error to code line",
+            "Tracing a failed action to the line of code");
+    private static final UseCase UC7 = new UseCase("UC7", "Metrics in Grafana",
+            "Getting the metrics into Prometheus and Grafana");
+    private static final UseCase UC8 = new UseCase("UC8", "Slow lazy lists",
+            "Finding why a lazy list is slow");
+
+    private static final List<UseCase> USE_CASES = List.of(UC1, UC2, UC3, UC4,
+            UC5, UC6, UC7, UC8);
 
     @Test
-    void cardsShowTheShortNameAsTitleAndTheProblemAsDescription() {
-        navigate(HomeView.class);
+    void cardsAreGroupedByKindOfProblemInMenuOrder() {
+        HomeView home = navigate(HomeView.class);
 
-        List<UseCase> cards = findInView(Card.class).all().stream()
-                .map(card -> new UseCase(card.getHeader().getElement().getText(),
-                        card.getTitle().getElement().getText(),
-                        card.getChildren()
-                                .filter(Paragraph.class::isInstance)
-                                .map(p -> ((Paragraph) p).getText())
-                                .findFirst().orElse(null)))
-                .toList();
+        List<Group> groups = new ArrayList<>();
+        home.getChildren().forEach(child -> {
+            if (child instanceof H2 heading) {
+                groups.add(new Group(heading.getText(), new ArrayList<>()));
+            } else if (child.getElement().getClassList()
+                    .contains("home-cards")) {
+                child.getChildren().map(Card.class::cast)
+                        .map(HomeViewTest::useCaseOf)
+                        .forEach(groups.getLast().useCases()::add);
+            }
+        });
 
-        assertEquals(USE_CASES, cards);
+        assertEquals(
+                List.of(new Group("Something is slow",
+                        List.of(UC1, UC2, UC4, UC8)),
+                        new Group("Something fails", List.of(UC5, UC6)),
+                        new Group("Running in production", List.of(UC3, UC7))),
+                groups);
+    }
+
+    private static UseCase useCaseOf(Card card) {
+        return new UseCase(card.getHeader().getElement().getText(),
+                card.getTitle().getElement().getText(),
+                card.getChildren().filter(Paragraph.class::isInstance)
+                        .map(p -> ((Paragraph) p).getText()).findFirst()
+                        .orElse(null));
     }
 
     @Test
     void navItemsKeepTheShortNameAndShowTheProblemAsTooltip() {
         navigate(HomeView.class);
 
-        Map<String, SideNavItem> items = find(SideNavItem.class).all()
-                .stream().collect(Collectors.toMap(SideNavItem::getLabel,
+        Map<String, SideNavItem> items = find(SideNavItem.class).all().stream()
+                .collect(Collectors.toMap(SideNavItem::getLabel,
                         Function.identity()));
 
         USE_CASES.forEach(useCase -> assertEquals(useCase.problem(),
-                items.get(useCase.tag() + " — " + useCase.title())
-                        .getTooltip().getText(),
+                items.get(useCase.tag() + " — " + useCase.title()).getTooltip()
+                        .getText(),
                 "the nav tooltip and the home card read the same text"));
     }
 }

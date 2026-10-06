@@ -93,9 +93,9 @@ import com.vaadin.observability.micrometer.ObservabilitySettings;
  * other users' sessions move the numbers without any interaction here.
  */
 @Route(value = "uc3", layout = MainLayout.class)
-@PageTitle("UC3 — Capacity & scaling")
+@PageTitle("UC3 — When to scale out")
 @UseCaseDescription("Knowing when to add another server")
-@Menu(order = 3, title = "UC3 — Capacity & scaling")
+@Menu(order = 3, title = "UC3 — When to scale out")
 public class ScalingSignalsView extends VerticalLayout {
 
     private static final String HEAP_USED = "jvm.memory.used";

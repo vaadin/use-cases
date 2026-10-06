@@ -87,9 +87,9 @@ import com.vaadin.flow.signals.local.ValueSignal;
  *      "https://github.com/vaadin/use-cases/blob/main/observability/API-GAPS.md">API-GAPS.md</a>
  */
 @Route(value = "uc7", layout = MainLayout.class)
-@PageTitle("UC7 — Monitoring stack")
+@PageTitle("UC7 — Metrics in Grafana")
 @UseCaseDescription("Getting the metrics into Prometheus and Grafana")
-@Menu(order = 7, title = "UC7 — Monitoring stack")
+@Menu(order = 7, title = "UC7 — Metrics in Grafana")
 public class MonitoringStackView extends VerticalLayout {
 
     private static final Duration TIMEOUT = Duration.ofSeconds(1);
