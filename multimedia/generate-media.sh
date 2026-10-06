@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 #
 # Regenerates every sample media file used by the multimedia use cases.
-# Needs ffmpeg built with libx264, libvpx-vp9, libopus, libmp3lame and
+# Needs ffmpeg built with libx264, libsvtav1, libmp3lame and
 # drawtext, plus jq and Node.js. Narration is spoken by the ElevenLabs API
 # through tts.mjs, so ELEVENLABS_API_KEY must be set (responses are cached,
-# see tts.mjs). The generated files are committed, so running this is only
-# needed when the samples change.
+# see tts.mjs); the quarterly review and the product trailer are HeyGen
+# recordings instead, see REVIEW_SOURCE and TRAILER_SOURCE below. The generated files are committed, so running this is
+# only needed when the samples change.
 #
 # Private media (served through DownloadHandlers) goes to
 # src/main/resources/media; public media (served as static files) goes to
@@ -26,7 +27,6 @@ FF="ffmpeg -hide_banner -loglevel error -y"
 X264="-c:v libx264 -preset slow -pix_fmt yuv420p -g 50 -keyint_min 50 -sc_threshold 0"
 
 # ElevenLabs premade voices.
-NARRATOR=Xb7hH8MSUJpSbSDYk0k2   # Alice: clear, engaging educator
 PRESENTER=iP95p4xoKVk53GoZ742B  # Chris: charming, down-to-earth
 HOST=JBFqnCBsd6RMkjVDRZzb       # George: warm, captivating storyteller
 
@@ -63,66 +63,77 @@ drawtext=fontfile=$FONT:text='%{pts\:hms}':fontcolor=white@0.7:fontsize=h/22:x=w
         $X264 -t "$4" "$5"
 }
 
-# --- The quarterly review: four 15 s chapters (UC2, UC3, UC7, UC8, UC9) ---
-CHAPTERS=("Welcome|#1d4ed8" "Roadmap|#047857" "Demo|#b45309" "Questions|#7c3aed")
-# Two subtitle cues per chapter; the English cues are also the narration.
+# --- The quarterly review (UC2, UC3, UC7, UC8, UC9) ---
+# An avatar video recorded with HeyGen in four scenes; the chapter starts in
+# Chapters.java follow the scene cuts. Pass the HeyGen export (1080p) as
+# REVIEW_SOURCE to re-encode it; without it the committed recording is kept
+# and only the subtitles and the HLS ladder are rebuilt from it.
+REVIEW_SOURCE=${REVIEW_SOURCE:-}
+if [[ -n $REVIEW_SOURCE ]]; then
+    $FF -i "$REVIEW_SOURCE" -vf scale=1280:720 $X264 -crf 32 \
+        -c:a aac -b:a 64k -ac 1 -movflags +faststart "$WORK/quarterly-review.mp4"
+    mv "$WORK/quarterly-review.mp4" "$PRIVATE/quarterly-review.mp4"
+fi
+
+# Subtitle cues, timed by hand to the pauses in the narration (UC9).
+CUE_TIMES=(
+    "0.33 3.88" "4.26 7.39" "7.68 10.49"
+    "11.05 14.05" "14.63 18.75" "19.10 22.72"
+    "23.25 24.85" "25.41 27.93" "28.33 30.85" "31.11 35.12"
+    "36.08 40.24" "40.91 44.20" "44.97 47.48"
+)
 SUBTITLES_EN=(
-    "Welcome to the quarterly product review."
-    $'Today we look at what shipped, what is next,\nand your questions.'
-    "The next release focuses on faster startup,"
-    $'better offline support,\nand a new reporting module.'
-    $'In the demo we open a customer record,\nchange the address,'
-    "and every user sees the update at once."
-    "Finally, questions and answers."
-    $'Thank you for joining,\nand see you at the next review.'
+    $'Hi, and welcome to the quarterly product review!\nGreat to have you here.'
+    $'In the next minute we\'ll walk through the roadmap,\nshow you a quick live demo,'
+    $'and answer the question we hear most often.\nLet\'s dive in.'
+    $'First, the roadmap.\nThe next release is all about speed.'
+    $'Apps start up to twice as fast,\noffline support handles flaky connections gracefully,'
+    $'and a brand-new reporting module lets you\nbuild dashboards without writing a single query.'
+    "Now for the fun part: the demo."
+    $'I\'m opening a customer record\nand changing the shipping address.'
+    $'Watch the second window.\nThe moment I hit save,'
+    $'every other user sees the new address instantly.\nNo refresh, no extra code.'
+    $'Finally, your questions.\nThe big one: when can I try this?'
+    $'The beta opens next month,\nand upgrading is a one-line change.'
+    $'Thanks so much for watching,\nand see you at the next review!'
 )
 SUBTITLES_DE=(
-    "Willkommen zum Quartals-Produktreview."
-    $'Heute sehen wir, was ausgeliefert wurde, was als Nächstes kommt,\nund beantworten Ihre Fragen.'
-    "Das nächste Release bringt einen schnelleren Start,"
-    $'besseren Offline-Support\nund ein neues Berichtsmodul.'
-    $'In der Demo öffnen wir einen Kundendatensatz,\nändern die Adresse,'
-    "und alle Nutzer sehen die Änderung sofort."
-    "Zum Schluss Fragen und Antworten."
-    $'Danke fürs Dabeisein,\nbis zum nächsten Review.'
+    $'Hallo und willkommen zum Quartals-Produktreview!\nSchön, dass Sie dabei sind.'
+    $'In der nächsten Minute gehen wir die Roadmap durch,\nzeigen Ihnen eine kurze Live-Demo'
+    $'und beantworten die Frage, die wir am häufigsten hören.\nLegen wir los.'
+    $'Zuerst die Roadmap.\nIm nächsten Release dreht sich alles um Geschwindigkeit.'
+    $'Apps starten bis zu doppelt so schnell,\nder Offline-Support meistert wackelige Verbindungen souverän,'
+    $'und mit einem brandneuen Berichtsmodul erstellen Sie\nDashboards, ohne eine einzige Abfrage zu schreiben.'
+    "Jetzt kommt der spannende Teil: die Demo."
+    $'Ich öffne einen Kundendatensatz\nund ändere die Lieferadresse.'
+    $'Achten Sie auf das zweite Fenster.\nSobald ich speichere,'
+    $'sehen alle anderen Nutzer sofort die neue Adresse.\nKein Neuladen, kein zusätzlicher Code.'
+    $'Zum Schluss Ihre Fragen.\nDie wichtigste: Wann kann ich das ausprobieren?'
+    $'Die Beta startet nächsten Monat,\nund das Upgrade ist eine einzeilige Änderung.'
+    $'Vielen Dank fürs Zuschauen,\nbis zum nächsten Review!'
 )
 SUBTITLES_FI=(
-    "Tervetuloa neljännesvuoden tuotekatsaukseen."
-    $'Katsomme, mitä julkaistiin, mitä on tulossa,\nja vastaamme kysymyksiinne.'
-    "Seuraava julkaisu tuo nopeamman käynnistyksen,"
-    $'paremman offline-tuen\nja uuden raportointimoduulin.'
-    $'Demossa avaamme asiakastietueen,\nmuutamme osoitteen,'
-    "ja jokainen käyttäjä näkee muutoksen heti."
-    "Lopuksi kysymykset ja vastaukset."
-    $'Kiitos osallistumisesta,\nnähdään seuraavassa katsauksessa.'
+    $'Hei ja tervetuloa neljännesvuoden tuotekatsaukseen!\nMukava, että olet mukana.'
+    $'Seuraavan minuutin aikana käymme läpi tiekartan,\nnäytämme lyhyen live-demon'
+    $'ja vastaamme useimmin kuulemaamme kysymykseen.\nAloitetaan.'
+    $'Ensin tiekartta.\nSeuraavassa julkaisussa keskitytään nopeuteen.'
+    $'Sovellukset käynnistyvät jopa kaksi kertaa nopeammin,\noffline-tuki selviää katkeilevista yhteyksistä sujuvasti,'
+    $'ja upouudella raportointimoduulilla rakennat\nkoontinäyttöjä kirjoittamatta yhtään kyselyä.'
+    "Sitten hauskin osuus: demo."
+    $'Avaan asiakastietueen\nja muutan toimitusosoitteen.'
+    $'Katso toista ikkunaa.\nHeti kun tallennan,'
+    $'jokainen muu käyttäjä näkee uuden osoitteen välittömästi.\nEi päivitystä, ei lisäkoodia.'
+    $'Lopuksi kysymyksenne.\nTärkein niistä: milloin pääsen kokeilemaan?'
+    $'Beta avautuu ensi kuussa,\nja päivitys vaatii vain yhden rivin muutoksen.'
+    $'Kiitos katsomisesta,\nnähdään seuraavassa katsauksessa!'
 )
-: > "$WORK/review-parts.txt"
-CUE_TIMES=()
-i=0
-for chapter in "${CHAPTERS[@]}"; do
-    IFS='|' read -r title color <<< "$chapter"
-    slide "$color" "$title" "Quarterly product review" 15 "$WORK/v$i.mp4"
-    first=${SUBTITLES_EN[2 * i]}
-    second=${SUBTITLES_EN[2 * i + 1]}
-    times=$(say "$NARRATOR" 15 "$WORK/a$i.wav" "${first//$'\n'/ }" "${second//$'\n'/ }")
-    while read -r start end; do
-        CUE_TIMES+=("$(vtt_time "$(awk -v t="$start" -v o=$((15 * i)) 'BEGIN { print t + o }')") --> $(vtt_time "$(awk -v t="$end" -v o=$((15 * i)) 'BEGIN { print t + o }')")")
-    done < <(jq -r '.[] | "\(.[0]) \(.[1])"' <<< "$times")
-    $FF -i "$WORK/v$i.mp4" -i "$WORK/a$i.wav" -c:v copy -c:a aac -b:a 64k \
-        "$WORK/part$i.mp4"
-    echo "file '$WORK/part$i.mp4'" >> "$WORK/review-parts.txt"
-    i=$((i + 1))
-done
-$FF -f concat -safe 0 -i "$WORK/review-parts.txt" -c copy -movflags +faststart \
-    "$PRIVATE/quarterly-review.mp4"
-
-# Subtitles timed to the narration (UC9).
 for language in en de fi; do
     declare -n cues="SUBTITLES_${language^^}"
     {
         echo "WEBVTT"
         for c in "${!CUE_TIMES[@]}"; do
-            printf '\n%s\n%s\n' "${CUE_TIMES[c]}" "${cues[c]}"
+            read -r start end <<< "${CUE_TIMES[c]}"
+            printf '\n%s --> %s\n%s\n' "$(vtt_time "$start")" "$(vtt_time "$end")" "${cues[c]}"
         done
     } > "$PRIVATE/subtitles/$language.vtt"
     unset -n cues
@@ -135,7 +146,7 @@ label() {
     echo "scale=$2,drawtext=fontfile=$FONT_BOLD:text='$1':fontcolor=black:box=1:boxcolor=white@0.8:boxborderw=6:fontsize=h/18:x=h/20:y=h/20"
 }
 rm -rf "$PRIVATE/hls" && mkdir -p "$PRIVATE/hls"
-$FF -i "$PRIVATE/quarterly-review.mp4" -filter_complex "\
+$FF -i "${REVIEW_SOURCE:-$PRIVATE/quarterly-review.mp4}" -filter_complex "\
 [0:v]split=3[s0][s1][s2];\
 [s0]$(label 240p 426x240)[v0];\
 [s1]$(label 360p 640x360)[v1];\
@@ -162,17 +173,20 @@ for recording in "sprint-41|#0f766e|Sprint 41 review|Sprint forty-one review. Se
     $FF -ss 1 -i "$PRIVATE/$id.mp4" -frames:v 1 -q:v 4 "$PRIVATE/$id-poster.jpg"
 done
 
-# --- Same clip in two formats, the format burnt in (UC4) ---
-$FF -f lavfi -i "gradients=s=640x360:r=25:d=10:speed=0.02" \
-    -f lavfi -i "sine=frequency=330:duration=10" -vf "\
-drawtext=fontfile=$FONT_BOLD:text='WebM · VP9':fontcolor=white:fontsize=48:x=(w-tw)/2:y=(h-th)/2" \
-    -c:v libvpx-vp9 -b:v 0 -crf 40 -row-mt 1 -c:a libopus -b:a 32k -t 10 \
-    "$PUBLIC/trailer.webm"
-$FF -f lavfi -i "gradients=s=640x360:r=25:d=10:speed=0.02" \
-    -f lavfi -i "sine=frequency=330:duration=10" -vf "\
-drawtext=fontfile=$FONT_BOLD:text='MP4 · H.264':fontcolor=white:fontsize=48:x=(w-tw)/2:y=(h-th)/2" \
-    $X264 -crf 30 -c:a aac -b:a 48k -t 10 -movflags +faststart \
-    "$PUBLIC/trailer.mp4"
+# --- The product trailer with two codecs, the codec burnt in (UC4) ---
+# An avatar video recorded with HeyGen. Pass the HeyGen export (1080p) as
+# TRAILER_SOURCE to re-encode it; without it the committed files are kept.
+# Both are 720p; the codecs attributes in FormatFallbackView match the
+# profiles and levels below (AV1 Main 3.1, H.264 High 3.1).
+TRAILER_SOURCE=${TRAILER_SOURCE:-}
+if [[ -n $TRAILER_SOURCE ]]; then
+    $FF -i "$TRAILER_SOURCE" -vf "$(label AV1 1280:720)" \
+        -c:v libsvtav1 -preset 4 -crf 50 -pix_fmt yuv420p -g 50 \
+        -c:a aac -b:a 64k -ac 1 -movflags +faststart "$PUBLIC/trailer-av1.mp4"
+    $FF -i "$TRAILER_SOURCE" -vf "$(label H.264 1280:720)" \
+        $X264 -crf 30 -level 3.1 \
+        -c:a aac -b:a 64k -ac 1 -movflags +faststart "$PUBLIC/trailer.mp4"
+fi
 
 # --- Silent background loop (UC5) ---
 $FF -f lavfi -i "gradients=s=960x540:r=25:d=8:speed=0.01:c0=0x1d4ed8:c1=0x7c3aed:c2=0x0f766e:nb_colors=3" \
