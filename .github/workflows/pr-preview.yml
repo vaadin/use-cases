@@ -11,9 +11,12 @@ name: PR Preview
 # does not deploy everything: only the deployables (directories holding a
 # fly.toml) with a changed file under them are picked, at most
 # MAX_PREVIEW_APPS of them. Each one runs as its own Fly app named
-# <production app>-pr-<number>, scaled to zero while idle. A preview of a
-# module with sidecar apps (observability) still links to the production
-# sidecars unless they are changed too.
+# <production app>-pr-<number>, scaled to zero while idle. A preview always
+# uses the production sidecar apps of a module (observability's Prometheus and
+# Grafana): the apps address each other by their production names, fixed in
+# the module's configuration, so a preview of observability links to the
+# production sidecars, and a preview of a sidecar connects to the production
+# observability app.
 on:
   pull_request:
     types: [labeled, unlabeled, synchronize, reopened, closed]
@@ -23,12 +26,17 @@ permissions:
 
 concurrency:
   # Only the newest commit is worth deploying, and closing the pull request or
-  # removing the label supersedes any deployment still running. Adding or
-  # removing any other label changes nothing, so those runs get a group of
-  # their own instead of cancelling a deployment.
+  # removing the label supersedes any deployment still running. A run that does
+  # nothing - a push or reopening without the label, adding or removing any
+  # other label - gets a group of its own instead, so that it cannot cancel a
+  # cleanup still destroying the preview. Only a run that deploys again, which
+  # reuses the apps, may supersede a cleanup.
   group: >-
     ${{ github.workflow }}-${{ github.event.number }}${{
-    github.event.label && github.event.label.name != 'deploy preview' && format('-{0}', github.run_id) || '' }}
+    !(github.event.action == 'closed'
+      || (github.event.label && github.event.label.name == 'deploy preview')
+      || (!github.event.label && contains(github.event.pull_request.labels.*.name, 'deploy preview')))
+    && format('-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 env:
@@ -162,13 +170,14 @@ jobs:
     name: Comment the preview
     runs-on: ubuntu-latest
     permissions:
+      # To read the outcome of each deploy job of the matrix
+      actions: read
       pull-requests: write
     steps:
       - env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPS: ${{ needs.discover.outputs.apps }}
           SKIPPED: ${{ needs.discover.outputs.skipped }}
-          RESULT: ${{ needs.deploy.result }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           marker='<!-- use-cases-pr-preview -->'
@@ -176,12 +185,18 @@ jobs:
             echo "$marker"
             if [ -n "$SKIPPED" ]; then
               echo "No preview deployed for ${_HEAD_SHA}: $SKIPPED"
-            elif [ "$RESULT" = "success" ]; then
-              echo "Preview of ${_HEAD_SHA} deployed:"
-              echo
-              echo "$APPS" | jq -r '.[] | "- `\(.module)`: https://\(.app).fly.dev"'
             else
-              echo "Preview deployment of ${_HEAD_SHA} failed, see [the workflow run]($RUN_URL)."
+              # One app failing leaves the others deployed, so each one is
+              # listed with the outcome of its own job
+              jobs=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs" \
+                --paginate --jq '.jobs[] | {name, conclusion}' | jq -s -c .)
+              echo "Preview of ${_HEAD_SHA}:"
+              echo
+              echo "$APPS" | jq -r --argjson jobs "$jobs" --arg run "$RUN_URL" '.[]
+                | . as $app
+                | ($jobs | map(select(.name == "Deploy \($app.module)")) | first | .conclusion // "missing") as $result
+                | if $result == "success" then "- `\(.module)`: https://\(.app).fly.dev"
+                  else "- `\(.module)`: deployment \($result), see [the workflow run](\($run))" end'
             fi
             echo
             echo "Removing the \`deploy preview\` label or closing the pull request destroys the preview."
