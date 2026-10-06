@@ -1,5 +1,7 @@
 package com.example.uc2;
 
+import com.example.Chapters;
+import com.example.Chapters.Chapter;
 import com.example.MediaLibrary;
 import com.example.RangeDownloadHandler;
 import com.example.views.MainLayout;
@@ -37,8 +39,10 @@ public class SeekableStreamView extends VerticalLayout {
 
     public SeekableStreamView() {
         add(new H1("UC2 — Seekable streaming"));
+        Chapter questions = Chapters.QUARTERLY_REVIEW.getLast();
         add(new Paragraph("Start either player, then drag the scrubber to "
-                + "0:45 (the \"Questions\" chapter). The built-in handler "
+                + Chapters.format(questions.start()) + " (the \""
+                + questions.title() + "\" chapter). The built-in handler "
                 + "sends the file in one piece without advertising range "
                 + "support, so the browser cannot jump ahead of what it has "
                 + "downloaded. The range-aware handler answers each seek with "

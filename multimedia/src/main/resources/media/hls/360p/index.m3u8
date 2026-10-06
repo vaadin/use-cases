@@ -18,12 +18,6 @@ segment04.m4s
 segment05.m4s
 #EXTINF:6.000000,
 segment06.m4s
-#EXTINF:6.000000,
+#EXTINF:5.640000,
 segment07.m4s
-#EXTINF:6.000000,
-segment08.m4s
-#EXTINF:6.000000,
-segment09.m4s
-#EXTINF:0.040000,
-segment10.m4s
 #EXT-X-ENDLIST

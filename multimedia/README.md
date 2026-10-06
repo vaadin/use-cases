@@ -34,9 +34,16 @@ All media is generated. [`generate-media.sh`](generate-media.sh) rebuilds
 every file with `ffmpeg`; the narration is spoken by
 [ElevenLabs](https://elevenlabs.io) text to speech through
 [`tts.mjs`](tts.mjs), which needs `ELEVENLABS_API_KEY` and caches its
-responses. The subtitles are timed from the character timings ElevenLabs
-returns, so they stay in sync when the narration changes; the German and
-Finnish translations live in the script.
+responses.
+
+The quarterly review used by UC2, UC3 and UC7–UC9 is an avatar video made
+with [HeyGen](https://www.heygen.com) in four scenes, one per chapter. Pass
+the HeyGen export as `REVIEW_SOURCE` to re-encode it; otherwise the script
+rebuilds the HLS ladder and subtitles from the committed recording. The
+subtitle cues are timed by hand to the pauses in the narration, and the
+German and Finnish translations live in the script; the chapter starts in
+`Chapters.java` follow the scene cuts. Update both when the recording
+changes.
 
 Files the application serves itself live in `src/main/resources/media`;
 public files served as static resources live in
