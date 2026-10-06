@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Regenerates every sample media file used by the multimedia use cases.
-# Needs ffmpeg built with libx264, libvpx-vp9, libopus, libmp3lame and
+# Needs ffmpeg built with libx264, libsvtav1, libmp3lame and
 # drawtext, plus jq and Node.js. Narration is spoken by the ElevenLabs API
 # through tts.mjs, so ELEVENLABS_API_KEY must be set (responses are cached,
 # see tts.mjs). The generated files are committed, so running this is only
@@ -162,12 +162,13 @@ for recording in "sprint-41|#0f766e|Sprint 41 review|Sprint forty-one review. Se
     $FF -ss 1 -i "$PRIVATE/$id.mp4" -frames:v 1 -q:v 4 "$PRIVATE/$id-poster.jpg"
 done
 
-# --- Same clip in two formats, the format burnt in (UC4) ---
+# --- Same clip with two codecs, the codec burnt in (UC4) ---
+# AV1 Main profile, level 2.1, matching codecs="av01.0.01M.08" in the view.
 $FF -f lavfi -i "gradients=s=640x360:r=25:d=10:speed=0.02" \
     -f lavfi -i "sine=frequency=330:duration=10" -vf "\
-drawtext=fontfile=$FONT_BOLD:text='WebM · VP9':fontcolor=white:fontsize=48:x=(w-tw)/2:y=(h-th)/2" \
-    -c:v libvpx-vp9 -b:v 0 -crf 40 -row-mt 1 -c:a libopus -b:a 32k -t 10 \
-    "$PUBLIC/trailer.webm"
+drawtext=fontfile=$FONT_BOLD:text='MP4 · AV1':fontcolor=white:fontsize=48:x=(w-tw)/2:y=(h-th)/2" \
+    -c:v libsvtav1 -preset 4 -crf 45 -pix_fmt yuv420p -g 50 -c:a aac -b:a 48k \
+    -t 10 -movflags +faststart "$PUBLIC/trailer-av1.mp4"
 $FF -f lavfi -i "gradients=s=640x360:r=25:d=10:speed=0.02" \
     -f lavfi -i "sine=frequency=330:duration=10" -vf "\
 drawtext=fontfile=$FONT_BOLD:text='MP4 · H.264':fontcolor=white:fontsize=48:x=(w-tw)/2:y=(h-th)/2" \
