@@ -21,6 +21,8 @@
         <module>multimedia</module>
         <module>clipboard</module>
         <module>page-visibility</module>
+        <module>reporting</module>
+        <module>printing</module>
         <module>route-hierarchy</module>
         <module>text-selection</module>
         <module>web-share</module>
