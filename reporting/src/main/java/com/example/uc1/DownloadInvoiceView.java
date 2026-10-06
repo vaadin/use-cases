@@ -45,6 +45,8 @@ public class DownloadInvoiceView extends VerticalLayout {
 
     private static final int INVOICE_COUNT = 12;
 
+    private final Div selected = new Div();
+
     public DownloadInvoiceView() {
         add(new H1("UC1 — Download the invoice"));
         add(new Paragraph(
@@ -52,7 +54,8 @@ public class DownloadInvoiceView extends VerticalLayout {
                         + "data the row shows. The link is an ordinary "
                         + "anchor: the browser downloads it without a round "
                         + "trip through the UI, and the file name comes from "
-                        + "the invoice number."));
+                        + "the invoice number. Select a row to see that "
+                        + "invoice below."));
 
         List<Invoice> invoices = Invoices.sample(INVOICE_COUNT);
 
@@ -68,11 +71,16 @@ public class DownloadInvoiceView extends VerticalLayout {
                 .setHeader("PDF").setAutoWidth(true);
         grid.setItems(invoices);
         grid.setAllRowsVisible(true);
-        add(grid);
+        grid.asSingleSelect().addValueChangeListener(event -> {
+            selected.removeAll();
+            if (event.getValue() != null) {
+                selected.add(new InvoiceView(event.getValue()));
+            }
+        });
 
-        Div preview = new Div(new InvoiceView(invoices.getFirst()));
-        preview.setId("first-invoice");
-        add(preview);
+        selected.setId("selected-invoice");
+        add(grid, selected);
+        grid.select(invoices.getFirst());
     }
 
     /**

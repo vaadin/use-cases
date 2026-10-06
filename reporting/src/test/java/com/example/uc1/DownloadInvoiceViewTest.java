@@ -10,7 +10,9 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -50,5 +52,23 @@ class DownloadInvoiceViewTest extends SpringBrowserlessTest {
         assertEquals(InvoicePdf.money(invoice.gross()),
                 test(grid).getCellText(0, 3));
         assertEquals(invoice.customer(), test(grid).getCellText(0, 1));
+    }
+
+    @Test
+    void thePanelShowsTheSelectedInvoice() {
+        navigate(DownloadInvoiceView.class);
+        Grid<?> grid = findInView(Grid.class).single();
+        Div selected = findInView(Div.class).withId("selected-invoice")
+                .single();
+
+        assertEquals("Invoice 2026-0001", heading(selected));
+
+        test(grid).select(2);
+        assertEquals("Invoice " + test(grid).getCellText(2, 0),
+                heading(selected));
+    }
+
+    private String heading(Div panel) {
+        return find(H3.class).from(panel).single().getText();
     }
 }
