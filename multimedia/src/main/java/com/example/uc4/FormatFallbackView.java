@@ -22,8 +22,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * it on devices with a hardware AV1 decoder (Apple M3 / A17 Pro and newer). The
  * player lists both as {@code <source>} children in order of preference, and
  * the browser takes the first one it can play. The files are public assets
- * served as static resources, so plain URLs are enough. The format is burnt
- * into the picture, and the badge reports the file the browser chose.
+ * served as static resources, so plain URLs are enough. The codec is burnt into
+ * the picture, and the badge reports the file the browser chose.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Format fallback")
@@ -54,8 +54,8 @@ public class FormatFallbackView extends VerticalLayout {
         video.setWidth("640px");
         video.setMaxWidth("100%");
         video.setAriaLabel("Product trailer");
-        video.addSource(AV1, "video/mp4; codecs=\"av01.0.01M.08, mp4a.40.2\"");
-        video.addSource(H264, "video/mp4; codecs=\"avc1.64001e, mp4a.40.2\"");
+        video.addSource(AV1, "video/mp4; codecs=\"av01.0.05M.08, mp4a.40.2\"");
+        video.addSource(H264, "video/mp4; codecs=\"avc1.64001f, mp4a.40.2\"");
         add(video);
 
         MissingAPI.addSourceChosenListener(video,

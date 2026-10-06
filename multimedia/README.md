@@ -45,6 +45,11 @@ German and Finnish translations live in the script; the chapter starts in
 `Chapters.java` follow the scene cuts. Update both when the recording
 changes.
 
+The UC4 product trailer is a HeyGen avatar video as well. Pass the export as
+`TRAILER_SOURCE` to re-encode it into the AV1 and H.264 files; otherwise the
+committed files are kept. The `codecs` attributes in `FormatFallbackView`
+match the encoder settings, so update them together.
+
 Files the application serves itself live in `src/main/resources/media`;
 public files served as static resources live in
 `src/main/resources/META-INF/resources/media`.
