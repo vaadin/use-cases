@@ -1,5 +1,7 @@
 package com.example.common;
 
+import org.jspecify.annotations.Nullable;
+
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.Anchor;
@@ -14,6 +16,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.server.menu.MenuConfiguration;
+import com.vaadin.flow.server.menu.MenuEntry;
 
 /**
  * Shared {@link AppLayout} for the use-case demo apps. Renders a navbar with
@@ -45,9 +48,20 @@ public abstract class BaseMainLayout extends AppLayout
         addToDrawer(AppCatalog.createSelector(moduleId));
 
         SideNav nav = new SideNav();
-        MenuConfiguration.getMenuEntries().forEach(entry -> nav
-                .addItem(new SideNavItem(entry.title(), entry.path())));
+        MenuConfiguration.getMenuEntries().forEach(entry -> {
+            SideNavItem item = new SideNavItem(entry.title(), entry.path());
+            UseCaseDescription description = descriptionOf(entry);
+            if (description != null) {
+                item.setTooltipText(description.value());
+            }
+            nav.addItem(item);
+        });
         addToDrawer(nav);
+    }
+
+    static @Nullable UseCaseDescription descriptionOf(MenuEntry entry) {
+        return entry.menuClass() == null ? null
+                : entry.menuClass().getAnnotation(UseCaseDescription.class);
     }
 
     private static Element buildSourceCodeOverlay(Anchor link) {

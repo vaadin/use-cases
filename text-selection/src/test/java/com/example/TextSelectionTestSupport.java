@@ -3,7 +3,7 @@ package com.example;
 import tools.jackson.databind.node.ObjectNode;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.shared.HasSelection;
+import com.vaadin.flow.component.shared.HasTextSelection;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -12,8 +12,8 @@ import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 /**
  * Shared helper for browserless tests that need to drive the
  * {@code selectionSignal()} of a TextField/TextArea without a real browser. The
- * signal is filled by a {@code vaadin-selection-change} DOM event dispatched
- * from the client; tests fire the same event directly through
+ * signal is filled by a {@code vaadin-text-selection-change} DOM event
+ * dispatched from the client; tests fire the same event directly through
  * {@link ElementListenerMap}, mirroring flow-components' own
  * {@code SelectionSignalTest}.
  */
@@ -22,7 +22,8 @@ public final class TextSelectionTestSupport {
     private TextSelectionTestSupport() {
     }
 
-    public static void setSelection(HasSelection field, int start, int end) {
+    public static void setSelection(HasTextSelection field, int start,
+            int end) {
         // Ensure the signal — and therefore its DOM listener — is created
         // before we fire the event. selectionSignal() is lazy.
         field.selectionSignal();
@@ -38,17 +39,18 @@ public final class TextSelectionTestSupport {
         data.put("event.detail.content", content);
 
         Element element = ((Component) field).getElement();
-        DomEvent event = new DomEvent(element, "vaadin-selection-change", data);
+        DomEvent event = new DomEvent(element, "vaadin-text-selection-change",
+                data);
         element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
     }
 
-    private static String readValue(HasSelection field) {
+    private static String readValue(HasTextSelection field) {
         try {
             Object v = field.getClass().getMethod("getValue").invoke(field);
             return v == null ? "" : v.toString();
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException(
-                    "HasSelection field does not expose getValue()", e);
+                    "HasTextSelection field does not expose getValue()", e);
         }
     }
 }
