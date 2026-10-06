@@ -72,6 +72,8 @@ jobs:
           echo "modules=$modules" >> "$GITHUB_OUTPUT"
   deploy:
     needs: discover
+    # An empty matrix fails the run, so skip when no deployable changed.
+    if: needs.discover.outputs.modules != '[]'
     name: Deploy ${{ matrix.module }}
     runs-on: ubuntu-latest
     concurrency: deploy-${{ matrix.module }}
