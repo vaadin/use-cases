@@ -1,5 +1,6 @@
 package com.example.uc6;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.clipboard.Clipboard;
@@ -25,6 +26,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Copy via context menu")
+@UseCaseDescription("Offering copy as a context-menu item")
 @Menu(order = 6, title = "UC6 — Context menu")
 @StyleSheet("uc6.css")
 public class CopyFromContextMenuView extends VerticalLayout {

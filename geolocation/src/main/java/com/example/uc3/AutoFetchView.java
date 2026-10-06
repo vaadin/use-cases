@@ -2,6 +2,7 @@ package com.example.uc3;
 
 import java.time.Duration;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -27,6 +28,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Auto-fetch on view load, gated on permission")
+@UseCaseDescription("Locating returning visitors without a surprise prompt")
 @Menu(order = 3, title = "UC3 — Auto-fetch on attach")
 public class AutoFetchView extends VerticalLayout {
 
