@@ -1,7 +1,5 @@
 package com.example.usecase04;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -18,13 +16,14 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-04", layout = MainLayout.class)
 @PageTitle("Use Case 4: Filtered and Sorted Data Grid")
 @Menu(order = 4, title = "UC 4: Filtered Data Grid")
-@PermitAll
+@AnonymousAllowed
 public class UseCase04View extends VerticalLayout {
 
     public UseCase04View() {

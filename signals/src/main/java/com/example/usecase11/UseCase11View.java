@@ -1,7 +1,5 @@
 package com.example.usecase11;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.MissingAPI;
 import com.example.MissingAPI.ComponentSize;
 import com.example.views.MainLayout;
@@ -17,6 +15,7 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -36,7 +35,7 @@ import com.vaadin.flow.signals.Signal;
 @PageTitle("Use Case 11: Responsive Layout")
 @Menu(order = 11, title = "UC 11: Responsive Layout")
 @StyleSheet("usecase11.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase11View extends VerticalLayout {
 
     private static final int SMALL_BREAKPOINT = 400;

@@ -53,9 +53,8 @@ src/main/java/com/example/
 │   └── MUC01Signals.java           # Per-MUC shared signal class
 ├── muc02/ ... muc07/
 ├── security/
-│   ├── CurrentUserSignal.java       # Application-scoped user context signal
-│   ├── SecurityConfiguration.java   # Spring Security setup
-│   └── SecurityService.java
+│   ├── CurrentUserSignal.java       # Session-scoped user context signal
+│   └── SecurityConfiguration.java   # Spring Security setup
 ├── service/                         # Shared services (analytics, data loading)
 ├── signals/
 │   ├── UserSessionRegistry.java     # Active user tracking
@@ -81,6 +80,10 @@ src/main/java/com/example/
 4. **Access**: Open http://localhost:8080
 
 ### Login Credentials
+
+Logging in is optional: anonymous visitors can open every use case and are
+shown as a generated `guest-N` user. Use **Log in** in the navbar to switch
+to one of the demo users:
 
 - `viewer` / `password` (VIEWER role)
 - `editor` / `password` (EDITOR role)
