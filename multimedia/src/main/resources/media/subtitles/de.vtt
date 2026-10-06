@@ -1,29 +1,52 @@
 WEBVTT
 
-00:00.000 --> 00:02.345
-Willkommen zum Quartals-Produktreview.
+00:00.330 --> 00:03.880
+Hallo und willkommen zum Quartals-Produktreview!
+Schön, dass Sie dabei sind.
 
-00:02.554 --> 00:06.780
-Heute sehen wir, was ausgeliefert wurde, was als Nächstes kommt,
-und beantworten Ihre Fragen.
+00:04.260 --> 00:07.390
+In der nächsten Minute gehen wir die Roadmap durch,
+zeigen Ihnen eine kurze Live-Demo
 
-00:15.000 --> 00:17.984
-Das nächste Release bringt einen schnelleren Start,
+00:07.680 --> 00:10.490
+und beantworten die Frage, die wir am häufigsten hören.
+Legen wir los.
 
-00:18.100 --> 00:21.873
-besseren Offline-Support
-und ein neues Berichtsmodul.
+00:11.050 --> 00:14.050
+Zuerst die Roadmap.
+Im nächsten Release dreht sich alles um Geschwindigkeit.
 
-00:30.000 --> 00:33.506
-In der Demo öffnen wir einen Kundendatensatz,
-ändern die Adresse,
+00:14.630 --> 00:18.750
+Apps starten bis zu doppelt so schnell,
+der Offline-Support meistert wackelige Verbindungen souverän,
 
-00:33.680 --> 00:36.316
-und alle Nutzer sehen die Änderung sofort.
+00:19.100 --> 00:22.720
+und mit einem brandneuen Berichtsmodul erstellen Sie
+Dashboards, ohne eine einzige Abfrage zu schreiben.
 
-00:45.000 --> 00:46.997
-Zum Schluss Fragen und Antworten.
+00:23.250 --> 00:24.850
+Jetzt kommt der spannende Teil: die Demo.
 
-00:47.241 --> 00:50.387
-Danke fürs Dabeisein,
-bis zum nächsten Review.
+00:25.410 --> 00:27.930
+Ich öffne einen Kundendatensatz
+und ändere die Lieferadresse.
+
+00:28.330 --> 00:30.850
+Achten Sie auf das zweite Fenster.
+Sobald ich speichere,
+
+00:31.110 --> 00:35.120
+sehen alle anderen Nutzer sofort die neue Adresse.
+Kein Neuladen, kein zusätzlicher Code.
+
+00:36.080 --> 00:40.240
+Zum Schluss Ihre Fragen.
+Die wichtigste: Wann kann ich das ausprobieren?
+
+00:40.910 --> 00:44.200
+Die Beta startet nächsten Monat,
+und das Upgrade ist eine einzeilige Änderung.
+
+00:44.970 --> 00:47.480
+Vielen Dank fürs Zuschauen,
+bis zum nächsten Review!
