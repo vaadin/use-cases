@@ -60,7 +60,8 @@ public abstract class BaseHomeView extends VerticalLayout {
         Div cards = new Div();
         cards.addClassName("home-cards");
         MenuConfiguration.getMenuEntries().stream()
-                .filter(entry -> views.contains(entry.menuClass()))
+                .filter(entry -> entry.menuClass() != null
+                        && views.contains(entry.menuClass()))
                 .forEach(entry -> {
                     String[] tagAndTitle = entry.title().split(" — ", 2);
                     UseCaseDescription description = BaseMainLayout
