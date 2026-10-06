@@ -36,11 +36,15 @@ class FormatFallbackViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
         assertBadge("Browser chose: not loaded yet");
 
-        new MediaTester(findInView(Video.class).single()).fire("loadedmetadata",
-                "element.currentSrc",
+        MediaTester media = new MediaTester(findInView(Video.class).single());
+        media.fire("loadedmetadata", "element.currentSrc",
+                "http://localhost:8080/media/trailer-av1.mp4");
+        runPendingSignalsTasks();
+        assertBadge("Browser chose: AV1");
+
+        media.fire("loadedmetadata", "element.currentSrc",
                 "http://localhost:8080/media/trailer.mp4");
         runPendingSignalsTasks();
-
         assertBadge("Browser chose: H.264");
     }
 
