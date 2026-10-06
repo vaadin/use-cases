@@ -82,8 +82,7 @@ public class CurrentUserSignal {
 
     private final ValueSignal<UserInfo> userSignal;
     private final AuthenticationContext authenticationContext;
-    private final String guestName = "guest-"
-            + GUEST_COUNTER.incrementAndGet();
+    private final String guestName = "guest-" + GUEST_COUNTER.incrementAndGet();
 
     public CurrentUserSignal(AuthenticationContext authenticationContext) {
         this.authenticationContext = authenticationContext;

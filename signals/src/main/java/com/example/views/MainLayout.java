@@ -6,6 +6,7 @@ import java.util.Map;
 import com.example.common.AppCatalog;
 import com.example.preferences.UserPreferences;
 import com.example.security.CurrentUserSignal;
+import com.example.security.SecurityConfiguration;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
 import org.jspecify.annotations.Nullable;
@@ -31,7 +32,11 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.Location;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.menu.MenuConfiguration;
@@ -39,7 +44,7 @@ import com.vaadin.flow.signals.Signal;
 
 @PageTitle("Signal API Use Cases")
 @AnonymousAllowed
-public class MainLayout extends AppLayout {
+public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
     private final CurrentUserSignal currentUserSignal;
     private final UserSessionRegistry userSessionRegistry;
@@ -177,7 +182,7 @@ public class MainLayout extends AppLayout {
 
         // Logging in is optional; guests can switch to a demo user any time
         Button loginButton = new Button("Log in",
-                event -> getUI().ifPresent(ui -> ui.navigate(LoginView.class)));
+                event -> getUI().ifPresent(this::loginAndReturn));
         loginButton.addThemeVariants(ButtonVariant.TERTIARY);
         loginButton.bindVisible(currentUserSignal.getUserSignal()
                 .map(user -> !user.isAuthenticated()));
@@ -252,6 +257,30 @@ public class MainLayout extends AppLayout {
             }
             updateSourceCodeLink(target);
         });
+    }
+
+    /**
+     * Reloads the current page with the login parameter, so Spring Security
+     * shows the login view and returns to this page after a successful login.
+     */
+    private void loginAndReturn(UI ui) {
+        Location location = ui.getActiveViewLocation();
+        QueryParameters parameters = location.getQueryParameters()
+                .merging(SecurityConfiguration.LOGIN_PARAMETER, "");
+        ui.getPage()
+                .setLocation("/" + new Location(location.getPath(), parameters)
+                        .getPathWithQueryParameters());
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        // Drop the login parameters from the URL once the user is back
+        QueryParameters parameters = event.getLocation().getQueryParameters();
+        if (parameters.getParameters()
+                .containsKey(SecurityConfiguration.LOGIN_PARAMETER)) {
+            event.forwardTo(event.getLocation().getPath(), parameters.excluding(
+                    SecurityConfiguration.LOGIN_PARAMETER, "continue"));
+        }
     }
 
     @Override
