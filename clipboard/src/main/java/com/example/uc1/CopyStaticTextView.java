@@ -2,6 +2,7 @@ package com.example.uc1;
 
 import java.time.Duration;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
@@ -35,6 +36,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Copy static text on click")
+@UseCaseDescription("Copying a fixed text with one click and confirming it")
 @Menu(order = 1, title = "UC1 — Copy static text")
 public class CopyStaticTextView extends VerticalLayout {
 

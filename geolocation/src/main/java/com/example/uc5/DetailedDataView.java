@@ -2,6 +2,7 @@ package com.example.uc5;
 
 import java.time.Duration;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -27,6 +28,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Reading detailed position data")
+@UseCaseDescription("Reading altitude, heading, speed and accuracy")
 @Menu(order = 5, title = "UC5 — Detailed data")
 public class DetailedDataView extends VerticalLayout {
 

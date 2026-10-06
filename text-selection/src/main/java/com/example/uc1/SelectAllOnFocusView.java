@@ -1,5 +1,6 @@
 package com.example.uc1;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.html.H1;
@@ -22,6 +23,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Select all on focus")
+@UseCaseDescription("Selecting a field's value when it gets focus")
 @Menu(order = 1, title = "UC1 — Select all on focus")
 public class SelectAllOnFocusView extends VerticalLayout {
 

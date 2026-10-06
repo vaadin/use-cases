@@ -3,6 +3,7 @@ package com.example.uc8;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
@@ -50,6 +51,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc8", layout = MainLayout.class)
 @PageTitle("UC8 — Copy button in every grid row")
+@UseCaseDescription("Putting a copy button next to every value in a grid")
 @Menu(order = 8, title = "UC8 — Copy from a grid")
 @StyleSheet("uc8.css")
 public class CopyFromGridView extends VerticalLayout {

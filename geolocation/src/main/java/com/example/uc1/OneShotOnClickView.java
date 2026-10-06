@@ -1,5 +1,6 @@
 package com.example.uc1;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -27,6 +28,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — One-shot request on user click")
+@UseCaseDescription("Asking for the user's location with a button")
 @Menu(order = 1, title = "UC1 — One-shot request")
 public class OneShotOnClickView extends VerticalLayout {
 

@@ -2,6 +2,7 @@ package com.example.uc6;
 
 import java.time.Duration;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -27,6 +28,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Tuning precision, freshness and battery")
+@UseCaseDescription("Trading precision and freshness against battery")
 @Menu(order = 6, title = "UC6 — Tuning options")
 public class OptionsView extends VerticalLayout {
 

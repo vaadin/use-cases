@@ -1,5 +1,6 @@
 package com.example.uc2;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -24,6 +25,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Copy current value of a component")
+@UseCaseDescription("Copying whatever a field holds at the moment of the click")
 @Menu(order = 2, title = "UC2 — Copy component value")
 public class CopyComponentValueView extends VerticalLayout {
 

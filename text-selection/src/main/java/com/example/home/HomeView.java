@@ -1,6 +1,15 @@
 package com.example.home;
 
+import java.util.List;
+
 import com.example.common.BaseHomeView;
+import com.example.uc1.SelectAllOnFocusView;
+import com.example.uc2.FormatAndSelectView;
+import com.example.uc3.FindAndHighlightView;
+import com.example.uc4.ValidationJumpView;
+import com.example.uc5.InsertTemplateView;
+import com.example.uc6.LiveSelectionInfoView;
+import com.example.uc7.SelectionToolbarView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.router.Menu;
@@ -14,11 +23,14 @@ public class HomeView extends BaseHomeView {
 
     public HomeView() {
         super("Text Selection API — use cases",
-                "Each link below exercises one use case of the Text Selection "
+                "Each card below exercises one use case of the Text Selection "
                         + "API on TextField and TextArea. The API gives the "
                         + "server programmatic control over selection, cursor "
                         + "position, and clipboard, and exposes the current "
                         + "selection as a Signal so it can drive reactive UI.");
-        addMenuLinkList();
+        addMenuCards(List.of(SelectAllOnFocusView.class,
+                FormatAndSelectView.class, FindAndHighlightView.class,
+                ValidationJumpView.class, InsertTemplateView.class,
+                LiveSelectionInfoView.class, SelectionToolbarView.class));
     }
 }
