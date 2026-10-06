@@ -7,6 +7,7 @@ import com.example.uc3.PrintableListView;
 import com.example.uc4.PrintPreviewView;
 import com.example.uc5.HeaderFooterView;
 import com.example.uc6.PrintDashboardView;
+import com.example.uc7.ExpandForPrintView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.html.Div;
@@ -45,6 +46,9 @@ public class HomeView extends BaseHomeView {
         cards.add(homeCard("UC6", "Printing a dashboard",
                 "Charts reflowed to the paper width, widgets kept whole.",
                 PrintDashboardView.class));
+        cards.add(homeCard("UC7", "Expand everything for print",
+                "Folded sections opened for the paper, in the browser, and folded back after.",
+                ExpandForPrintView.class));
         add(cards);
     }
 }

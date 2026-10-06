@@ -25,21 +25,20 @@ import com.vaadin.flow.shared.Registration;
  * What these listeners cannot do is change what ends up on paper. The browser
  * paginates synchronously right after {@code beforeprint}, so by the time the
  * round trip reaches the server the page has already been laid out, and any
- * change a listener makes to the UI only shows up on screen. Hiding or
- * swapping components for print takes a print stylesheet, or a client-side
- * trigger that hides and restores them in the browser itself around
- * {@code beforeprint} and {@code afterprint}.
+ * change a listener makes to the UI only shows up on screen. Hiding or swapping
+ * components for print takes a print stylesheet, or a {@link PrintTrigger},
+ * whose actions run in the browser itself, inside the event.
  * <p>
  * The listeners are registered against an {@code AbortController} kept on
  * {@code window} under this component's own key, and
  * {@link MissingAPI#abortPrintListeners} cancels it on detach, so that
- * navigating away really removes them — a plain
- * {@code window.addEventListener} in {@code onAttach} leaks one listener per
- * visit for the lifetime of the single-page application.
+ * navigating away really removes them — a plain {@code window.addEventListener}
+ * in {@code onAttach} leaks one listener per visit for the lifetime of the
+ * single-page application.
  * <p>
  * Note what the events can and cannot tell you: {@code afterprint} fires when
- * the print dialog closes, whether the user printed, saved a PDF or
- * cancelled. The browser exposes no outcome, so neither does this class.
+ * the print dialog closes, whether the user printed, saved a PDF or cancelled.
+ * The browser exposes no outcome, so neither does this class.
  */
 public class PrintEvents extends Div {
 

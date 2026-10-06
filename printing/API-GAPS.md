@@ -9,8 +9,9 @@ The short version: **Vaadin has no printing API of any kind.** There is no
 chrome, not content", nothing for the CSS page box, and nothing that makes a
 `Grid` or a `Chart` printable. Every use case in this module is buildable
 today, and every one of them starts by writing JavaScript. That plumbing lives
-in `src/main/java/com/example/MissingAPI.java` and
-`src/main/java/com/example/print/PrintEvents.java` rather than being scattered
+in `src/main/java/com/example/MissingAPI.java`,
+`src/main/java/com/example/print/PrintEvents.java` and
+`src/main/java/com/example/print/PrintTrigger.java` rather than being scattered
 over the views.
 
 Printing is also missing from the issue trackers: it appears only as
@@ -50,8 +51,8 @@ two listeners against an `AbortController` stored in a registry on `window`
 under a key of its own, maps them to `@ClientCallable` methods, and aborts that
 controller from `onDetach` through `Page#executeJs` (not `Element#executeJs`,
 which would never be sent). `MissingAPI#withPrintListenerRegistry` and
-`#abortPrintListeners` hold that pattern, because the chart reflow below needs
-exactly the same bookkeeping.
+`#abortPrintListeners` hold that pattern. (`PrintTrigger` below does not need
+it: the trigger API removes its listener with the host.)
 **Suggested API:** `Page#addBeforePrintListener` / `addAfterPrintListener`
 returning a `Registration`, in the shape of the existing
 `Page#addBrowserWindowResizeListener`. A `printStateSignal()` in the shape of
@@ -59,9 +60,8 @@ returning a `Registration`, in the shape of the existing
 Such listeners can only observe printing, never shape it: the browser lays out
 the pages synchronously after `beforeprint`, before any round trip returns, so
 a UI change made from the server only shows on screen. Changing what is printed
-from Java would need a print trigger that runs in the browser — for example,
-hiding a set of components on `beforeprint` and restoring them on `afterprint`
-without involving the server.
+from Java needs a trigger that runs in the browser instead — see "Changing the
+page for print needs a trigger that runs in the browser" below.
 
 ## Nothing can say "this component is chrome, do not print it"
 
@@ -81,6 +81,30 @@ space its hidden ancestors occupy does not print as a blank first sheet.
 **Suggested API:** `component.setPrintable(false)`, or a
 `vaadin-app-layout` that keeps its own chrome off the paper by default, or a
 documented `@media print` contract per component.
+
+## Changing the page for print needs a trigger that runs in the browser
+
+**Where it bit us:** uc7 / ExpandForPrintView.java, uc6 / PrintDashboardView.java
+**Symptom:** some of what should change for paper cannot be said in CSS. The
+content of a closed `Details` sits in its shadow root, where a print stylesheet
+cannot open it, and a chart has to be told to re-measure. Doing it from a
+server-side `beforeprint` listener is too late: the browser lays out the pages
+synchronously right after the event, so the change only ever reaches the
+screen.
+**Workaround used:** `com.example.print.PrintTrigger`, a subclass of Flow's
+`Trigger` that fires on `window`'s `beforeprint` or `afterprint`. Its actions
+run in the browser inside the event: UC7 wires each section to the built-in
+`SetPropertyAction` and `PropertyInput` to remember its `opened` state, open it,
+and put it back afterwards; UC6 wires a small `ReflowChartsAction`. The trigger
+API installs and removes the listener with the host component, which also
+retired the hand-written `AbortController` bookkeeping UC6 used to need. The
+catch is that the whole trigger API still lives in
+`com.vaadin.flow.component.trigger.internal`.
+**Suggested API:** a public print trigger in the trigger API once it leaves
+`internal` — `PrintTrigger.beforePrint(host)` / `afterPrint(host)` in this
+shape — so that "open this, hide that, reflow those while printing" is a line
+of Java. A `Details#setOpenedWhenPrinting(true)` would cover the most common
+case without any wiring.
 
 ## A print-only route prints a blank page
 
@@ -181,11 +205,10 @@ This is the shape of
 cannot help: printing is synchronous on the client, so by the time a
 `beforeprint` round trip reached the server the page would already be
 rasterised.
-**Workaround used:** `com.example.print.ChartPrintReflow`, an invisible
-component in the same shape as `PrintEvents`: it registers a
-`beforeprint`/`afterprint` pair that calls `chart.configuration.reflow()` on
-every `vaadin-chart` in the subtree, and aborts them on detach so that
-revisiting the view does not pile up another pair.
+**Workaround used:** a `PrintTrigger` pair wired to
+`com.example.print.ReflowChartsAction`, which calls
+`chart.configuration.reflow()` on every `vaadin-chart` in the subtree on
+`beforeprint`, and again on `afterprint` for the screen.
 **Suggested API:** `Chart#setReflowOnPrint(true)`, or simply making that the
 default — a chart that prints wrong by default is a bug, not a setting.
 
@@ -214,7 +237,12 @@ a view queued, which is why `PrintTestSupport` reads
 `UIInternals#containsPendingJavascript`. That in turn has a sharp edge:
 `Page#executeJs` lands in the pending list immediately, while
 `Element#executeJs` only does after a `roundTrip()`.
-**Workaround used:** `src/test/java/com/example/PrintTestSupport.java`, plus
+Listeners installed through the trigger API are harder still: they travel as
+function arguments of a generic initializer, so `containsPendingJavascript`
+does not see them, and their removal on detach happens in the browser without
+any message from the server.
+**Workaround used:** `src/test/java/com/example/PrintTestSupport.java` —
+which also unpacks those function arguments — plus
 calling `PrintEvents#beforePrint()` / `#afterPrint()` directly to stand in for
 the browser's events.
 **Suggested API:** a `PrintSimulator` in the test kit that fires the print

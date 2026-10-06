@@ -43,10 +43,10 @@ public final class MissingAPI {
      * round trip.
      * <p>
      * A print-only route that calls {@link #print(UI)} straight from
-     * {@code onAttach} prints an empty page: the JavaScript is delivered in
-     * the same response as the DOM changes, and {@code window.print()} blocks
-     * the main thread before the browser has laid them out. Two nested
-     * animation frames are the portable way to wait for that.
+     * {@code onAttach} prints an empty page: the JavaScript is delivered in the
+     * same response as the DOM changes, and {@code window.print()} blocks the
+     * main thread before the browser has laid them out. Two nested animation
+     * frames are the portable way to wait for that.
      *
      * @param ui
      *            the UI to print
@@ -74,9 +74,9 @@ public final class MissingAPI {
      * classic "print window" that shows nothing but the document.
      * <p>
      * {@link com.vaadin.flow.component.page.Page#open(String, String)} takes a
-     * window name but no window features, so the size and the chrome of the
-     * new window cannot be influenced through it. That leaves
-     * {@code window.open} and a string of features.
+     * window name but no window features, so the size and the chrome of the new
+     * window cannot be influenced through it. That leaves {@code window.open}
+     * and a string of features.
      *
      * @param ui
      *            the UI that opens the window
@@ -96,9 +96,9 @@ public final class MissingAPI {
      * through {@code Element#getStyle()} or a component class name; the only
      * way to change it at runtime is to write a {@code <style>} element into
      * the head. The rule is replaced, not appended, so repeated calls do not
-     * pile up — but it is a property of the <em>document</em>, not of the
-     * view that set it, so a view that sets it must also
-     * {@link #clearPageRule(UI) clear it} when the user navigates away.
+     * pile up — but it is a property of the <em>document</em>, not of the view
+     * that set it, so a view that sets it must also {@link #clearPageRule(UI)
+     * clear it} when the user navigates away.
      *
      * @param ui
      *            the UI whose page box to set
@@ -118,9 +118,9 @@ public final class MissingAPI {
     }
 
     /**
-     * Removes the {@code @page} rule set by
-     * {@link #setPageRule(UI, String)}, so that the next view prints on the
-     * browser's default paper rather than on the last one someone chose.
+     * Removes the {@code @page} rule set by {@link #setPageRule(UI, String)},
+     * so that the next view prints on the browser's default paper rather than
+     * on the last one someone chose.
      *
      * @param ui
      *            the UI whose page box to reset
@@ -133,13 +133,13 @@ public final class MissingAPI {
     /**
      * Aborts the window-level print listeners registered under {@code key}.
      * <p>
-     * Both {@link com.example.print.PrintEvents} and
-     * {@link com.example.print.ChartPrintReflow} listen on {@code window},
-     * which outlives any view, and JavaScript scheduled on an element that is
-     * being detached is dropped before it reaches the browser. They therefore
-     * park their {@code AbortController} in a registry on {@code window} under
-     * a key of their own, and cancel it from {@code onDetach} through the
-     * Page.
+     * {@link com.example.print.PrintEvents} listens on {@code window}, which
+     * outlives any view, and JavaScript scheduled on an element that is being
+     * detached is dropped before it reaches the browser. It therefore parks its
+     * {@code AbortController} in a registry on {@code window} under a key of
+     * its own, and cancels it from {@code onDetach} through the Page.
+     * {@link com.example.print.PrintTrigger} does not need this: the trigger
+     * API removes its listener when the host is detached.
      *
      * @param ui
      *            the UI the listeners were registered in
@@ -157,14 +157,14 @@ public final class MissingAPI {
     }
 
     /**
-     * The JavaScript prologue both window-listener shims share: abort what an
-     * earlier instance registered under the same key, then open a fresh
+     * The JavaScript prologue of a window-listener shim: abort what an earlier
+     * instance registered under the same key, then open a fresh
      * {@code AbortController} and expose its {@code signal} to the statements
      * that follow.
      * <p>
-     * Concatenated into the caller's script rather than executed on its own,
-     * so that the listeners are registered in the same round trip that opens
-     * the controller.
+     * Concatenated into the caller's script rather than executed on its own, so
+     * that the listeners are registered in the same round trip that opens the
+     * controller.
      *
      * @param script
      *            the JavaScript that registers the listeners; it can use

@@ -9,10 +9,11 @@ import java.util.stream.Collectors;
 import com.example.MissingAPI;
 import com.example.data.Order;
 import com.example.data.Orders;
-import com.example.print.ChartPrintReflow;
 import com.example.print.OrderDocument;
 import com.example.print.PrintColumn;
 import com.example.print.PrintColumns;
+import com.example.print.PrintTrigger;
+import com.example.print.ReflowChartsAction;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
@@ -45,8 +46,9 @@ import com.vaadin.flow.router.Route;
  * <li>A chart sizes its SVG once, in pixels, when it is drawn. Print CSS
  * changes the layout width underneath it and nothing tells the chart to
  * re-measure, so it prints clipped or overflowing. The fix is a
- * {@code beforeprint} listener that reflows every chart — client-side, because
- * printing is synchronous and the server cannot answer in time.</li>
+ * {@link PrintTrigger} that reflows every chart on {@code beforeprint} —
+ * client-side, because printing is synchronous and the server cannot answer in
+ * time.</li>
  * <li>A dashboard lays itself out in columns sized for a screen. On A4 those
  * columns are too narrow to read, so print CSS collapses the dashboard to a
  * single column and forbids breaking a widget across sheets.</li>
@@ -99,7 +101,14 @@ public class PrintDashboardView extends VerticalLayout {
                 widget("Orders per week", volumeChart(orders)),
                 widget("Largest orders", topOrders(orders)));
 
-        add(intro, print, dashboard, new ChartPrintReflow(dashboard));
+        add(intro, print, dashboard);
+
+        // Reflow for the paper, then for the screen again. Both run in the
+        // browser: the server could not answer before the page is laid out.
+        PrintTrigger.beforePrint(dashboard)
+                .triggers(new ReflowChartsAction(dashboard));
+        PrintTrigger.afterPrint(dashboard)
+                .triggers(new ReflowChartsAction(dashboard));
     }
 
     private static DashboardWidget widget(String title, Component content) {

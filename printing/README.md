@@ -10,7 +10,7 @@ way to mark a component as chrome rather than content, nothing for the CSS page
 box, and nothing that makes a `Grid` or a `Chart` printable. Every view here is
 built on `src/main/resources/META-INF/resources/print.css` and a handful of
 JavaScript shims in `com.example.MissingAPI` and `com.example.print`
-(`PrintEvents`, `ChartPrintReflow`). That is
+(`PrintEvents`, `PrintTrigger`). That is
 the point of the module: the use cases are all achievable today, and
 [API-GAPS.md](API-GAPS.md) records what each one had to work around to get
 there.
@@ -23,6 +23,7 @@ there.
 | UC4 | Paper setup and preview | Paper size, orientation and margins, previewed at true size on screen and applied to the real page box through an injected `@page` rule. |
 | UC5 | Letterhead and page numbers | A 64-line order paginated by the server into numbered sheets, because no browser implements CSS page counters for content pages. |
 | UC6 | Printing a dashboard | Charts reflowed to the paper width on `beforeprint`, the dashboard collapsed to one column, every widget kept whole. |
+| UC7 | Expand everything for print | Folded `Details` sections opened on `beforeprint` and put back as the user left them on `afterprint` — in the browser, through a `PrintTrigger` wired to built-in actions, because a server-side listener answers after the pages are laid out. |
 
 Data export is deliberately **not** part of this module — that is
 [vaadin/platform#7196](https://github.com/vaadin/platform/issues/7196) and the
