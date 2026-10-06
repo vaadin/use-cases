@@ -321,3 +321,100 @@
 .catalog-summary {
     color: var(--vaadin-text-color-secondary);
 }
+
+/* UC4's trail: one interaction's spans, nested by parent on a shared
+   timeline. Built on the meter table's typography, with a timeline column
+   that has to stay wide enough for a bar to mean something. */
+.trail-table {
+    border-collapse: collapse;
+    margin-block: 0.5rem 0.75rem;
+    table-layout: fixed;
+}
+
+.trail-table th {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--vaadin-text-color-secondary);
+    text-align: start;
+    padding: 0.375rem 0.75rem 0.375rem 0;
+    border-bottom: 1px solid var(--vaadin-border-color);
+}
+
+.trail-table td {
+    padding: 0.375rem 0.75rem 0.375rem 0;
+    border-bottom: 1px solid var(--vaadin-border-color-secondary,
+        var(--vaadin-border-color));
+    vertical-align: middle;
+}
+
+/* Fixed layout, so the columns are sized here rather than by their content:
+   the timeline is a bar with no intrinsic width and would otherwise collapse,
+   and the attribute chips would otherwise take the whole row. */
+.trail-table th:nth-child(1),
+.trail-table td:nth-child(1) {
+    width: 28%;
+}
+
+.trail-table th:nth-child(2),
+.trail-table td:nth-child(2) {
+    width: 24%;
+}
+
+.trail-table th:nth-child(3),
+.trail-table td:nth-child(3) {
+    width: 6.5em;
+    text-align: end;
+}
+
+/* The timeline column: a full-width track the span's bar sits in, so a row's
+   bar reads as "this is when it ran, and for how long". */
+.trail-track {
+    width: 100%;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb,
+        var(--vaadin-text-color-secondary) 12%, transparent);
+}
+
+.trail-bar {
+    height: 100%;
+    min-width: 2px;
+    border-radius: 999px;
+    background: var(--aura-accent-color, var(--vaadin-text-color-secondary));
+}
+
+/* A span name and, under it, the failure recorded on that span. */
+.trail-name {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.125rem;
+}
+
+.trail-error {
+    font-family: var(--vaadin-font-family-monospace, ui-monospace, monospace);
+    font-size: 0.75rem;
+    color: var(--aura-accent-text-color, var(--vaadin-text-color-secondary));
+    overflow-wrap: anywhere;
+}
+
+.trail-attributes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+/* An attribute chip may be a SQL statement or a fully qualified class name,
+   so these wrap inside the column rather than run past its edge — unlike the
+   short meter and tag names chips are normally used for. */
+.trail-attributes .metric {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+/* The failing row, in the error accent the insight cards use. */
+.trail-failed {
+    background: var(--aura-accent-surface, transparent);
+}

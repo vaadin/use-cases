@@ -1,0 +1,238 @@
+name: PR Preview
+
+# Deploys the use-case apps a pull request touches to Fly.io, so their views can
+# be tried in a browser before the pull request is merged, and destroys them
+# when the pull request is closed. The deployment is opt-in per pull request:
+# it starts once the "deploy preview" label is added, runs again for every
+# commit pushed while the label is there, and is destroyed when the label is
+# removed.
+#
+# Unlike fly-deploy.yml, a change to a shared file (common/, the parent pom)
+# does not deploy everything: only the deployables (directories holding a
+# fly.toml) with a changed file under them are picked, at most
+# MAX_PREVIEW_APPS of them. Each one runs as its own Fly app named
+# <production app>-pr-<number>, scaled to zero while idle. A preview always
+# uses the production sidecar apps of a module (observability's Prometheus and
+# Grafana): the apps address each other by their production names, fixed in
+# the module's configuration, so a preview of observability links to the
+# production sidecars, and a preview of a sidecar connects to the production
+# observability app.
+on:
+  pull_request:
+    types: [labeled, unlabeled, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+
+concurrency:
+  # Only the newest commit is worth deploying, and closing the pull request or
+  # removing the label supersedes any deployment still running. A run that does
+  # nothing - a push or reopening without the label, adding or removing any
+  # other label - gets a group of its own instead, so that it cannot cancel a
+  # cleanup still destroying the preview. Only a run that deploys again, which
+  # reuses the apps, may supersede a cleanup.
+  group: >-
+    ${{ github.workflow }}-${{ github.event.number }}${{
+    !(github.event.action == 'closed'
+      || (github.event.label && github.event.label.name == 'deploy preview')
+      || (!github.event.label && contains(github.event.pull_request.labels.*.name, 'deploy preview')))
+    && format('-{0}', github.run_id) || '' }}
+  cancel-in-progress: true
+
+env:
+  FLY_ORG: ${{ vars.FLY_ORG }}
+  MAX_PREVIEW_APPS: 3
+  _HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+  _PR_NUMBER: ${{ github.event.number }}
+
+jobs:
+  discover:
+    name: Discover modules
+    # Secrets are only handed to pull requests from a branch of this
+    # repository. Deploying a fork would mean running its code with the Fly.io
+    # token, so forks are skipped.
+    #
+    # The label has to be present for every event type, and a `labeled` event
+    # for some other label must not start a deployment of its own.
+    if: >-
+      !github.event.pull_request.head.repo.fork
+      && contains(github.event.pull_request.labels.*.name, 'deploy preview')
+      && (github.event.action == 'synchronize' || github.event.action == 'reopened'
+        || (github.event.action == 'labeled' && github.event.label.name == 'deploy preview'))
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.find.outputs.apps }}
+      skipped: ${{ steps.find.outputs.skipped }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env._HEAD_SHA }}
+      - id: find
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # The deployables on the pull request's head, so that a module the
+          # pull request adds is found too
+          all_modules=$(find . -mindepth 2 -maxdepth 3 -name fly.toml -printf '%h\n' \
+            | sed 's|^\./||' \
+            | sort)
+
+          # The files the pull request changes, as GitHub computes them against
+          # its base branch, which spares a full-history checkout
+          changed=$(gh api "repos/${{ github.repository }}/pulls/$_PR_NUMBER/files" --paginate --jq '.[].filename')
+          echo "Changed files:"
+          echo "$changed"
+
+          selected=""
+          for module in $all_modules; do
+            if echo "$changed" | grep -q "^$module/"; then
+              app=$(sed -nE "s/^app *= *['\"]([^'\"]+)['\"].*/\1/p" "$module/fly.toml")
+              selected="$selected$module $app"$'\n'
+            fi
+          done
+          count=$(printf '%s' "$selected" | grep -c . || true)
+
+          skipped=""
+          if [ "$count" -gt "$MAX_PREVIEW_APPS" ]; then
+            skipped="The pull request changes $count apps, more than the $MAX_PREVIEW_APPS a preview deploys."
+            selected=""
+          elif [ "$count" -eq 0 ]; then
+            skipped="The pull request changes no app directory (one holding a fly.toml)."
+          fi
+
+          apps=$(printf '%s' "$selected" \
+            | jq -R -s -c 'split("\n") | map(select(length > 0) | split(" ")
+                | {module: .[0], production: .[1], app: "\(.[1])-pr-\(env._PR_NUMBER)"})')
+          echo "Selected apps: $apps"
+          echo "apps=$apps" >> "$GITHUB_OUTPUT"
+          echo "skipped=$skipped" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: discover
+    if: needs.discover.outputs.apps != '[]'
+    name: Deploy ${{ matrix.module }}
+    timeout-minutes: 45
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.discover.outputs.apps) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env._HEAD_SHA }}
+      - uses: docker/setup-buildx-action@v3
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Write the preview configuration
+        env:
+          MODULE: ${{ matrix.module }}
+          APP: ${{ matrix.app }}
+        # The module's own fly.toml under the preview app's name, stopped while
+        # nobody uses it instead of always running like the production app
+        run: |
+          sed -E \
+            -e "s/^app *=.*/app = '$APP'/" \
+            -e "s/^( *)auto_stop_machines *=.*/\1auto_stop_machines = 'stop'/" \
+            -e "s/^( *)min_machines_running *=.*/\1min_machines_running = 0/" \
+            "$MODULE/fly.toml" > preview-fly.toml
+          cat preview-fly.toml
+      - name: Create the Fly.io app
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          APP: ${{ matrix.app }}
+        # In the FLY_ORG repository variable's organization, or else in the one
+        # the production apps the token deploys live in
+        run: |
+          apps=$(flyctl apps list --json)
+          if ! echo "$apps" | jq -e --arg name "$APP" '.[] | select(.Name == $name)' > /dev/null; then
+            org=${FLY_ORG:-$(echo "$apps" | jq -r 'first.Organization.Slug // "personal"')}
+            flyctl apps create "$APP" --org "$org"
+          fi
+          flyctl auth docker
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.module }}/Dockerfile
+          push: true
+          tags: registry.fly.io/${{ matrix.app }}:${{ env._HEAD_SHA }}
+          secrets: |
+            proKey=${{ secrets.VAADIN_PRO_KEY }}
+          # Reuses the layers fly-deploy.yml caches for the production app, and
+          # writes none of its own, so previews do not evict them
+          cache-from: type=gha,scope=${{ matrix.production }}
+      - run: flyctl deploy --image registry.fly.io/${{ matrix.app }}:${{ env._HEAD_SHA }} --config preview-fly.toml --ha=false
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+  comment:
+    needs: [discover, deploy]
+    if: always() && needs.discover.result == 'success'
+    name: Comment the preview
+    runs-on: ubuntu-latest
+    permissions:
+      # To read the outcome of each deploy job of the matrix
+      actions: read
+      pull-requests: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPS: ${{ needs.discover.outputs.apps }}
+          SKIPPED: ${{ needs.discover.outputs.skipped }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          marker='<!-- use-cases-pr-preview -->'
+          {
+            echo "$marker"
+            if [ -n "$SKIPPED" ]; then
+              echo "No preview deployed for ${_HEAD_SHA}: $SKIPPED"
+            else
+              # One app failing leaves the others deployed, so each one is
+              # listed with the outcome of its own job
+              jobs=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs" \
+                --paginate --jq '.jobs[] | {name, conclusion}' | jq -s -c .)
+              echo "Preview of ${_HEAD_SHA}:"
+              echo
+              echo "$APPS" | jq -r --argjson jobs "$jobs" --arg run "$RUN_URL" '.[]
+                | . as $app
+                | ($jobs | map(select(.name == "Deploy \($app.module)")) | first | .conclusion // "missing") as $result
+                | if $result == "success" then "- `\(.module)`: https://\(.app).fly.dev"
+                  else "- `\(.module)`: deployment \($result), see [the workflow run](\($run))" end'
+            fi
+            echo
+            echo "Removing the \`deploy preview\` label or closing the pull request destroys the preview."
+          } > preview-comment.md
+          existing=$(gh api "repos/${{ github.repository }}/issues/$_PR_NUMBER/comments" --paginate \
+            --jq "[.[] | select(.body | startswith(\"$marker\")) | .id] | first // empty")
+          existing=${existing%%$'\n'*}
+          if [ -n "$existing" ]; then
+            gh api --method PATCH "repos/${{ github.repository }}/issues/comments/$existing" -F body=@preview-comment.md
+          else
+            gh api "repos/${{ github.repository }}/issues/$_PR_NUMBER/comments" -F body=@preview-comment.md
+          fi
+
+  cleanup:
+    # Merged or not, a closed pull request needs no preview, and neither does
+    # one the label is removed from. A reopened one that still has the label is
+    # deployed again. A pull request closed without the label has nothing left
+    # to destroy: removing the label already did it.
+    if: >-
+      !github.event.pull_request.head.repo.fork
+      && ((github.event.action == 'closed' && contains(github.event.pull_request.labels.*.name, 'deploy preview'))
+        || (github.event.action == 'unlabeled' && github.event.label.name == 'deploy preview'))
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Destroy the Fly.io apps
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        # Every app a deployment of this pull request created, including one
+        # for a module a later commit no longer changes
+        run: |
+          apps=$(flyctl apps list --json | jq -r --arg suffix "-pr-$_PR_NUMBER" '.[].Name | select(endswith($suffix))')
+          if [ -z "$apps" ]; then
+            echo "No preview apps for pull request $_PR_NUMBER, nothing to destroy"
+          fi
+          for app in $apps; do
+            flyctl apps destroy "$app" --yes
+          done
