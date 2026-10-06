@@ -20,8 +20,15 @@ import com.vaadin.flow.shared.Registration;
  * so there is no way to hear them without writing JavaScript. This invisible
  * component does that once and turns the two events into ordinary server-side
  * listeners: add it to a view and an application can log that a document was
- * printed, stamp it with "printed by", or swap in a print-friendly rendering
- * while the page is being paginated.
+ * printed, or record who printed it and when.
+ * <p>
+ * What these listeners cannot do is change what ends up on paper. The browser
+ * paginates synchronously right after {@code beforeprint}, so by the time the
+ * round trip reaches the server the page has already been laid out, and any
+ * change a listener makes to the UI only shows up on screen. Hiding or
+ * swapping components for print takes a print stylesheet, or a client-side
+ * trigger that hides and restores them in the browser itself around
+ * {@code beforeprint} and {@code afterprint}.
  * <p>
  * The listeners are registered against an {@code AbortController} kept on
  * {@code window} under this component's own key, and
@@ -50,6 +57,10 @@ public class PrintEvents extends Div {
     /**
      * Adds a listener notified when the browser is about to paginate the
      * document.
+     * <p>
+     * The listener runs on the server after the browser has already laid out
+     * the printed pages, so changes it makes to the UI do not affect what is
+     * printed; see the class documentation.
      *
      * @param listener
      *            the listener to add

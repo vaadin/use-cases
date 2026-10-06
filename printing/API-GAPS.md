@@ -56,6 +56,12 @@ exactly the same bookkeeping.
 returning a `Registration`, in the shape of the existing
 `Page#addBrowserWindowResizeListener`. A `printStateSignal()` in the shape of
 `pageVisibilitySignal()` would fit the 25.x style even better.
+Such listeners can only observe printing, never shape it: the browser lays out
+the pages synchronously after `beforeprint`, before any round trip returns, so
+a UI change made from the server only shows on screen. Changing what is printed
+from Java would need a print trigger that runs in the browser — for example,
+hiding a set of components on `beforeprint` and restoring them on `afterprint`
+without involving the server.
 
 ## Nothing can say "this component is chrome, do not print it"
 
