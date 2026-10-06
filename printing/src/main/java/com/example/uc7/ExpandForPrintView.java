@@ -8,6 +8,7 @@ import com.example.data.Orders;
 import com.example.print.OrderDocument;
 import com.example.print.PrintColumns;
 import com.example.print.PrintTrigger;
+import com.example.print.RenderNowAction;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
@@ -35,8 +36,10 @@ import com.vaadin.flow.router.Route;
  * the pages.
  * <p>
  * So the change has to happen in the browser, inside the event. Each section
- * gets a pair of {@link PrintTrigger}s wired to built-in actions only: on
- * {@code beforeprint} it remembers whether it was open and opens, on
+ * gets a pair of {@link PrintTrigger}s: on {@code beforeprint} it remembers
+ * whether it was open, opens, and renders that at once with a
+ * {@link RenderNowAction} — the Print button starts printing from script, where
+ * the component would otherwise render too late for the paper. On
  * {@code afterprint} it goes back to what it was. No round trip, no
  * hand-written JavaScript in the view, and the user's own choice of open
  * sections survives printing.
@@ -112,7 +115,8 @@ public class ExpandForPrintView extends VerticalLayout {
                         new SetPropertyAction<>(section, OPENED_ON_SCREEN,
                                 new PropertyInput<>(section, "opened",
                                         Boolean.class)),
-                        new SetPropertyAction<>(section, "opened", true));
+                        new SetPropertyAction<>(section, "opened", true),
+                        new RenderNowAction(section));
         PrintTrigger.afterPrint(section).triggers(new SetPropertyAction<>(
                 section, "opened",
                 new PropertyInput<>(section, OPENED_ON_SCREEN, Boolean.class)));
