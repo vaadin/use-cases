@@ -2,6 +2,7 @@ package com.example.uc7;
 
 import java.util.Base64;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.clipboard.Clipboard;
@@ -34,6 +35,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Paste files")
+@UseCaseDescription("Receiving pasted images and files on the server")
 @Menu(order = 7, title = "UC7 — Paste files")
 @StyleSheet("paste-drop-zone.css")
 @StyleSheet("uc7.css")

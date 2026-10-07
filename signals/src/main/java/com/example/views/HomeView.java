@@ -1,7 +1,5 @@
 package com.example.views;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -12,11 +10,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @Route(value = "", layout = MainLayout.class)
 @PageTitle("Signal API Use Cases - Home")
 @Menu(order = 0, title = "Home")
-@PermitAll
+@AnonymousAllowed
 public class HomeView extends VerticalLayout {
 
     public HomeView() {
@@ -30,7 +29,7 @@ public class HomeView extends VerticalLayout {
 
         // Introduction
         Paragraph intro = new Paragraph(
-                "This application demonstrates 29 use cases (23 single-user + 6 multi-user) for the Vaadin Signal API. "
+                "This application demonstrates 30 use cases (23 single-user + 7 multi-user) for the Vaadin Signal API. "
                         + "Each use case validates different aspects of the reactive programming model, from basic "
                         + "one-way bindings to complex forms, AI integration, and multi-user collaboration.");
 
@@ -53,10 +52,10 @@ public class HomeView extends VerticalLayout {
         stats.setSpacing(false);
         stats.setPadding(false);
         stats.add(
-                createStat("29",
-                        "Total use cases (23 single-user + 6 multi-user)"),
+                createStat("30",
+                        "Total use cases (23 single-user + 7 multi-user)"),
                 createStat("23", "Single-user use cases across 11 categories"),
-                createStat("6", "Multi-user collaboration use cases"));
+                createStat("7", "Multi-user collaboration use cases"));
 
         // Categories
         H2 categoriesTitle = new H2("Use Case Categories");
@@ -85,8 +84,8 @@ public class HomeView extends VerticalLayout {
                         "Reactive i18n, two-way mapped signals, real-time dashboard"),
                 createCategory("VirtualList & Streaming", "UC24-25",
                         "VirtualList notification inbox, real-time stock ticker"),
-                createCategory("Multi-User Collaboration", "MUC01-04, MUC06-07",
-                        "Chat, cursors, click race game, collaborative editing, shared tasks, shared LLM tasks"));
+                createCategory("Multi-User Collaboration", "MUC01-04, MUC06-08",
+                        "Chat, cursors, click race game, collaborative editing, shared tasks, shared LLM tasks, broadcast announcements"));
 
         // Documentation Link
         H2 docsTitle = new H2("Documentation");

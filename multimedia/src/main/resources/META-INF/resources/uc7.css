@@ -1,0 +1,22 @@
+.uc7-view {
+    video {
+        border-radius: var(--vaadin-radius-m);
+        background: black;
+    }
+
+    .time {
+        font-variant-numeric: tabular-nums;
+        color: var(--vaadin-text-color-secondary);
+    }
+
+    .chapters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .chapter.current {
+        background: color-mix(in srgb, var(--aura-blue) 14%, transparent);
+        font-weight: 600;
+    }
+}

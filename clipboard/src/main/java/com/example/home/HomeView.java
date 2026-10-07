@@ -1,6 +1,16 @@
 package com.example.home;
 
+import java.util.List;
+
 import com.example.common.BaseHomeView;
+import com.example.uc1.CopyStaticTextView;
+import com.example.uc2.CopyComponentValueView;
+import com.example.uc3.CopyRichContentView;
+import com.example.uc4.CopyImageView;
+import com.example.uc5.PasteSpreadsheetView;
+import com.example.uc6.CopyFromContextMenuView;
+import com.example.uc7.PasteFilesView;
+import com.example.uc8.CopyFromGridView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.html.Anchor;
@@ -17,8 +27,12 @@ public class HomeView extends BaseHomeView {
 
     public HomeView() {
         super("Clipboard API — use cases",
-                "Each link below exercises one use case of the Vaadin Flow Clipboard API.");
-        addMenuLinkList();
+                "Each card below exercises one use case of the Vaadin Flow Clipboard API.");
+        addMenuCards(List.of(CopyStaticTextView.class,
+                CopyComponentValueView.class, CopyRichContentView.class,
+                CopyImageView.class, PasteSpreadsheetView.class,
+                CopyFromContextMenuView.class, PasteFilesView.class,
+                CopyFromGridView.class));
         Anchor inspector = new Anchor(
                 "https://evercoder.github.io/clipboard-inspector/",
                 "Clipboard Inspector");

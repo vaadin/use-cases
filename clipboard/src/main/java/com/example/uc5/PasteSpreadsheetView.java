@@ -3,6 +3,7 @@ package com.example.uc5;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -33,6 +34,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Paste a table from a spreadsheet")
+@UseCaseDescription("Pasting cells from a spreadsheet into a grid")
 @Menu(order = 5, title = "UC5 — Paste a table")
 @StyleSheet("paste-drop-zone.css")
 public class PasteSpreadsheetView extends VerticalLayout {
