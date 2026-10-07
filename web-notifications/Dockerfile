@@ -4,6 +4,9 @@ FROM eclipse-temurin:25-jdk AS build
 COPY --from=jq-stage /jq /usr/bin/jq
 # Test that jq works after copying
 RUN jq --version
+# Node 26 (downloaded by the Vaadin build) links against libatomic
+RUN apt-get update && apt-get install -y --no-install-recommends libatomic1 \
+    && rm -rf /var/lib/apt/lists/*
 
 ENV HOME=/app
 RUN mkdir -p $HOME
