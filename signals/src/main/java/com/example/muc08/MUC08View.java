@@ -1,7 +1,5 @@
 package com.example.muc08;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.security.CurrentUserSignal;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.ActiveUsersDisplay;
@@ -23,6 +21,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 
@@ -44,19 +43,14 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @PageTitle("MUC 8: Broadcast Announcement")
 @Menu(order = 57, title = "MUC 8: Broadcast Announcement")
 @StyleSheet("muc08.css")
-@PermitAll
+@AnonymousAllowed
 public class MUC08View extends VerticalLayout {
 
     public MUC08View(CurrentUserSignal currentUserSignal,
             MUC08Signals muc08Signals,
             UserSessionRegistry userSessionRegistry) {
-        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .peek();
-        if (userInfo == null || !userInfo.isAuthenticated()) {
-            throw new IllegalStateException(
-                    "User must be authenticated to access this view");
-        }
-        String currentUser = userInfo.getUsername();
+        String currentUser = currentUserSignal.getUserSignal().peek()
+                .getUsername();
 
         addClassName("muc08-view");
         setSpacing(true);

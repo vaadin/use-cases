@@ -17,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The demo app must be explorable without logging in first: an anonymous
- * visitor opening a use case is served the page instead of being redirected to
- * the login view.
+ * visitor opening a use case is served the page (and its per-view stylesheet)
+ * instead of being redirected to the login view.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AnonymousAccessTest {
@@ -27,8 +27,8 @@ class AnonymousAccessTest {
     private int port;
 
     @ParameterizedTest
-    @ValueSource(strings = { "/", "/use-case-01", "/muc-01" })
-    void anonymousVisitor_isServedView_notRedirectedToLogin(String path)
+    @ValueSource(strings = { "/", "/use-case-01", "/muc-01", "/muc08.css" })
+    void anonymousVisitor_isServedPage_notRedirectedToLogin(String path)
             throws Exception {
         HttpClient client = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NEVER).build();

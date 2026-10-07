@@ -3,6 +3,7 @@ package com.example.muc08;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -86,6 +87,25 @@ class MUC08ViewTest extends SpringBrowserlessTest {
                 .peek();
         assertNotNull(stored);
         assertEquals("user", stored.author());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void anonymousVisitorCanPostAsGuest() {
+        navigate(MUC08View.class);
+        runPendingSignalsTasks();
+
+        test(findInView(TextArea.class).single())
+                .setValue("Hello from a guest");
+        test(button("Post announcement")).click();
+        runPendingSignalsTasks();
+
+        MUC08Signals.Announcement stored = muc08Signals.getAnnouncementSignal()
+                .peek();
+        assertNotNull(stored);
+        assertTrue(stored.author().matches("guest-\\d+"),
+                () -> "Unexpected guest author " + stored.author());
+        assertTrue(bannerShown());
     }
 
     @Test
