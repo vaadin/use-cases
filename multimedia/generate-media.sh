@@ -4,9 +4,10 @@
 # Needs ffmpeg built with libx264, libsvtav1, libmp3lame and
 # drawtext, plus jq and Node.js. Narration is spoken by the ElevenLabs API
 # through tts.mjs, so ELEVENLABS_API_KEY must be set (responses are cached,
-# see tts.mjs); the quarterly review and the product trailer are HeyGen
-# recordings instead, see REVIEW_SOURCE and TRAILER_SOURCE below. The generated files are committed, so running this is
-# only needed when the samples change.
+# see tts.mjs); the UC1 recordings, the quarterly review and the product
+# trailer are HeyGen recordings instead, see SPRINT_41_SOURCE,
+# SPRINT_42_SOURCE, REVIEW_SOURCE and TRAILER_SOURCE below. The generated
+# files are committed, so running this is only needed when the samples change.
 #
 # Private media (served through DownloadHandlers) goes to
 # src/main/resources/media; public media (served as static files) goes to
@@ -20,15 +21,13 @@ WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
 mkdir -p "$PRIVATE/hls" "$PRIVATE/subtitles" "$PUBLIC/podcast"
 
-FONT=${FONT:-/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf}
 FONT_BOLD=${FONT_BOLD:-/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf}
 FF="ffmpeg -hide_banner -loglevel error -y"
 # Two-second GOP so seeking and HLS segment boundaries land on keyframes.
 X264="-c:v libx264 -preset slow -pix_fmt yuv420p -g 50 -keyint_min 50 -sc_threshold 0"
 
-# ElevenLabs premade voices.
-PRESENTER=iP95p4xoKVk53GoZ742B  # Chris: charming, down-to-earth
-HOST=JBFqnCBsd6RMkjVDRZzb       # George: warm, captivating storyteller
+# ElevenLabs premade voice.
+HOST=JBFqnCBsd6RMkjVDRZzb  # George: warm, captivating storyteller
 
 # say <voice> <seconds> <out.wav> <segment>...: speech padded to a fixed
 # length. Prints the [start, end] times of the segments as JSON.
@@ -50,17 +49,6 @@ say() {
 # vtt_time <seconds>: formats a cue time as mm:ss.mmm.
 vtt_time() {
     awk -v t="$1" 'BEGIN { m = int(t / 60); printf "%02d:%06.3f", m, t - m * 60 }'
-}
-
-# slide <color> <title> <subtitle> <seconds> <out.mp4> [size]: a titled
-# colour card with a running timecode, silent.
-slide() {
-    local size=${6:-640x360}
-    $FF -f lavfi -i "color=c=$1:s=$size:r=25:d=$4" -vf "\
-drawtext=fontfile=$FONT_BOLD:text='$2':fontcolor=white:fontsize=h/9:x=(w-tw)/2:y=h*0.36,\
-drawtext=fontfile=$FONT:text='$3':fontcolor=white@0.85:fontsize=h/20:x=(w-tw)/2:y=h*0.52,\
-drawtext=fontfile=$FONT:text='%{pts\:hms}':fontcolor=white@0.7:fontsize=h/22:x=w-tw-h/20:y=h-th-h/20" \
-        $X264 -t "$4" "$5"
 }
 
 # --- The quarterly review (UC2, UC3, UC7, UC8, UC9) ---
@@ -163,13 +151,17 @@ $FF -i "${REVIEW_SOURCE:-$PRIVATE/quarterly-review.mp4}" -filter_complex "\
     "$PRIVATE/hls/%v/index.m3u8"
 
 # --- Per-user recordings with posters (UC1) ---
-for recording in "sprint-41|#0f766e|Sprint 41 review|Sprint forty-one review. Search is now twice as fast, and the export button is back." \
-                 "sprint-42|#be123c|Sprint 42 review|Sprint forty-two review. Dark mode has shipped, and the mobile layout was reworked."; do
-    IFS='|' read -r id color title text <<< "$recording"
-    slide "$color" "$title" "Team recording" 10 "$WORK/$id.mp4"
-    say "$PRESENTER" 10 "$WORK/$id.wav" "$text" > /dev/null
-    $FF -i "$WORK/$id.mp4" -i "$WORK/$id.wav" -c:v copy -c:a aac -b:a 64k \
-        -movflags +faststart "$PRIVATE/$id.mp4"
+# Avatar videos recorded with HeyGen, one presenter and setting each. Pass
+# the HeyGen exports (1080p) as SPRINT_41_SOURCE and SPRINT_42_SOURCE to
+# re-encode them and take a new poster; otherwise the committed files are
+# kept.
+SPRINT_41_SOURCE=${SPRINT_41_SOURCE:-}
+SPRINT_42_SOURCE=${SPRINT_42_SOURCE:-}
+for recording in "sprint-41|$SPRINT_41_SOURCE" "sprint-42|$SPRINT_42_SOURCE"; do
+    IFS='|' read -r id source <<< "$recording"
+    [[ -n $source ]] || continue
+    $FF -i "$source" -vf scale=1280:720 $X264 -crf 32 \
+        -c:a aac -b:a 64k -ac 1 -movflags +faststart "$PRIVATE/$id.mp4"
     $FF -ss 1 -i "$PRIVATE/$id.mp4" -frames:v 1 -q:v 4 "$PRIVATE/$id-poster.jpg"
 done
 
