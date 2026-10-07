@@ -26,8 +26,7 @@ class FormatFallbackViewTest extends SpringBrowserlessTest {
         Video video = findInView(Video.class).single();
         assertEquals(List.of(FormatFallbackView.AV1, FormatFallbackView.H264),
                 video.getSources().stream().map(Source::getSrc).toList());
-        assertTrue(video.getSources().get(0).getType().orElseThrow()
-                .contains("av01"));
+        assertTrue(video.getSources().get(0).getType().contains("av01"));
     }
 
     @Test

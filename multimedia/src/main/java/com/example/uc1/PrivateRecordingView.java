@@ -5,6 +5,7 @@ import java.util.List;
 import com.example.MediaLibrary;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -15,9 +16,12 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Video;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.signals.Signal;
@@ -32,12 +36,14 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * {@link DownloadHandler}s: the URLs are tied to this session and this
  * component, and stop working when either goes away. The poster shows before
  * playback starts, and {@link Media.Preload#METADATA} fetches only enough to
- * show the duration.
+ * show the duration. The selected recording is part of the URL, such as
+ * {@code uc1/sprint-42}, so it can be bookmarked and shared.
  */
-@Route(value = "uc1", layout = MainLayout.class)
+@Route(value = "uc1/:recording?", layout = MainLayout.class)
 @PageTitle("UC1 — Private recording")
 @Menu(order = 1, title = "UC1 — Private recording")
-public class PrivateRecordingView extends VerticalLayout {
+public class PrivateRecordingView extends VerticalLayout
+        implements BeforeEnterObserver {
 
     /**
      * A recording owned by the signed-in user.
@@ -66,7 +72,8 @@ public class PrivateRecordingView extends VerticalLayout {
         HorizontalLayout list = new HorizontalLayout();
         for (Recording recording : RECORDINGS) {
             Button button = new Button(recording.title(),
-                    e -> selected.set(recording));
+                    e -> UI.getCurrent().navigate(PrivateRecordingView.class,
+                            new RouteParameters("recording", recording.id())));
             button.bindThemeName(ButtonVariant.PRIMARY.getVariantName(),
                     selected.map(recording::equals));
             list.add(button);
@@ -79,6 +86,13 @@ public class PrivateRecordingView extends VerticalLayout {
             playerSlot.removeAll();
             playerSlot.add(createPlayer(selected.get()));
         });
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        String id = event.getRouteParameters().get("recording").orElse("");
+        selected.set(RECORDINGS.stream().filter(r -> r.id().equals(id))
+                .findFirst().orElse(RECORDINGS.get(0)));
     }
 
     private static Div createPlayer(Recording recording) {

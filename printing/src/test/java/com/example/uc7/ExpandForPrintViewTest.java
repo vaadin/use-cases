@@ -57,14 +57,29 @@ class ExpandForPrintViewTest extends SpringBrowserlessTest {
         for (Details section : findInView(Details.class).all()) {
             // Remember the state the user left the section in, open it for
             // the paper, and put that state back when the dialog closes —
-            // all in the browser, in this order.
+            // all in the browser, in this order. Rendering the opened state
+            // at once is what makes it reach the paper when the Print button
+            // prints from script.
             assertEquals(
                     List.of(List.of("openedOnScreen", "opened", "beforeprint"),
                             List.of("opened", true, "beforeprint"),
+                            List.of("beforeprint"),
                             List.of("opened", "openedOnScreen", "afterprint")),
                     listeners.get(section.getElement()),
                     section.getSummaryText());
         }
+    }
+
+    @Test
+    void openedSectionsAreRenderedBeforeThePagesAreLaidOut() {
+        navigate(ExpandForPrintView.class);
+        roundTrip();
+
+        assertTrue(
+                PrintTestSupport.queuedJsMentions("performUpdate",
+                        "beforeprint"),
+                "A section opened by a Print button stays folded on paper "
+                        + "unless it is rendered inside the event");
     }
 
     @Test

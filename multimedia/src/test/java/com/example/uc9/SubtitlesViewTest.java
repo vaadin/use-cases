@@ -5,10 +5,13 @@ import java.util.Locale;
 
 import com.example.MediaTester;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Video;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.dom.Element;
@@ -58,5 +61,32 @@ class SubtitlesViewTest extends SpringBrowserlessTest {
         assertEquals("fi", SubtitlesView.initialLanguage(Locale.of("fi")));
         assertEquals("en", SubtitlesView.initialLanguage(Locale.JAPAN));
         assertEquals("en", SubtitlesView.initialLanguage(null));
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "fi, Suomi", "off, Off", "xx, English" })
+    void languageInTheUrlWinsOverTheBrowserLanguage(String parameter,
+            String label) {
+        navigate("uc9?subtitles=" + parameter, SubtitlesView.class);
+
+        @SuppressWarnings("unchecked")
+        RadioButtonGroup<String> picker = find(RadioButtonGroup.class).single();
+        assertEquals(label, picker.getValue());
+    }
+
+    @Test
+    void pickingALanguagePutsItInTheUrl() {
+        navigate(SubtitlesView.class);
+
+        @SuppressWarnings("unchecked")
+        RadioButtonGroup<String> picker = find(RadioButtonGroup.class).single();
+        picker.setValue("Deutsch");
+
+        assertEquals("uc9?subtitles=de", location());
+    }
+
+    private static String location() {
+        return UI.getCurrent().getInternals().getActiveViewLocation()
+                .getPathWithQueryParameters();
     }
 }
