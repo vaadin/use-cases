@@ -100,7 +100,7 @@ class MenuOnlyNestingTest extends SpringBrowserlessTest {
     void menuNestedEntryStaysOutOfTheMainNav() {
         navigate(RevenueForecastView.class);
 
-        // The main nav lists roots and their direct children, so an entry that
+        // The main nav lists only the menu roots, so an entry that
         // @Menu(parent = ...) pushed a level deeper drops out of it: without
         // the annotation the top-level /forecast route would have sat here
         // next to the use cases themselves.
@@ -110,9 +110,8 @@ class MenuOnlyNestingTest extends SpringBrowserlessTest {
     }
 
     private List<String> mainNav() {
-        return find(SideNav.class).all().stream()
-                .filter(nav -> !ReportsView.MENU_ID
-                        .equals(nav.getId().orElse("")))
+        return find(SideNav.class).all().stream().filter(
+                nav -> !ReportsView.MENU_ID.equals(nav.getId().orElse("")))
                 .flatMap(nav -> nav.getItems().stream())
                 .map(SideNavItem::getLabel).toList();
     }
@@ -124,7 +123,8 @@ class MenuOnlyNestingTest extends SpringBrowserlessTest {
     }
 
     private static Optional<Class<?>> menuParentOf(Class<?> menuClass) {
-        return parentIn(MenuConfiguration.getMenuEntriesTree(), null, menuClass);
+        return parentIn(MenuConfiguration.getMenuEntriesTree(), null,
+                menuClass);
     }
 
     private static Optional<Class<?>> parentIn(List<MenuEntry> entries,

@@ -33,7 +33,7 @@ way.
 
 The hierarchical menu and `@Menu(parent = ...)` have not landed in the baseline
 Flow version yet, so this module pins `flow.version` to
-`25.3.hierarchical-menu-SNAPSHOT` (see [`pom.xml`](pom.xml)).
+`25.4.hierarchical-menu-SNAPSHOT` (see [`pom.xml`](pom.xml)).
 
 | # | View | What it shows |
 | - | ---- | ------------- |
