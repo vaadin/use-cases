@@ -124,6 +124,8 @@ public class PodcastPlaylistView extends VerticalLayout
     void playEpisode(int index) {
         loadEpisode(index);
         MissingAPI.play(audio);
+        // beforeEnter sees the episode is already current, so the navigation
+        // only updates the URL and neither reloads nor plays it again.
         UI.getCurrent().navigate(PodcastPlaylistView.class,
                 new RouteParameters("episode", String.valueOf(index + 1)));
     }
