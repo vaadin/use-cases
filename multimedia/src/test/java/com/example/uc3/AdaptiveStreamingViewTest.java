@@ -26,7 +26,7 @@ class AdaptiveStreamingViewTest extends SpringBrowserlessTest {
         Video video = findInView(Video.class).single();
         var source = video.getSources().get(0);
         assertEquals(AdaptiveStreamingView.HLS_TYPE,
-                source.getType().orElseThrow());
+                source.getType());
         assertTrue(source.getSrc().endsWith("/index.m3u8"),
                 "handler URL should end with the playlist name, was "
                         + source.getSrc());
