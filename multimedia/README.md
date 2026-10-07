@@ -45,6 +45,11 @@ German and Finnish translations live in the script; the chapter starts in
 `Chapters.java` follow the scene cuts. Update both when the recording
 changes.
 
+The two UC1 sprint review recordings are HeyGen avatar videos too, each with
+its own presenter and setting. Pass the exports as `SPRINT_41_SOURCE` and
+`SPRINT_42_SOURCE` to re-encode them and take new posters; otherwise the
+committed files are kept.
+
 The UC4 product trailer is a HeyGen avatar video as well. Pass the export as
 `TRAILER_SOURCE` to re-encode it into the AV1 and H.264 files; otherwise the
 committed files are kept. The `codecs` attributes in `FormatFallbackView`
