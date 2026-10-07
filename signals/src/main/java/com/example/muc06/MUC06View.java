@@ -1,7 +1,5 @@
 package com.example.muc06;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -28,6 +26,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.shared.SharedListSignal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
@@ -48,7 +47,7 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @PageTitle("MUC 6: Shared Task List")
 @Menu(order = 55, title = "MUC 6: Shared Task List")
 @StyleSheet("muc06.css")
-@PermitAll
+@AnonymousAllowed
 public class MUC06View extends VerticalLayout {
 
     private final String currentUser;
@@ -58,13 +57,8 @@ public class MUC06View extends VerticalLayout {
     public MUC06View(CurrentUserSignal currentUserSignal,
             MUC06Signals muc06Signals,
             UserSessionRegistry userSessionRegistry) {
-        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .peek();
-        if (userInfo == null || !userInfo.isAuthenticated()) {
-            throw new IllegalStateException(
-                    "User must be authenticated to access this view");
-        }
-        this.currentUser = userInfo.getUsername();
+        this.currentUser = currentUserSignal.getUserSignal().peek()
+                .getUsername();
         this.muc06Signals = muc06Signals;
         this.userSessionRegistry = userSessionRegistry;
 

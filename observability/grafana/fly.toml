@@ -38,6 +38,6 @@ primary_region = 'iad'
   max_machines_running = 1
 
 [[vm]]
-  memory = '512mb'
+  memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1

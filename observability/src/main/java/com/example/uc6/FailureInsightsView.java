@@ -11,6 +11,7 @@ import com.example.acme.InsightCard;
 import com.example.acme.Insights;
 import com.example.acme.Investigation;
 import com.example.acme.Telemetry;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -82,8 +83,9 @@ import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
  */
 @Route(value = FailureInsightsView.ROUTE, layout = MainLayout.class)
 @RouteAlias(value = "uc6", layout = MainLayout.class)
-@PageTitle("UC6 — Failure insights")
-@Menu(order = 6, title = "UC6 — Failure insights")
+@PageTitle("UC6 — From error to code line")
+@UseCaseDescription("Tracing a failed action to the line of code")
+@Menu(order = 6, title = "UC6 — From error to code line")
 public class FailureInsightsView extends VerticalLayout {
 
     /**

@@ -1,7 +1,5 @@
 package com.example.views;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -12,11 +10,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @Route(value = "", layout = MainLayout.class)
 @PageTitle("Signal API Use Cases - Home")
 @Menu(order = 0, title = "Home")
-@PermitAll
+@AnonymousAllowed
 public class HomeView extends VerticalLayout {
 
     public HomeView() {

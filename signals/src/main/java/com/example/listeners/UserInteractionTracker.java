@@ -1,8 +1,9 @@
 package com.example.listeners;
 
-import com.example.security.SecurityService;
+import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 import com.vaadin.flow.server.HandlerHelper;
@@ -30,12 +31,12 @@ import com.vaadin.flow.server.VaadinSession;
 public class UserInteractionTracker implements VaadinServiceInitListener {
 
     private final UserSessionRegistry userSessionRegistry;
-    private final SecurityService securityService;
+    private final ObjectProvider<CurrentUserSignal> currentUserSignal;
 
     public UserInteractionTracker(UserSessionRegistry userSessionRegistry,
-            SecurityService securityService) {
+            ObjectProvider<CurrentUserSignal> currentUserSignal) {
         this.userSessionRegistry = userSessionRegistry;
-        this.securityService = securityService;
+        this.currentUserSignal = currentUserSignal;
     }
 
     @Override
@@ -73,7 +74,9 @@ public class UserInteractionTracker implements VaadinServiceInitListener {
         // Access session synchronously to get user information
         session.access(() -> {
             try {
-                String username = securityService.getUsername();
+                // Session-scoped bean, so resolve it inside the session lock
+                String username = currentUserSignal.getObject().getUserSignal()
+                        .peek().getUsername();
                 String sessionId = SessionIdHelper.getCurrentSessionId();
 
                 if (username != null && sessionId != null) {

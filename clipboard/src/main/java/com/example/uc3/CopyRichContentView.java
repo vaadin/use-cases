@@ -1,5 +1,6 @@
 package com.example.uc3;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -25,6 +26,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Copy rich content")
+@UseCaseDescription("Copying formatted HTML with a plain-text fallback")
 @Menu(order = 3, title = "UC3 — Copy rich content")
 public class CopyRichContentView extends VerticalLayout {
 
