@@ -5,6 +5,7 @@ import com.example.collab.Peer;
 import com.example.collab.PeerRig;
 import com.example.collab.Presence;
 import com.example.collab.UseCaseView;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
@@ -40,7 +41,8 @@ import com.vaadin.flow.signals.Signal;
 @Route(value = "form", layout = MainLayout.class)
 @RouteAlias(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Edit a form together")
-@Menu(order = 5, title = "UC5 Collaborative form")
+@UseCaseDescription("Several users editing the same form, with field highlights")
+@Menu(order = 5, title = "UC5 — Collaborative form")
 public class CollaborativeFormView extends UseCaseView {
 
     static final String TOPIC = "uc5-form";

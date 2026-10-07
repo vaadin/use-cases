@@ -7,6 +7,7 @@ import com.example.collab.Peer;
 import com.example.collab.PeerRig;
 import com.example.collab.Presence;
 import com.example.collab.UseCaseView;
+import com.example.common.UseCaseDescription;
 import com.example.uc4.ChatTopic.Message;
 import com.example.views.MainLayout;
 
@@ -42,7 +43,8 @@ import com.vaadin.flow.signals.Signal;
 @Route(value = "chat", layout = MainLayout.class)
 @RouteAlias(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Chat in real time")
-@Menu(order = 4, title = "UC4 Real-time chat")
+@UseCaseDescription("Sending messages that every participant sees at once")
+@Menu(order = 4, title = "UC4 — Real-time chat")
 public class ChatView extends UseCaseView {
 
     static final String TOPIC = "uc4-chat";

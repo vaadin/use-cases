@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import com.example.collab.Peer;
 import com.example.collab.PeerRig;
 import com.example.collab.UseCaseView;
+import com.example.common.UseCaseDescription;
 import com.example.uc11.BoardTopic.Status;
 import com.example.uc11.BoardTopic.Task;
 import com.example.views.MainLayout;
@@ -46,7 +47,8 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @Route(value = "computed", layout = MainLayout.class)
 @RouteAlias(value = "uc11", layout = MainLayout.class)
 @PageTitle("UC11 — Derive shared state instead of storing it")
-@Menu(order = 11, title = "UC11 Computed shared state")
+@UseCaseDescription("Deriving shared totals instead of storing them")
+@Menu(order = 11, title = "UC11 — Computed shared state")
 public class ComputedStateView extends UseCaseView {
 
     public ComputedStateView(BoardTopic topic) {

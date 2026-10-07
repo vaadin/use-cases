@@ -5,6 +5,7 @@ import com.example.collab.Peer;
 import com.example.collab.PeerRig;
 import com.example.collab.Presence;
 import com.example.collab.UseCaseView;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
@@ -46,7 +47,8 @@ import com.vaadin.flow.signals.Signal;
 @Route(value = "form-access", layout = MainLayout.class)
 @RouteAlias(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Control who may edit")
-@Menu(order = 7, title = "UC7 Write access")
+@UseCaseDescription("Letting only some users edit a shared form")
+@Menu(order = 7, title = "UC7 — Write access")
 public class FormAccessView extends UseCaseView {
 
     static final String TOPIC = "uc7-access";

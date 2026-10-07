@@ -4,6 +4,7 @@ import com.example.collab.Peer;
 import com.example.collab.PeerRig;
 import com.example.collab.Presence;
 import com.example.collab.UseCaseView;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
@@ -33,7 +34,8 @@ import com.vaadin.flow.router.RouteAlias;
 @Route(value = "presence-opt-in", layout = MainLayout.class)
 @RouteAlias(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Join and leave on purpose")
-@Menu(order = 2, title = "UC2 Join and leave")
+@UseCaseDescription("Letting users decide when they count as present")
+@Menu(order = 2, title = "UC2 — Join and leave")
 public class OptInPresenceView extends UseCaseView {
 
     static final String TOPIC = "uc2-opt-in";

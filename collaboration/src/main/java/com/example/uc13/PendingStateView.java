@@ -4,6 +4,7 @@ import com.example.collab.Outcomes;
 import com.example.collab.Peer;
 import com.example.collab.PeerRig;
 import com.example.collab.UseCaseView;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
@@ -46,7 +47,8 @@ import com.vaadin.flow.signals.operations.SignalOperation;
 @Route(value = "pending", layout = MainLayout.class)
 @RouteAlias(value = "uc13", layout = MainLayout.class)
 @PageTitle("UC13 — Pending versus confirmed state")
-@Menu(order = 13, title = "UC13 Pending vs confirmed")
+@UseCaseDescription("Telling a local, unconfirmed change from a confirmed one")
+@Menu(order = 13, title = "UC13 — Pending vs confirmed")
 public class PendingStateView extends UseCaseView {
 
     public PendingStateView(PendingTopic topic) {

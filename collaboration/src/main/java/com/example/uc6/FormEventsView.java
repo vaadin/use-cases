@@ -7,6 +7,7 @@ import com.example.collab.FormState;
 import com.example.collab.Peer;
 import com.example.collab.PeerRig;
 import com.example.collab.UseCaseView;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
@@ -43,7 +44,8 @@ import com.vaadin.flow.signals.Signal;
 @Route(value = "form-events", layout = MainLayout.class)
 @RouteAlias(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — See the raw collaboration events")
-@Menu(order = 6, title = "UC6 Collaboration events")
+@UseCaseDescription("Reacting to what other users do in a shared form")
+@Menu(order = 6, title = "UC6 — Collaboration events")
 public class FormEventsView extends UseCaseView {
 
     public FormEventsView(FormEventsTopic topic) {

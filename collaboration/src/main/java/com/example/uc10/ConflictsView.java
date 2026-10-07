@@ -4,6 +4,7 @@ import com.example.collab.Outcomes;
 import com.example.collab.Peer;
 import com.example.collab.PeerRig;
 import com.example.collab.UseCaseView;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
@@ -50,7 +51,8 @@ import com.vaadin.flow.signals.operations.SignalOperation;
 @Route(value = "conflicts", layout = MainLayout.class)
 @RouteAlias(value = "uc10", layout = MainLayout.class)
 @PageTitle("UC10 — Make concurrent edits provably safe")
-@Menu(order = 10, title = "UC10 Conflicts & atomicity")
+@UseCaseDescription("Keeping concurrent edits from losing updates")
+@Menu(order = 10, title = "UC10 — Conflicts & atomicity")
 public class ConflictsView extends UseCaseView {
 
     public ConflictsView(RaceTopic topic) {

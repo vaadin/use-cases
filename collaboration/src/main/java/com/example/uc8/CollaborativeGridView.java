@@ -6,6 +6,7 @@ import com.example.collab.Peer;
 import com.example.collab.PeerRig;
 import com.example.collab.SignalBindings;
 import com.example.collab.UseCaseView;
+import com.example.common.UseCaseDescription;
 import com.example.uc8.RosterTopic.Employee;
 import com.example.views.MainLayout;
 
@@ -39,7 +40,8 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @Route(value = "grid", layout = MainLayout.class)
 @RouteAlias(value = "uc8", layout = MainLayout.class)
 @PageTitle("UC8 — Collaborate in a Grid")
-@Menu(order = 8, title = "UC8 Collaborative Grid")
+@UseCaseDescription("Showing which row each user is looking at in a Grid")
+@Menu(order = 8, title = "UC8 — Collaborative Grid")
 public class CollaborativeGridView extends UseCaseView {
 
     private static final AtomicInteger NEXT_ROW = new AtomicInteger();

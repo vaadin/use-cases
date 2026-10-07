@@ -4,6 +4,7 @@ import com.example.collab.Peer;
 import com.example.collab.PeerRig;
 import com.example.collab.SignalBindings;
 import com.example.collab.UseCaseView;
+import com.example.common.UseCaseDescription;
 import com.example.uc9.CatalogTopic.Product;
 import com.example.views.MainLayout;
 
@@ -37,7 +38,8 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @Route(value = "grid-pro", layout = MainLayout.class)
 @RouteAlias(value = "uc9", layout = MainLayout.class)
 @PageTitle("UC9 — Collaborate in a Grid Pro")
-@Menu(order = 9, title = "UC9 Collaborative Grid Pro")
+@UseCaseDescription("Editing a Grid Pro together without overwriting each other")
+@Menu(order = 9, title = "UC9 — Collaborative Grid Pro")
 public class CollaborativeGridProView extends UseCaseView {
 
     public CollaborativeGridProView(CatalogTopic topic) {

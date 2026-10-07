@@ -4,6 +4,7 @@ import com.example.collab.Peer;
 import com.example.collab.PeerRig;
 import com.example.collab.Presence;
 import com.example.collab.UseCaseView;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
@@ -35,7 +36,8 @@ import com.vaadin.flow.router.RouteAlias;
 @Route(value = "presence", layout = MainLayout.class)
 @RouteAlias(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Show who is here")
-@Menu(order = 1, title = "UC1 Show who is here")
+@UseCaseDescription("Showing everybody who is looking at the same thing")
+@Menu(order = 1, title = "UC1 — Show who is here")
 public class PresenceView extends UseCaseView {
 
     static final String TOPIC = "uc1-presence";

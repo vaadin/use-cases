@@ -5,6 +5,7 @@ import java.util.List;
 import com.example.collab.Peer;
 import com.example.collab.PeerRig;
 import com.example.collab.UseCaseView;
+import com.example.common.UseCaseDescription;
 import com.example.uc12.RoomsTopic.Post;
 import com.example.views.MainLayout;
 
@@ -48,7 +49,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "rooms", layout = MainLayout.class)
 @RouteAlias(value = "uc12", layout = MainLayout.class)
 @PageTitle("UC12 — Room per topic, created on demand")
-@Menu(order = 12, title = "UC12 Rooms on demand")
+@UseCaseDescription("Creating a shared topic per room only when someone opens it")
+@Menu(order = 12, title = "UC12 — Rooms on demand")
 public class RoomsView extends UseCaseView {
 
     public RoomsView(RoomsTopic topic) {

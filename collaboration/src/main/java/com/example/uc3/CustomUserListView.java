@@ -9,6 +9,7 @@ import com.example.collab.Peer;
 import com.example.collab.PeerRig;
 import com.example.collab.Presence;
 import com.example.collab.UseCaseView;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
@@ -43,7 +44,8 @@ import com.vaadin.flow.signals.Signal;
 @Route(value = "presence-custom", layout = MainLayout.class)
 @RouteAlias(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Render presence my own way")
-@Menu(order = 3, title = "UC3 Custom user list")
+@UseCaseDescription("Rendering the list of present users with my own components")
+@Menu(order = 3, title = "UC3 — Custom user list")
 public class CustomUserListView extends UseCaseView {
 
     static final String TOPIC = "uc3-custom-list";
