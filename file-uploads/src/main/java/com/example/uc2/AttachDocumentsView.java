@@ -1,9 +1,13 @@
 package com.example.uc2;
 
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.Images;
+import com.example.MissingAPI;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
@@ -26,6 +30,8 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.streams.TransferContext;
+import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.server.streams.UploadMetadata;
 
@@ -33,22 +39,28 @@ import com.vaadin.flow.server.streams.UploadMetadata;
  * UC2 — Attach documents to a form.
  * <p>
  * An expense claim: what the money was spent on, how much, and the receipts.
- * The receipts are part of the form — at least one is required, they can be
- * removed again before sending, and only PDFs and photos of up to 10 MB are
- * accepted, at most five of them.
+ * The receipts are part of the form — at least one is required, and only PDFs
+ * and photos of up to 10 MB are accepted, at most five of them.
  * <p>
- * {@link Upload} is not a form field: it cannot be bound with the
- * {@link Binder} that validates the other two fields, has no required
- * indicator, error message or helper text, and uploads every file the moment it
- * is picked rather than when the form is sent. The view therefore keeps the
- * received receipts in a draft list, removes them again on the upload's
- * file-removed event, shows the constraints and the "required" error in plain
- * text elements next to it, and reports all files rejected by one selection in
- * a single notification instead of one per file. See {@code API-GAPS.md}.
+ * Nothing is sent before the user presses "Send claim": the upload has
+ * {@code autoUpload} off, so picked receipts only wait in its list, where they
+ * can still be removed. Send checks the fields, starts the queued uploads and,
+ * once all of them have finished, processes the claim and its receipts as one:
+ * every receipt must really be a PDF or a photo, and if one is not, the claim
+ * is not saved and the user is told which file to replace. Receipts that did
+ * arrive are kept with the draft, so only the replacement is sent next time.
+ * <p>
+ * Two parts of this need {@link MissingAPI}: starting the queued uploads from
+ * the server, and knowing whether any receipts are queued at all, which the
+ * "required" check needs. {@link Upload} is not a form field either: it cannot
+ * be bound with the {@link Binder} that validates the other fields, and has no
+ * required indicator, error message or helper text, so those are plain text
+ * elements next to it. Files rejected by one selection are reported in a single
+ * notification instead of one per file. See {@code API-GAPS.md}.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Attach documents")
-@UseCaseDescription("Sending documents together with the rest of a form")
+@UseCaseDescription("Sending documents and processing them together with the rest of a form")
 @Menu(order = 2, title = "UC2 — Attach documents")
 public class AttachDocumentsView extends VerticalLayout {
 
@@ -86,16 +98,23 @@ public class AttachDocumentsView extends VerticalLayout {
     private final Binder<ClaimForm> binder = new Binder<>();
     private final Upload upload;
     private final Span receiptsError = new Span("Attach at least one receipt.");
-    private final List<Receipt> receipts = new ArrayList<>();
+    private final Button send = new Button("Send claim", e -> send());
+    private final List<Receipt> received = new ArrayList<>();
+    private final List<String> failed = new ArrayList<>();
     private final List<String> rejectedInThisRoundTrip = new ArrayList<>();
     private final List<Claim> claims = new ArrayList<>();
     private final Grid<Claim> grid = new Grid<>(Claim.class, false);
+    private int queued;
+    private boolean sending;
+    private int expected;
+    private int finished;
 
     public AttachDocumentsView() {
         add(new H1("UC2 — Attach documents to a form"));
-        add(new Paragraph("File an expense claim. The receipts are sent "
-                + "together with the rest of the form; you can remove a "
-                + "wrong one before sending."));
+        add(new Paragraph("File an expense claim. Nothing is sent until you "
+                + "press \"Send claim\": then the receipts are uploaded and "
+                + "checked together with the rest of the form, and the claim "
+                + "is only saved if all of them can be used."));
 
         TextField purpose = new TextField("What was it for?");
         purpose.setWidthFull();
@@ -108,15 +127,25 @@ public class AttachDocumentsView extends VerticalLayout {
                 .bind(ClaimForm::getAmount, ClaimForm::setAmount);
         binder.setBean(new ClaimForm());
 
-        upload = new Upload(UploadHandler.inMemory(this::receiptReceived));
+        upload = new Upload(UploadHandler.inMemory(this::receiptReceived)
+                .validateHeader(Images.HEADER_SIZE,
+                        AttachDocumentsView::rejectUnlessReceipt)
+                .whenComplete(this::receiptFinished));
+        upload.setAutoUpload(false);
         upload.setAcceptedMimeTypes("application/pdf", "image/jpeg",
                 "image/png");
         upload.setAcceptedFileExtensions(".pdf", ".jpg", ".jpeg", ".png");
         upload.setMaxFiles(MAX_RECEIPTS);
         upload.setMaxFileSize(MAX_RECEIPT_BYTES);
         upload.setWidthFull();
-        upload.addFileRemovedListener(e -> receiptRemoved(e.getFileName()));
         upload.addFileRejectedListener(this::receiptRejected);
+        upload.addFileRemovedListener(e -> receiptRemoved(e.getFileName()));
+        MissingAPI.addQueueSizeListener(upload, count -> {
+            queued = count;
+            if (count > 0) {
+                receiptsError.setVisible(false);
+            }
+        });
 
         NativeLabel receiptsLabel = new NativeLabel("Receipts");
         receiptsLabel.addClassName("field-label");
@@ -125,8 +154,6 @@ public class AttachDocumentsView extends VerticalLayout {
         constraints.addClassName("helper-text");
         receiptsError.addClassName("error-text");
         receiptsError.setVisible(false);
-
-        Button send = new Button("Send claim", e -> send());
         send.addThemeVariants(ButtonVariant.PRIMARY);
 
         add(purpose, amount, receiptsLabel, upload, constraints, receiptsError,
@@ -143,17 +170,103 @@ public class AttachDocumentsView extends VerticalLayout {
         add(grid);
     }
 
+    private static void rejectUnlessReceipt(UploadEvent event,
+            ByteBuffer header) {
+        byte[] start = new byte[Math.min(4, header.remaining())];
+        header.duplicate().get(start);
+        boolean pdf = "%PDF"
+                .equals(new String(start, StandardCharsets.US_ASCII));
+        if (!pdf && !Images.isImage(header)) {
+            event.reject(event.getFileName() + " is not a PDF or a photo");
+        }
+    }
+
+    private void send() {
+        boolean fieldsValid = binder.validate().isOk();
+        boolean hasReceipts = queued > 0 || !received.isEmpty();
+        receiptsError.setVisible(!hasReceipts);
+        if (!fieldsValid || !hasReceipts) {
+            return;
+        }
+        if (queued == 0) {
+            // Everything already arrived on an earlier attempt.
+            process();
+            return;
+        }
+        sending = true;
+        expected = queued;
+        finished = 0;
+        binder.setReadOnly(true);
+        send.setEnabled(false);
+        send.setText("Sending receipts…");
+        MissingAPI.startUpload(upload);
+    }
+
     private void receiptReceived(UploadMetadata metadata, byte[] bytes) {
-        receipts.add(new Receipt(metadata.fileName(), metadata.contentType(),
+        received.add(new Receipt(metadata.fileName(), metadata.contentType(),
                 bytes));
-        receiptsError.setVisible(false);
+        arrived();
+    }
+
+    private void receiptFinished(TransferContext context, boolean success) {
+        if (!success) {
+            failed.add(context.fileName());
+            arrived();
+        }
+    }
+
+    private void arrived() {
+        // Counted per file rather than with the all-finished event, which can
+        // fire whenever no upload happens to be running.
+        if (sending && ++finished >= expected) {
+            process();
+        }
     }
 
     private void receiptRemoved(String fileName) {
-        // The event carries only the file name, so with two receipts of the
-        // same name there is no telling which one was removed.
-        receipts.stream().filter(r -> r.fileName().equals(fileName)).findFirst()
-                .ifPresent(receipts::remove);
+        // Removing a receipt that already arrived drops it from the draft. The
+        // event carries only the file name, so with two receipts of the same
+        // name there is no telling which one was removed.
+        received.stream().filter(r -> r.fileName().equals(fileName)).findFirst()
+                .ifPresent(received::remove);
+    }
+
+    /** Processes the claim and all of its receipts as one unit. */
+    private void process() {
+        sending = false;
+        binder.setReadOnly(false);
+        send.setEnabled(true);
+        send.setText("Send claim");
+
+        if (!failed.isEmpty()) {
+            Notification
+                    .show("The claim was not sent. " + String.join(", ", failed)
+                            + (failed.size() == 1
+                                    ? " is not a PDF or a photo; remove it"
+                                    : " are not PDFs or photos; remove them")
+                            + " and send again.");
+            // The browser reports the queue only when files are added or
+            // removed;
+            // right now only the failed files are still waiting.
+            queued = failed.size();
+            failed.clear();
+            return;
+        }
+        ClaimForm form = binder.getBean();
+        BigDecimal amount = form.getAmount();
+        if (amount == null) {
+            return;
+        }
+        claims.add(new Claim(form.getPurpose(), amount,
+                received.stream().map(Receipt::fileName).toList()));
+        grid.getDataProvider().refreshAll();
+        Notification.show("Claim sent with " + received.size()
+                + (received.size() == 1 ? " receipt." : " receipts."));
+
+        binder.setBean(new ClaimForm());
+        received.clear();
+        queued = 0;
+        upload.clearFileList();
     }
 
     private void receiptRejected(FileRejectedEvent event) {
@@ -173,31 +286,5 @@ public class AttachDocumentsView extends VerticalLayout {
                 : rejectedInThisRoundTrip.size() + " files were not attached: ")
                 + String.join(", ", rejectedInThisRoundTrip));
         rejectedInThisRoundTrip.clear();
-    }
-
-    private void send() {
-        boolean fieldsValid = binder.validate().isOk();
-        receiptsError.setVisible(receipts.isEmpty());
-        if (!fieldsValid || receipts.isEmpty()) {
-            return;
-        }
-        if (upload.isUploading()) {
-            Notification.show("Wait until all receipts have been uploaded.");
-            return;
-        }
-        ClaimForm form = binder.getBean();
-        BigDecimal amount = form.getAmount();
-        if (amount == null) {
-            return;
-        }
-        claims.add(new Claim(form.getPurpose(), amount,
-                receipts.stream().map(Receipt::fileName).toList()));
-        grid.getDataProvider().refreshAll();
-        Notification.show("Claim sent with " + receipts.size()
-                + (receipts.size() == 1 ? " receipt." : " receipts."));
-
-        binder.setBean(new ClaimForm());
-        receipts.clear();
-        upload.clearFileList();
     }
 }

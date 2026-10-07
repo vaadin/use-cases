@@ -3,6 +3,7 @@ package com.example.uc2;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.example.BrowserQueue;
 import com.example.TestFiles;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,23 +28,58 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AttachDocumentsViewTest extends SpringBrowserlessTest {
 
     @Test
-    void claimIsSentWithTheReceiptsThatWereNotRemoved() {
+    void receiptsAreOnlySentOnSend_andTheClaimIsSavedOnceAllHaveArrived() {
         navigate(AttachDocumentsView.class);
         fillInFields();
-        UploadTester<Upload> upload = test(findInView(Upload.class).single());
+        queue("taxi.pdf", "application/pdf", TestFiles.text("%PDF-1.7"));
+        queue("hotel.png", "image/png", TestFiles.png(10, 10));
+        queue("wrong.pdf", "application/pdf", TestFiles.text("%PDF-1.7"));
+        upload().removeFile("wrong.pdf");
+        browserQueue().reportQueued(2);
+        assertEquals(0, test(claims()).size(), "Nothing is sent yet");
 
-        upload.upload("taxi.pdf", "application/pdf", TestFiles.text("%PDF"));
-        upload.upload("hotel.png", "image/png", TestFiles.png(10, 10));
-        upload.upload("wrong.pdf", "application/pdf", TestFiles.text("%PDF"));
-        upload.removeFile("wrong.pdf");
         clickSend();
+        Button sending = find(Button.class).withText("Sending receipts…")
+                .single();
+        assertFalse(sending.isEnabled());
+        assertEquals(0, test(claims()).size());
+
+        // The browser runs the queued uploads that Send started
+        upload().startUpload("taxi.pdf");
+        upload().startUpload("hotel.png");
 
         AttachDocumentsView.Claim claim = test(claims()).getRow(0);
         assertEquals("Conference trip", claim.purpose());
         assertEquals(new BigDecimal("123.45"), claim.amount());
         assertEquals(List.of("taxi.pdf", "hotel.png"), claim.receipts());
-        assertTrue(test(findInView(Upload.class).single()).getFiles().isEmpty(),
+        assertTrue(upload().getFiles().isEmpty(),
                 "The file list starts over after sending");
+    }
+
+    @Test
+    void receiptThatIsNotAPdfOrPhoto_keepsTheWholeClaimFromBeingSaved() {
+        navigate(AttachDocumentsView.class);
+        fillInFields();
+        queue("taxi.pdf", "application/pdf", TestFiles.text("%PDF-1.7"));
+        queue("dinner.pdf", "application/pdf", TestFiles.text("not a pdf"));
+        browserQueue().reportQueued(2);
+
+        clickSend();
+        upload().startUpload("taxi.pdf");
+        upload().startUpload("dinner.pdf");
+
+        assertEquals(0, test(claims()).size());
+        assertTrue(test(find(Notification.class).single()).getText()
+                .contains("dinner.pdf is not a PDF or a photo"));
+        assertTrue(
+                find(Button.class).withText("Send claim").single().isEnabled());
+
+        // The user removes the bad file; the good one has already arrived
+        upload().removeFile("dinner.pdf");
+        browserQueue().reportQueued(0);
+        clickSend();
+
+        assertEquals(List.of("taxi.pdf"), test(claims()).getRow(0).receipts());
     }
 
     @Test
@@ -75,6 +111,18 @@ class AttachDocumentsViewTest extends SpringBrowserlessTest {
         assertTrue(text.startsWith("2 files were not attached"), text);
         assertTrue(text.contains("notes.txt") && text.contains("script.exe"),
                 text);
+    }
+
+    private void queue(String fileName, String contentType, byte[] content) {
+        upload().upload(fileName, contentType, content);
+    }
+
+    private UploadTester<Upload> upload() {
+        return test(findInView(Upload.class).single());
+    }
+
+    private BrowserQueue browserQueue() {
+        return new BrowserQueue(findInView(Upload.class).single());
     }
 
     private void fillInFields() {

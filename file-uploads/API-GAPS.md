@@ -11,12 +11,12 @@ What works well and is used as is: `UploadButton#setCapture(UploadCapture)` and 
 **Workaround used:** The received files are kept in a list next to the `Binder`, the "required" error and the constraints are plain `Span`s under the upload, and the current picture is shown in an `Avatar` beside it.
 **Suggested API:** An upload field (`HasValue<…, List<UploadedFile>>` with label, helper text, required indicator and error message) that can be bound with `Binder` and initialised with files that already exist. Tracked in vaadin/flow-components#6629, #2421, #8352 and #7134.
 
-## Files are uploaded when picked, not when the form is sent
+## A form cannot upload its files when it is sent
 
 **Where it bit us:** uc2 / `AttachDocumentsView.java`
-**Symptom:** With auto-upload on, every receipt is sent to the server as soon as it is picked, also for forms that are never sent. With auto-upload off, the server has no way to start the queued uploads when the user clicks "Send claim", and no way to ask how many files are queued.
-**Workaround used:** Auto-upload stays on; the receipts are held as a draft in memory and only become part of a claim when it is sent. Files of abandoned forms are dropped with the view.
-**Suggested API:** `Upload#startUpload()` / `UploadManager#startUpload()` plus a read-only view of the queue, so that a form can upload its files on submit. Tracked in vaadin/flow-components#1384 and #6858.
+**Symptom:** A form whose files are processed together with its fields needs the files to wait in the browser until the user sends the form. `setAutoUpload(false)` makes them wait, but then only the user can start them, file by file: the server has no way to start the queued uploads when "Send claim" is clicked, and no way to ask whether any files are queued, which the "at least one receipt" check needs before starting. Upload's `AllFinishedEvent` cannot tell the form that its files are done either, because it fires whenever no upload happens to be running.
+**Workaround used:** `MissingAPI.startUpload(upload)` calls the web component's `uploadFiles()`, and `MissingAPI.addQueueSizeListener` tracks the number of unsent files from the browser's `files-changed` event. That event is not fired when a file completes, so after a failed attempt the view resets the count itself. The view counts arrivals against the number of files queued at Send instead of relying on `AllFinishedEvent`.
+**Suggested API:** `Upload#startUpload()` / `UploadManager#startUpload()` returning something that completes once all the started files have finished, with the received and failed files, plus a read-only view of the queue. Tracked in vaadin/flow-components#1384 and #6858.
 
 ## Rejected files arrive one event at a time
 

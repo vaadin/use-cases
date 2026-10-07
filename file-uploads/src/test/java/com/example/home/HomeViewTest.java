@@ -38,7 +38,7 @@ class HomeViewTest extends SpringBrowserlessTest {
                 "Photographing a problem on the spot and sending it with its location",
                 "uc1"),
                 new UseCase("UC2", "Attach documents",
-                        "Sending documents together with the rest of a form",
+                        "Sending documents and processing them together with the rest of a form",
                         "uc2"),
                 new UseCase("UC3", "Profile picture",
                         "Replacing a single picture and resizing it on the server",
