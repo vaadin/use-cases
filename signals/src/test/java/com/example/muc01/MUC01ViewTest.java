@@ -3,6 +3,7 @@ package com.example.muc01;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -53,6 +54,24 @@ class MUC01ViewTest extends SpringBrowserlessTest {
         assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> d.getText() != null
                         && d.getText().contains("Total messages: 1")));
+    }
+
+    @Test
+    @WithAnonymousUser
+    void anonymousVisitorCanChatAsGuest() {
+        navigate(MUC01View.class);
+        runPendingSignalsTasks();
+
+        test(findInView(TextField.class).single()).setValue("Hello as guest");
+        test(findInView(Button.class).all().stream()
+                .filter(b -> "Send Message".equals(b.getText())).findFirst()
+                .orElseThrow()).click();
+        runPendingSignalsTasks();
+
+        MUC01Signals.Message message = muc01Signals.getMessagesSignal().peek()
+                .getFirst().peek();
+        assertTrue(message.username().matches("guest-\\d+"),
+                () -> "Unexpected guest username " + message.username());
     }
 
     @Test

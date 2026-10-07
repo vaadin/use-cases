@@ -1,7 +1,5 @@
 package com.example.muc03;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.Random;
 
 import com.example.security.CurrentUserSignal;
@@ -26,6 +24,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -42,7 +41,7 @@ import com.vaadin.flow.signals.Signal;
 @PageTitle("Multi-User Case 3: Click Game")
 @Menu(order = 52, title = "MUC 3: Click Race Game")
 @StyleSheet("muc03.css")
-@PermitAll
+@AnonymousAllowed
 public class MUC03View extends VerticalLayout {
 
     private final String currentUser;
@@ -55,13 +54,8 @@ public class MUC03View extends VerticalLayout {
     public MUC03View(CurrentUserSignal currentUserSignal,
             MUC03Signals muc03Signals,
             UserSessionRegistry userSessionRegistry) {
-        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .peek();
-        if (userInfo == null || !userInfo.isAuthenticated()) {
-            throw new IllegalStateException(
-                    "User must be authenticated to access this view");
-        }
-        this.currentUser = userInfo.getUsername();
+        this.currentUser = currentUserSignal.getUserSignal().peek()
+                .getUsername();
         this.muc03Signals = muc03Signals;
         this.userSessionRegistry = userSessionRegistry;
 

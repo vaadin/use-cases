@@ -1,0 +1,8 @@
+/*
+ * The printable twin of the Grid. It is `.print-only`, so on screen it is
+ * `display: none` and costs nothing; print.css reveals it.
+ */
+#printable-list > div:first-child {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}

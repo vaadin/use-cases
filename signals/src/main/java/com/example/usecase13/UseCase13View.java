@@ -1,7 +1,5 @@
 package com.example.usecase13;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +23,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
@@ -44,7 +43,7 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @PageTitle("Use Case 13: Real-Time Active Users")
 @Menu(order = 13, title = "UC 13: Real-Time Active Users")
 @StyleSheet("usecase13.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase13View extends VerticalLayout {
 
     private final UserSessionRegistry userSessionRegistry;

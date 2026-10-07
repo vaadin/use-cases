@@ -1,7 +1,5 @@
 package com.example.usecase01;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.concurrent.CompletableFuture;
 
 import com.example.views.MainLayout;
@@ -21,13 +19,14 @@ import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-01", layout = MainLayout.class)
 @PageTitle("Use Case 1: Dynamic Button State")
 @Menu(order = 1, title = "UC 1: Dynamic Button State")
-@PermitAll
+@AnonymousAllowed
 public class UseCase01View extends VerticalLayout {
 
     public enum SubmissionState {

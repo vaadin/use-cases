@@ -1,7 +1,5 @@
 package com.example.usecase22;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -18,6 +16,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -25,7 +24,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 22: Two-Way Mapped Signals")
 @Menu(order = 22, title = "UC 22: Two-Way Mapped Signals")
 @StyleSheet("usecase22.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase22View extends VerticalLayout {
 
     public UseCase22View() {
