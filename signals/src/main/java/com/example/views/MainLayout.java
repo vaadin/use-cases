@@ -1,13 +1,12 @@
 package com.example.views;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.Locale;
 import java.util.Map;
 
 import com.example.common.AppCatalog;
 import com.example.preferences.UserPreferences;
 import com.example.security.CurrentUserSignal;
+import com.example.security.SecurityConfiguration;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
 import org.jspecify.annotations.Nullable;
@@ -33,14 +32,19 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.Location;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.signals.Signal;
 
 @PageTitle("Signal API Use Cases")
-@PermitAll
-public class MainLayout extends AppLayout {
+@AnonymousAllowed
+public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
     private final CurrentUserSignal currentUserSignal;
     private final UserSessionRegistry userSessionRegistry;
@@ -57,12 +61,11 @@ public class MainLayout extends AppLayout {
         this.userSessionRegistry = userSessionRegistry;
         this.userPreferences = userPreferences;
 
-        // Get current user info
-        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .peek();
-        if (userInfo != null && userInfo.isAuthenticated()) {
-            this.currentUser = userInfo.getUsername();
-        }
+        // The session-scoped signal outlives a login, so re-read the
+        // authentication state on every page load
+        currentUserSignal.refresh();
+        this.currentUser = currentUserSignal.getUserSignal().peek()
+                .getUsername();
 
         DrawerToggle toggle = new DrawerToggle();
 
@@ -148,8 +151,7 @@ public class MainLayout extends AppLayout {
 
         Avatar userAvatar = new Avatar();
         userAvatar.getElement().bindProperty("name", currentUserSignal
-                .getUserSignal()
-                .map(user -> user.isAuthenticated() ? user.getUsername() : ""),
+                .getUserSignal().map(CurrentUserSignal.UserInfo::getUsername),
                 null);
         userAvatar.getElement().bindProperty("img",
                 currentUserSignal.getUserSignal()
@@ -157,11 +159,9 @@ public class MainLayout extends AppLayout {
                                 ? getProfilePicturePath(user.getUsername())
                                 : ""),
                 null);
-        userAvatar.bindVisible(currentUserSignal.getUserSignal()
-                .map(user -> user.isAuthenticated()));
 
         Span userName = new Span(currentUserSignal.getUserSignal()
-                .map(user -> user.isAuthenticated() ? user.getUsername() : ""));
+                .map(CurrentUserSignal.UserInfo::getUsername));
         userName.getStyle().set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-size", "var(--aura-font-size-s)");
 
@@ -174,12 +174,21 @@ public class MainLayout extends AppLayout {
             logoutHandler.logout(
                     VaadinServletRequest.getCurrent().getHttpServletRequest(),
                     null, null);
-            getUI().ifPresent(ui -> ui.getPage().setLocation("/login"));
+            getUI().ifPresent(ui -> ui.getPage().setLocation("/"));
         });
         logoutButton.addThemeVariants(ButtonVariant.TERTIARY);
+        logoutButton.bindVisible(currentUserSignal.getUserSignal()
+                .map(CurrentUserSignal.UserInfo::isAuthenticated));
+
+        // Logging in is optional; guests can switch to a demo user any time
+        Button loginButton = new Button("Log in",
+                event -> getUI().ifPresent(this::loginAndReturn));
+        loginButton.addThemeVariants(ButtonVariant.TERTIARY);
+        loginButton.bindVisible(currentUserSignal.getUserSignal()
+                .map(user -> !user.isAuthenticated()));
 
         addToNavbar(toggle, title, activeUsersDisplay, nicknameField,
-                localeSelector, userDisplay, logoutButton);
+                localeSelector, userDisplay, logoutButton, loginButton);
 
         // Fixed-position source code link overlay
         Div sourceCodeContainer = new Div();
@@ -248,6 +257,30 @@ public class MainLayout extends AppLayout {
             }
             updateSourceCodeLink(target);
         });
+    }
+
+    /**
+     * Reloads the current page with the login parameter, so Spring Security
+     * shows the login view and returns to this page after a successful login.
+     */
+    private void loginAndReturn(UI ui) {
+        Location location = ui.getActiveViewLocation();
+        QueryParameters parameters = location.getQueryParameters()
+                .merging(SecurityConfiguration.LOGIN_PARAMETER, "");
+        // Relative to the document base, so a context path is preserved
+        ui.getPage().setLocation(new Location(location.getPath(), parameters)
+                .getPathWithQueryParameters());
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        // Drop the login parameters from the URL once the user is back
+        QueryParameters parameters = event.getLocation().getQueryParameters();
+        if (parameters.getParameters()
+                .containsKey(SecurityConfiguration.LOGIN_PARAMETER)) {
+            event.forwardTo(event.getLocation().getPath(), parameters.excluding(
+                    SecurityConfiguration.LOGIN_PARAMETER, "continue"));
+        }
     }
 
     @Override

@@ -1,0 +1,52 @@
+WEBVTT
+
+00:00.330 --> 00:03.880
+Hi, and welcome to the quarterly product review!
+Great to have you here.
+
+00:04.260 --> 00:07.390
+In the next minute we'll walk through the roadmap,
+show you a quick live demo,
+
+00:07.680 --> 00:10.490
+and answer the question we hear most often.
+Let's dive in.
+
+00:11.050 --> 00:14.050
+First, the roadmap.
+The next release is all about speed.
+
+00:14.630 --> 00:18.750
+Apps start up to twice as fast,
+offline support handles flaky connections gracefully,
+
+00:19.100 --> 00:22.720
+and a brand-new reporting module lets you
+build dashboards without writing a single query.
+
+00:23.250 --> 00:24.850
+Now for the fun part: the demo.
+
+00:25.410 --> 00:27.930
+I'm opening a customer record
+and changing the shipping address.
+
+00:28.330 --> 00:30.850
+Watch the second window.
+The moment I hit save,
+
+00:31.110 --> 00:35.120
+every other user sees the new address instantly.
+No refresh, no extra code.
+
+00:36.080 --> 00:40.240
+Finally, your questions.
+The big one: when can I try this?
+
+00:40.910 --> 00:44.200
+The beta opens next month,
+and upgrading is a one-line change.
+
+00:44.970 --> 00:47.480
+Thanks so much for watching,
+and see you at the next review!

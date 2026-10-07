@@ -1,6 +1,16 @@
 package com.example.home;
 
+import java.util.List;
+
 import com.example.common.BaseHomeView;
+import com.example.uc1.OneShotOnClickView;
+import com.example.uc2.TrackingView;
+import com.example.uc3.AutoFetchView;
+import com.example.uc4.DenialView;
+import com.example.uc5.DetailedDataView;
+import com.example.uc6.OptionsView;
+import com.example.uc7.FormFieldView;
+import com.example.uc8.DbTrackingView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.router.Menu;
@@ -14,7 +24,9 @@ public class HomeView extends BaseHomeView {
 
     public HomeView() {
         super("Geolocation API — use cases",
-                "Each link below exercises one use case of the Vaadin Flow Geolocation API.");
-        addMenuLinkList();
+                "Each card below exercises one use case of the Vaadin Flow Geolocation API.");
+        addMenuCards(List.of(OneShotOnClickView.class, TrackingView.class,
+                AutoFetchView.class, DenialView.class, DetailedDataView.class,
+                OptionsView.class, FormFieldView.class, DbTrackingView.class));
     }
 }

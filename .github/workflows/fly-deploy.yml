@@ -72,6 +72,8 @@ jobs:
           echo "modules=$modules" >> "$GITHUB_OUTPUT"
   deploy:
     needs: discover
+    # An empty matrix fails the run, so skip when no deployable changed.
+    if: needs.discover.outputs.modules != '[]'
     name: Deploy ${{ matrix.module }}
     runs-on: ubuntu-latest
     concurrency: deploy-${{ matrix.module }}
@@ -87,9 +89,22 @@ jobs:
         run: |
           app=$(awk -F"'" '/^app *=/ {print $2}' ${{ matrix.module }}/fly.toml)
           echo "name=$app" >> "$GITHUB_OUTPUT"
-      - run: flyctl auth docker
+      - name: Create the Fly.io app
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          FLY_ORG: ${{ vars.FLY_ORG }}
+          APP: ${{ steps.app.outputs.name }}
+        # A module added since the last deploy has no app yet, and pushing its
+        # image would fail with "app repository not found". It is created in
+        # the FLY_ORG repository variable's organization, or else in the one
+        # the existing apps live in, like pr-preview.yml does.
+        run: |
+          apps=$(flyctl apps list --json)
+          if ! echo "$apps" | jq -e --arg name "$APP" '.[] | select(.Name == $name)' > /dev/null; then
+            org=${FLY_ORG:-$(echo "$apps" | jq -r 'first.Organization.Slug // "personal"')}
+            flyctl apps create "$APP" --org "$org"
+          fi
+          flyctl auth docker
       - uses: docker/build-push-action@v5
         with:
           context: .
