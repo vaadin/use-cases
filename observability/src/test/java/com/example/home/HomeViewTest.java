@@ -1,6 +1,5 @@
 package com.example.home;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -22,6 +21,7 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,17 +66,13 @@ class HomeViewTest extends SpringBrowserlessTest {
     void cardsAreGroupedByKindOfProblemInMenuOrder() {
         HomeView home = navigate(HomeView.class);
 
-        List<Group> groups = new ArrayList<>();
-        home.getChildren().forEach(child -> {
-            if (child instanceof H2 heading) {
-                groups.add(new Group(heading.getText(), new ArrayList<>()));
-            } else if (child.getElement().getClassList()
-                    .contains("home-cards")) {
-                child.getChildren().map(Card.class::cast)
-                        .map(HomeViewTest::useCaseOf)
-                        .forEach(groups.getLast().useCases()::add);
-            }
-        });
+        List<Group> groups = home.getChildren()
+                .filter(Section.class::isInstance)
+                .map(section -> new Group(
+                        find(H2.class).from(section).single().getText(),
+                        find(Card.class).from(section).all().stream()
+                                .map(HomeViewTest::useCaseOf).toList()))
+                .toList();
 
         assertEquals(
                 List.of(new Group("Something is slow",
@@ -87,8 +83,8 @@ class HomeViewTest extends SpringBrowserlessTest {
     }
 
     private static UseCase useCaseOf(Card card) {
-        return new UseCase(card.getHeader().getElement().getText(),
-                card.getTitle().getElement().getText(),
+        return new UseCase(card.getHeaderPrefix().getElement().getText(),
+                card.getTitleAsText(),
                 card.getChildren().filter(Paragraph.class::isInstance)
                         .map(p -> ((Paragraph) p).getText()).findFirst()
                         .orElse(null));
