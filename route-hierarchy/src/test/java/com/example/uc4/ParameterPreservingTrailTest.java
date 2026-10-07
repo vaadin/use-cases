@@ -27,10 +27,8 @@ class ParameterPreservingTrailTest extends SpringBrowserlessTest {
 
         // The Project ancestor crumb is itself dynamic ("Project Apollo" from
         // the :projectId); the leaf uses the task's PageTitleGenerator label.
-        assertEquals(
-                List.of("Projects", "Project Apollo", "Tasks",
-                        "Wire the backend"),
-                crumbs());
+        assertEquals(List.of("Projects", "Project Apollo", "Tasks",
+                "Wire the backend"), crumbs());
     }
 
     @Test
@@ -76,14 +74,13 @@ class ParameterPreservingTrailTest extends SpringBrowserlessTest {
     /**
      * The resolved {@code href} of each linked (non-current) crumb, in order.
      * Not available from the tester — see the note in the README about a
-     * {@code getItemPaths()} (or similar) addition to {@code BreadcrumbsTester}.
+     * {@code getItemPaths()} (or similar) addition to
+     * {@code BreadcrumbsTester}.
      */
     private List<String> ancestorLinkPaths() {
         return find(Breadcrumbs.class).single().getChildren()
                 .filter(BreadcrumbsItem.class::isInstance)
-                .map(BreadcrumbsItem.class::cast)
-                .map(BreadcrumbsItem::getPath)
-                .filter(path -> path != null && !path.isEmpty())
-                .toList();
+                .map(BreadcrumbsItem.class::cast).map(BreadcrumbsItem::getPath)
+                .filter(path -> path != null && !path.isEmpty()).toList();
     }
 }

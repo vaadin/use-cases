@@ -1,7 +1,5 @@
 package com.example.usecase25;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
@@ -21,6 +19,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -29,7 +28,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-25", layout = MainLayout.class)
 @Menu(order = 25, title = "UC 25: Stock Ticker")
 @StyleSheet("usecase25.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase25View extends Main {
 
     final ListSignal<StockQuote> stockSignals = new ListSignal<>();

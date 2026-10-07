@@ -11,31 +11,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <!--
-          Observability Kit (the Micrometer rewrite, 5.0-SNAPSHOT) builds on Flow
-          25.3-SNAPSHOT and relies on the SessionLockListener / RpcInvocationListener
-          SPIs (Flow PRs #24498 / #24499). Pin this module to the 25.3 line so the
-          Flow / components / vaadin artifacts align with the kit; the rest of the
-          repo stays on the baseline 25.2-SNAPSHOT.
-        -->
-        <flow.version>25.3-SNAPSHOT</flow.version>
-        <flow-components.version>25.3-SNAPSHOT</flow-components.version>
-        <vaadin.version>25.3-SNAPSHOT</vaadin.version>
-        <observability-kit.version>5.0-SNAPSHOT</observability-kit.version>
-        <!--
-          browserless-test has to follow the same Flow line. Its MockVaadin fires
-          the session-init / service-destroy listeners to simulate the lifecycle,
-          and Flow 25.3 (flow#25268) moved those off VaadinService's private
-          listener lists onto VaadinService#getEventBus() (VaadinServiceEventBus).
-          The 1.1 line still reads the removed fields reflectively, so every
-          browserless test here fails in setup with NoSuchFieldException:
-          sessionInitListeners; the 1.2 line is built against 25.3 and fires
-          through the event bus instead.
-        -->
-        <browserless-test.version>1.2-SNAPSHOT</browserless-test.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.example</groupId>
@@ -80,6 +55,43 @@
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+        <!--
+          UC4 follows one interaction as a trace. The kit already drives its
+          request, RPC, navigation, data-query and JDBC instrumentation through
+          Micrometer's Observation API; what turns those observations into
+          spans with a shared trace id is a tracing bridge, and there is none on
+          the classpath by default. These two are that bridge: Boot's Brave
+          auto-configuration and the Micrometer/Brave implementation it needs.
+          Add them and every use case in this module starts producing spans —
+          UC4 is only the view that reads them.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-micrometer-tracing-brave</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-brave</artifactId>
+        </dependency>
+        <!--
+          Forwards the application's errors to Sentry. The starter switches on
+          only once a DSN is configured (SENTRY_DSN, see application.properties),
+          so without one it stays out of the way. sentry-logback is what does
+          the capturing: a failing Vaadin interaction still answers the RPC with
+          200, so Spring MVC's exception handling, which the starter hooks into,
+          never sees it, but Vaadin's default error handler logs it at ERROR and
+          the Logback appender turns that log line into a Sentry event.
+        -->
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-spring-boot-4-starter</artifactId>
+            <version>${sentry.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-logback</artifactId>
+            <version>${sentry.version}</version>
         </dependency>
         <!--
           UC2's join-table fetch demo needs a JPA layer and a database. H2 in

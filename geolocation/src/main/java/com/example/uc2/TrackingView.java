@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -49,6 +50,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Continuous tracking with reactive signal")
+@UseCaseDescription("Following the user's position as it changes")
 @Menu(order = 2, title = "UC2 — Tracking")
 public class TrackingView extends VerticalLayout {
 

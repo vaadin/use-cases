@@ -21,9 +21,9 @@ import com.vaadin.flow.signals.Signal;
  * <p>
  * Unlike a full breadcrumb it only needs the <em>immediate</em> parent, so it
  * calls {@link RouteConfiguration#getRouteParent(Class, RouteParameters)}
- * rather than the whole hierarchy. When the current view is already a hierarchy root, that
- * returns {@link Optional#empty()} and the control renders a plain "top level"
- * note instead of a link.
+ * rather than the whole hierarchy. When the current view is already a hierarchy
+ * root, that returns {@link Optional#empty()} and the control renders a plain
+ * "top level" note instead of a link.
  * <p>
  * The control wires itself to {@link UI#routerStateSignal()} via a single
  * {@link Signal#effect}; the parent is recomputed from the current

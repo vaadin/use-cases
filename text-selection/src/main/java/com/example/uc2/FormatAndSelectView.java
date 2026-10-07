@@ -2,6 +2,7 @@ package com.example.uc2;
 
 import java.util.regex.Pattern;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -26,6 +27,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Post-transform select-all")
+@UseCaseDescription("Selecting a value after the server reformats it")
 @Menu(order = 2, title = "UC2 — Post-transform select-all")
 public class FormatAndSelectView extends VerticalLayout {
 

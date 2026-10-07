@@ -1,7 +1,5 @@
 package com.example.muc04;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.muc04.SignalFieldHighlighter.User;
 import com.example.security.CurrentUserSignal;
 import com.example.security.CurrentUserSignal.UserInfo;
@@ -24,6 +22,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 
@@ -42,7 +41,7 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @PageTitle("Multi-User Case 4: Collaborative Editing")
 @Menu(order = 53, title = "MUC 4: Collaborative Editing")
 @StyleSheet("muc04.css")
-@PermitAll
+@AnonymousAllowed
 public class MUC04View extends VerticalLayout {
 
     private final User currentUser;

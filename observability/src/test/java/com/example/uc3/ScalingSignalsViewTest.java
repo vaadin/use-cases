@@ -44,13 +44,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @SpringBootTest
 @ViewPackages(classes = { ScalingSignalsView.class, HomeView.class })
-// A fresh context per test. The kit's binder is created by the Vaadin service
-// init listener and registers gauges that hold it; re-initialising the Vaadin
-// environment between tests builds a second binder while the shared registry
-// still serves the first one's gauges, which then report zero because the UIs
-// they knew about are gone. Reloading the context keeps registry and binder in
-// step, so a gauge reading means what it says.
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+// A fresh context before every test, the first one included. The kit's binder
+// is created by the Vaadin service init listener and registers gauges that
+// hold it weakly; re-initialising the Vaadin environment builds a second
+// binder while the shared registry still serves the first one's gauges, which
+// then report zero (UIs gone) or NaN (binder collected). That first binder may
+// come from a test class that ran earlier in the same context, which is why
+// AFTER_EACH was not enough: CI's test order put UC8 first and the first UC3
+// test read NaN. Reloading before each test keeps registry and binder in step.
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ScalingSignalsViewTest extends SpringBrowserlessTest {
 
     @Autowired

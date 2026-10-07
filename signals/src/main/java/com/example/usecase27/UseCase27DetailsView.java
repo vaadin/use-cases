@@ -1,7 +1,5 @@
 package com.example.usecase27;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -10,6 +8,7 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 /**
  * Detail sub-view of {@link UseCase27View}. Demonstrates that
@@ -19,7 +18,7 @@ import com.vaadin.flow.router.RouterLink;
  */
 @Route(value = "use-case-27/details/:id", layout = UseCase27Layout.class)
 @PageTitle("Use Case 27: Details")
-@PermitAll
+@AnonymousAllowed
 public class UseCase27DetailsView extends VerticalLayout
         implements BeforeEnterObserver {
 

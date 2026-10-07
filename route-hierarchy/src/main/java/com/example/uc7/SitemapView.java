@@ -94,11 +94,9 @@ public class SitemapView extends VerticalLayout {
         for (Class<? extends Component> node : nodes) {
             ListItem item = new ListItem();
             item.addClassName("sitemap-node");
-            item.add(new RouterLink(
-                    VaadinService.getCurrent().getRouter()
-                            .resolvePageTitle(node, RouteParameters.empty())
-                            .orElseGet(node::getSimpleName),
-                    node));
+            item.add(new RouterLink(VaadinService.getCurrent().getRouter()
+                    .resolvePageTitle(node, RouteParameters.empty())
+                    .orElseGet(node::getSimpleName), node));
             Set<Class<? extends Component>> kids = children.get(node);
             if (kids != null && !kids.isEmpty()) {
                 item.add(renderLevel(kids, children));

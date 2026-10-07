@@ -14,12 +14,12 @@ import com.vaadin.flow.signals.Signal;
 /**
  * UC6 — Layout-wide auto breadcrumbs.
  * <p>
- * One {@link Breadcrumbs} component lives in this parent layout, shared by every
- * child view ({@code uc6}, {@code uc6/team}, {@code uc6/team/:member}). The child
- * views build no breadcrumb of their own.
+ * One {@link Breadcrumbs} component lives in this parent layout, shared by
+ * every child view ({@code uc6}, {@code uc6/team}, {@code uc6/team/:member}).
+ * The child views build no breadcrumb of their own.
  * <p>
- * The {@link Breadcrumbs} component in {@code ROUTER} mode already subscribes to
- * the router and rebuilds the shared trail on every navigation — no
+ * The {@link Breadcrumbs} component in {@code ROUTER} mode already subscribes
+ * to the router and rebuilds the shared trail on every navigation — no
  * {@code AfterNavigationObserver} registration or manual seeding step. The
  * {@link Signal#effect} added here is independent of the breadcrumb: it
  * subscribes to {@link UI#routerStateSignal()} purely to drive the rebuild

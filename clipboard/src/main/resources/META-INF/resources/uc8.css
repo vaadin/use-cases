@@ -1,0 +1,16 @@
+/* The value and its copy button share the cell; the button stays out of the
+   way until the row is worth acting on. */
+.copy-cell {
+    padding: 0;
+    gap: var(--vaadin-gap-s, 0.5rem);
+    width: 100%;
+}
+
+.copy-cell vaadin-button {
+    opacity: 0.55;
+}
+
+vaadin-grid-cell-content:hover .copy-cell vaadin-button,
+.copy-cell vaadin-button:focus-visible {
+    opacity: 1;
+}

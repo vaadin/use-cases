@@ -1,7 +1,5 @@
 package com.example.usecase27;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
@@ -13,6 +11,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.router.RouterState;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -27,7 +26,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @ParentLayout(MainLayout.class)
 @StyleSheet("usecase27.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase27Layout extends Div implements RouterLayout {
 
     public static final String BREADCRUMB_ID = "uc27-breadcrumb";

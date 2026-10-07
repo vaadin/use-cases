@@ -1,0 +1,9 @@
+.sheets {
+    display: flex;
+    flex-direction: column;
+}
+
+.sheets .sheet {
+    padding: 2rem;
+    max-width: 48rem;
+}

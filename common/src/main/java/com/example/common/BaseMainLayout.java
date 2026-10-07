@@ -2,6 +2,8 @@ package com.example.common;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.Anchor;
@@ -48,8 +50,14 @@ public abstract class BaseMainLayout extends AppLayout
         addToDrawer(AppCatalog.createSelector(moduleId));
 
         SideNav nav = new SideNav();
-        mainNavEntries().forEach(entry -> nav
-                .addItem(new SideNavItem(entry.title(), entry.path())));
+        mainNavEntries().forEach(entry -> {
+            SideNavItem item = new SideNavItem(entry.title(), entry.path());
+            UseCaseDescription description = descriptionOf(entry);
+            if (description != null) {
+                item.setTooltipText(description.value());
+            }
+            nav.addItem(item);
+        });
         addToDrawer(nav);
     }
 
@@ -61,6 +69,11 @@ public abstract class BaseMainLayout extends AppLayout
      */
     protected List<MenuEntry> mainNavEntries() {
         return MenuConfiguration.getMenuEntries();
+    }
+
+    static @Nullable UseCaseDescription descriptionOf(MenuEntry entry) {
+        return entry.menuClass() == null ? null
+                : entry.menuClass().getAnnotation(UseCaseDescription.class);
     }
 
     private static Element buildSourceCodeOverlay(Anchor link) {

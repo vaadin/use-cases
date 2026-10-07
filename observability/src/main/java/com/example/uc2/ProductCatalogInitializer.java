@@ -8,19 +8,22 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Seeds a handful of products, each in one or two categories, so the join-table
- * fetch demo has something to load. Enough products that the N+1 fan-out is
- * unmistakable in the statement count, few enough to stay an in-memory toy.
+ * Seeds a handful of Acme Supply's products, each in one or two categories, so
+ * the join-table fetch demo has something to load. Enough products that the
+ * N+1 fan-out is unmistakable in the statement count, few enough to stay an
+ * in-memory toy.
  */
 @Component
 class ProductCatalogInitializer implements CommandLineRunner {
 
-    private static final String[] CATEGORY_NAMES = { "Fiction", "Non-fiction",
-            "Children", "Technical", "Reference" };
-    private static final String[] PRODUCT_NAMES = { "The Pragmatic Programmer",
-            "Clean Code", "Refactoring", "Effective Java",
-            "Domain-Driven Design", "Working Effectively with Legacy Code",
-            "The Mythical Man-Month", "Designing Data-Intensive Applications" };
+    private static final String[] CATEGORY_NAMES = { "Bolts", "Screws",
+            "Washers", "Nuts", "Anchors" };
+    private static final String[] PRODUCT_NAMES = {
+            "Stainless steel hex bolt M8 × 40", "Zinc-plated wood screw 4 × 40",
+            "Brass flat washer M6", "Galvanized hex nut M10",
+            "Hardened steel anchor bolt M12 × 100",
+            "Nylon lock washer M8", "Copper self-tapping screw 3.5 × 25",
+            "Titanium carriage bolt M6 × 50" };
 
     private final ProductRepository products;
     private final CategoryRepository categories;

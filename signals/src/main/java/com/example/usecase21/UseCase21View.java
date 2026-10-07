@@ -1,7 +1,5 @@
 package com.example.usecase21;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.Locale;
 
 import com.example.views.MainLayout;
@@ -22,6 +20,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 
 import static com.example.usecase21.TranslationService.translate;
@@ -30,7 +29,7 @@ import static com.example.usecase21.TranslationService.translate;
 @PageTitle("Use Case 21: Signals-Based i18n")
 @Menu(order = 21, title = "UC 21: Signals-Based i18n")
 @StyleSheet("usecase21.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase21View extends VerticalLayout {
 
     public UseCase21View() {

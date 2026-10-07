@@ -19,16 +19,20 @@ out of the box.
 The kit is good and covers most of the use cases in
 [#277](https://github.com/vaadin/use-cases/issues/277). The gaps below are what
 remains *missing or awkward even with the kit in place* — i.e. the things the
-demo can't do cleanly, and the Flow / kit API changes they argue for. A reusable
-shim, where one is possible, would live in `src/main/java/com/example/MissingAPI.java`.
+demo can't do cleanly, and the Flow / kit API changes they argue for. Where a shim
+is possible it lives with the use case that needs it, next to the view. Two of them
+have since been deleted, both from UC5, because the kit grew what they stood in for —
+see gap #5 for what writing them taught, and what the kit's own versions do better.
 
 Meters referenced below use the kit's `MeterNames` constants. The server records
 `vaadin.request.duration`, `vaadin.rpc.duration` (tagged `type` / `outcome`),
 `vaadin.navigation`, `vaadin.errors`, `vaadin.sessions.*`, `vaadin.session.lock.*`
 and `vaadin.ui.*`. The client collector records, into the *same* registry,
 `vaadin.client.bootstrap.duration`, `vaadin.client.navigation.duration` (tagged
-`route` / `trigger`), `vaadin.client.web_vitals.lcp`, `vaadin.client.web_vitals.fcp`
-and the `vaadin.client.errors` counter.
+`route` / `trigger`), `vaadin.client.web_vitals.lcp`, `vaadin.client.web_vitals.fcp`,
+the `vaadin.client.errors` counter, and — since it began subscribing to Flow's
+connection-state store — `vaadin.client.connection` and
+`vaadin.client.connection.downtime` (both tagged `state`).
 
 **Reachability is not the problem.** The in-browser collector POSTs its samples
 back via the `<vaadin-metrics-collector>` `@ClientCallable`, and `ClientMetricsBinder`
@@ -38,54 +42,48 @@ meters — a Flow view can inject the `MeterRegistry` and read them today. The g
 below are therefore about **what the client measures, granularity, correlation, and
 completeness**, not about getting client data to the server.
 
-> **Watch out:** `MeterNames.CLIENT_RPC_DURATION` (`vaadin.client.rpc.duration`)
-> is a *defined constant but is intentionally never collected* — it is excluded
-> from `ClientMetricNames.ALLOWED`, and the collector never emits it, because RPC
-> timing is measured server-side only. Application code that reads
-> `vaadin.client.rpc.duration` expecting a browser round-trip will always find an
-> empty meter. (UC1 originally made this mistake; it now reads the client meters
-> that actually populate — see gap #2.)
+> **Note:** the kit once declared a `vaadin.client.rpc.duration` constant that was
+> never emitted. It is gone. The browser's per-interaction timers are
+> `vaadin.client.request.duration` and `vaadin.client.render.duration` (see gap #2,
+> now closed); UC1 reads both.
 
 ## 1. No public client-side request-lifecycle hook
 
-**Where it bites:** UC1 (end-to-end responsiveness); the whole client collector.
+**Where it bites:** UC1 (attributing one click end to end); the whole client collector.
 **Symptom:** there is no supported way for application/add-on code to learn when a
-UIDL request starts and ends in the browser. The internal `RequestResponseTracker`
-fires `RequestStartingEvent` / `ResponseHandlingEndedEvent`, but on a GWT-internal
-`EventBus` with Java-only handlers and no `@JsExport` — invisible to JS. Lacking
-such a hook, the kit's `VaadinMetricsClient.js` does **not** instrument UIDL
-requests at all: it sidesteps the problem by measuring SPA navigation through the
-History API (wrapping `history.pushState` / `replaceState` and listening for
-`popstate`) and page quality through `PerformanceObserver` (LCP/FCP) — never the
-request/response of an in-place interaction. (The earlier prototype monkey-patched
-`XMLHttpRequest.prototype.send` and string-matched `v-r=uidl`; the kit dropped that
-rather than rely on an implementation detail.)
-**Workaround used:** none clean; the kit measures navigation + vitals instead of requests.
-**Suggested API:** a first-class client hook, e.g.
-`window.Vaadin.Flow.addRequestListener({ onRequestStart, onResponseReceived, onRendered })`,
-emitting per-request timestamps, request/response sizes, transport, outcome, and a
-correlation id — surfacing the events `RequestResponseTracker` already fires.
+UIDL request starts and ends in the browser. The `RequestResponseTracker` fires
+`RequestStartingEvent` / `ResponseHandlingEndedEvent`, now in TypeScript
+([flow#24951](https://github.com/vaadin/flow/pull/24951)), but they are not
+published on `window.Vaadin.Flow.clients`. The kit's collector no longer needs the
+hook for *timing*: it reads each UIDL `POST`'s Resource Timing entry for the round
+trip and Flow's published `getProfilingData()` for the render time (gap #2). What
+it still cannot do without the hook is tell *which* request a timing belongs to, or
+attribute a request to the click that started it.
+**Workaround used:** Resource Timing for the wire, `getProfilingData()` for the render,
+the connection store's loading transitions as the "a request ended" signal.
+**Suggested API:** publish the tracker's events, as
+[flow#7369](https://github.com/vaadin/flow/issues/7369) has asked since 2020:
+`window.Vaadin.Flow.addRequestListener({ onRequestStart, onResponseReceived, onRendered })`
+with a correlation id, so a click can be followed from the browser to the server.
 
-## 2. No per-interaction client timing — only navigation and web vitals
+## 2. Per-interaction client timing — closed
 
-**Where it bites:** UC1 (the browser segment of perceived latency).
-**Symptom:** the kit deliberately emits **no client round-trip meter**
-(`vaadin.client.rpc.duration` is excluded from the ingest allowlist — see the note
-above). So an in-place interaction such as a button click produces no client-side
-timing whatsoever; only a *route navigation* (a History change) yields
-`vaadin.client.navigation.duration`, and even that is measured to the next
-animation frame after the URL changes, not to the moment Flow finishes applying the
-UIDL diff and painting. "Click-to-rendered" — the number the user actually feels for
-a non-navigating interaction — is therefore not measurable on the client at all. The
-engine *does* measure render time (TestBench reads `timeSpentRenderingLastRequest()`),
-but it is not on any public JS surface.
-**Workaround used:** UC1 reads the meters that do populate — `vaadin.request.duration`
-and the new server-side `vaadin.rpc.duration` for the server share, plus
-`vaadin.client.navigation.duration` and the web-vitals timers for page-load quality.
-The per-click browser/network share is simply absent.
-**Suggested API:** an `onRendered` timestamp on the hook from gap #1 (fired after the
-UIDL response has been applied), and/or exposing the engine's existing render timing to
-production client code, so a per-interaction client duration can exist.
+**Where it bit:** UC1 (the browser segment of perceived latency).
+**Status: closed by Observability Kit 5.0**
+([observability-kit#396](https://github.com/vaadin/observability-kit/pull/396)).
+The collector times each UIDL request from the browser's end as
+`vaadin.client.request.duration`, read off the Resource Timing entry every UIDL `POST`
+leaves behind, and the time Flow's client spent applying the response as
+`vaadin.client.render.duration`, read from the profiling data Flow publishes on
+`window.Vaadin.Flow.clients[id].getProfilingData()`. Both are tagged by `route`. The
+render figure exists only when Flow's `requestTiming` setting is on — the default
+outside production mode; a production deployment sets `vaadin.requestTiming=true`, as
+this module does. Subtracting `vaadin.request.duration{vaadin_request_type="uidl"}`
+from the browser's round trip gives the network's share, which UC1 shows.
+**What remains:** the render figure is Flow's processing time, not "click to painted";
+and the three segments are aggregates that cannot be stitched per click (gap #3). The
+request meter needs the default transport: with `@Push(transport = WEBSOCKET)` the UIDL
+rides the websocket and leaves no Resource Timing entry.
 
 ## 3. Client samples are aggregated and uncorrelated — no per-interaction value
 
@@ -102,8 +100,17 @@ production client code, so a per-interaction client duration can exist.
    aggregates exist. The collector also sends no W3C `traceparent` on the UIDL request
    (`recordSamples` carries only name/tags/value/ts), so the server-side trace
    (`vaadin.request` observation) doesn't descend from a browser-rooted span — the trace
-   effectively starts on the server, not at the click.
-**Workaround used:** aggregates only; no per-interaction stitch.
+   effectively starts on the server, not at the click. Boot's propagation would
+   *accept* one — `management.tracing.propagation.consume` includes W3C out of the box
+   — so the missing half is entirely on the client side.
+**Workaround used:** aggregates only; no per-interaction stitch. UC4 shows how far the
+server-side half does reach once a tracing bridge is on the classpath: the kit's
+request and RPC observations, the application's own hops and every `vaadin.db.query`
+do stitch into one trace, and the trail simply begins at the HTTP span instead of at
+the click. Worth noting for anyone reading the kit's feature list: the Observation
+path emits *nothing* until the application adds a bridge (UC4 adds
+`spring-boot-micrometer-tracing-brave` plus `micrometer-tracing-bridge-brave`), and
+without one the observations exist but produce no spans, silently.
 **Suggested API:** a per-UIDL-request correlation id exposed to both the client hook
 (gap #1) and the server request interceptor, ideally as a W3C `traceparent` the client
 injects and the server continues, so browser → server → backend is one trace.
@@ -119,24 +126,84 @@ samples. For push-heavy apps the client view of responsiveness is blind.
 **Suggested API:** the client hook (#1) should be transport-agnostic, covering the
 push connection, not just navigations.
 
-## 5. No connection-state metric, despite the client API existing
+## 5. Connection and client-side problems — **resolved in the kit**
 
-**Where it bites:** UC5 (connection lost / reconnecting), UC2 (the health badge, which
-can therefore only report the cadence of its own poll requests, never the browser's
+**Where it bit:** UC5 (connection lost / reconnecting), UC2 (the health badge, which
+could therefore only report the cadence of its own poll requests, never the browser's
 connection state).
-**Symptom:** the kit collects client *errors* but not connection-state
-transitions. Yet `window.Vaadin.connectionState` already exposes
-`online`/`offline`, a `state` (`CONNECTED` / `CONNECTION_LOST` / `RECONNECTING`), and
-`addStateChangeListener(...)`. The information is one listener away but is neither
-collected by the kit nor surfaced as a meter.
-**Workaround used (possible):** an app-level shim that subscribes to
-`window.Vaadin.connectionState.addStateChangeListener` and reports transitions to the
-server via a `@ClientCallable`, recorded as a `vaadin.client.connection.state` meter —
-a candidate for `MissingAPI`.
-**Suggested API:** have the collector record connection-state transitions out of the
-box (e.g. a `vaadin.client.connection` gauge/counter tagged by state), since the
-client store already drives them.
+**Status: closed, in two steps.** The kit's in-browser collector now subscribes
+to `window.Vaadin.connectionState` and publishes two meters, on by default with the rest
+of `vaadin.observability.client`:
 
+- `vaadin.client.connection` — a counter of transitions, tagged `state` with the state
+  entered, bounded to `connected` / `connection-lost` / `reconnecting` / `_unknown`;
+- `vaadin.client.connection.downtime` — a timer of how long a browser stayed unable to
+  reach the server, tagged `state` with the state it was spent in.
+
+UC5 previously carried a shim of its own for exactly this. It is deleted, and the view
+now just reads the registry like every other use case in this module. Four findings from
+that consumer-side implementation stand, and the kit's version reflects all four:
+`loading` is not a connection state and has to be ignored in both directions, or the
+counter counts one transition per interaction; a report needs the connection it is about,
+so samples must be buffered and flushed on recovery with the age measured on the
+browser's clock; a polling view probes the connection on every tick and shortens the very
+outages it displays, so a readout must refresh from the report rather than from a
+schedule; and instrumentation attached to a view watches only that view. The kit's
+implementation goes further than the shim did on two counts — it persists the buffer to
+`sessionStorage` so a reload mid-outage does not lose it, and it splits downtime per
+state rather than per outage, which is the better call: Flow enters `reconnecting` on the
+first failed request and `connection-lost` only after exhausting retries, so a short
+outage that recovers while still retrying would otherwise not be measured at all.
+
+**Then the error detail followed.** `vaadin.client.errors` still only counts, tagged
+`uncaught` or `promise`, which is right — a message on a tag is one time series per
+distinct message. What identifies an error is retained as a `client-error` *insight*
+instead, served from the same endpoint as the failed interactions UC6 renders. UC5 had a
+second shim for this, `ClientErrorReporter`; it is deleted too, and the view reads the
+payload. The kit's version does four things the shim did not, and each is a reason this
+never belonged in application code:
+
+- **The location is parsed and validated, not trusted.** `frame` is the location out of
+  the stack line, without the function name that stood in front of it, and `source` and
+  `frame` are published only when what the browser said is actually a location. A
+  cross-origin `Script error.` has no filename, a rejection none at all, and the page's
+  own URL is not where the code is — so those are dropped rather than substituted, which
+  is what keeps one finding per bug from becoming one per order id. The shim passed the
+  browser's string through.
+- **Grouping.** By route, kind, source and frame, with an occurrence count, so a hundred
+  tabs hitting the same broken chart are one finding. The shim's log was a flat list.
+- **The message and the function name are gated**, under `insights-details`, and for a
+  browser error the setting governs *collection*: with it off the browser never gathers
+  them, so there is nothing buffered to withhold. The payload says which case it is
+  rather than leaving a null field. The shim kept everything unconditionally, which was
+  its worst defect.
+- **`maxBufferedMs`** — offline time the report waited before it could be delivered,
+  measured on the browser's clock and carried through `sessionStorage` across a reload.
+  The shim could not produce this at all: it rode Flow's pending-message queue, which
+  delivers but does not date.
+
+**What the kit still leaves to the application:**
+
+1. **Whole-outage length is the application's arithmetic.** Splitting the downtime timer
+   per state is right, but an SLO wants the outage end to end, which is the sum of the two
+   tags. UC5's readout does that addition; a documented recording rule or a derived meter
+   would save every consumer from rediscovering that either tag alone under-reports.
+2. **Client samples arrive with no event to listen for.** `ClientMetricsBinder.ingest`
+   and the insight collectors raise nothing an application can subscribe to, so a view
+   showing client-collected data has to poll or be refreshed by hand. For UC5 polling is
+   not an option — a poll is a UIDL request, and one that gets through ends the outage as
+   far as the browser is concerned, so a polling tab under-reports the downtime it is
+   displaying. So the readout is recomputed from the picking screen's own interactions,
+   and the script that simulates the recovery calls a `@ClientCallable` on the view once
+   the browser has the server back — an application-side stand-in for the event the kit
+   does not raise, and one a real outage would not make. A `ClientSamplesRecorded`-style
+   service event would let an in-app readout be live without probing the connection it
+   measures.
+3. **The payload is still an untyped map in process** (gap #9), and UC5 now casts through
+   it the same way UC6 does.
+
+**Suggested API:** an ingest event as above; and the typed insight objects gap #9 asks
+for, which would remove the last hand-written casting from both consumers.
 ## 6. UI-state size — **resolved in the kit**, with bytes left to the application
 
 **Where it bit:** UC3 (capacity & scaling), UC2 (the health readout counted sessions
@@ -231,16 +298,16 @@ only by exception type — deliberately, to bound cardinality. So a Prometheus/G
 dashboard still cannot group latency or errors by component or view; only the in-process
 insights (or a tracing backend) carry that. A *business* action name ("save order", as
 opposed to the `click` that carried it) also remains the application's own to record.
-**Workaround used:** UC1 keeps its own `uc1.interaction` timer for per-action metric
-granularity; UC6 uses the insights for per-component attribution.
+**Workaround used:** UC1 keeps its own `acme.invoice.action{action=…}` timer for
+per-action metric granularity; UC6 uses the insights for per-component attribution.
 **Suggested API:** an opt-in, cardinality-bounded resolver the application supplies (e.g.
 route plus a logical action name) that the kit may apply as *meter* tags, so dashboards
 can group by view/action without unbounded cardinality.
 
 ## 9. Insights are consumable in-process only as an untyped JSON map
 
-**Where it bites:** UC6.
-**Symptom:** the kit's interaction insights are shaped for the Actuator endpoint:
+**Where it bites:** UC6, UC8 and UC5.
+**Symptom:** the kit's insights are shaped for the Actuator endpoint:
 `InsightsService.payload()` returns a `Map<String, Object>` of nested maps and lists. An
 application that wants to render insights in its own UI — as UC6 does, rather than have
 the app call its own HTTP endpoint — has to cast its way through that map
@@ -248,8 +315,16 @@ the app call its own HTTP endpoint — has to cast its way through that map
 `(Map<String, Object>) insight.get("evidence")`), with unchecked casts, string keys and
 no compile-time contract. The JSON shape is a good published contract for *agents*; it is
 a poor one for Java callers.
-**Workaround used:** UC6 flattens the map into a view-local `Row` record, with
-`@SuppressWarnings("unchecked")`.
+**And it now bites three times.** Since the kit retains browser errors, UC5 reads the same
+payload for the `client-error` insights, and UC8 reads it for the data-query ones — the
+same two casts and the same null-tolerant accessors each time. More consumers also
+surface what the untyped shape costs beyond the casts: `type` is a string constant each
+view has to know, the presence of `message` versus `detail` encodes whether collection
+was on, and a field the browser never supplied is a null in a map rather than an empty
+`Optional`.
+**Workaround used:** the casts and the accessors are written once, in this module's own
+`com.example.acme.Insights`, with `@SuppressWarnings("unchecked")` — which is to say
+every application consuming insights has to write this helper.
 **Suggested API:** typed insight objects (e.g. `List<Insight>` exposing id, severity,
 summary, evidence and examples) alongside the JSON rendering, so in-app consumers get a
 compile-checked contract and JSON stays a serialization concern.
@@ -326,6 +401,57 @@ scoped accessor for the fetches recorded during the current RPC invocation (the
 correlation id from gap #3 would carry it), or a per-request `vaadin.db.fetch.count`
 exposed alongside `vaadin.rpc.duration`.
 
+## 14. Session id on the trail — closed
+
+**Where it bit:** UC4 (following *this user's* interaction).
+**Status: closed by Observability Kit 5.0**
+([observability-kit#405](https://github.com/vaadin/observability-kit/pull/405)).
+The kit used to declare `vaadin.observability.traces-session-id` and an
+`ObservationNames.KEY_SESSION_ID` (`vaadin.session.id`) attribute key without
+anything reading either, so turning the property on changed nothing. Now, with it
+on, `RequestMetricsBinder` adds the HTTP session id to the `vaadin.request.*` span as
+a high-cardinality key-value — span-only, never a Timer tag — resolved at request end
+so the page load that creates the session is attributed too. UC4 turns it on, and
+its list of followed dispatches says which of them came from the reader's own
+session: "show me what that clerk did" becomes a filter in the trace backend.
+**What remains:** only the request span carries it. The RPC span and the
+application's own spans below it do not, so a backend query for a session finds the
+trail's root and reaches the rest by trace id. And the span carries the raw id —
+unlike the insights payload, which reduces it to a short one-way hash unless
+`insights-details` is on — so a trace backend with this switch on holds live session
+cookies' values and needs the access controls that implies. UC4's trail is readable
+from every session, so it masks the value rather than print it.
+
+## 15. The route template the kit lifts into the HTTP observation is a class name
+
+**Where it bites:** UC4 (the trail's root span), UC7 (a dashboard that groups by URI).
+**Tracked in:** [observability-kit#417](https://github.com/vaadin/observability-kit/issues/417).
+**Symptom:** `RequestMetricsBinder#requestEnd` lifts the active view's route template
+into the framework's HTTP observation, so that `http.server.requests` reads
+`/orders/:id` rather than the protocol-level `/vaadin/uidl` — a good idea, and the
+javadoc says as much. In this Spring Boot application it resolves to the *view class
+simple name* instead. Measured on the running module: clicking on `/shipping`
+produces `http_server_requests_seconds_count{uri="/InteractionTraceView"}`, on
+`/invoices` `uri="/InteractionLatencyView"`, and on `/uc3` `uri="/ScalingSignalsView"`
+— while every kit meter and span for the same interactions is tagged
+`route=shipping`, `route=invoices`, `route=uc3`. It is not the `@RouteAlias`: UC3 has
+none and behaves the same.
+**Cause:** `RouteTagResolver#tagForUi` resolves against the registry it reads off the
+UI's router (`RouteConfiguration.forRegistry(registry).getTemplate(target)`) and falls
+back to `Class#getSimpleName` when that returns empty, which is what happens here.
+The `tagFor(Class)` path, which goes through `RouteConfiguration.forSessionScope()`,
+resolves the same views correctly — that is why the kit's own `route` tags are right
+and only the lifted `uri` is wrong. The class's javadoc anticipates the registry
+difference for session-scoped routes; the effect here is broader than that.
+**Consequence:** the two halves of one dashboard disagree about what to call a
+screen, and the fallback is silent — the value looks like a route (`/SomeView`), so
+nothing signals that the template was not found.
+**Workaround used:** none. UC4's readout says so rather than hiding it, since the
+root span is the first row of its trail.
+**Suggested API:** resolve the template the way `tagFor(Class)` does when a session
+is bound (the request thread always has one), or make the fallback legible — an
+explicit `_unknown` rather than a class name that impersonates a route.
+
 ## Test-simulator note
 
 Most client-side gaps are where the repo's browserless tests cannot exercise the JS
@@ -333,6 +459,26 @@ collector. Server-side binders *are* testable browserlessly (drive `navigate(...
 session/UI lifecycle and assert against a `SimpleMeterRegistry`), and the kit ships
 exactly such tests. Gaps that live purely in the browser (#1–#5, #7-client, #11) have no
 browserless simulator and would need an end-to-end test or a documented manual check.
+
+**A kit-side feature is testable from the seam behind the browser**, which is how UC5 is
+covered now that it measures nothing itself. Its tests record into
+`vaadin.client.connection.downtime` exactly as the collector would, and capture browser
+errors through the kit's own `ClientErrorCollector.capture(...)` into the buffer
+`ObservabilityKit.getRecentClientErrors()` publishes — so the assertions run against real
+frame parsing and real detail gating, not a hand-built payload. That is the pattern
+wherever a client-side feature lands server-side through a seam an application can reach:
+pick the seam nearest the browser and drive it with what the browser would send. The
+collector's own half — the subscription to `window.Vaadin.connectionState`, the buffering
+across an outage, the detail gathered there — is covered by the kit's `ClientProblemsIT`
+and its `VaadinMetricsClient.test.js`.
+
+**Watch the buffer's lifecycle in a browserless test.** `RecentClientErrors` is built by
+the kit's service-init listener and published as a static, so `cleanVaadinEnvironment()` +
+`initVaadinEnvironment()` replaces it and drops what the previous session captured — the
+same harness artefact as UC3's gauges (#6). A production service is initialised once, so
+the buffer really is application-wide; to exercise that, capture two reports without
+re-initialising and assert they group into one finding, rather than trying to hand one
+across a simulated session boundary.
 
 **RPC-driven capture is also outside browserless reach.** Anything hooked on Flow's RPC
 invocation listener — `vaadin.rpc.duration`, and UC6's interaction insights — is observed
@@ -342,6 +488,18 @@ and nothing is captured. UC6's test therefore covers rendering, wiring (the fail
 action must let its exception propagate) and lifecycle, while the capture itself needs a
 browser. A `SpringBrowserlessTest` hook to drive an invocation through the RPC pipeline
 would close this.
+
+**Tracing is the exception**, and it is worth knowing why. Everything driven through the
+Observation API from ordinary application code — UC4's `acme.shipment.dispatch`,
+`acme.warehouse.reserve` and `acme.carrier.book` spans, and the kit's `vaadin.db.query`
+span per JDBC statement, since the `DataSource` proxy does not care how the call
+arrived — is created on the calling thread, so a browserless click produces a real,
+correctly nested trail. What a browserless test cannot produce is its *top*: the
+`vaadin.request` and `vaadin.rpc` spans need a UIDL request, and Spring's HTTP span
+needs a servlet one. So `InteractionTraceViewTest` asserts the trail's shape, its trace
+id, the failing hop and the ranking for real, and only the framework's two outermost
+spans are covered by using the running application (which is also where gaps #14 and
+#15 were measured).
 
 Two specifics for the UI-state binder (#6), learned writing UC3's tests. Its UI-init and
 after-navigation hooks do fire browserlessly, so `navigate(...)` after growing a tree is

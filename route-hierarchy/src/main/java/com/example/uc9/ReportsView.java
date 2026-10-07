@@ -22,13 +22,14 @@ import com.vaadin.flow.server.menu.MenuEntry;
  * UC9 — Menu-only nesting (root, {@code uc9}).
  * <p>
  * Every other use case here has one hierarchy: the route hierarchy nests the
- * breadcrumb <em>and</em> the menu. This one splits them. {@link
- * RevenueForecastView} is a top-level route at {@code /forecast} — its URL sits
- * nowhere near {@code uc9}, and neither does its breadcrumb — but in the menu
- * it belongs under Reports. {@code @Menu(parent = ReportsView.class)} says so,
- * and it moves the entry in {@link MenuConfiguration#getMenuEntriesTree()}
- * only: navigation, the breadcrumb trail and the flat
- * {@link MenuConfiguration#getMenuEntries()} are all untouched.
+ * breadcrumb <em>and</em> the menu. This one splits them.
+ * {@link RevenueForecastView} is a top-level route at {@code /forecast} — its
+ * URL sits nowhere near {@code uc9}, and neither does its breadcrumb — but in
+ * the menu it belongs under Reports. {@code @Menu(parent = ReportsView.class)}
+ * says so, and it moves the entry in
+ * {@link MenuConfiguration#getMenuEntriesTree()} only: navigation, the
+ * breadcrumb trail and the flat {@link MenuConfiguration#getMenuEntries()} are
+ * all untouched.
  * <p>
  * That is the difference from UC2's {@code @RouteParent}, which relocates the
  * route itself and so moves the breadcrumb with it. Use {@code @RouteParent}
@@ -49,15 +50,13 @@ public class ReportsView extends VerticalLayout {
     public ReportsView() {
         add(new Breadcrumbs());
         add(new H1("Reports"));
-        add(new Paragraph(
-                "The tree below is this entry's own branch of "
-                        + "getMenuEntriesTree(). It holds both reports, even "
-                        + "though only one of them is a route child of /uc9: "
-                        + "Revenue forecast lives at /forecast and is pulled in "
-                        + "here by @Menu(parent = ReportsView.class). Open it "
-                        + "and its breadcrumb will not mention Reports at all — "
-                        + "the menu was regrouped, the route hierarchy was "
-                        + "not."));
+        add(new Paragraph("The tree below is this entry's own branch of "
+                + "getMenuEntriesTree(). It holds both reports, even "
+                + "though only one of them is a route child of /uc9: "
+                + "Revenue forecast lives at /forecast and is pulled in "
+                + "here by @Menu(parent = ReportsView.class). Open it "
+                + "and its breadcrumb will not mention Reports at all — "
+                + "the menu was regrouped, the route hierarchy was " + "not."));
 
         SideNav subtree = new SideNav();
         subtree.setId(MENU_ID);
