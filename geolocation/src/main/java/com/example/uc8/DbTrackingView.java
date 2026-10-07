@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -52,6 +53,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc8", layout = MainLayout.class)
 @PageTitle("UC8 — DB-backed tracking")
+@UseCaseDescription("Storing a tracked route in a database")
 @Menu(order = 8, title = "UC8 — DB-backed tracking")
 public class DbTrackingView extends VerticalLayout {
 

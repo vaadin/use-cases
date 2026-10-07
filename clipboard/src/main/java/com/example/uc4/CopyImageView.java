@@ -3,6 +3,7 @@ package com.example.uc4;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -30,6 +31,7 @@ import com.vaadin.flow.server.StreamResource;
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Copy image")
+@UseCaseDescription("Copying an image so it can be pasted elsewhere")
 @Menu(order = 4, title = "UC4 — Copy image")
 public class CopyImageView extends VerticalLayout {
 

@@ -1,7 +1,5 @@
 package com.example.usecase08;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.List;
 
 import com.example.views.MainLayout;
@@ -25,6 +23,7 @@ import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -32,7 +31,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 8: Multi-Step Wizard with Validation")
 @Menu(order = 8, title = "UC 8: Multi-Step Wizard")
 @StyleSheet("usecase08.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase08View extends VerticalLayout {
 
     public UseCase08View() {

@@ -1,7 +1,5 @@
 package com.example.usecase15;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
@@ -31,6 +29,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -51,7 +50,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 15: Debounced Search")
 @Menu(order = 15, title = "UC 15: Debounced Search")
 @StyleSheet("usecase15.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase15View extends VerticalLayout {
 
     public record Product(String id, String name, String category,

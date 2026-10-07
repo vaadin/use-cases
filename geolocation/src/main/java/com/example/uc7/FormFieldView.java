@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -34,6 +35,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Capturing a location as part of a form")
+@UseCaseDescription("Capturing a location as part of a form")
 @Menu(order = 7, title = "UC7 — Form field")
 public class FormFieldView extends VerticalLayout {
 

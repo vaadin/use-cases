@@ -10,6 +10,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @Route("login")
@@ -44,7 +45,11 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
         infoBox.add(infoTitle, infoText);
 
-        add(new H1("Signal API Use Cases"), infoBox, loginForm);
+        RouterLink continueAsGuest = new RouterLink(
+                "Continue without logging in", HomeView.class);
+
+        add(new H1("Signal API Use Cases"), infoBox, loginForm,
+                continueAsGuest);
     }
 
     @Override
