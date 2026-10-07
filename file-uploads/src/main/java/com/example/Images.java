@@ -10,6 +10,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
@@ -30,6 +32,9 @@ public final class Images {
      * every format in {@link #isImage(ByteBuffer)}.
      */
     public static final int HEADER_SIZE = 12;
+
+    private static final Set<String> HEIF_BRANDS = Set.of("heic", "heix",
+            "hevc", "heim", "heis", "mif1", "msf1");
 
     private Images() {
     }
@@ -59,7 +64,20 @@ public final class Images {
                 || startsWith(bytes, 0, 'G', 'I', 'F', '8') // GIF
                 || startsWith(bytes, 0, 'R', 'I', 'F', 'F')
                         && startsWith(bytes, 8, 'W', 'E', 'B', 'P') // WebP
-                || startsWith(bytes, 4, 'f', 't', 'y', 'p'); // HEIC/HEIF
+                || startsWith(bytes, 4, 'f', 't', 'y', 'p')
+                        && isHeifBrand(bytes); // HEIC/HEIF
+    }
+
+    /**
+     * MP4, MOV and other ISO media files start with the same {@code ftyp} box
+     * as HEIC; only the major brand that follows tells a photo from a video.
+     */
+    private static boolean isHeifBrand(byte[] bytes) {
+        if (bytes.length < 12) {
+            return false;
+        }
+        String brand = new String(bytes, 8, 4, StandardCharsets.US_ASCII);
+        return HEIF_BRANDS.contains(brand);
     }
 
     private static boolean startsWith(byte[] bytes, int offset,

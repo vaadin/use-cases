@@ -1,10 +1,6 @@
 package com.example.uc2;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
 import java.util.List;
 
 import com.example.TestFiles;
@@ -68,8 +64,9 @@ class AttachDocumentsViewTest extends SpringBrowserlessTest {
     void filesRejectedInOneSelection_areReportedInOneNotification() {
         navigate(AttachDocumentsView.class);
 
-        test(findInView(Upload.class).single())
-                .uploadAll(List.of(file("notes.txt"), file("script.exe")));
+        test(findInView(Upload.class).single()).uploadAll(List.of(
+                TestFiles.file("notes.txt", TestFiles.text("notes")),
+                TestFiles.file("script.exe", TestFiles.text("script"))));
         roundTrip();
 
         List<Notification> notifications = find(Notification.class).all();
@@ -78,17 +75,6 @@ class AttachDocumentsViewTest extends SpringBrowserlessTest {
         assertTrue(text.startsWith("2 files were not attached"), text);
         assertTrue(text.contains("notes.txt") && text.contains("script.exe"),
                 text);
-    }
-
-    private static File file(String name) {
-        try {
-            File file = Files.createTempFile("uc2-", "-" + name).toFile();
-            file.deleteOnExit();
-            Files.write(file.toPath(), TestFiles.text(name));
-            return file;
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
     }
 
     private void fillInFields() {

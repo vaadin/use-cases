@@ -1,5 +1,7 @@
 package com.example.uc1;
 
+import java.util.stream.IntStream;
+
 import com.example.TestFiles;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -77,10 +79,29 @@ class DamageReportViewTest extends SpringBrowserlessTest {
 
         test(takePhoto()).upload("pothole.jpg", "image/jpeg",
                 TestFiles.text("not a photo"));
+        assertEquals(UploadTester.UploadStatus.REJECTED,
+                test(takePhoto()).getLastUploadStatus().get(0).status());
 
+        // A video shares its leading box with HEIC photos
+        test(takePhoto()).upload("pothole.heic", "image/heic", TestFiles.mp4());
         assertEquals(UploadTester.UploadStatus.REJECTED,
                 test(takePhoto()).getLastUploadStatus().get(0).status());
         assertTrue(findInView(Image.class).all().isEmpty());
+    }
+
+    @Test
+    void pickingMorePhotosThanAllowedAtOnce_keepsOnlyTheMaximum() {
+        navigate(DamageReportView.class);
+
+        test(find(UploadButton.class).withText("Choose existing").single())
+                .uploadAll(IntStream
+                        .rangeClosed(1, DamageReportView.MAX_PHOTOS + 1)
+                        .mapToObj(i -> TestFiles.file("photo" + i + ".png",
+                                TestFiles.png(10, 10)))
+                        .toList());
+
+        assertEquals(DamageReportView.MAX_PHOTOS,
+                findInView(Image.class).all().size());
     }
 
     @Test

@@ -125,9 +125,8 @@ public class DamageReportView extends VerticalLayout {
                 e.getFileName() + " was not added: " + switch (e.getReason()) {
                 case FILE_TOO_LARGE -> "photos can be at most 20 MB.";
                 case INCORRECT_FILE_TYPE -> "only photos can be attached.";
-                case TOO_MANY_FILES ->
-                    "a report can have at most " + MAX_PHOTOS + " photos.";
-                case UNKNOWN -> "it could not be read.";
+                // No maxFiles is set: the total is counted in photoReceived.
+                case TOO_MANY_FILES, UNKNOWN -> "it could not be added.";
                 }));
 
         UploadButton takePhoto = new UploadButton("Take photo", uploadManager);
@@ -178,8 +177,8 @@ public class DamageReportView extends VerticalLayout {
     }
 
     private void photoReceived(UploadMetadata metadata, byte[] bytes) {
-        // The manager limits a single selection, but photos taken one by one
-        // add up, so the total is enforced here.
+        // Photos taken one by one and photos picked several at once all
+        // arrive here, so this is where the total is enforced.
         if (photosSignal.peek().size() >= MAX_PHOTOS) {
             Notification.show("A report can have at most " + MAX_PHOTOS
                     + " photos. Remove one first.");
