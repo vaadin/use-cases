@@ -28,12 +28,12 @@ class PrivateRecordingViewTest extends SpringBrowserlessTest {
                 findInView(H1.class).single().getText());
         Video video = findInView(Video.class).single();
         assertTrue(video.isControls());
-        assertEquals(Media.Preload.METADATA, video.getPreload().orElseThrow());
+        assertEquals(Media.Preload.METADATA, video.getPreload());
         assertEquals(1, video.getSources().size());
         // Handler URLs live under the dynamic resource path, not a static one.
         assertTrue(video.getSources().get(0).getSrc()
                 .startsWith("VAADIN/dynamic/resource/"));
-        assertTrue(video.getPoster().orElseThrow()
+        assertTrue(video.getPoster()
                 .startsWith("VAADIN/dynamic/resource/"));
     }
 
