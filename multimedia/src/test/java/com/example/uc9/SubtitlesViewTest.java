@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Video;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.dom.Element;
@@ -58,5 +59,30 @@ class SubtitlesViewTest extends SpringBrowserlessTest {
         assertEquals("fi", SubtitlesView.initialLanguage(Locale.of("fi")));
         assertEquals("en", SubtitlesView.initialLanguage(Locale.JAPAN));
         assertEquals("en", SubtitlesView.initialLanguage(null));
+    }
+
+    @Test
+    void languageInTheUrlWinsOverTheBrowserLanguage() {
+        navigate("uc9?subtitles=fi", SubtitlesView.class);
+
+        @SuppressWarnings("unchecked")
+        RadioButtonGroup<String> picker = find(RadioButtonGroup.class).single();
+        assertEquals("Suomi", picker.getValue());
+    }
+
+    @Test
+    void pickingALanguagePutsItInTheUrl() {
+        navigate(SubtitlesView.class);
+
+        @SuppressWarnings("unchecked")
+        RadioButtonGroup<String> picker = find(RadioButtonGroup.class).single();
+        picker.setValue("Deutsch");
+
+        assertEquals("uc9?subtitles=de", location());
+    }
+
+    private static String location() {
+        return UI.getCurrent().getInternals().getActiveViewLocation()
+                .getPathWithQueryParameters();
     }
 }

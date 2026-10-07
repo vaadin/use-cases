@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.Video;
@@ -92,5 +93,32 @@ class ChapterControlsViewTest extends SpringBrowserlessTest {
     private Span time() {
         return findInView(Span.class).all().stream()
                 .filter(s -> s.hasClassName("time")).findFirst().orElseThrow();
+    }
+
+    @Test
+    void timeInTheUrlStartsPlaybackThere() {
+        navigate("uc7?t=23", ChapterControlsView.class);
+        runPendingSignalsTasks();
+        MediaTester media = new MediaTester(findInView(Video.class).single());
+
+        assertTrue(media.takeJavaScript().stream()
+                .anyMatch(js -> js.contains("currentTime")));
+        assertTrue(chapterButtons().get(2).hasClassName("current"));
+    }
+
+    @Test
+    void jumpingToAChapterPutsItsTimeInTheUrl() {
+        navigate(ChapterControlsView.class);
+        runPendingSignalsTasks();
+
+        chapterButtons().get(1).click();
+        runPendingSignalsTasks();
+
+        assertEquals("uc7?t=11", location());
+    }
+
+    private static String location() {
+        return UI.getCurrent().getInternals().getActiveViewLocation()
+                .getPathWithQueryParameters();
     }
 }
