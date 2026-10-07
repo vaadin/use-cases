@@ -5,6 +5,8 @@ import java.util.Locale;
 
 import com.example.MediaTester;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
@@ -61,13 +63,15 @@ class SubtitlesViewTest extends SpringBrowserlessTest {
         assertEquals("en", SubtitlesView.initialLanguage(null));
     }
 
-    @Test
-    void languageInTheUrlWinsOverTheBrowserLanguage() {
-        navigate("uc9?subtitles=fi", SubtitlesView.class);
+    @ParameterizedTest
+    @CsvSource({ "fi, Suomi", "off, Off", "xx, English" })
+    void languageInTheUrlWinsOverTheBrowserLanguage(String parameter,
+            String label) {
+        navigate("uc9?subtitles=" + parameter, SubtitlesView.class);
 
         @SuppressWarnings("unchecked")
         RadioButtonGroup<String> picker = find(RadioButtonGroup.class).single();
-        assertEquals("Suomi", picker.getValue());
+        assertEquals(label, picker.getValue());
     }
 
     @Test

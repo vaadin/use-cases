@@ -1,11 +1,14 @@
 package com.example.uc7;
 
+import java.util.Optional;
+
 import com.example.Chapters;
 import com.example.Chapters.Chapter;
 import com.example.MissingAPI;
 import com.example.RangeDownloadHandler;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -18,8 +21,11 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.Video;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -36,12 +42,17 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * {@code pause()}, {@code currentTime}, and the {@code play} / {@code pause} /
  * {@code timeupdate} events — none of which the component exposes yet. The view
  * uses {@link MissingAPI} for them and keeps the observed state in signals.
+ * <p>
+ * Jumping to a chapter puts its start time in the URL, such as
+ * {@code uc7?t=23}, so a link can point at a chapter; opening it starts the
+ * player there.
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Chapters & controls")
 @Menu(order = 7, title = "UC7 — Chapters & controls")
 @StyleSheet("uc7.css")
-public class ChapterControlsView extends VerticalLayout {
+public class ChapterControlsView extends VerticalLayout
+        implements BeforeEnterObserver {
 
     private final ValueSignal<Boolean> playing = new ValueSignal<>(false);
     private final ValueSignal<Double> position = new ValueSignal<>(0.0);
@@ -105,10 +116,34 @@ public class ChapterControlsView extends VerticalLayout {
         add(chapters);
     }
 
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        event.getLocation().getQueryParameters().getSingleParameter("t")
+                .flatMap(ChapterControlsView::parseSeconds)
+                .filter(seconds -> seconds != position.peek())
+                .ifPresent(seconds -> {
+                    position.set(seconds);
+                    MissingAPI.startAt(video, seconds);
+                });
+    }
+
     private void jumpTo(Chapter chapter) {
         // Update right away rather than waiting for the next timeupdate.
         position.set((double) chapter.start());
         MissingAPI.seek(video, chapter.start());
         MissingAPI.play(video);
+        UI.getCurrent().navigate(ChapterControlsView.class,
+                QueryParameters.of("t", String.valueOf(chapter.start())));
+    }
+
+    private static Optional<Double> parseSeconds(String value) {
+        try {
+            double seconds = Double.parseDouble(value);
+            return seconds >= 0 && Double.isFinite(seconds)
+                    ? Optional.of(seconds)
+                    : Optional.empty();
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
     }
 }
