@@ -106,6 +106,26 @@ shape — so that "open this, hide that, reflow those while printing" is a line
 of Java. A `Details#setOpenedWhenPrinting(true)` would cover the most common
 case without any wiring.
 
+## A property set for print is rendered too late when a button prints
+
+**Where it bit us:** uc7 / ExpandForPrintView.java
+**Symptom:** with Ctrl/Cmd+P every section was open on paper; with the view's
+own Print button, only the one that was already open. The trigger did set
+`opened` in time, but Vaadin's web components render a property change in a
+microtask, and `vaadin-details` hides its content on the `opened` attribute
+that rendering reflects. `window.print()` fires `beforeprint` while the script
+that called it is still running — a server round trip or a click listener
+alike — so no microtask runs before the pages are laid out and the sections
+print folded. Ctrl/Cmd+P starts printing with no script on the stack, so it
+hides the problem.
+**Workaround used:** `com.example.print.RenderNowAction`, wired after the
+`SetPropertyAction`s, calls Lit's `performUpdate()` so the change is rendered
+inside the event. That method is not part of the components' documented API.
+**Suggested API:** either a `SetPropertyAction` that renders before it returns,
+or a documented "render now" on the web components. Waiting for pending
+updates before calling `window.print()` would not help: the change is made
+inside `beforeprint`, after that wait.
+
 ## A print-only route prints a blank page
 
 **Where it bit us:** uc2 / PackingSlipView.java
