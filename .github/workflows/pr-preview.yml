@@ -89,12 +89,14 @@ jobs:
 
           # Every changed deployable with its changed lines and files, the
           # most changed first, so that only the least changed ones are left
-          # out when there are too many
+          # out when there are too many. A generated package-lock.json marks
+          # its module as changed, but its lines are not counted: a dependency
+          # bump rewrites thousands of them
           selected=""
           for module in $all_modules; do
             read -r files lines < <(echo "$changed" | awk -v prefix="$module/" '
               { n = $1; sub(/^[0-9]+ /, "") }
-              index($0, prefix) == 1 { files++; lines += n }
+              index($0, prefix) == 1 { files++; if ($0 !~ /\/package-lock\.json$/) lines += n }
               END { print files + 0, lines + 0 }')
             if [ "$files" -gt 0 ]; then
               app=$(sed -nE "s/^app *= *['\"]([^'\"]+)['\"].*/\1/p" "$module/fly.toml")
@@ -109,7 +111,7 @@ jobs:
           if [ "$count" -gt "$MAX_PREVIEW_APPS" ]; then
             omitted=$(printf '%s\n' "$selected" | tail -n +$((MAX_PREVIEW_APPS + 1)) \
               | awk '{ printf "%s`%s`", (NR > 1 ? ", " : ""), $1 }')
-            omitted="The pull request changes $count apps, more than the $MAX_PREVIEW_APPS a preview deploys, so the ones with the most changed lines are deployed. Not deployed: $omitted."
+            omitted="The pull request changes $count apps, more than the $MAX_PREVIEW_APPS a preview deploys, so the ones with the most changed lines are deployed. Not deployed: $omitted. A preview of one of them deployed for an earlier commit may still be running at that commit."
             selected=$(printf '%s\n' "$selected" | head -n "$MAX_PREVIEW_APPS")
           elif [ "$count" -eq 0 ]; then
             skipped="The pull request changes no app directory (one holding a fly.toml)."
