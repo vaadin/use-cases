@@ -1,7 +1,5 @@
 package com.example.usecase17;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
@@ -23,6 +21,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -44,7 +43,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 17: Custom PC Builder")
 @Menu(order = 17, title = "UC 17: PC Builder (70 signals)")
 @StyleSheet("usecase17.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase17View extends VerticalLayout {
 
     // ==================== Signal Declarations (~70 total) ====================

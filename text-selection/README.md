@@ -1,14 +1,14 @@
 # Text Selection API — use cases
 
 A standalone Spring Boot demo of the Text Selection API for Vaadin Flow text
-inputs. The API is implemented on the
-[`select-api` branch of `vaadin/flow-components`](https://github.com/vaadin/flow-components/tree/select-api),
-addressing
-[vaadin/flow-components#1377](https://github.com/vaadin/flow-components/issues/1377)
-and continuing the work in Matti Tahvonen's
-[PR #3194](https://github.com/vaadin/flow-components/pull/3194) (the same
-shape has shipped in [Viritin](https://github.com/viritin/flow-viritin)
-for years). Build that branch into the local Maven repo to run this module.
+inputs, addressing
+[vaadin/flow-components#1377](https://github.com/vaadin/flow-components/issues/1377).
+It builds on the official `HasTextSelection` mixin from
+[vaadin/flow-components#10266](https://github.com/vaadin/flow-components/pull/10266)
+(25.4) plus the `deselect()` / `selectionSignal()` additions on the
+[`feature/text-selection` branch](https://github.com/vaadin/flow-components/tree/feature/text-selection),
+published as `25.4.text-selection-SNAPSHOT` in the Vaadin prereleases
+repository.
 
 | # | View | What it shows |
 | - | ---- | ------------- |
@@ -23,19 +23,16 @@ for years). Build that branch into the local Maven repo to run this module.
 ## API surface
 
 `TextField`, `TextArea`, `PasswordField`, and `BigDecimalField` implement
-`com.vaadin.flow.component.shared.HasSelection`. Number-input-backed
-fields (Integer/Number) opt out — `<input type="number">` doesn't support
-`setSelectionRange` in the browser.
+`com.vaadin.flow.component.shared.HasTextSelection`. `EmailField`,
+`IntegerField` and `NumberField` do not — browsers don't support text
+selection for `<input type="email">` / `<input type="number">`.
 
 ```java
-public interface HasSelection extends HasElement {
-    void selectAll();                                       // focuses
-    void selectAll(boolean focus);
-    void deselect();                                        // never focuses
-    void setSelectionRange(int start, int end);             // focuses
-    void setSelectionRange(int start, int end, boolean focus);
-    void setCursorPosition(int position);                   // focuses
-    void setCursorPosition(int position, boolean focus);
+public interface HasTextSelection extends HasElement {
+    void setSelectionRange(int selectionStart, int selectionEnd); // focuses
+    void selectAll();                                             // focuses
+    void setCursorPosition(int position);                         // focuses
+    void deselect();                                              // never focuses
     Signal<SelectionRange> selectionSignal();
 }
 
@@ -47,17 +44,19 @@ public record SelectionRange(int start, int end, String content) {
 ```
 
 Names mirror `HTMLInputElement.setSelectionRange()` / `selectionStart` /
-`selectionEnd`. The selection-mutating methods focus the field by default
-(browsers don't paint a selection on a non-focused input) — pass
-`focus = false` to keep focus where it is. All calls are deferred via
-`setTimeout(0)` on the client so a click-induced focus change can't race
-with the selection.
+`selectionEnd`. The selection-mutating methods always focus the field
+(browsers don't paint a selection on a non-focused input); the resulting
+focus event reports `isFromClient() == false`, as with `Focusable.focus()`,
+and `autoselect` is suppressed for that focus. `deselect()` collapses the
+selection at its end and leaves focus alone. All calls are deferred via
+`setTimeout(0)` on the client so a pending re-render can't reset the range.
 
-The reactive `selectionSignal()` replaces the original async
-`getSelectionRange(callback)` from PR #3194: now that the Vaadin
-event-ordering bug is fixed, the client pushes the current selection on
-every change rather than the server pulling on demand. The signal value
-carries `content` so views don't have to slice the field's value manually.
+`selectionSignal()` is read-only and pushed from the client on every
+selection or cursor change, debounced so typing or drag-selecting results in
+a single update. The value carries `content` so views don't have to slice the
+field's value manually. Only `setSelectionRange`, `selectAll` and
+`setCursorPosition` are in the released 25.4 API so far; UC4 (`deselect()`)
+and UC5–UC7 (`selectionSignal()`) depend on the additions.
 
 Clipboard integration (`copyToClipboard()` and friends) is intentionally
 out of scope for this round and will be tackled separately.

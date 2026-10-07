@@ -1,7 +1,5 @@
 package com.example.usecase09;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.Objects;
 
 import com.example.views.MainLayout;
@@ -24,12 +22,13 @@ import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @Route(value = "use-case-09", layout = MainLayout.class)
 @PageTitle("Use Case 9: Form with Binder Integration and Signal Validation")
 @Menu(order = 9, title = "UC 9: Binder Integration")
 @StyleSheet("usecase09.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase09View extends VerticalLayout {
 
     public UseCase09View() {

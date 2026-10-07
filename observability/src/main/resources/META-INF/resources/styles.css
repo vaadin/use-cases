@@ -12,6 +12,11 @@
     max-width: 960px;
 }
 
+.home-group-heading {
+    font-size: var(--aura-font-size-m);
+    margin: 1rem 0 0;
+}
+
 .home-card .home-card-tag {
     font-size: 0.8125rem;
     text-transform: uppercase;

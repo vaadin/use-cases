@@ -1,5 +1,6 @@
 package com.example.uc3;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -25,6 +26,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Find and highlight in textarea")
+@UseCaseDescription("Stepping through search matches in a text area")
 @Menu(order = 3, title = "UC3 — Find & highlight")
 public class FindAndHighlightView extends VerticalLayout {
 

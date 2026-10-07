@@ -1,7 +1,5 @@
 package com.example.usecase20;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -18,13 +16,14 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-20", layout = MainLayout.class)
 @PageTitle("Use Case 20: Session-scoped User Preferences")
 @Menu(order = 20, title = "UC 20: User Preferences")
 @StyleSheet("usecase20.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase20View extends VerticalLayout {
 
     private static final Map<String, String> PRESET_COLORS = createPresetColors();

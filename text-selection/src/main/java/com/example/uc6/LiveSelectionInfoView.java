@@ -1,5 +1,6 @@
 package com.example.uc6;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -27,6 +28,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Live selection info")
+@UseCaseDescription("Showing live details about the selected text")
 @Menu(order = 6, title = "UC6 — Live selection info")
 @StyleSheet("uc6.css")
 public class LiveSelectionInfoView extends VerticalLayout {

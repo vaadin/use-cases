@@ -1,5 +1,6 @@
 package com.example.uc4;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -33,6 +34,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Denial, failure and unavailability")
+@UseCaseDescription("Handling a denied, failed or unavailable location")
 @Menu(order = 4, title = "UC4 — Denial & unavailability")
 public class DenialView extends VerticalLayout {
 

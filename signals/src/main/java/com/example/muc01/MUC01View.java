@@ -1,7 +1,5 @@
 package com.example.muc01;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
@@ -23,6 +21,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 /**
  * Multi-User Case 1: Shared Chat/Message List
@@ -40,7 +39,7 @@ import com.vaadin.flow.router.Route;
 @PageTitle("MUC 1: Shared Chat")
 @Menu(order = 50, title = "MUC 1: Shared Chat")
 @StyleSheet("muc01.css")
-@PermitAll
+@AnonymousAllowed
 public class MUC01View extends VerticalLayout {
 
     private final String currentUser;
@@ -51,13 +50,8 @@ public class MUC01View extends VerticalLayout {
     public MUC01View(CurrentUserSignal currentUserSignal,
             MUC01Signals muc01Signals,
             UserSessionRegistry userSessionRegistry) {
-        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .peek();
-        if (userInfo == null || !userInfo.isAuthenticated()) {
-            throw new IllegalStateException(
-                    "User must be authenticated to access this view");
-        }
-        this.currentUser = userInfo.getUsername();
+        this.currentUser = currentUserSignal.getUserSignal().peek()
+                .getUsername();
         this.muc01Signals = muc01Signals;
         this.userSessionRegistry = userSessionRegistry;
 

@@ -1,7 +1,5 @@
 package com.example.usecase19;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.service.DataLoadingService;
 import com.example.views.MainLayout;
 
@@ -22,6 +20,7 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -43,7 +42,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 19: Parallel Loading")
 @Menu(order = 19, title = "UC 19: Parallel Loading")
 @StyleSheet("usecase19.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase19View extends VerticalLayout {
 
     /**

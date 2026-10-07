@@ -3,6 +3,7 @@ package com.example.uc4;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -26,6 +27,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Jump to validation error")
+@UseCaseDescription("Pointing the user to the exact invalid part of a value")
 @Menu(order = 4, title = "UC4 — Jump to validation error")
 public class ValidationJumpView extends VerticalLayout {
 

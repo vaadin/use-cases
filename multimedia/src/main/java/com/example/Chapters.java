@@ -3,8 +3,8 @@ package com.example;
 import java.util.List;
 
 /**
- * The chapters of the bundled {@code quarterly-review.mp4}, which is cut into
- * four 15-second parts.
+ * The chapters of the bundled {@code quarterly-review.mp4}, one per scene of
+ * the recording.
  */
 public final class Chapters {
 
@@ -20,8 +20,8 @@ public final class Chapters {
     }
 
     public static final List<Chapter> QUARTERLY_REVIEW = List.of(
-            new Chapter("Welcome", 0), new Chapter("Roadmap", 15),
-            new Chapter("Demo", 30), new Chapter("Questions", 45));
+            new Chapter("Welcome", 0), new Chapter("Roadmap", 11),
+            new Chapter("Demo", 23), new Chapter("Questions", 36));
 
     private Chapters() {
     }

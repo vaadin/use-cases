@@ -12,7 +12,7 @@
     </parent>
 
     <properties>
-        <flow-components.version>25.3.text-selection-SNAPSHOT</flow-components.version>
+        <flow-components.version>25.4.text-selection-SNAPSHOT</flow-components.version>
     </properties>
 
     <dependencies>
