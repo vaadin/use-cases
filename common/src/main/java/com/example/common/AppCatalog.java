@@ -29,6 +29,7 @@ public final class AppCatalog {
                     "https://reporting-cases.fly.dev/"),
             new App("route-hierarchy", "Route Hierarchy & Menu",
                     "https://route-hierarchy-cases.fly.dev/"),
+            new App("scopes", "Scopes", "https://scopes-cases.fly.dev/"),
             new App("screen-orientation", "Screen Orientation API",
                     "https://screen-orientation-cases.fly.dev/"),
             new App("signals", "Signal API", "https://signals-cases.fly.dev/"),

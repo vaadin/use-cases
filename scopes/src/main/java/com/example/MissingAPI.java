@@ -153,9 +153,10 @@ public final class MissingAPI {
                 BrowserTab tab = BrowserTab.get(ui);
                 TabBeanStore store = tab.getAttribute(TabBeanStore.class);
                 if (store == null) {
-                    store = new TabBeanStore(tab.getId());
-                    tab.setAttribute(TabBeanStore.class, store);
-                    tab.addDestroyListener(store::destroy);
+                    TabBeanStore newStore = new TabBeanStore(tab.getId());
+                    tab.setAttribute(TabBeanStore.class, newStore);
+                    tab.addDestroyListener(destroyedTab -> newStore.destroy());
+                    store = newStore;
                 }
                 return action.apply(store);
             } finally {
