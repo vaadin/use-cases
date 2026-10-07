@@ -1,13 +1,12 @@
 package com.example.usecase20;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.example.preferences.UserPreferences;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -17,12 +16,14 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-20", layout = MainLayout.class)
 @PageTitle("Use Case 20: Session-scoped User Preferences")
 @Menu(order = 20, title = "UC 20: User Preferences")
-@PermitAll
+@StyleSheet("usecase20.css")
+@AnonymousAllowed
 public class UseCase20View extends VerticalLayout {
 
     private static final Map<String, String> PRESET_COLORS = createPresetColors();
@@ -39,6 +40,7 @@ public class UseCase20View extends VerticalLayout {
     }
 
     public UseCase20View(UserPreferences preferences) {
+        addClassName("usecase20-view");
         setSpacing(true);
         setPadding(true);
 
@@ -62,19 +64,14 @@ public class UseCase20View extends VerticalLayout {
                     .filter(e -> e.getValue().equals(item))
                     .map(Map.Entry::getKey).findFirst().orElse(item);
             Div tile = new Div();
-            tile.getStyle().set("background-color", item)
-                    .set("padding", "0.5rem 0.75rem")
-                    .set("border-radius", "8px")
-                    .set("border",
-                            "1px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)")
-                    .set("min-width", "180px").set("min-height", "40px")
-                    .set("display", "flex").set("align-items", "center")
-                    .set("justify-content", "center")
-                    .set("box-sizing", "border-box");
+            tile.addClassName("color-tile");
+            // Per-item color is dynamic — keep inline
+            tile.getStyle().set("background-color", item);
             String textColor = chooseTextColor(item);
             Paragraph text = new Paragraph(label);
-            text.getStyle().set("margin", "0").set("font-weight", "500")
-                    .set("color", textColor);
+            text.addClassName("color-tile-text");
+            // Per-item text color is dynamic — keep inline
+            text.getStyle().set("color", textColor);
             tile.add(text);
             return tile;
         }));

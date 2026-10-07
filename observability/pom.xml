@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>observability-use-cases</artifactId>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>com.example</groupId>
+        <artifactId>use-cases-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>use-cases-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring-boot-starter</artifactId>
+        </dependency>
+        <!--
+          Observability Kit Spring Boot starter. Its auto-configuration pulls in
+          Boot's Micrometer metrics support (a MeterRegistry is wired out of the
+          box) and registers the Vaadin instrumentation, which records into that
+          registry. spring-boot-starter-actuator is kept to expose the metrics
+          over /actuator; it is otherwise optional now that the starter provides
+          the registry.
+        -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>observability-kit-starter</artifactId>
+            <version>${observability-kit.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <!--
+          UC7 exports the Micrometer registry in Prometheus format. The registry
+          is what makes /actuator/prometheus exist; without it the kit's meters
+          stay in-process and no external stack can scrape them.
+        -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+        <!--
+          UC4 follows one interaction as a trace. The kit already drives its
+          request, RPC, navigation, data-query and JDBC instrumentation through
+          Micrometer's Observation API; what turns those observations into
+          spans with a shared trace id is a tracing bridge, and there is none on
+          the classpath by default. These two are that bridge: Boot's Brave
+          auto-configuration and the Micrometer/Brave implementation it needs.
+          Add them and every use case in this module starts producing spans —
+          UC4 is only the view that reads them.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-micrometer-tracing-brave</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-brave</artifactId>
+        </dependency>
+        <!--
+          Forwards the application's errors to Sentry. The starter switches on
+          only once a DSN is configured (SENTRY_DSN, see application.properties),
+          so without one it stays out of the way. sentry-logback is what does
+          the capturing: a failing Vaadin interaction still answers the RPC with
+          200, so Spring MVC's exception handling, which the starter hooks into,
+          never sees it, but Vaadin's default error handler logs it at ERROR and
+          the Logback appender turns that log line into a Sentry event.
+        -->
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-spring-boot-4-starter</artifactId>
+            <version>${sentry.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-logback</artifactId>
+            <version>${sentry.version}</version>
+        </dependency>
+        <!--
+          UC2's join-table fetch demo needs a JPA layer and a database. H2 in
+          memory is enough: the point is to make Hibernate's per-collection
+          "1 row" fetches (the N+1) observable, not to ship a real datastore.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>browserless-test-spring</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <defaultGoal>spring-boot:run</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,7 +1,5 @@
 package com.example.usecase14;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.service.AnalyticsService;
 import com.example.service.AnalyticsService.AnalyticsReport;
 import com.example.views.MainLayout;
@@ -11,6 +9,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -24,6 +23,7 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -45,7 +45,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-14", layout = MainLayout.class)
 @PageTitle("Use Case 14: Async Data Loading")
 @Menu(order = 14, title = "UC 14: Async Data Loading")
-@PermitAll
+@StyleSheet("usecase14.css")
+@AnonymousAllowed
 public class UseCase14View extends VerticalLayout {
     private enum LoadingState {
         IDLE, LOADING, GENERATING, SUCCESS, ERROR
@@ -64,6 +65,7 @@ public class UseCase14View extends VerticalLayout {
 
     public UseCase14View(AnalyticsService analyticsService) {
         this.analyticsService = analyticsService;
+        addClassName("usecase14-view");
         setSpacing(true);
         setPadding(true);
 
@@ -81,7 +83,7 @@ public class UseCase14View extends VerticalLayout {
 
         Button loadButton = new Button("Generate Analytics Report",
                 event -> loadReport());
-        loadButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        loadButton.addThemeVariants(ButtonVariant.PRIMARY);
 
         // Disable load button while loading
         Signal<Boolean> isLoadingSignal = stateSignal
@@ -96,8 +98,7 @@ public class UseCase14View extends VerticalLayout {
         });
 
         Div errorToggle = new Div();
-        errorToggle.getStyle().set("display", "flex")
-                .set("align-items", "center").set("gap", "0.5em");
+        errorToggle.addClassName("error-toggle");
 
         var checkbox = new Checkbox("Simulate Error");
         checkbox.bindValue(shouldFailSignal, shouldFailSignal::set);
@@ -107,26 +108,19 @@ public class UseCase14View extends VerticalLayout {
 
         // State display box
         Div stateBox = new Div();
-        stateBox.getStyle().set("border",
-                "2px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)")
-                .set("border-radius", "8px").set("padding", "1.5em")
-                .set("margin", "1em 0").set("min-height", "300px");
+        stateBox.addClassName("state-box");
 
         // Idle state
         Div idleContent = new Div();
         Paragraph idleMessage = new Paragraph(
                 "👆 Click 'Generate Analytics Report' to start the two-step process: fetch data, then generate comprehensive report with sales metrics and performance data");
-        idleMessage.getStyle()
-                .set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-style", "italic");
+        idleMessage.addClassName("idle-message");
         idleContent.add(idleMessage);
         idleContent.bindVisible(() -> stateSignal.get() == LoadingState.IDLE);
 
         // Loading state
         Div loadingContent = new Div();
-        loadingContent.getStyle().set("display", "flex")
-                .set("flex-direction", "column").set("align-items", "center")
-                .set("gap", "1em");
+        loadingContent.addClassName("loading-content");
 
         ProgressBar progressBar = new ProgressBar();
         progressBar.setIndeterminate(true);
@@ -138,7 +132,7 @@ public class UseCase14View extends VerticalLayout {
                 case GENERATING -> "Generating report... (2/2)";
                 default -> "";
                 });
-        loadingMessage.getStyle().set("color", "var(--aura-accent-color)");
+        loadingMessage.addClassName("loading-message");
 
         loadingContent.add(progressBar, loadingMessage);
         loadingContent.bindVisible(isLoadingSignal);
@@ -149,15 +143,11 @@ public class UseCase14View extends VerticalLayout {
                 reportDataSignal.map(report -> !report.isEmpty()
                         ? "Analytics Report - " + report.getPeriod()
                         : "Analytics Report"));
-        successTitle.getStyle().set("margin-top", "0").set("color",
-                "var(--aura-green)");
+        successTitle.addClassName("success-title");
 
         // Metrics grid
         Div metricsGrid = new Div();
-        metricsGrid.getStyle().set("display", "grid")
-                .set("grid-template-columns",
-                        "repeat(auto-fit, minmax(200px, 1fr))")
-                .set("gap", "1em").set("margin-top", "1em");
+        metricsGrid.addClassName("metrics-grid");
 
         // Create metric cards with signals
         Signal<String> revenueSignal = reportDataSignal.map(report -> {
@@ -204,17 +194,14 @@ public class UseCase14View extends VerticalLayout {
 
         // Error state
         Div errorContent = new Div();
-        errorContent.getStyle().set("background-color", "#ffebee")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("border-left", "4px solid var(--aura-red)");
+        errorContent.addClassName("error-content");
 
         H3 errorTitle = new H3("❌ Report Generation Failed");
-        errorTitle.getStyle().set("margin-top", "0").set("color",
-                "var(--aura-red)");
+        errorTitle.addClassName("error-title");
 
         Paragraph errorMessage = new Paragraph(
                 "Analytics report generation failed. Please contact the administrator.");
-        errorMessage.getStyle().set("margin", "0.5em 0");
+        errorMessage.addClassName("error-message");
 
         errorContent.add(errorTitle, errorMessage);
         errorContent.bindVisible(() -> stateSignal.get() == LoadingState.ERROR);
@@ -262,19 +249,17 @@ public class UseCase14View extends VerticalLayout {
 
         // Use title slot for label
         Span labelSpan = new Span(label);
-        labelSpan.getStyle().set("font-size", "var(--aura-font-size-s)")
-                .set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-weight", "500");
+        labelSpan.addClassName("metric-label");
         card.setTitle(labelSpan);
 
         // Main content slot for value display
         Span valueSpan = new Span(valueSignal);
-        valueSpan.getStyle().set("font-size", "2.5em")
-                .set("font-weight", "bold").set("color", color)
-                .set("line-height", "1");
+        valueSpan.addClassName("metric-value");
+        // Per-metric color is dynamic — keep inline
+        valueSpan.getStyle().set("color", color);
         card.add(valueSpan);
 
-        // Custom styling for colored border
+        // Per-metric border color is dynamic — keep inline
         card.getStyle().set("border-left", "4px solid " + color);
 
         return card;

@@ -1,0 +1,17 @@
+.uc8-view {
+    .delete-button {
+        background: color-mix(in srgb, var(--aura-red) 80%, transparent);
+        color: white;
+        user-select: none;
+    }
+
+    .delete-button:hover {
+        background: color-mix(in srgb, var(--aura-red) 90%, transparent);
+    }
+
+    .status {
+        font-family: monospace;
+        color: var(--vaadin-text-color-secondary);
+        align-self: center;
+    }
+}

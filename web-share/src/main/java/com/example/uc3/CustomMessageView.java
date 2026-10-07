@@ -10,6 +10,7 @@ import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -17,10 +18,11 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Page;
-import com.vaadin.flow.component.page.WebShareSupport;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.webshare.ShareContent;
+import com.vaadin.flow.component.webshare.WebShare;
+import com.vaadin.flow.component.webshare.WebShareSupport;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
@@ -30,13 +32,13 @@ import com.vaadin.flow.signals.Signal;
  * <p>
  * A small form lets the user fill in any of the three payload fields
  * ({@code title}, {@code text}, {@code url}) and shows a live JSON preview of
- * the data that will be handed to {@link Page#share(String, String, String)}.
- * Empty fields are passed as {@code null} so the browser sees them as omitted
- * rather than empty strings — useful when sharing only a URL or only a text
- * snippet.
+ * the data that will be handed to the native share sheet. The share is bound
+ * once via {@link WebShare#onClick} to the live values of the three fields, so
+ * each click shares whatever the form currently holds.
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @Menu(order = 3, title = "UC3 — Share a custom message")
+@StyleSheet("uc3.css")
 public class CustomMessageView extends VerticalLayout {
 
     private static final ObjectMapper JSON = JsonMapper.builder()
@@ -50,11 +52,12 @@ public class CustomMessageView extends VerticalLayout {
             VaadinIcon.SHARE.create());
 
     public CustomMessageView() {
+        addClassName("uc3-view");
         add(new H1("UC3 — Share a custom message"));
         add(new Paragraph("Fill any combination of the three fields. The "
-                + "preview shows exactly what gets passed to "
-                + "Page.share(title, text, url); empty fields are sent as "
-                + "null so the browser treats them as omitted."));
+                + "preview shows exactly what gets shared; the Share button "
+                + "is bound to the live field values and empty fields are "
+                + "treated as omitted by the browser."));
 
         titleField.setPlaceholder("e.g. Look at this!");
         titleField.setValue("Look at this!");
@@ -67,7 +70,7 @@ public class CustomMessageView extends VerticalLayout {
         urlField.setWidthFull();
 
         preview.addClassName("share-preview");
-        shareButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        shareButton.addThemeVariants(ButtonVariant.PRIMARY);
 
         titleField.setValueChangeMode(
                 com.vaadin.flow.data.value.ValueChangeMode.EAGER);
@@ -79,33 +82,28 @@ public class CustomMessageView extends VerticalLayout {
         textField.addValueChangeListener(e -> updatePreview());
         urlField.addValueChangeListener(e -> updatePreview());
 
-        add(titleField, textField, urlField, new H2("Payload preview"),
-                preview, shareButton);
+        add(titleField, textField, urlField, new H2("Payload preview"), preview,
+                shareButton);
         updatePreview();
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        Page page = attachEvent.getUI().getPage();
-        Signal<WebShareSupport> support = page.shareSupportSignal();
+        Signal<WebShareSupport> support = WebShare.supportSignal();
 
         Signal.effect(this, () -> shareButton
                 .setEnabled(support.get() == WebShareSupport.SUPPORTED));
 
-        shareButton.addClickListener(e -> {
-            String title = nullIfBlank(titleField.getValue());
-            String text = nullIfBlank(textField.getValue());
-            String url = nullIfBlank(urlField.getValue());
-            if (title == null && text == null && url == null) {
-                Notification.show("Fill at least one field before sharing",
-                        2500, Notification.Position.BOTTOM_START);
-                return;
-            }
-            page.share(title, text, url);
-            Notification.show("Share invoked with the previewed payload",
-                    2000, Notification.Position.BOTTOM_START);
-        });
+        // Bind the share once to the live field values: each click shares
+        // whatever the form currently holds.
+        WebShare.onClick(shareButton).share(
+                ShareContent.create().title(titleField).text(textField)
+                        .url(urlField),
+                () -> Notification.show("Shared with the previewed payload",
+                        2000, Notification.Position.BOTTOM_START),
+                err -> Notification.show("Share failed: " + err.message(), 2000,
+                        Notification.Position.BOTTOM_START));
     }
 
     private void updatePreview() {

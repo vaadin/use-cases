@@ -11,15 +11,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <!-- The Fullscreen API (Component#requestFullscreen,
-             Page#requestFullscreen, Page#fullscreenSignal) ships in the
-             fullscreen-branch snapshot of vaadin/flow (PR #23616); override
-             flow.version to pull that build while leaving vaadin.version
-             on the regular 25.2 snapshot. -->
-        <flow.version>25.2.fullscreen-SNAPSHOT</flow.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.example</groupId>

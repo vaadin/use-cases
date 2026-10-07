@@ -1,7 +1,5 @@
 package com.example.usecase24;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -11,6 +9,7 @@ import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -24,6 +23,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -31,13 +31,15 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-24", layout = MainLayout.class)
 @PageTitle("Use Case 24: VirtualList with Signal Data Source")
 @Menu(order = 24, title = "UC 24: VirtualList Notifications")
-@PermitAll
+@StyleSheet("usecase24.css")
+@AnonymousAllowed
 public class UseCase24View extends VerticalLayout {
 
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter
             .ofPattern("MMM d, yyyy HH:mm");
 
     public UseCase24View() {
+        addClassName("usecase24-view");
         setSpacing(true);
         setPadding(true);
 
@@ -153,17 +155,11 @@ public class UseCase24View extends VerticalLayout {
         // Header row with count and unread badge
         var countLabel = new Span();
         countLabel.bindText(countLabelSignal);
-        countLabel.getStyle().set("color",
-                "var(--vaadin-text-color-secondary)");
+        countLabel.addClassName("count-label");
 
         var unreadBadge = new Span();
         unreadBadge.bindText(unreadCountSignal.map(c -> c + " unread"));
-        unreadBadge.getStyle()
-                .set("background-color", "var(--aura-accent-color)")
-                .set("color", "white").set("padding", "0.25em 0.75em")
-                .set("border-radius", "1em")
-                .set("font-size", "var(--aura-font-size-s)")
-                .set("font-weight", "bold");
+        unreadBadge.addClassName("unread-badge");
         unreadBadge.bindVisible(unreadCountSignal.map(c -> c > 0));
 
         var headerRow = new HorizontalLayout(countLabel, unreadBadge);
@@ -184,16 +180,12 @@ public class UseCase24View extends VerticalLayout {
         // Empty state
         var emptyState = new Paragraph(
                 "No notifications to display. Try adjusting your filters or adding new notifications.");
-        emptyState.getStyle().set("text-align", "center").set("padding", "2em")
-                .set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-style", "italic");
+        emptyState.addClassName("empty-state");
         emptyState.bindVisible(filteredSignal.map(List::isEmpty));
 
         // Info box
         var infoBox = new Div();
-        infoBox.getStyle().set("background-color", "#e0f7fa")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-top", "1em").set("font-style", "italic");
+        infoBox.addClassName("info-box");
         infoBox.add(new Paragraph(
                 "This use case demonstrates VirtualList bound to a signal-based data source. "
                         + "A ListSignal<Notification> is the source of truth. A computed signal filters by type and read status, "
@@ -208,67 +200,52 @@ public class UseCase24View extends VerticalLayout {
     Div createNotificationCard(Notification notification,
             ListSignal<Notification> notificationsSignal) {
         var card = new Div();
-        card.getStyle().set("display", "flex").set("align-items", "flex-start")
-                .set("gap", "1em").set("padding", "1em")
-                .set("margin", "0.25em 0").set("border-radius", "8px")
-                .set("border-left",
-                        "4px solid " + getTypeColor(notification.type()));
-
-        if (notification.read()) {
-            card.getStyle().set("background-color", "#fafafa");
-        } else {
-            card.getStyle().set("background-color", "#e3f2fd");
-        }
+        card.addClassName("notification-card");
+        card.addClassName(notification.read() ? "is-read" : "is-unread");
+        // Per-type border color is dynamic — keep inline
+        card.getStyle().set("border-left",
+                "4px solid " + getTypeColor(notification.type()));
 
         // Icon
         var icon = new Icon(getTypeIcon(notification.type()));
         icon.setSize("24px");
         icon.setColor(getTypeColor(notification.type()));
-        icon.getStyle().set("flex-shrink", "0").set("margin-top", "0.15em");
+        icon.addClassName("notification-icon");
 
         // Content
         var content = new Div();
-        content.getStyle().set("flex-grow", "1").set("min-width", "0");
+        content.addClassName("notification-content");
 
         // Title row with badge
         var titleSpan = new Span(notification.title());
-        titleSpan.getStyle().set("font-weight",
-                notification.read() ? "normal" : "bold");
+        titleSpan.addClassName("notification-title");
+        if (!notification.read()) {
+            titleSpan.addClassName("is-unread");
+        }
 
         var typeBadge = new Span(notification.type().name());
-        typeBadge.getStyle()
-                .set("background-color", getTypeColor(notification.type()))
-                .set("color", "white").set("padding", "0.1em 0.5em")
-                .set("border-radius", "0.75em")
-                .set("font-size", "var(--aura-font-size-xs)")
-                .set("margin-left", "0.5em");
+        typeBadge.addClassName("type-badge");
+        // Per-type color is dynamic — keep inline
+        typeBadge.getStyle().set("background-color",
+                getTypeColor(notification.type()));
 
         var titleRow = new Div(titleSpan, typeBadge);
-        titleRow.getStyle().set("display", "flex").set("align-items", "center")
-                .set("margin-bottom", "0.25em");
+        titleRow.addClassName("notification-title-row");
 
         // Message
         var messageSpan = new Span(notification.message());
-        messageSpan.getStyle()
-                .set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-size", "var(--aura-font-size-s)")
-                .set("display", "block").set("margin-bottom", "0.5em");
+        messageSpan.addClassName("notification-message");
 
         // Timestamp
         var timestampSpan = new Span(
                 notification.timestamp().format(TIME_FORMAT));
-        timestampSpan.getStyle()
-                .set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-size", "var(--aura-font-size-xs)")
-                .set("display", "block");
+        timestampSpan.addClassName("notification-timestamp");
 
         content.add(titleRow, messageSpan, timestampSpan);
 
         // Actions
         var actions = new Div();
-        actions.getStyle().set("display", "flex")
-                .set("flex-direction", "column").set("gap", "0.25em")
-                .set("flex-shrink", "0");
+        actions.addClassName("notification-actions");
 
         var toggleReadButton = new Button(
                 notification.read() ? "Mark Unread" : "Mark Read", e -> {

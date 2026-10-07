@@ -29,16 +29,16 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
         navigate(UseCase24View.class);
 
         // Type filter and Status filter
-        assertEquals(2, $view(ComboBox.class).all().size());
+        assertEquals(2, findInView(ComboBox.class).all().size());
     }
 
     @Test
     void viewRendersWithActionButtons() {
         navigate(UseCase24View.class);
 
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Mark All Read".equals(b.getText())));
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Clear All".equals(b.getText())));
     }
 
@@ -46,13 +46,13 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
     void viewRendersWithAddButtons() {
         navigate(UseCase24View.class);
 
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Add Info".equals(b.getText())));
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Add Warning".equals(b.getText())));
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Add Error".equals(b.getText())));
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Add Success".equals(b.getText())));
     }
 
@@ -62,7 +62,7 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // 8 seed notifications, 5 unread
-        Span countLabel = $view(Span.class).all().stream().filter(
+        Span countLabel = findInView(Span.class).all().stream().filter(
                 s -> s.getText() != null && s.getText().contains("Showing"))
                 .findFirst().orElseThrow();
         assertTrue(countLabel.getText().contains("8 notification"));
@@ -74,7 +74,7 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
         navigate(UseCase24View.class);
         runPendingSignalsTasks();
 
-        assertTrue($view(Span.class).all().stream().anyMatch(
+        assertTrue(findInView(Span.class).all().stream().anyMatch(
                 s -> s.getText() != null && s.getText().contains("unread")));
     }
 
@@ -83,13 +83,13 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
         navigate(UseCase24View.class);
         runPendingSignalsTasks();
 
-        Button addInfo = $view(Button.class).all().stream()
+        Button addInfo = findInView(Button.class).all().stream()
                 .filter(b -> "Add Info".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(addInfo).click();
         runPendingSignalsTasks();
 
-        Span countLabel = $view(Span.class).all().stream().filter(
+        Span countLabel = findInView(Span.class).all().stream().filter(
                 s -> s.getText() != null && s.getText().contains("Showing"))
                 .findFirst().orElseThrow();
         assertTrue(countLabel.getText().contains("9 notification"));
@@ -100,13 +100,13 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
         navigate(UseCase24View.class);
         runPendingSignalsTasks();
 
-        Button clearAll = $view(Button.class).all().stream()
+        Button clearAll = findInView(Button.class).all().stream()
                 .filter(b -> "Clear All".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(clearAll).click();
         runPendingSignalsTasks();
 
-        Span countLabel = $view(Span.class).all().stream().filter(
+        Span countLabel = findInView(Span.class).all().stream().filter(
                 s -> s.getText() != null && s.getText().contains("Showing"))
                 .findFirst().orElseThrow();
         assertTrue(countLabel.getText().contains("0 notification"));
@@ -118,20 +118,20 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Verify we start with 5 unread
-        Span countLabel = $view(Span.class).all().stream().filter(
+        Span countLabel = findInView(Span.class).all().stream().filter(
                 s -> s.getText() != null && s.getText().contains("Showing"))
                 .findFirst().orElseThrow();
         assertTrue(countLabel.getText().contains("5 unread"));
 
         // Click Mark All Read
-        Button markAllRead = $view(Button.class).all().stream()
+        Button markAllRead = findInView(Button.class).all().stream()
                 .filter(b -> "Mark All Read".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(markAllRead).click();
         runPendingSignalsTasks();
 
         // Verify 0 unread
-        countLabel = $view(Span.class).all().stream().filter(
+        countLabel = findInView(Span.class).all().stream().filter(
                 s -> s.getText() != null && s.getText().contains("Showing"))
                 .findFirst().orElseThrow();
         assertTrue(countLabel.getText().contains("0 unread"),
@@ -152,7 +152,7 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
         // Render a card and attach it to the view so test framework can click
         // Before the fix, the click handler used get() outside a reactive
         // context which throws IllegalStateException
-        UseCase24View view = $view(UseCase24View.class).first();
+        UseCase24View view = findInView(UseCase24View.class).first();
         Div card = view.createNotificationCard(unread, signal);
         view.add(card);
 
@@ -179,7 +179,7 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
         // Render a card and attach it to the view so test framework can click
         // Before the fix, the click handler used get() outside a reactive
         // context which throws IllegalStateException
-        UseCase24View view = $view(UseCase24View.class).first();
+        UseCase24View view = findInView(UseCase24View.class).first();
         Div card = view.createNotificationCard(n, signal);
         view.add(card);
 
@@ -209,13 +209,14 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
         navigate(UseCase24View.class);
         runPendingSignalsTasks();
 
-        ComboBox<String> typeFilter = (ComboBox<String>) $view(ComboBox.class)
-                .all().stream().filter(c -> "Type".equals(c.getLabel()))
-                .findFirst().orElseThrow();
+        ComboBox<String> typeFilter = (ComboBox<String>) findInView(
+                ComboBox.class).all().stream()
+                .filter(c -> "Type".equals(c.getLabel())).findFirst()
+                .orElseThrow();
         test(typeFilter).selectItem("ERROR");
         runPendingSignalsTasks();
 
-        Span countLabel = $view(Span.class).all().stream().filter(
+        Span countLabel = findInView(Span.class).all().stream().filter(
                 s -> s.getText() != null && s.getText().contains("Showing"))
                 .findFirst().orElseThrow();
         assertTrue(countLabel.getText().contains("2 notification"));

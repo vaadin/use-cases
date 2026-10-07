@@ -1,0 +1,10 @@
+.usecase26-view {
+    .log-panel {
+        background-color: #f5f5f5;
+        padding: 1em;
+        border-radius: 4px;
+    }
+    .forms-area {
+        flex: 1;
+    }
+}

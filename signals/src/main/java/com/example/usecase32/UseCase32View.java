@@ -1,7 +1,5 @@
 package com.example.usecase32;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.example.views.MainLayout;
@@ -19,6 +17,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -34,7 +33,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 32: Mutable vs immutable form models")
 @Route(value = "use-case-32", layout = MainLayout.class)
 @Menu(order = 32, title = "UC 32: Mutable vs immutable")
-@PermitAll
+@AnonymousAllowed
 public class UseCase32View extends VerticalLayout {
 
     private static final String[] PLANS = { "Free", "Pro", "Enterprise" };

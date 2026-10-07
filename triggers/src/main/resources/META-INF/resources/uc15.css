@@ -1,0 +1,20 @@
+.uc15-view {
+    .line {
+        display: inline-flex;
+        gap: 0.4rem;
+        align-items: baseline;
+        font-family: monospace;
+        font-size: 1.1rem;
+        margin-right: 1.5rem;
+    }
+
+    .label {
+        color: var(--vaadin-text-color-secondary);
+    }
+
+    .readout {
+        font-weight: 600;
+        min-width: 4ch;
+        text-align: right;
+    }
+}

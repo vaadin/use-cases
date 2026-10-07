@@ -1,5 +1,6 @@
 package com.example.uc2;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -24,6 +25,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Copy current value of a component")
+@UseCaseDescription("Copying whatever a field holds at the moment of the click")
 @Menu(order = 2, title = "UC2 — Copy component value")
 public class CopyComponentValueView extends VerticalLayout {
 
@@ -38,9 +40,9 @@ public class CopyComponentValueView extends VerticalLayout {
         linkField.setWidthFull();
 
         Button copyButton = new Button("Copy");
-        Clipboard.copyOnClick(copyButton, linkField,
-                () -> Notification.show("Link copied"),
-                () -> Notification.show("Copy failed"));
+        Clipboard.onClick(copyButton).writeText(linkField,
+                written -> Notification.show("Link copied"),
+                error -> Notification.show("Copy failed: " + error.message()));
 
         HorizontalLayout row = new HorizontalLayout(linkField, copyButton);
         row.setAlignItems(Alignment.END);

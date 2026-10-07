@@ -1,0 +1,28 @@
+.uc4-view {
+    .rate-card {
+        width: fit-content;
+        min-width: 240px;
+
+        &.highlight {
+            --vaadin-card-background: color-mix(in srgb, var(--aura-yellow) 25%,
+                    transparent);
+        }
+    }
+
+    .rate-pair {
+        font-size: 0.9rem;
+        color: var(--vaadin-text-color-secondary);
+    }
+
+    .rate-value {
+        font-size: 2.4rem;
+        font-weight: 600;
+        line-height: 1;
+    }
+
+    .rate-timestamp {
+        font-size: 0.85rem;
+        color: var(--vaadin-text-color-secondary);
+        margin-top: 0.5rem;
+    }
+}

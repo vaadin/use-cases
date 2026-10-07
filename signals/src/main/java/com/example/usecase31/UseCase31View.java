@@ -1,7 +1,5 @@
 package com.example.usecase31;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -23,6 +21,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -40,7 +39,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 31: Seat reservation")
 @Route(value = "use-case-31", layout = MainLayout.class)
 @Menu(order = 31, title = "UC 31: Seat reservation")
-@PermitAll
+@AnonymousAllowed
 public class UseCase31View extends VerticalLayout {
 
     private static final int SEAT_COUNT = 8;

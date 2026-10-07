@@ -1,0 +1,10 @@
+.usecase28-view {
+    .uc28-flash {
+        animation: usecase28-flash 0.6s ease-out;
+    }
+}
+
+@keyframes usecase28-flash {
+    0% { background-color: rgba(33, 150, 243, 0.35); }
+    100% { background-color: transparent; }
+}

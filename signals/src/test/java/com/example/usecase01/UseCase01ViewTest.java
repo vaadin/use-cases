@@ -23,20 +23,20 @@ class UseCase01ViewTest extends SpringBrowserlessTest {
     void formRendersWithAllComponents() {
         navigate(UseCase01View.class);
 
-        assertEquals(1, $view(EmailField.class).all().size());
-        assertEquals(2, $view(PasswordField.class).all().size());
-        assertEquals(1, $view(Button.class).all().size());
+        assertEquals(1, findInView(EmailField.class).all().size());
+        assertEquals(2, findInView(PasswordField.class).all().size());
+        assertEquals(1, findInView(Button.class).all().size());
     }
 
     @Test
     void submitButtonDisabledWhenFormIsEmpty() {
         navigate(UseCase01View.class);
-        test($view(EmailField.class).single()).setValue("");
-        test($view(PasswordField.class).atIndex(1)).setValue("");
-        test($view(PasswordField.class).atIndex(2)).setValue("");
+        test(findInView(EmailField.class).single()).setValue("");
+        test(findInView(PasswordField.class).atIndex(1)).setValue("");
+        test(findInView(PasswordField.class).atIndex(2)).setValue("");
         runPendingSignalsTasks();
 
-        Button submitButton = $view(Button.class).single();
+        Button submitButton = findInView(Button.class).single();
         assertFalse(submitButton.isEnabled());
     }
 
@@ -44,12 +44,14 @@ class UseCase01ViewTest extends SpringBrowserlessTest {
     void submitButtonDisabledWithInvalidEmail() {
         navigate(UseCase01View.class);
 
-        test($view(EmailField.class).single()).setValue("notanemail");
-        test($view(PasswordField.class).atIndex(1)).setValue("password123");
-        test($view(PasswordField.class).atIndex(2)).setValue("password123");
+        test(findInView(EmailField.class).single()).setValue("notanemail");
+        test(findInView(PasswordField.class).atIndex(1))
+                .setValue("password123");
+        test(findInView(PasswordField.class).atIndex(2))
+                .setValue("password123");
         runPendingSignalsTasks();
 
-        Button submitButton = $view(Button.class).single();
+        Button submitButton = findInView(Button.class).single();
         assertFalse(submitButton.isEnabled());
     }
 
@@ -57,12 +59,13 @@ class UseCase01ViewTest extends SpringBrowserlessTest {
     void submitButtonDisabledWithShortPassword() {
         navigate(UseCase01View.class);
 
-        test($view(EmailField.class).single()).setValue("user@example.com");
-        test($view(PasswordField.class).atIndex(1)).setValue("short");
-        test($view(PasswordField.class).atIndex(2)).setValue("short");
+        test(findInView(EmailField.class).single())
+                .setValue("user@example.com");
+        test(findInView(PasswordField.class).atIndex(1)).setValue("short");
+        test(findInView(PasswordField.class).atIndex(2)).setValue("short");
         runPendingSignalsTasks();
 
-        Button submitButton = $view(Button.class).single();
+        Button submitButton = findInView(Button.class).single();
         assertFalse(submitButton.isEnabled());
     }
 
@@ -70,12 +73,15 @@ class UseCase01ViewTest extends SpringBrowserlessTest {
     void submitButtonDisabledWhenPasswordsDontMatch() {
         navigate(UseCase01View.class);
 
-        test($view(EmailField.class).single()).setValue("user@example.com");
-        test($view(PasswordField.class).atIndex(1)).setValue("password123");
-        test($view(PasswordField.class).atIndex(2)).setValue("different123");
+        test(findInView(EmailField.class).single())
+                .setValue("user@example.com");
+        test(findInView(PasswordField.class).atIndex(1))
+                .setValue("password123");
+        test(findInView(PasswordField.class).atIndex(2))
+                .setValue("different123");
         runPendingSignalsTasks();
 
-        Button submitButton = $view(Button.class).single();
+        Button submitButton = findInView(Button.class).single();
         assertFalse(submitButton.isEnabled());
     }
 
@@ -83,12 +89,15 @@ class UseCase01ViewTest extends SpringBrowserlessTest {
     void submitButtonEnabledWhenFormIsValid() {
         navigate(UseCase01View.class);
 
-        test($view(EmailField.class).single()).setValue("user@example.com");
-        test($view(PasswordField.class).atIndex(1)).setValue("password123");
-        test($view(PasswordField.class).atIndex(2)).setValue("password123");
+        test(findInView(EmailField.class).single())
+                .setValue("user@example.com");
+        test(findInView(PasswordField.class).atIndex(1))
+                .setValue("password123");
+        test(findInView(PasswordField.class).atIndex(2))
+                .setValue("password123");
         runPendingSignalsTasks();
 
-        Button submitButton = $view(Button.class).single();
+        Button submitButton = findInView(Button.class).single();
         assertTrue(submitButton.isEnabled());
     }
 
@@ -97,7 +106,7 @@ class UseCase01ViewTest extends SpringBrowserlessTest {
         navigate(UseCase01View.class);
         runPendingSignalsTasks();
 
-        Button submitButton = $view(Button.class).single();
+        Button submitButton = findInView(Button.class).single();
         assertEquals("Create Account", submitButton.getText());
     }
 
@@ -105,12 +114,15 @@ class UseCase01ViewTest extends SpringBrowserlessTest {
     void clickingSubmitChangesButtonTextAndDisablesButton() {
         navigate(UseCase01View.class);
 
-        test($view(EmailField.class).single()).setValue("user@example.com");
-        test($view(PasswordField.class).atIndex(1)).setValue("password123");
-        test($view(PasswordField.class).atIndex(2)).setValue("password123");
+        test(findInView(EmailField.class).single())
+                .setValue("user@example.com");
+        test(findInView(PasswordField.class).atIndex(1))
+                .setValue("password123");
+        test(findInView(PasswordField.class).atIndex(2))
+                .setValue("password123");
         runPendingSignalsTasks();
 
-        Button submitButton = $view(Button.class).single();
+        Button submitButton = findInView(Button.class).single();
         test(submitButton).click();
         runPendingSignalsTasks();
 
@@ -123,20 +135,24 @@ class UseCase01ViewTest extends SpringBrowserlessTest {
         navigate(UseCase01View.class);
 
         // Fill valid form
-        test($view(EmailField.class).single()).setValue("user@example.com");
-        test($view(PasswordField.class).atIndex(1)).setValue("password123");
-        test($view(PasswordField.class).atIndex(2)).setValue("password123");
+        test(findInView(EmailField.class).single())
+                .setValue("user@example.com");
+        test(findInView(PasswordField.class).atIndex(1))
+                .setValue("password123");
+        test(findInView(PasswordField.class).atIndex(2))
+                .setValue("password123");
         runPendingSignalsTasks();
-        assertTrue($view(Button.class).single().isEnabled());
+        assertTrue(findInView(Button.class).single().isEnabled());
 
         // Break form (clear email)
-        test($view(EmailField.class).single()).setValue("");
+        test(findInView(EmailField.class).single()).setValue("");
         runPendingSignalsTasks();
-        assertFalse($view(Button.class).single().isEnabled());
+        assertFalse(findInView(Button.class).single().isEnabled());
 
         // Fix form again
-        test($view(EmailField.class).single()).setValue("other@example.com");
+        test(findInView(EmailField.class).single())
+                .setValue("other@example.com");
         runPendingSignalsTasks();
-        assertTrue($view(Button.class).single().isEnabled());
+        assertTrue(findInView(Button.class).single().isEnabled());
     }
 }

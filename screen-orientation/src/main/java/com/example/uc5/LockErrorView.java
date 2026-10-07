@@ -6,14 +6,15 @@ import java.time.format.DateTimeFormatter;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Page;
-import com.vaadin.flow.component.page.ScreenOrientation;
-import com.vaadin.flow.component.page.ScreenOrientationLockError;
+import com.vaadin.flow.component.screenorientation.ScreenOrientation;
+import com.vaadin.flow.component.screenorientation.ScreenOrientationLockError;
+import com.vaadin.flow.component.screenorientation.ScreenOrientationType;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -22,20 +23,21 @@ import com.vaadin.flow.router.Route;
  * UC5 — Lock error UX.
  * <p>
  * Demonstrates the three common error paths surfaced through
- * {@link Page#lockOrientation(ScreenOrientation,
- * com.vaadin.flow.function.SerializableRunnable,
- * com.vaadin.flow.function.SerializableConsumer)
- * Page#lockOrientation(...)}: <ul>
+ * {@link ScreenOrientation#lock(ScreenOrientationType, com.vaadin.flow.function.SerializableRunnable, com.vaadin.flow.function.SerializableConsumer)
+ * ScreenOrientation.lock(...)}:
+ * <ul>
  * <li>{@code SecurityError} — locking without fullscreen on most desktops,
  * <li>{@code NotSupportedError} — browsers that don't implement the API,
- * <li>{@code AbortError} — a newer lock supersedes the previous one. </ul>
- * Each click is logged with the resolved {@link ScreenOrientationLockError}
- * (or a "success" line), giving a quick visual reference for what the new
+ * <li>{@code AbortError} — a newer lock supersedes the previous one.
+ * </ul>
+ * Each click is logged with the resolved {@link ScreenOrientationLockError} (or
+ * a "success" line), giving a quick visual reference for what the new
  * callback-based API surfaces.
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Lock error UX")
 @Menu(order = 5, title = "UC5 — Lock error UX")
+@StyleSheet("uc5.css")
 public class LockErrorView extends VerticalLayout {
 
     private static final DateTimeFormatter TIME = DateTimeFormatter
@@ -44,6 +46,7 @@ public class LockErrorView extends VerticalLayout {
     private final Div log = new Div();
 
     public LockErrorView() {
+        addClassName("uc5-view");
         add(new H1("UC5 — Lock error UX"));
         add(new Paragraph("Each button triggers a typical lock failure path. "
                 + "Clicks log the resolved success/error directly under the "
@@ -52,20 +55,19 @@ public class LockErrorView extends VerticalLayout {
 
         Button lockWithoutFullscreen = new Button(
                 "Lock without fullscreen (expect SecurityError)",
-                e -> attempt(ScreenOrientation.LANDSCAPE_PRIMARY));
+                e -> attempt(ScreenOrientationType.LANDSCAPE_PRIMARY));
         Button rapidLocks = new Button(
-                "Two locks in a row (expect AbortError on the first)",
-                e -> {
-                    attempt(ScreenOrientation.LANDSCAPE_PRIMARY);
-                    attempt(ScreenOrientation.PORTRAIT_PRIMARY);
+                "Two locks in a row (expect AbortError on the first)", e -> {
+                    attempt(ScreenOrientationType.LANDSCAPE_PRIMARY);
+                    attempt(ScreenOrientationType.PORTRAIT_PRIMARY);
                 });
         Button portraitLock = new Button("Lock to portrait",
-                e -> attempt(ScreenOrientation.PORTRAIT_PRIMARY));
+                e -> attempt(ScreenOrientationType.PORTRAIT_PRIMARY));
 
         HorizontalLayout actions = new HorizontalLayout(lockWithoutFullscreen,
                 rapidLocks, portraitLock);
         actions.setSpacing(true);
-        actions.getStyle().set("flex-wrap", "wrap");
+        actions.addClassName("uc5-actions");
         add(actions);
 
         log.addClassName("uc5-error-log");
@@ -73,13 +75,11 @@ public class LockErrorView extends VerticalLayout {
         add(log);
     }
 
-    private void attempt(ScreenOrientation target) {
-        getUI().ifPresent(ui -> ui.getPage().lockOrientation(target,
-                () -> addLog("ok",
-                        "✓ Locked to " + target.getClientValue()),
-                error -> addLog("err",
-                        "✗ " + target.getClientValue() + " — " + error.name()
-                                + ": " + error.message())));
+    private void attempt(ScreenOrientationType target) {
+        ScreenOrientation.lock(target,
+                () -> addLog("ok", "✓ Locked to " + target.getClientValue()),
+                error -> addLog("err", "✗ " + target.getClientValue() + " — "
+                        + error.errorCode().name() + ": " + error.debugInfo()));
     }
 
     private void addLog(String cls, String text) {

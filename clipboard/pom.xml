@@ -11,13 +11,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <!-- The Clipboard API lives on the feature/clipboard branch of
-             vaadin/flow (PR #23615); override flow.version to pull that
-             build while leaving vaadin.version on the regular release. -->
-        <flow.version>25.2.clipboard-SNAPSHOT</flow.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.example</groupId>
@@ -54,7 +47,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>browserless-test-junit6</artifactId>
+            <artifactId>browserless-test-spring</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

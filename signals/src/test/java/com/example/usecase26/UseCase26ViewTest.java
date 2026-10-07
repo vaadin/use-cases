@@ -21,7 +21,7 @@ class UseCase26ViewTest extends SpringBrowserlessTest {
 
     @SuppressWarnings("unchecked")
     private ComboBox<Country> countryCombo() {
-        return (ComboBox<Country>) $view(ComboBox.class).all().stream()
+        return (ComboBox<Country>) findInView(ComboBox.class).all().stream()
                 .filter(c -> "Country".equals(c.getLabel())).findFirst()
                 .orElseThrow();
     }
@@ -37,8 +37,8 @@ class UseCase26ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Only the country ComboBox should be visible, no address TextFields
-        assertEquals(1, $view(ComboBox.class).all().size());
-        assertEquals(0, $view(TextField.class).all().size());
+        assertEquals(1, findInView(ComboBox.class).all().size());
+        assertEquals(0, findInView(TextField.class).all().size());
     }
 
     @Test
@@ -49,12 +49,12 @@ class UseCase26ViewTest extends SpringBrowserlessTest {
         selectCountry("US");
 
         // US fields should appear
-        assertTrue($view(TextField.class).all().stream()
+        assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "Street".equals(f.getLabel())));
-        assertTrue($view(TextField.class).all().stream()
+        assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "ZIP".equals(f.getLabel())));
         // State ComboBox should appear
-        assertTrue($view(ComboBox.class).all().stream()
+        assertTrue(findInView(ComboBox.class).all().stream()
                 .anyMatch(c -> "State".equals(c.getLabel())));
     }
 
@@ -65,9 +65,9 @@ class UseCase26ViewTest extends SpringBrowserlessTest {
 
         selectCountry("JAPAN");
 
-        assertTrue($view(TextField.class).all().stream()
+        assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "Postal Code".equals(f.getLabel())));
-        assertTrue($view(ComboBox.class).all().stream()
+        assertTrue(findInView(ComboBox.class).all().stream()
                 .anyMatch(c -> "Prefecture".equals(c.getLabel())));
     }
 
@@ -77,15 +77,15 @@ class UseCase26ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         selectCountry("US");
-        assertTrue($view(TextField.class).all().stream()
+        assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "Street".equals(f.getLabel())));
 
         selectCountry("JAPAN");
         // US fields hidden
-        assertFalse($view(TextField.class).all().stream()
+        assertFalse(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "Street".equals(f.getLabel())));
         // Japan fields visible
-        assertTrue($view(TextField.class).all().stream()
+        assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "Postal Code".equals(f.getLabel())));
     }
 
@@ -100,7 +100,7 @@ class UseCase26ViewTest extends SpringBrowserlessTest {
         selectCountry("US");
 
         // Only 1 "Created US" log entry (create-once pattern)
-        long usCreationCount = $view(Span.class).all().stream()
+        long usCreationCount = findInView(Span.class).all().stream()
                 .filter(s -> "Created US address form".equals(s.getText()))
                 .count();
         assertEquals(1, usCreationCount);
@@ -117,12 +117,12 @@ class UseCase26ViewTest extends SpringBrowserlessTest {
         selectCountry("JAPAN");
 
         // 2 creation events + 1 destroy event for Japan
-        long jpCreationCount = $view(Span.class).all().stream()
+        long jpCreationCount = findInView(Span.class).all().stream()
                 .filter(s -> "Created Japan address form".equals(s.getText()))
                 .count();
         assertEquals(2, jpCreationCount);
 
-        long jpDestroyCount = $view(Span.class).all().stream()
+        long jpDestroyCount = findInView(Span.class).all().stream()
                 .filter(s -> "Destroyed Japan address form".equals(s.getText()))
                 .count();
         assertEquals(1, jpDestroyCount);
@@ -134,7 +134,7 @@ class UseCase26ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Log starts empty
-        long logEntries = $view(Span.class).all().stream().filter(
+        long logEntries = findInView(Span.class).all().stream().filter(
                 s -> s.getText() != null && s.getText().startsWith("Created"))
                 .count();
         assertEquals(0, logEntries);
@@ -142,7 +142,7 @@ class UseCase26ViewTest extends SpringBrowserlessTest {
         // Select a country -> log gains an entry
         selectCountry("US");
 
-        logEntries = $view(Span.class).all().stream().filter(
+        logEntries = findInView(Span.class).all().stream().filter(
                 s -> s.getText() != null && s.getText().startsWith("Created"))
                 .count();
         assertEquals(1, logEntries);
@@ -160,7 +160,7 @@ class UseCase26ViewTest extends SpringBrowserlessTest {
         selectCountry("US");
 
         // No spurious destroy messages when switching away from US
-        long destroyCount = $view(Span.class).all().stream().filter(
+        long destroyCount = findInView(Span.class).all().stream().filter(
                 s -> s.getText() != null && s.getText().startsWith("Destroyed"))
                 .count();
         // Japan was switched away from twice
@@ -178,19 +178,19 @@ class UseCase26ViewTest extends SpringBrowserlessTest {
         selectCountry("US");
 
         // Japan created twice, destroyed twice
-        long jpCreated = $view(Span.class).all().stream()
+        long jpCreated = findInView(Span.class).all().stream()
                 .filter(s -> "Created Japan address form".equals(s.getText()))
                 .count();
         assertEquals(2, jpCreated);
 
-        long jpDestroyed = $view(Span.class).all().stream()
+        long jpDestroyed = findInView(Span.class).all().stream()
                 .filter(s -> "Destroyed Japan address form".equals(s.getText()))
                 .count();
         assertEquals(2, jpDestroyed);
 
         // Create-once US: created exactly once
         assertEquals(1,
-                $view(Span.class).all().stream().filter(
+                findInView(Span.class).all().stream().filter(
                         s -> "Created US address form".equals(s.getText()))
                         .count());
     }

@@ -1,0 +1,30 @@
+.uc1-view {
+    .uc1-pane {
+        border: 1px solid var(--vaadin-border-color);
+        background: var(--vaadin-background-container);
+        border-radius: var(--vaadin-radius-m);
+        padding: 0.75rem 1rem;
+        min-height: 120px;
+        flex: 1;
+    }
+
+    .uc1-pane-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .uc1-container {
+        display: flex;
+        gap: 0.75rem;
+        width: 100%;
+        max-width: 720px;
+    }
+
+    .uc1-container.stacked {
+        flex-direction: column;
+    }
+
+    .uc1-container.side-by-side {
+        flex-direction: row;
+    }
+}

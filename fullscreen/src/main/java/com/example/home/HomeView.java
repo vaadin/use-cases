@@ -8,6 +8,7 @@ import com.example.uc4.ReactiveLayoutView;
 import com.example.uc5.KioskExitDetectionView;
 import com.example.uc6.ChartExpandView;
 import com.example.uc7.AppFullscreenView;
+import com.example.uc8.OverlaysFullscreenView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.html.Div;
@@ -57,6 +58,10 @@ public class HomeView extends BaseHomeView {
                 "Page#requestFullscreen() hides browser chrome and shows "
                         + "the whole app — kiosk-style.",
                 AppFullscreenView.class));
+        cards.add(homeCard("UC8", "Overlays in fullscreen",
+                "Menus, popovers, dropdowns, context menus and tooltips keep "
+                        + "opening on top of a fullscreened component.",
+                OverlaysFullscreenView.class));
         add(cards);
     }
 }

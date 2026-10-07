@@ -19,15 +19,15 @@ class SelectAllOnFocusViewTest extends SpringBrowserlessTest {
     void viewRendersWithExpectedHeadingAndPrefilledQuantity() {
         navigate(SelectAllOnFocusView.class);
 
-        assertTrue($view(H1.class).all().stream().anyMatch(
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
                 h -> "UC1 — Select all on focus".equals(h.getText())));
-        assertEquals("10", $(TextField.class).single().getValue());
+        assertEquals("10", find(TextField.class).single().getValue());
     }
 
     @Test
     void autoselectIsEnabled() {
         navigate(SelectAllOnFocusView.class);
-        assertTrue($(TextField.class).single().isAutoselect(),
+        assertTrue(find(TextField.class).single().isAutoselect(),
                 "the field should drive selection via setAutoselect(true)");
     }
 }

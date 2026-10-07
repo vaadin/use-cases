@@ -1,7 +1,5 @@
 package com.example.usecase06;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
@@ -11,6 +9,7 @@ import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -23,6 +22,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -30,10 +30,12 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-06", layout = MainLayout.class)
 @PageTitle("Use Case 6: Shopping Cart with Real-time Totals")
 @Menu(order = 6, title = "UC 6: Shopping Cart")
-@PermitAll
+@StyleSheet("usecase06.css")
+@AnonymousAllowed
 public class UseCase06View extends VerticalLayout {
 
     public UseCase06View() {
+        addClassName("usecase06-view");
         setSpacing(true);
         setPadding(true);
 
@@ -88,9 +90,7 @@ public class UseCase06View extends VerticalLayout {
         // Products list
         var productsTitle = new H3("Available Products");
         var productsContainer = new Div();
-        productsContainer.getStyle().set("background-color", "#fff3e0")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-bottom", "1em");
+        productsContainer.addClassName("products-container");
         products.forEach(product -> productsContainer
                 .add(createProductRow(product, cartItemsSignal)));
 
@@ -106,17 +106,14 @@ public class UseCase06View extends VerticalLayout {
         cartHeader.setAlignItems(Alignment.CENTER);
         cartHeader.expand(cartTitle);
         var cartItemsContainer = new Div();
-        cartItemsContainer.getStyle().set("background-color", "#f5f5f5")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-bottom", "1em");
+        cartItemsContainer.addClassName("cart-items-container");
 
         var cartItemsList = new Div();
         cartItemsList.bindChildren(cartItemsSignal,
                 itemSignal -> createCartItemRow(itemSignal, cartItemsSignal));
 
         var emptyCart = new Paragraph("Empty cart");
-        emptyCart.getStyle().set("margin", "0").set("font-style", "italic")
-                .set("color", "var(--vaadin-text-color-secondary)");
+        emptyCart.addClassName("empty-cart-text");
         emptyCart.bindVisible(cartItemsSignal.map(List::isEmpty));
         cartItemsContainer.add(emptyCart, cartItemsList);
 
@@ -141,50 +138,38 @@ public class UseCase06View extends VerticalLayout {
 
         // Totals display
         var totalsBox = new Div();
-        totalsBox.getStyle().set("background-color", "#e8f5e9")
-                .set("padding", "1.5em").set("border-radius", "4px")
-                .set("margin-top", "1em");
+        totalsBox.addClassName("totals-box");
 
         var summaryTitle = new H3("Order Summary");
-        summaryTitle.getStyle().set("margin-top", "0");
+        summaryTitle.addClassName("summary-title");
 
         var subtotalLabel = new Span(formatter("Subtotal: $", subtotalSignal));
-        subtotalLabel.getStyle().set("display", "block").set("margin-bottom",
-                "0.5em");
+        subtotalLabel.addClassName("total-line");
 
         var discountLabel = new Span(formatter("Discount: -$", discountSignal));
         discountLabel.bindVisible(
                 () -> discountSignal.get().compareTo(BigDecimal.ZERO) > 0);
-        discountLabel.getStyle().set("display", "block")
-                .set("margin-bottom", "0.5em")
-                .set("color", "var(--aura-green)");
+        discountLabel.addClassName("total-line");
+        discountLabel.addClassName("total-line-discount");
 
         var shippingLabel = new Span(formatter("Shipping: $", shippingSignal));
-        shippingLabel.getStyle().set("display", "block").set("margin-bottom",
-                "0.5em");
+        shippingLabel.addClassName("total-line");
 
         var taxLabel = new Span(formatter("Tax (8%): $", taxSignal));
-        taxLabel.getStyle().set("display", "block").set("margin-bottom",
-                "0.5em");
+        taxLabel.addClassName("total-line");
 
         var divider = new Div();
-        divider.getStyle().set("border-top",
-                "2px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)")
-                .set("margin", "0.75em 0");
+        divider.addClassName("totals-divider");
 
         var totalLabel = new Span(formatter("Total: $", totalSignal));
-        totalLabel.getStyle().set("display", "block").set("font-weight", "bold")
-                .set("font-size", "1.5em")
-                .set("color", "var(--aura-accent-color)");
+        totalLabel.addClassName("total-grand");
 
         totalsBox.add(summaryTitle, subtotalLabel, discountLabel, shippingLabel,
                 taxLabel, divider, totalLabel);
 
         // Info box
         var infoBox = new Div();
-        infoBox.getStyle().set("background-color", "#e0f7fa")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-top", "1em").set("font-style", "italic");
+        infoBox.addClassName("info-box");
         infoBox.add(new Paragraph(
                 "💡 This use case demonstrates computed signals with multiple levels of calculation. "
                         + "The subtotal is computed from cart items, the discount is computed from the subtotal and discount code, "
@@ -201,13 +186,11 @@ public class UseCase06View extends VerticalLayout {
         row.setWidthFull();
         row.setAlignItems(Alignment.CENTER);
         row.setSpacing(true);
-        row.getStyle().set("background-color", "#ffffff")
-                .set("padding", "0.75em").set("border-radius", "4px")
-                .set("margin-bottom", "0.5em");
+        row.addClassName("product-row");
 
         var nameLabel = new Span(
                 format(product.name() + " - $", product.price()));
-        nameLabel.getStyle().set("flex-grow", "1").set("font-weight", "500");
+        nameLabel.addClassName("row-name");
 
         var addButton = new Button("Add",
                 e -> addToCart(product, cartItemsSignal));
@@ -224,14 +207,12 @@ public class UseCase06View extends VerticalLayout {
         row.setWidthFull();
         row.setAlignItems(Alignment.CENTER);
         row.setSpacing(true);
-        row.getStyle().set("background-color", "#ffffff")
-                .set("padding", "0.75em").set("border-radius", "4px")
-                .set("margin-bottom", "0.5em");
+        row.addClassName("cart-item-row");
 
         var nameLabel = new Span(
                 itemSignal.map(item -> format(item.product().name() + " - $",
                         item.product().price())));
-        nameLabel.getStyle().set("flex-grow", "1").set("font-weight", "500");
+        nameLabel.addClassName("row-name");
 
         var quantityField = new IntegerField();
         quantityField.setMin(1);
@@ -255,9 +236,7 @@ public class UseCase06View extends VerticalLayout {
                 formatter("$", itemSignal.map(CartItem::totalPrice)));
 
         itemTotalLabel.setWidth("100px");
-        itemTotalLabel.getStyle().set("text-align", "right")
-                .set("font-weight", "bold")
-                .set("color", "var(--aura-accent-color)");
+        itemTotalLabel.addClassName("item-total");
 
         var removeButton = new Button("Remove", e -> {
             cartItemsSignal.remove(itemSignal);

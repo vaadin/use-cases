@@ -1,7 +1,5 @@
 package com.example.usecase15;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
@@ -17,6 +15,7 @@ import org.jsoup.safety.Safelist;
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -30,6 +29,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -49,7 +49,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-15", layout = MainLayout.class)
 @PageTitle("Use Case 15: Debounced Search")
 @Menu(order = 15, title = "UC 15: Debounced Search")
-@PermitAll
+@StyleSheet("usecase15.css")
+@AnonymousAllowed
 public class UseCase15View extends VerticalLayout {
 
     public record Product(String id, String name, String category,
@@ -110,6 +111,7 @@ public class UseCase15View extends VerticalLayout {
     private volatile @Nullable ScheduledFuture<?> pendingDebounce = null;
 
     public UseCase15View() {
+        addClassName("usecase15-view");
         setSpacing(true);
         setPadding(true);
 
@@ -140,48 +142,37 @@ public class UseCase15View extends VerticalLayout {
 
         // Search stats
         Div statsBox = new Div();
-        statsBox.getStyle().set("background-color", "#f5f5f5")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin", "1em 0").set("display", "flex").set("gap", "2em")
-                .set("flex-wrap", "wrap").set("align-items", "center");
+        statsBox.addClassName("stats-box");
 
         Div instantQueryDiv = new Div();
         Span instantLabel = new Span("Instant value: ");
-        instantLabel.getStyle().set("color",
-                "var(--vaadin-text-color-secondary)");
+        instantLabel.addClassName("stat-label");
         Span instantValue = new Span(instantQuerySignal
                 .map(q -> q.isEmpty() ? "(empty)" : "\"" + q + "\""));
-        instantValue.getStyle().set("font-family", "monospace")
-                .set("font-weight", "bold");
+        instantValue.addClassName("stat-value");
         instantQueryDiv.add(instantLabel, instantValue);
 
         Div debouncedQueryDiv = new Div();
         Span debouncedLabel = new Span("Debounced value (1000ms): ");
-        debouncedLabel.getStyle().set("color",
-                "var(--vaadin-text-color-secondary)");
+        debouncedLabel.addClassName("stat-label");
         Span debouncedValue = new Span(searchQuerySignal
                 .map(q -> q.isEmpty() ? "(empty)" : "\"" + q + "\""));
-        debouncedValue.getStyle().set("font-family", "monospace")
-                .set("font-weight", "bold")
-                .set("color", "var(--aura-accent-color)");
+        debouncedValue.addClassName("stat-value-accent");
         debouncedQueryDiv.add(debouncedLabel, debouncedValue);
 
         Div keystrokeCountDiv = new Div();
         Span keystrokeLabel = new Span("Keystrokes: ");
-        keystrokeLabel.getStyle().set("color",
-                "var(--vaadin-text-color-secondary)");
+        keystrokeLabel.addClassName("stat-label");
         Span keystrokeValue = new Span(
                 keystrokeCountSignal.map(String::valueOf));
-        keystrokeValue.getStyle().set("font-weight", "bold");
+        keystrokeValue.addClassName("stat-value-bold");
         keystrokeCountDiv.add(keystrokeLabel, keystrokeValue);
 
         Div searchCountDiv = new Div();
         Span countLabel = new Span("Searches performed: ");
-        countLabel.getStyle().set("color",
-                "var(--vaadin-text-color-secondary)");
+        countLabel.addClassName("stat-label");
         Span countValue = new Span(searchCountSignal.map(String::valueOf));
-        countValue.getStyle().set("font-weight", "bold").set("color",
-                "var(--aura-green)");
+        countValue.addClassName("stat-value-success");
         searchCountDiv.add(countLabel, countValue);
 
         statsBox.add(instantQueryDiv, debouncedQueryDiv, keystrokeCountDiv,
@@ -189,16 +180,15 @@ public class UseCase15View extends VerticalLayout {
 
         // Search status
         Div statusBox = new Div();
-        statusBox.getStyle().set("min-height", "30px").set("display", "flex")
-                .set("align-items", "center").set("gap", "0.5em");
+        statusBox.addClassName("status-box");
 
         Icon searchingIcon = new Icon(VaadinIcon.SPINNER);
-        searchingIcon.getStyle().set("animation", "spin 1s linear infinite");
+        searchingIcon.addClassName("searching-icon");
         searchingIcon.bindVisible(isSearchingSignal);
 
         Span statusText = new Span(isSearchingSignal
                 .map(searching -> searching ? "Searching..." : ""));
-        statusText.getStyle().set("color", "var(--aura-accent-color)");
+        statusText.addClassName("status-text");
 
         statusBox.add(searchingIcon, statusText);
 
@@ -221,9 +211,7 @@ public class UseCase15View extends VerticalLayout {
         H3 resultsTitle = new H3(resultsTitleSignal);
 
         Div resultsContainer = new Div();
-        resultsContainer.getStyle().set("display", "flex")
-                .set("flex-direction", "column").set("gap", "0.5em")
-                .set("margin-top", "1em");
+        resultsContainer.addClassName("results-container");
 
         // Peek rather than binding since products are immutable
         resultsContainer.bindChildren(searchResultsSignal,
@@ -231,19 +219,12 @@ public class UseCase15View extends VerticalLayout {
 
         // Info box
         Div infoBox = new Div();
-        infoBox.getStyle().set("background-color", "#e0f7fa")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-top", "1em").set("font-style", "italic");
+        infoBox.addClassName("info-box");
         infoBox.add(new Paragraph(
                 "Debouncing is critical for performance in production applications. "
                         + "Without debouncing, typing 'laptop' would trigger 6 searches (one per character). "
                         + "With 1000ms debouncing, it triggers just 1 search after you stop typing. "
                         + "Compare the Keystrokes and Searches performed counters to see the savings."));
-
-        // Add CSS for spinner animation
-        getElement().executeJs("const style = document.createElement('style');"
-                + "style.textContent = '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';"
-                + "document.head.appendChild(style);");
 
         add(title, description, searchField, statsBox, statusBox, resultsTitle,
                 resultsContainer, infoBox);
@@ -318,15 +299,11 @@ public class UseCase15View extends VerticalLayout {
 
     private Div createProductCard(Product product) {
         Div card = new Div();
-        card.getStyle().set("background-color", "#ffffff").set("border",
-                "1px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)")
-                .set("border-radius", "4px").set("padding", "1em")
-                .set("display", "flex").set("justify-content", "space-between")
-                .set("align-items", "center");
+        card.addClassName("product-card");
 
         Div leftSide = new Div();
         Div nameDiv = new Div();
-        nameDiv.getStyle().set("font-weight", "bold");
+        nameDiv.addClassName("product-name");
 
         // Highlight matching text
         String query = searchQuerySignal.peek();
@@ -334,15 +311,13 @@ public class UseCase15View extends VerticalLayout {
                 highlightMatch(product.name(), query));
 
         Div categoryDiv = new Div(product.category());
-        categoryDiv.getStyle().set("font-size", "0.9em").set("color",
-                "var(--vaadin-text-color-secondary)");
+        categoryDiv.addClassName("product-category");
 
         leftSide.add(nameDiv, categoryDiv);
 
         Div priceDiv = new Div(
                 "$" + product.price().setScale(2, RoundingMode.HALF_UP));
-        priceDiv.getStyle().set("font-weight", "bold").set("color",
-                "var(--aura-accent-color)");
+        priceDiv.addClassName("product-price");
 
         card.add(leftSide, priceDiv);
         return card;

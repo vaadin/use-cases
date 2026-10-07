@@ -8,7 +8,7 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.page.WebShareSupport;
+import com.vaadin.flow.component.webshare.WebShareSupport;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -20,8 +20,9 @@ class CopyLinkFallbackViewTest extends SpringBrowserlessTest {
     void viewRendersHeading() {
         navigate(CopyLinkFallbackView.class);
 
-        assertTrue($view(H1.class).all().stream().anyMatch(
-                h -> "UC2 — Share with copy-link fallback".equals(h.getText())));
+        assertTrue(findInView(H1.class).all().stream()
+                .anyMatch(h -> "UC2 — Share with copy-link fallback"
+                        .equals(h.getText())));
     }
 
     @Test
@@ -43,14 +44,14 @@ class CopyLinkFallbackViewTest extends SpringBrowserlessTest {
 
     private void assertButtonExists(String text) {
         assertTrue(
-                $view(Button.class).all().stream()
+                findInView(Button.class).all().stream()
                         .anyMatch(b -> text.equals(b.getText())),
                 "expected a button labelled \"" + text + "\"");
     }
 
     private void assertButtonAbsent(String text) {
         assertTrue(
-                $view(Button.class).all().stream()
+                findInView(Button.class).all().stream()
                         .noneMatch(b -> text.equals(b.getText())),
                 "expected no button labelled \"" + text + "\"");
     }

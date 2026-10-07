@@ -1,7 +1,5 @@
 package com.example.usecase21;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.Locale;
 
 import com.example.views.MainLayout;
@@ -9,6 +7,7 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -21,6 +20,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 
 import static com.example.usecase21.TranslationService.translate;
@@ -28,10 +28,12 @@ import static com.example.usecase21.TranslationService.translate;
 @Route(value = "use-case-21", layout = MainLayout.class)
 @PageTitle("Use Case 21: Signals-Based i18n")
 @Menu(order = 21, title = "UC 21: Signals-Based i18n")
-@PermitAll
+@StyleSheet("usecase21.css")
+@AnonymousAllowed
 public class UseCase21View extends VerticalLayout {
 
     public UseCase21View() {
+        addClassName("usecase21-view");
         setSpacing(true);
         setPadding(true);
 
@@ -115,7 +117,7 @@ public class UseCase21View extends VerticalLayout {
 
         // Buttons
         Button submitButton = new Button();
-        submitButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        submitButton.addThemeVariants(ButtonVariant.PRIMARY);
         submitButton.bindText(translate("uc21.sampleForm.submitButton"));
 
         Button cancelButton = new Button();
@@ -149,7 +151,7 @@ public class UseCase21View extends VerticalLayout {
         Span languageLabel = new Span();
         languageLabel
                 .bindText(translate("uc21.status.language").map(s -> s + ":"));
-        languageLabel.getStyle().set("font-weight", "bold");
+        languageLabel.addClassName("row-label");
 
         Span languageValue = new Span();
         Signal<String> languageNameSignal = Signal.computed(() -> {
@@ -167,15 +169,12 @@ public class UseCase21View extends VerticalLayout {
 
         Span localeLabel = new Span();
         localeLabel.bindText(translate("uc21.status.locale").map(s -> s + ":"));
-        localeLabel.getStyle().set("font-weight", "bold");
+        localeLabel.addClassName("row-label");
 
         Span localeValue = new Span();
         localeValue.bindText(
                 UI.getCurrent().localeSignal().map(Locale::toLanguageTag));
-        localeValue.getStyle().set("font-family", "monospace").set(
-                "background-color",
-                "color-mix(in srgb, var(--vaadin-text-color) 10%, transparent)")
-                .set("padding", "0.25em 0.5em").set("border-radius", "4px");
+        localeValue.addClassName("locale-code");
 
         localeRow.add(localeLabel, localeValue);
 
@@ -185,10 +184,7 @@ public class UseCase21View extends VerticalLayout {
 
     private Div createCard() {
         Div card = new Div();
-        card.getStyle().set("background-color",
-                "color-mix(in srgb, var(--vaadin-text-color) 5%, transparent)")
-                .set("border-radius", "8px").set("padding", "1.5em")
-                .set("margin-bottom", "1em");
+        card.addClassName("card");
         return card;
     }
 }

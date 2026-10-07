@@ -1,7 +1,5 @@
 package com.example.views;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -12,11 +10,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @Route(value = "", layout = MainLayout.class)
 @PageTitle("Signal API Use Cases - Home")
 @Menu(order = 0, title = "Home")
-@PermitAll
+@AnonymousAllowed
 public class HomeView extends VerticalLayout {
 
     public HomeView() {
@@ -30,7 +29,7 @@ public class HomeView extends VerticalLayout {
 
         // Introduction
         Paragraph intro = new Paragraph(
-                "This application demonstrates 37 use cases (31 single-user + 6 multi-user) for the Vaadin Signal API. "
+                "This application demonstrates 38 use cases (31 single-user + 7 multi-user) for the Vaadin Signal API. "
                         + "Each use case validates different aspects of the reactive programming model, from basic "
                         + "one-way bindings to complex forms, AI integration, and multi-user collaboration.");
 
@@ -53,10 +52,10 @@ public class HomeView extends VerticalLayout {
         stats.setSpacing(false);
         stats.setPadding(false);
         stats.add(
-                createStat("37",
-                        "Total use cases (31 single-user + 6 multi-user)"),
+                createStat("38",
+                        "Total use cases (31 single-user + 7 multi-user)"),
                 createStat("31", "Single-user use cases across 12 categories"),
-                createStat("6", "Multi-user collaboration use cases"));
+                createStat("7", "Multi-user collaboration use cases"));
 
         // Categories
         H2 categoriesTitle = new H2("Use Case Categories");
@@ -88,8 +87,8 @@ public class HomeView extends VerticalLayout {
                 createCategory("Advanced Signal API", "UC28-35",
                         "Contextual effects, untracked/unbound effects, Signal.cached, "
                                 + "replace/update/modify, custom equality, asReadonly, ListSignal moveTo/insertAt"),
-                createCategory("Multi-User Collaboration", "MUC01-04, MUC06-07",
-                        "Chat, cursors, click race game, collaborative editing, shared tasks, shared LLM tasks"));
+                createCategory("Multi-User Collaboration", "MUC01-04, MUC06-08",
+                        "Chat, cursors, click race game, collaborative editing, shared tasks, shared LLM tasks, broadcast announcements"));
 
         // Documentation Link
         H2 docsTitle = new H2("Documentation");

@@ -1,0 +1,67 @@
+.usecase25-view {
+    display: block;
+    padding: var(--vaadin-gap-l);
+
+    .header-row {
+        display: grid;
+        grid-template-columns: 80px 1fr 120px 100px 100px;
+        gap: var(--vaadin-gap-s);
+        padding: var(--vaadin-gap-s) var(--vaadin-gap-m);
+        border-bottom: 2px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent);
+        font-weight: bold;
+        font-size: var(--aura-font-size-s);
+        color: var(--vaadin-text-color-secondary);
+    }
+    .stock-list {
+        display: flex;
+        flex-direction: column;
+    }
+    .stock-row {
+        display: grid;
+        grid-template-columns: 80px 1fr 120px 100px 100px;
+        gap: var(--vaadin-gap-s);
+        padding: var(--vaadin-gap-s) var(--vaadin-gap-m);
+        align-items: center;
+        border-bottom: 1px solid color-mix(in srgb, var(--vaadin-text-color) 10%, transparent);
+    }
+    .header-cell-right,
+    .cell-right {
+        text-align: right;
+    }
+    .symbol-cell {
+        font-weight: bold;
+        font-family: monospace;
+    }
+    .name-cell {
+        color: var(--vaadin-text-color-secondary);
+        font-size: var(--aura-font-size-s);
+    }
+    .price-cell {
+        text-align: right;
+        font-family: monospace;
+        font-weight: 600;
+        border-radius: 4px;
+        padding: 2px 6px;
+    }
+    .change-cell {
+        text-align: right;
+        font-family: monospace;
+    }
+    .price-up {
+        color: var(--aura-green);
+        animation: usecase25-flash-green 0.6s ease-out;
+    }
+    .price-down {
+        color: var(--aura-red);
+        animation: usecase25-flash-red 0.6s ease-out;
+    }
+}
+
+@keyframes usecase25-flash-green {
+    0% { background-color: rgba(76, 175, 80, 0.3); }
+    100% { background-color: transparent; }
+}
+@keyframes usecase25-flash-red {
+    0% { background-color: rgba(244, 67, 54, 0.3); }
+    100% { background-color: transparent; }
+}

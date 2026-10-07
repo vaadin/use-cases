@@ -1,0 +1,24 @@
+.uc13-view {
+    .search-field {
+        width: 18rem;
+    }
+
+    .filter-list {
+        max-width: 22rem;
+        margin-top: 0.75rem;
+        border: 1px solid var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
+        background: var(--vaadin-background-container);
+        max-height: 320px;
+        overflow-y: auto;
+    }
+
+    .filter-list .row {
+        padding: 0.4rem 0.9rem;
+        border-bottom: 1px solid var(--vaadin-border-color);
+    }
+
+    .filter-list .row:last-child {
+        border-bottom: none;
+    }
+}

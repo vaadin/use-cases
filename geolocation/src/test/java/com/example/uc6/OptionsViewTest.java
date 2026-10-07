@@ -23,7 +23,7 @@ class OptionsViewTest extends BrowserlessTest {
         GeolocationSimulator geolocation = GeolocationSimulator.current();
         navigate(OptionsView.class);
 
-        List<Button> runs = $(Button.class).withText("Run").all();
+        List<Button> runs = find(Button.class).withText("Run").all();
         assertEquals(4, runs.size(), "Expected 4 Run buttons, one per profile");
 
         Button profileC = runs.get(2);

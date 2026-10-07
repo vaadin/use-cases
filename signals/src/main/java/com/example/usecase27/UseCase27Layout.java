@@ -1,17 +1,17 @@
 package com.example.usecase27;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.router.RouterState;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -25,7 +25,8 @@ import com.vaadin.flow.signals.Signal;
  * every subsequent navigation.
  */
 @ParentLayout(MainLayout.class)
-@PermitAll
+@StyleSheet("usecase27.css")
+@AnonymousAllowed
 public class UseCase27Layout extends Div implements RouterLayout {
 
     public static final String BREADCRUMB_ID = "uc27-breadcrumb";
@@ -36,22 +37,16 @@ public class UseCase27Layout extends Div implements RouterLayout {
     private int updateCount;
 
     public UseCase27Layout() {
+        addClassName("usecase27-view");
+
         breadcrumb.setId(BREADCRUMB_ID);
-        breadcrumb.getStyle().set("padding", "0.5em 0.75em").set(
-                "background-color",
-                "color-mix(in srgb, var(--vaadin-text-color) 5%, transparent)")
-                .set("border-radius", "4px")
-                .set("font-family", "var(--aura-font-family)");
+        breadcrumb.addClassName("breadcrumb");
 
         updateBadge.setId(UPDATE_COUNT_ID);
-        updateBadge.getStyle()
-                .set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-size", "var(--aura-font-size-s)")
-                .set("margin-left", "0.75em");
+        updateBadge.addClassName("update-badge");
 
         Div header = new Div(breadcrumb, updateBadge);
-        header.getStyle().set("display", "flex").set("align-items", "center")
-                .set("padding", "0.5em 1em");
+        header.addClassName("layout-header");
         getElement().appendChild(header.getElement());
 
         Signal.effect(this, () -> {
@@ -88,8 +83,7 @@ public class UseCase27Layout extends Div implements RouterLayout {
 
     private static Span separator() {
         Span s = new Span(" › ");
-        s.getStyle().set("color", "var(--vaadin-text-color-secondary)")
-                .set("margin", "0 0.4em");
+        s.addClassName("breadcrumb-separator");
         return s;
     }
 }

@@ -1,13 +1,12 @@
 package com.example.usecase09;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.Objects;
 
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -23,14 +22,17 @@ import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @Route(value = "use-case-09", layout = MainLayout.class)
 @PageTitle("Use Case 9: Form with Binder Integration and Signal Validation")
 @Menu(order = 9, title = "UC 9: Binder Integration")
-@PermitAll
+@StyleSheet("usecase09.css")
+@AnonymousAllowed
 public class UseCase09View extends VerticalLayout {
 
     public UseCase09View() {
+        addClassName("usecase09-view");
         setSpacing(true);
         setPadding(true);
 
@@ -119,10 +121,8 @@ public class UseCase09View extends VerticalLayout {
         Span statusLabel = new Span(
                 () -> okStatusSignal.get() ? "Form is valid - Ready to submit"
                         : "Please complete all required fields correctly");
-        statusLabel.getStyle().bind("color",
-                () -> okStatusSignal.get() ? "green" : "orange");
-        statusLabel.getStyle().bind("font-weight",
-                () -> okStatusSignal.get() ? "bold" : "normal");
+        statusLabel.addClassName("status-label");
+        statusLabel.getClassNames().bind("is-valid", okStatusSignal);
         statusDiv.add(statusLabel);
 
         add(title, description, usernameField, emailField, passwordField,

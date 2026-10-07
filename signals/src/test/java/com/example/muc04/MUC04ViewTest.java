@@ -29,7 +29,7 @@ class MUC04ViewTest extends SpringBrowserlessTest {
     private MUC04Signals muc04Signals;
 
     private TextField getFieldByLabel(String label) {
-        return $view(TextField.class).all().stream()
+        return findInView(TextField.class).all().stream()
                 .filter(f -> label.equals(f.getLabel())).findFirst()
                 .orElseThrow();
     }
@@ -38,8 +38,8 @@ class MUC04ViewTest extends SpringBrowserlessTest {
     void viewRendersWithThreeEditableFields() {
         navigate(MUC04View.class);
 
-        assertEquals(3, $view(TextField.class).all().size());
-        assertTrue($view(Button.class).all().stream()
+        assertEquals(3, findInView(TextField.class).all().size());
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Save Changes".equals(b.getText())));
     }
 
@@ -48,7 +48,7 @@ class MUC04ViewTest extends SpringBrowserlessTest {
         navigate(MUC04View.class);
         runPendingSignalsTasks();
 
-        $view(TextField.class).all().forEach(f -> assertTrue(f.isEnabled(),
+        findInView(TextField.class).all().forEach(f -> assertTrue(f.isEnabled(),
                 "Field '" + f.getLabel() + "' should be enabled"));
     }
 
@@ -71,7 +71,7 @@ class MUC04ViewTest extends SpringBrowserlessTest {
         navigate(MUC04View.class);
         runPendingSignalsTasks();
 
-        Checkbox lockingCheckbox = $view(Checkbox.class).first();
+        Checkbox lockingCheckbox = findInView(Checkbox.class).first();
         test(lockingCheckbox).click();
         runPendingSignalsTasks();
 
@@ -89,7 +89,7 @@ class MUC04ViewTest extends SpringBrowserlessTest {
         navigate(MUC04View.class);
         runPendingSignalsTasks();
 
-        Checkbox lockingCheckbox = $view(Checkbox.class).first();
+        Checkbox lockingCheckbox = findInView(Checkbox.class).first();
         test(lockingCheckbox).click();
         muc04Signals.startEditing("companyName", OTHER_USER);
         runPendingSignalsTasks();

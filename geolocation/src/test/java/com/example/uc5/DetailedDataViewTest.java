@@ -26,22 +26,23 @@ class DetailedDataViewTest extends BrowserlessTest {
 
         navigate(DetailedDataView.class);
 
-        Button fetch = $(Button.class).withText("Read full position").single();
+        Button fetch = find(Button.class).withText("Read full position")
+                .single();
         test(fetch).click();
 
-        assertTrue($(Span.class).withTextContaining("51.507400°").exists(),
+        assertTrue(find(Span.class).withTextContaining("51.507400°").exists(),
                 "Latitude field should be rendered");
-        assertTrue($(Span.class).withTextContaining("-0.127800°").exists(),
+        assertTrue(find(Span.class).withTextContaining("-0.127800°").exists(),
                 "Longitude field should be rendered");
-        assertTrue($(Span.class).withTextContaining("10.0 m").exists(),
+        assertTrue(find(Span.class).withTextContaining("10.0 m").exists(),
                 "Accuracy field should be rendered");
-        assertTrue($(Span.class).withTextContaining("12.5 m").exists(),
+        assertTrue(find(Span.class).withTextContaining("12.5 m").exists(),
                 "Altitude field should be rendered");
-        assertTrue($(Span.class).withTextContaining("3.0 m").exists(),
+        assertTrue(find(Span.class).withTextContaining("3.0 m").exists(),
                 "Altitude accuracy field should be rendered");
-        assertTrue($(Span.class).withTextContaining("90.0°").exists(),
+        assertTrue(find(Span.class).withTextContaining("90.0°").exists(),
                 "Heading field should be rendered");
-        assertTrue($(Span.class).withTextContaining("1.50 m/s").exists(),
+        assertTrue(find(Span.class).withTextContaining("1.50 m/s").exists(),
                 "Speed field should be rendered");
     }
 
@@ -53,13 +54,14 @@ class DetailedDataViewTest extends BrowserlessTest {
 
         navigate(DetailedDataView.class);
 
-        Button fetch = $(Button.class).withText("Read full position").single();
+        Button fetch = find(Button.class).withText("Read full position")
+                .single();
         test(fetch).click();
 
-        assertTrue($(Span.class).withTextContaining("48.856600°").exists(),
+        assertTrue(find(Span.class).withTextContaining("48.856600°").exists(),
                 "Latitude field should be rendered");
 
-        int dashCount = $(Span.class).withText("—").all().size();
+        int dashCount = find(Span.class).withText("—").all().size();
         assertTrue(dashCount >= 4,
                 "At least 4 fields should be shown as '—' for null coordinates, found: "
                         + dashCount);

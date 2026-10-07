@@ -5,12 +5,14 @@ import java.util.List;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.fullscreen.Fullscreen;
+import com.vaadin.flow.component.fullscreen.FullscreenState;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.FullscreenState;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
@@ -18,13 +20,15 @@ import com.vaadin.flow.signals.Signal;
 /**
  * UC1 — Image lightbox.
  * <p>
- * A grid of image thumbnails. Clicking one swaps it into the preview pane
- * below and immediately fullscreens that pane via
- * {@link com.vaadin.flow.component.Component#requestFullscreen()}. The browser
- * renders only the wrapped stage; pressing Escape returns to the gallery.
+ * A grid of image thumbnails. Clicking one swaps it into the preview pane below
+ * and immediately fullscreens that pane via
+ * {@link Fullscreen#onClick(com.vaadin.flow.component.Component)
+ * Fullscreen.onClick(...).enter(stage)}. The browser renders only the wrapped
+ * stage; pressing Escape returns to the gallery.
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @Menu(order = 1, title = "UC1 — Image lightbox")
+@StyleSheet("uc1.css")
 public class ImageLightboxView extends VerticalLayout {
 
     private record Photo(String name, String gradient) {
@@ -50,13 +54,14 @@ public class ImageLightboxView extends VerticalLayout {
     private final Span selectedName = new Span(PHOTOS.get(0).name());
 
     public ImageLightboxView() {
+        addClassName("uc1-view");
         add(new H1("UC1 — Image lightbox"));
         add(new Paragraph(
                 "Click any thumbnail to enlarge it to fullscreen. Press "
                         + "Escape (or the browser's close gesture) to return. "
                         + "The lightbox is a single Div fullscreened with "
-                        + "Component#requestFullscreen(); the rest of the view "
-                        + "is hidden by the wrapper."));
+                        + "Fullscreen.onClick(thumb).enter(stage); the rest of "
+                        + "the view is hidden by the wrapper."));
 
         stateBadge.addClassName("status-badge");
         add(stateBadge);
@@ -68,8 +73,7 @@ public class ImageLightboxView extends VerticalLayout {
         }
         add(grid);
 
-        Paragraph note = new Paragraph(
-                "Current selection: ");
+        Paragraph note = new Paragraph("Current selection: ");
         note.add(selectedName);
         add(note);
 
@@ -83,8 +87,7 @@ public class ImageLightboxView extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        Signal<FullscreenState> fs = attachEvent.getUI().getPage()
-                .fullscreenSignal();
+        Signal<FullscreenState> fs = Fullscreen.stateSignal();
 
         stateBadge.bindText(fs.map(ImageLightboxView::badgeText));
         stateBadge.bindClassName("unsupported",
@@ -97,17 +100,21 @@ public class ImageLightboxView extends VerticalLayout {
         Div thumb = new Div();
         thumb.addClassName("lightbox-thumb");
         thumb.setText(photo.name());
-        thumb.getStyle().set("background", photo.gradient());
-        thumb.addClickListener(e -> {
-            showPhoto(photo);
-            stage.requestFullscreen();
-        });
+        // Per-photo gradient is data, not a discrete state — pass it through
+        // as a CSS custom property so the rule lives in uc1.css.
+        thumb.getStyle().set("--lightbox-thumb-bg", photo.gradient());
+        thumb.addClickListener(e -> showPhoto(photo));
+        // Fullscreen needs the click's user gesture, so bind the request to the
+        // thumbnail's click trigger.
+        Fullscreen.onClick(thumb).enter(stage);
         return thumb;
     }
 
     private void showPhoto(Photo photo) {
         selectedName.setText(photo.name());
-        stageImage.getStyle().set("background", photo.gradient());
+        // Same pattern as the thumbnail: the gradient is dynamic per photo,
+        // exposed to uc1.css via a custom property.
+        stageImage.getStyle().set("--lightbox-image-bg", photo.gradient());
     }
 
     private static String badgeText(FullscreenState state) {

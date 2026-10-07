@@ -19,16 +19,16 @@ class DenialViewTest extends BrowserlessTest {
         navigate(DenialView.class);
 
         @SuppressWarnings("unchecked")
-        Select<GeolocationAvailability> select = $(Select.class)
+        Select<GeolocationAvailability> select = find(Select.class)
                 .withCaption("Browser-reported availability").single();
         test(select).selectItem("DENIED");
 
-        TextField postcode = $(TextField.class).withCaption("Postcode")
+        TextField postcode = find(TextField.class).withCaption("Postcode")
                 .single();
         assertTrue(postcode.isVisible(),
                 "Postcode field should be visible when availability is DENIED");
 
-        Span hint = $(Span.class).withTextContaining("Location is blocked")
+        Span hint = find(Span.class).withTextContaining("Location is blocked")
                 .single();
         assertTrue(hint.isVisible(),
                 "Hint span should be visible when availability is DENIED");

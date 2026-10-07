@@ -21,7 +21,7 @@ class UseCase15ViewTest extends SpringBrowserlessTest {
     void viewRendersWithSearchField() {
         navigate(UseCase15View.class);
 
-        assertTrue($view(TextField.class).all().stream()
+        assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "Search Products".equals(f.getLabel())));
     }
 
@@ -29,7 +29,7 @@ class UseCase15ViewTest extends SpringBrowserlessTest {
     void searchFieldPlaceholderPresent() {
         navigate(UseCase15View.class);
 
-        TextField searchField = $view(TextField.class).all().stream()
+        TextField searchField = findInView(TextField.class).all().stream()
                 .filter(f -> "Search Products".equals(f.getLabel())).findFirst()
                 .orElseThrow();
         assertEquals("Type to search...", searchField.getPlaceholder());
@@ -41,14 +41,14 @@ class UseCase15ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Type into the search field
-        TextField searchField = $view(TextField.class).all().stream()
+        TextField searchField = findInView(TextField.class).all().stream()
                 .filter(f -> "Search Products".equals(f.getLabel())).findFirst()
                 .orElseThrow();
         test(searchField).setValue("laptop");
         runPendingSignalsTasks();
 
         // The instant value Span should show the typed text
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> s.getText() != null
                         && s.getText().contains("\"laptop\"")));
     }
@@ -59,18 +59,18 @@ class UseCase15ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Initially keystroke count should be 0
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> "0".equals(s.getText())));
 
         // Type a value
-        TextField searchField = $view(TextField.class).all().stream()
+        TextField searchField = findInView(TextField.class).all().stream()
                 .filter(f -> "Search Products".equals(f.getLabel())).findFirst()
                 .orElseThrow();
         test(searchField).setValue("a");
         runPendingSignalsTasks();
 
         // Keystroke count should now be 1
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> "1".equals(s.getText())));
     }
 }

@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: vaadin
+    metrics_path: /actuator/prometheus
+    static_configs:
+      # Both ports are listed so the stack works whichever one the app is on:
+      # 8080 is the module default, 8082 a common override (PORT=8082). The
+      # unused one simply shows as a down target in Prometheus.
+      - targets:
+          - host.docker.internal:8080
+          - host.docker.internal:8082

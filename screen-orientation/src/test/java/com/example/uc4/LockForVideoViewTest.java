@@ -27,11 +27,11 @@ class LockForVideoViewTest extends SpringBrowserlessTest {
         navigate(LockForVideoView.class);
         runPendingSignalsTasks();
 
-        assertTrue($view(H1.class).all().stream().anyMatch(
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
                 h -> "UC4 — Lock landscape for video".equals(h.getText())));
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> b.getText().startsWith("Play")));
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> b.getText().startsWith("Stop")));
         assertSpanText("Idle");
     }
@@ -41,10 +41,10 @@ class LockForVideoViewTest extends SpringBrowserlessTest {
         navigate(LockForVideoView.class);
         runPendingSignalsTasks();
 
-        Button play = $view(Button.class).all().stream()
+        Button play = findInView(Button.class).all().stream()
                 .filter(b -> b.getText().startsWith("Play")).findFirst()
                 .orElseThrow();
-        Button stop = $view(Button.class).all().stream()
+        Button stop = findInView(Button.class).all().stream()
                 .filter(b -> b.getText().startsWith("Stop")).findFirst()
                 .orElseThrow();
 
@@ -60,7 +60,7 @@ class LockForVideoViewTest extends SpringBrowserlessTest {
 
     private void assertSpanText(String fragment) {
         assertTrue(
-                $view(Span.class).all().stream()
+                findInView(Span.class).all().stream()
                         .anyMatch(s -> s.getText() != null
                                 && s.getText().contains(fragment)),
                 "expected a span containing \"" + fragment + "\"");

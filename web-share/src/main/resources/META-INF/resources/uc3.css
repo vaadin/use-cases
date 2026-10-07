@@ -1,0 +1,11 @@
+.uc3-view {
+    .share-preview {
+        font-family: monospace;
+        font-size: 0.85rem;
+        background: var(--vaadin-background-container);
+        border: 1px solid var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
+        padding: 0.5rem 0.75rem;
+        white-space: pre-wrap;
+    }
+}

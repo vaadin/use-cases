@@ -11,10 +11,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <flow.version>25.2.wake-lock-SNAPSHOT</flow.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.example</groupId>

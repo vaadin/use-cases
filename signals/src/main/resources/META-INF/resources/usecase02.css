@@ -1,0 +1,12 @@
+.usecase02-view {
+    .result-display {
+        margin-top: 2em;
+        padding: 1em;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: #f5f5f5;
+    }
+    .result-text {
+        margin: 0;
+    }
+}

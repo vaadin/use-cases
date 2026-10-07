@@ -6,29 +6,32 @@ import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.fullscreen.Fullscreen;
+import com.vaadin.flow.component.fullscreen.FullscreenState;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.FullscreenState;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
 /**
- * UC4 — Reactive layout via {@code fullscreenSignal()}.
+ * UC4 — Reactive layout via {@code Fullscreen.stateSignal()}.
  * <p>
  * Demonstrates that the fullscreen state is just a signal: no callback, no
  * imperative wiring. The dashboard below changes its column count and the
  * density-aside text purely through {@code bindClassName} / {@code bindText}
- * subscriptions to {@link com.vaadin.flow.component.page.Page#fullscreenSignal()},
- * with no observers in user code. The user clicks Present once; the layout
- * reformats automatically and reverts on exit.
+ * subscriptions to {@link Fullscreen#stateSignal()}, with no observers in user
+ * code. The user clicks Present once; the layout reformats automatically and
+ * reverts on exit.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @Menu(order = 4, title = "UC4 — Reactive layout")
+@StyleSheet("uc4.css")
 public class ReactiveLayoutView extends VerticalLayout {
 
     private record Metric(String label, String value) {
@@ -47,6 +50,7 @@ public class ReactiveLayoutView extends VerticalLayout {
     private final Span stateBadge = new Span();
 
     public ReactiveLayoutView() {
+        addClassName("uc4-view");
         add(new H1("UC4 — Reactive layout"));
         add(new Paragraph(
                 "Click “Present” once. The 6 metric cards rearrange from "
@@ -63,10 +67,11 @@ public class ReactiveLayoutView extends VerticalLayout {
             dashboard.add(metricCard(metric));
         }
 
-        Button present = new Button("Present", e -> getUI()
-                .ifPresent(ui -> ui.getPage().requestFullscreen()));
-        Button exit = new Button("Exit", e -> getUI()
-                .ifPresent(ui -> ui.getPage().exitFullscreen()));
+        Button present = new Button("Present");
+        // Fullscreen needs the click's user gesture, so bind the request to the
+        // Present button's click trigger.
+        Fullscreen.onClick(present).enter();
+        Button exit = new Button("Exit", e -> Fullscreen.exit());
 
         add(new HorizontalLayout(present, exit, stateBadge, densityNote));
         add(dashboard);
@@ -75,8 +80,7 @@ public class ReactiveLayoutView extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        Signal<FullscreenState> fs = attachEvent.getUI().getPage()
-                .fullscreenSignal();
+        Signal<FullscreenState> fs = Fullscreen.stateSignal();
 
         stateBadge.bindText(fs.map(ReactiveLayoutView::badgeText));
         stateBadge.bindClassName("fullscreen",

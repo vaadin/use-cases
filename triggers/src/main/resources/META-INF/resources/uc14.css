@@ -1,0 +1,26 @@
+.uc14-view {
+    .card-grid {
+        display: grid;
+        gap: 1rem;
+        margin-top: 1rem;
+        /* Stretch to the parent flex container's width — without this the
+           grid item collapses to its content's intrinsic width (~126px)
+           because flex items default to min-width: auto. */
+        width: 100%;
+        /* Default to one column until the trigger applies a breakpoint
+           class — covers the first frame before ResizeObserver fires. */
+        grid-template-columns: 1fr;
+    }
+
+    .card-grid.w-narrow {
+        grid-template-columns: 1fr;
+    }
+
+    .card-grid.w-medium {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .card-grid.w-wide {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}

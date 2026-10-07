@@ -27,12 +27,12 @@ class UseCase09ViewTest extends SpringBrowserlessTest {
     void viewRendersWithAllFormFields() {
         navigate(UseCase09View.class);
 
-        assertEquals(1, $view(TextField.class).all().size());
-        assertEquals(1, $view(EmailField.class).all().size());
-        assertEquals(2, $view(PasswordField.class).all().size());
-        assertEquals(1, $view(ComboBox.class).all().size());
-        assertEquals(1, $view(IntegerField.class).all().size());
-        assertEquals(1, $view(Button.class).all().size());
+        assertEquals(1, findInView(TextField.class).all().size());
+        assertEquals(1, findInView(EmailField.class).all().size());
+        assertEquals(2, findInView(PasswordField.class).all().size());
+        assertEquals(1, findInView(ComboBox.class).all().size());
+        assertEquals(1, findInView(IntegerField.class).all().size());
+        assertEquals(1, findInView(Button.class).all().size());
     }
 
     @Test
@@ -40,7 +40,7 @@ class UseCase09ViewTest extends SpringBrowserlessTest {
         navigate(UseCase09View.class);
         runPendingSignalsTasks();
 
-        Button submitButton = $view(Button.class).single();
+        Button submitButton = findInView(Button.class).single();
         assertFalse(submitButton.isEnabled());
     }
 
@@ -50,10 +50,10 @@ class UseCase09ViewTest extends SpringBrowserlessTest {
         fillValidForm();
 
         // Override username with short value
-        test($view(TextField.class).single()).setValue("ab");
+        test(findInView(TextField.class).single()).setValue("ab");
         runPendingSignalsTasks();
 
-        assertFalse($view(Button.class).single().isEnabled());
+        assertFalse(findInView(Button.class).single().isEnabled());
     }
 
     @Test
@@ -61,10 +61,10 @@ class UseCase09ViewTest extends SpringBrowserlessTest {
         navigate(UseCase09View.class);
         fillValidForm();
 
-        test($view(EmailField.class).single()).setValue("notanemail");
+        test(findInView(EmailField.class).single()).setValue("notanemail");
         runPendingSignalsTasks();
 
-        assertFalse($view(Button.class).single().isEnabled());
+        assertFalse(findInView(Button.class).single().isEnabled());
     }
 
     @Test
@@ -72,11 +72,11 @@ class UseCase09ViewTest extends SpringBrowserlessTest {
         navigate(UseCase09View.class);
         fillValidForm();
 
-        test($view(PasswordField.class).atIndex(1)).setValue("short");
-        test($view(PasswordField.class).atIndex(2)).setValue("short");
+        test(findInView(PasswordField.class).atIndex(1)).setValue("short");
+        test(findInView(PasswordField.class).atIndex(2)).setValue("short");
         runPendingSignalsTasks();
 
-        assertFalse($view(Button.class).single().isEnabled());
+        assertFalse(findInView(Button.class).single().isEnabled());
     }
 
     @Test
@@ -84,10 +84,10 @@ class UseCase09ViewTest extends SpringBrowserlessTest {
         navigate(UseCase09View.class);
         fillValidForm();
 
-        test($view(PasswordField.class).atIndex(2)).setValue("different1");
+        test(findInView(PasswordField.class).atIndex(2)).setValue("different1");
         runPendingSignalsTasks();
 
-        assertFalse($view(Button.class).single().isEnabled());
+        assertFalse(findInView(Button.class).single().isEnabled());
     }
 
     @SuppressWarnings("unchecked")
@@ -97,13 +97,13 @@ class UseCase09ViewTest extends SpringBrowserlessTest {
         fillValidForm();
 
         // Switch to BUSINESS account
-        ComboBox<AccountType> accountType = $view(ComboBox.class).single();
+        ComboBox<AccountType> accountType = findInView(ComboBox.class).single();
         test(accountType).selectItem("BUSINESS");
         // Age 15 is valid for PERSONAL but not BUSINESS
-        test($view(IntegerField.class).single()).setValue(15);
+        test(findInView(IntegerField.class).single()).setValue(15);
         runPendingSignalsTasks();
 
-        assertFalse($view(Button.class).single().isEnabled());
+        assertFalse(findInView(Button.class).single().isEnabled());
     }
 
     @Test
@@ -111,7 +111,7 @@ class UseCase09ViewTest extends SpringBrowserlessTest {
         navigate(UseCase09View.class);
         fillValidForm();
 
-        assertTrue($view(Button.class).single().isEnabled());
+        assertTrue(findInView(Button.class).single().isEnabled());
     }
 
     @Test
@@ -119,7 +119,7 @@ class UseCase09ViewTest extends SpringBrowserlessTest {
         navigate(UseCase09View.class);
         fillValidForm();
 
-        Span statusLabel = $view(Span.class).all().stream()
+        Span statusLabel = findInView(Span.class).all().stream()
                 .filter(s -> s.getText().contains("Form is valid")
                         || s.getText().contains("Please complete"))
                 .findFirst().orElseThrow();
@@ -131,7 +131,7 @@ class UseCase09ViewTest extends SpringBrowserlessTest {
         navigate(UseCase09View.class);
         runPendingSignalsTasks();
 
-        Span statusLabel = $view(Span.class).all().stream()
+        Span statusLabel = findInView(Span.class).all().stream()
                 .filter(s -> s.getText().contains("Form is valid")
                         || s.getText().contains("Please complete"))
                 .findFirst().orElseThrow();
@@ -141,13 +141,16 @@ class UseCase09ViewTest extends SpringBrowserlessTest {
 
     @SuppressWarnings("unchecked")
     private void fillValidForm() {
-        test($view(TextField.class).single()).setValue("johndoe");
-        test($view(EmailField.class).single()).setValue("john@example.com");
-        test($view(PasswordField.class).atIndex(1)).setValue("password123");
-        test($view(PasswordField.class).atIndex(2)).setValue("password123");
-        ComboBox<AccountType> accountType = $view(ComboBox.class).single();
+        test(findInView(TextField.class).single()).setValue("johndoe");
+        test(findInView(EmailField.class).single())
+                .setValue("john@example.com");
+        test(findInView(PasswordField.class).atIndex(1))
+                .setValue("password123");
+        test(findInView(PasswordField.class).atIndex(2))
+                .setValue("password123");
+        ComboBox<AccountType> accountType = findInView(ComboBox.class).single();
         test(accountType).selectItem("PERSONAL");
-        test($view(IntegerField.class).single()).setValue(25);
+        test(findInView(IntegerField.class).single()).setValue(25);
         runPendingSignalsTasks();
     }
 }

@@ -1,0 +1,10 @@
+.uc1-view {
+    .uc1-time {
+        font-size: 2rem;
+        font-family: monospace;
+    }
+
+    .uc1-counter {
+        font-weight: 600;
+    }
+}

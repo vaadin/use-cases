@@ -19,7 +19,7 @@ class UseCase20ViewTest extends SpringBrowserlessTest {
     void viewRendersWithRadioButtonGroup() {
         navigate(UseCase20View.class);
 
-        assertEquals(1, $view(RadioButtonGroup.class).all().size());
+        assertEquals(1, findInView(RadioButtonGroup.class).all().size());
     }
 
     @SuppressWarnings("unchecked")
@@ -28,8 +28,8 @@ class UseCase20ViewTest extends SpringBrowserlessTest {
         navigate(UseCase20View.class);
         runPendingSignalsTasks();
 
-        RadioButtonGroup<String> colorPicker = $view(RadioButtonGroup.class)
-                .single();
+        RadioButtonGroup<String> colorPicker = findInView(
+                RadioButtonGroup.class).single();
         assertEquals("var(--aura-background-color)", colorPicker.getValue());
     }
 
@@ -38,8 +38,8 @@ class UseCase20ViewTest extends SpringBrowserlessTest {
     void selectingColorUpdatesValue() {
         navigate(UseCase20View.class);
 
-        RadioButtonGroup<String> colorPicker = $view(RadioButtonGroup.class)
-                .single();
+        RadioButtonGroup<String> colorPicker = findInView(
+                RadioButtonGroup.class).single();
         test(colorPicker).selectItem("#ffd54f");
         runPendingSignalsTasks();
 

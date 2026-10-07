@@ -1,13 +1,12 @@
 package com.example.usecase26;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.List;
 
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -19,6 +18,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -26,7 +26,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-26", layout = MainLayout.class)
 @PageTitle("Use Case 26: Lazy Component Creation")
 @Menu(order = 26, title = "UC 26: Lazy Creation")
-@PermitAll
+@StyleSheet("usecase26.css")
+@AnonymousAllowed
 public class UseCase26View extends VerticalLayout {
 
     private final ValueSignal<@Nullable Country> countrySignal = new ValueSignal<@Nullable Country>(
@@ -34,6 +35,7 @@ public class UseCase26View extends VerticalLayout {
     private final ListSignal<String> creationLog = new ListSignal<>();
 
     public UseCase26View() {
+        addClassName("usecase26-view");
         setSpacing(true);
         setPadding(true);
 
@@ -66,8 +68,7 @@ public class UseCase26View extends VerticalLayout {
 
         // Creation log panel
         var logPanel = new Div();
-        logPanel.getStyle().set("background-color", "#f5f5f5")
-                .set("padding", "1em").set("border-radius", "4px");
+        logPanel.addClassName("log-panel");
         logPanel.add(new H3("Creation Log"));
         var logEntries = new Div();
         logEntries.bindChildren(creationLog,
@@ -76,7 +77,7 @@ public class UseCase26View extends VerticalLayout {
 
         // Main content: forms on the left, log on the right
         var formsArea = new Div(countrySelect, usWrapper, jpWrapper);
-        formsArea.getStyle().set("flex", "1");
+        formsArea.addClassName("forms-area");
 
         var contentLayout = new HorizontalLayout(formsArea, logPanel);
         contentLayout.setWidthFull();

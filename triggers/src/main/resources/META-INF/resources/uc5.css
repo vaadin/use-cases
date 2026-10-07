@@ -1,0 +1,19 @@
+.uc5-view {
+    .status-badge {
+        display: inline-block;
+        padding: 0.3rem 0.9rem;
+        border-radius: 999px;
+        font-family: monospace;
+        font-size: 0.95rem;
+        background: color-mix(in srgb, var(--aura-green) 18%, transparent);
+        color: var(--aura-green-text, var(--aura-green));
+        border: 1px solid color-mix(in srgb, var(--aura-green) 35%, transparent);
+        transition: background-color 200ms, color 200ms, border-color 200ms;
+    }
+
+    .status-badge.idle {
+        background: color-mix(in srgb, var(--aura-orange) 18%, transparent);
+        color: var(--aura-orange-text, var(--aura-orange));
+        border-color: color-mix(in srgb, var(--aura-orange) 35%, transparent);
+    }
+}

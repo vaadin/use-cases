@@ -20,7 +20,7 @@ class ValidationJumpViewTest extends SpringBrowserlessTest {
     void viewRendersHeading() {
         navigate(ValidationJumpView.class);
 
-        assertTrue($view(H1.class).all().stream().anyMatch(
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
                 h -> "UC4 — Jump to validation error".equals(h.getText())));
     }
 
@@ -29,8 +29,8 @@ class ValidationJumpViewTest extends SpringBrowserlessTest {
         navigate(ValidationJumpView.class);
         runPendingSignalsTasks();
 
-        TextField username = $(TextField.class).single();
-        Button submit = $(Button.class).withText("Submit").single();
+        TextField username = find(TextField.class).single();
+        Button submit = find(Button.class).withText("Submit").single();
 
         // Default value "My Cool User" — first invalid run is "M".
         test(submit).click();
@@ -38,7 +38,7 @@ class ValidationJumpViewTest extends SpringBrowserlessTest {
 
         // Status text reports the offending range; that range, applied to the
         // current value, must contain at least one non-[a-z0-9_] character.
-        String status = $view(Span.class).all().stream().map(Span::getText)
+        String status = findInView(Span.class).all().stream().map(Span::getText)
                 .filter(t -> t != null
                         && t.startsWith("Invalid characters at "))
                 .findFirst().orElseThrow(() -> new AssertionError(
@@ -60,14 +60,14 @@ class ValidationJumpViewTest extends SpringBrowserlessTest {
     @Test
     void shortValueShowsTheLengthError() {
         navigate(ValidationJumpView.class);
-        TextField username = $(TextField.class).single();
+        TextField username = find(TextField.class).single();
         username.setValue("ab");
 
-        Button submit = $(Button.class).withText("Submit").single();
+        Button submit = find(Button.class).withText("Submit").single();
         test(submit).click();
         runPendingSignalsTasks();
 
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> s.getText() != null
                         && s.getText().contains("at least 3 characters")));
     }
@@ -75,15 +75,15 @@ class ValidationJumpViewTest extends SpringBrowserlessTest {
     @Test
     void validValueShowsSuccess() {
         navigate(ValidationJumpView.class);
-        TextField username = $(TextField.class).single();
+        TextField username = find(TextField.class).single();
         username.setValue("good_name_42");
         runPendingSignalsTasks();
 
-        Button submit = $(Button.class).withText("Submit").single();
+        Button submit = find(Button.class).withText("Submit").single();
         test(submit).click();
         runPendingSignalsTasks();
 
-        assertTrue($view(Span.class).all().stream().anyMatch(
+        assertTrue(findInView(Span.class).all().stream().anyMatch(
                 s -> s.getText() != null && s.getText().contains("is valid")));
     }
 }

@@ -25,21 +25,22 @@ class DbTrackingViewTest extends SpringBrowserlessTest {
         geolocation.grantPermission();
         navigate(DbTrackingView.class);
 
-        Grid<TrackedPosition> grid = $view(Grid.class).single();
+        Grid<TrackedPosition> grid = findInView(Grid.class).single();
         assertEquals(0, test(grid).size(),
                 "Grid should be empty before tracking starts");
 
-        Button start = $(Button.class).withText("Start tracking").single();
+        Button start = find(Button.class).withText("Start tracking").single();
         test(start).click();
 
         geolocation.setLocation(60.1699, 24.9384, 15.0);
-        Span status = $(Span.class).withText("Saved update #1 to DB").single();
+        Span status = find(Span.class).withText("Saved update #1 to DB")
+                .single();
         assertEquals("Saved update #1 to DB", status.getText());
         assertEquals(1, test(grid).size(),
                 "Grid should reflect one row from the database");
 
         geolocation.setLocation(60.1700, 24.9385, 12.0);
-        status = $(Span.class).withText("Saved update #2 to DB").single();
+        status = find(Span.class).withText("Saved update #2 to DB").single();
         assertEquals("Saved update #2 to DB", status.getText());
         assertEquals(2, test(grid).size(),
                 "Grid should reflect two rows from the database");
@@ -52,15 +53,15 @@ class DbTrackingViewTest extends SpringBrowserlessTest {
         geolocation.grantPermission();
         navigate(DbTrackingView.class);
 
-        test($(Button.class).withText("Start tracking").single()).click();
+        test(find(Button.class).withText("Start tracking").single()).click();
         geolocation.setLocation(60.1699, 24.9384, 15.0);
         geolocation.setLocation(60.1700, 24.9385, 12.0);
 
-        Grid<TrackedPosition> grid = $view(Grid.class).single();
+        Grid<TrackedPosition> grid = findInView(Grid.class).single();
         assertEquals(2, test(grid).size(),
                 "Grid should have two rows before clearing");
 
-        test($(Button.class).withText("Clear history").single()).click();
+        test(find(Button.class).withText("Clear history").single()).click();
 
         assertEquals(0, test(grid).size(),
                 "Grid should be empty after clearing history");
@@ -72,18 +73,18 @@ class DbTrackingViewTest extends SpringBrowserlessTest {
         geolocation.grantPermission();
         navigate(DbTrackingView.class);
 
-        test($(Button.class).withText("Start tracking").single()).click();
+        test(find(Button.class).withText("Start tracking").single()).click();
         geolocation.setLocation(60.1699, 24.9384, 15.0);
 
-        test($(Button.class).withText("Stop tracking").single()).click();
+        test(find(Button.class).withText("Stop tracking").single()).click();
 
-        Span status = $(Span.class).withTextContaining("Stopped after")
+        Span status = find(Span.class).withTextContaining("Stopped after")
                 .single();
         assertTrue(status.getText().contains("1"),
                 "Stopped status should reflect one update, was: "
                         + status.getText());
         assertTrue(
-                $(Button.class).withText("Resume tracking").single()
+                find(Button.class).withText("Resume tracking").single()
                         .isVisible(),
                 "Start button should be re-labelled to Resume after stop");
     }
@@ -94,12 +95,12 @@ class DbTrackingViewTest extends SpringBrowserlessTest {
         geolocation.grantPermission();
         navigate(DbTrackingView.class);
 
-        test($(Button.class).withText("Start tracking").single()).click();
+        test(find(Button.class).withText("Start tracking").single()).click();
 
         geolocation.setUnavailable(GeolocationErrorCode.POSITION_UNAVAILABLE,
                 "position unavailable");
 
-        Span status = $(Span.class).withTextContaining("Could not determine")
+        Span status = find(Span.class).withTextContaining("Could not determine")
                 .single();
         assertTrue(status.getText().contains("location"),
                 "Status should describe the location failure, was: "

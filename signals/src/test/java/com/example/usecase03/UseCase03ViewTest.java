@@ -23,7 +23,7 @@ class UseCase03ViewTest extends SpringBrowserlessTest {
     @Test
     void viewRendersWithTabs() {
         navigate(UseCase03View.class);
-        assertEquals(1, $view(Tabs.class).all().size());
+        assertEquals(1, findInView(Tabs.class).all().size());
     }
 
     @Test
@@ -32,14 +32,14 @@ class UseCase03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Rectangle tab is shown by default with its sliders
-        assertTrue($view(IntegerSlider.class).all().size() >= 5);
+        assertTrue(findInView(IntegerSlider.class).all().size() >= 5);
     }
 
     @Test
     void viewRendersWithResetButton() {
         navigate(UseCase03View.class);
 
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Reset to Defaults".equals(b.getText())));
     }
 
@@ -49,7 +49,7 @@ class UseCase03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Rectangle controls: Fill and Stroke ComboBoxes
-        assertTrue($view(ComboBox.class).all().size() >= 2);
+        assertTrue(findInView(ComboBox.class).all().size() >= 2);
     }
 
     @Test
@@ -59,17 +59,17 @@ class UseCase03ViewTest extends SpringBrowserlessTest {
 
         // Rectangle tab (index 0) is selected by default
         // Rectangle controls should have a "Width" slider visible
-        assertTrue($view(IntegerSlider.class).all().stream()
+        assertTrue(findInView(IntegerSlider.class).all().stream()
                 .anyMatch(s -> "Width".equals(s.getLabel())));
 
         // Switch to Star tab (index 1)
-        Tabs tabs = $view(Tabs.class).single();
+        Tabs tabs = findInView(Tabs.class).single();
         Tab starTab = (Tab) tabs.getComponentAt(1);
         tabs.setSelectedTab(starTab);
         runPendingSignalsTasks();
 
         // Star controls should now show "Points" slider
-        assertTrue($view(IntegerSlider.class).all().stream()
+        assertTrue(findInView(IntegerSlider.class).all().stream()
                 .anyMatch(s -> "Points".equals(s.getLabel())));
     }
 
@@ -79,15 +79,15 @@ class UseCase03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Find the Width slider and change its value (default is 150)
-        IntegerSlider widthSlider = $view(IntegerSlider.class).all().stream()
-                .filter(s -> "Width".equals(s.getLabel())).findFirst()
+        IntegerSlider widthSlider = findInView(IntegerSlider.class).all()
+                .stream().filter(s -> "Width".equals(s.getLabel())).findFirst()
                 .orElseThrow();
         widthSlider.setValue(200);
         runPendingSignalsTasks();
         assertEquals(200, widthSlider.getValue());
 
         // Click Reset to Defaults
-        Button resetButton = $view(Button.class).all().stream()
+        Button resetButton = findInView(Button.class).all().stream()
                 .filter(b -> "Reset to Defaults".equals(b.getText()))
                 .findFirst().orElseThrow();
         test(resetButton).click();
@@ -103,7 +103,7 @@ class UseCase03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Find the X position slider and set a value
-        IntegerSlider xSlider = $view(IntegerSlider.class).all().stream()
+        IntegerSlider xSlider = findInView(IntegerSlider.class).all().stream()
                 .filter(s -> "X".equals(s.getLabel())).findFirst()
                 .orElseThrow();
         xSlider.setValue(250);
@@ -118,9 +118,9 @@ class UseCase03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Rectangle-specific sliders should be present
-        assertTrue($view(IntegerSlider.class).all().stream()
+        assertTrue(findInView(IntegerSlider.class).all().stream()
                 .anyMatch(s -> "Corner Radius".equals(s.getLabel())));
-        assertTrue($view(IntegerSlider.class).all().stream()
+        assertTrue(findInView(IntegerSlider.class).all().stream()
                 .anyMatch(s -> "Height".equals(s.getLabel())));
     }
 }

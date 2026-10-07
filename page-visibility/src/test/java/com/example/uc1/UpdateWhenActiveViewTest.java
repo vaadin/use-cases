@@ -21,9 +21,9 @@ class UpdateWhenActiveViewTest extends SpringBrowserlessTest {
     void viewRendersWithExpectedHeadings() {
         navigate(UpdateWhenActiveView.class);
 
-        assertTrue($view(H1.class).all().stream()
+        assertTrue(findInView(H1.class).all().stream()
                 .anyMatch(h -> "UC1 — Update when active".equals(h.getText())));
-        assertTrue($view(H2.class).all().stream()
+        assertTrue(findInView(H2.class).all().stream()
                 .anyMatch(h -> "Status".equals(h.getText())));
     }
 
@@ -47,7 +47,7 @@ class UpdateWhenActiveViewTest extends SpringBrowserlessTest {
 
     private void assertBadgeContains(String fragment) {
         assertTrue(
-                $view(Span.class).all().stream()
+                findInView(Span.class).all().stream()
                         .anyMatch(s -> s.getText() != null
                                 && s.getText().contains(fragment)),
                 "expected status badge to contain \"" + fragment + "\"");

@@ -1,13 +1,12 @@
 package com.example.usecase08;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.List;
 
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -24,16 +23,19 @@ import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-08", layout = MainLayout.class)
 @PageTitle("Use Case 8: Multi-Step Wizard with Validation")
 @Menu(order = 8, title = "UC 8: Multi-Step Wizard")
-@PermitAll
+@StyleSheet("usecase08.css")
+@AnonymousAllowed
 public class UseCase08View extends VerticalLayout {
 
     public UseCase08View() {
+        addClassName("usecase08-view");
         setSpacing(true);
         setPadding(true);
 
@@ -144,7 +146,7 @@ public class UseCase08View extends VerticalLayout {
         step4Layout.add(new H3("Step 4: Review Your Information"));
 
         Div reviewDiv = new Div();
-        reviewDiv.getStyle().set("white-space", "pre-line");
+        reviewDiv.addClassName("review-content");
         // Update review when entering this step
         Signal.effect(reviewDiv, () -> {
             if (currentStepSignal.get() == Step.REVIEW) {
@@ -228,7 +230,7 @@ public class UseCase08View extends VerticalLayout {
             };
             return "Step " + stepNumber + " of 4";
         });
-        progressIndicator.getStyle().set("font-weight", "bold");
+        progressIndicator.addClassName("progress-indicator");
 
         add(title, description, progressIndicator, step1Layout, step2Layout,
                 step3Layout, step4Layout, navigationLayout);

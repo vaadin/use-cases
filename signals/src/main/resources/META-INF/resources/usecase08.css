@@ -1,0 +1,8 @@
+.usecase08-view {
+    .review-content {
+        white-space: pre-line;
+    }
+    .progress-indicator {
+        font-weight: bold;
+    }
+}

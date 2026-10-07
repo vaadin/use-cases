@@ -30,7 +30,7 @@ class MUC06ViewTest extends SpringBrowserlessTest {
     private MUC06Signals muc06Signals;
 
     private String getStatText(String prefix) {
-        return $view(Span.class).all().stream()
+        return findInView(Span.class).all().stream()
                 .filter(s -> s.getText() != null
                         && s.getText().startsWith(prefix))
                 .map(Span::getText).findFirst().orElse("");
@@ -50,7 +50,7 @@ class MUC06ViewTest extends SpringBrowserlessTest {
         navigate(MUC06View.class);
         runPendingSignalsTasks();
 
-        Button addButton = $view(Button.class).all().stream()
+        Button addButton = findInView(Button.class).all().stream()
                 .filter(b -> "Add Task".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(addButton).click();
@@ -83,7 +83,7 @@ class MUC06ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // User A adds a task via the UI
-        Button addButton = $view(Button.class).all().stream()
+        Button addButton = findInView(Button.class).all().stream()
                 .filter(b -> "Add Task".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(addButton).click();
@@ -132,7 +132,7 @@ class MUC06ViewTest extends SpringBrowserlessTest {
 
         // Find the first unchecked checkbox (corresponds to first incomplete
         // task)
-        Checkbox firstCheckbox = $view(Checkbox.class).all().stream()
+        Checkbox firstCheckbox = findInView(Checkbox.class).all().stream()
                 .filter(cb -> !cb.getValue()).findFirst().orElseThrow();
         assertFalse(firstCheckbox.getValue(),
                 "Checkbox should initially be unchecked");
@@ -161,7 +161,7 @@ class MUC06ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Get the first text field (first task's title)
-        TextField firstTitle = $view(TextField.class).first();
+        TextField firstTitle = findInView(TextField.class).first();
         String originalTitle = firstTitle.getValue();
 
         // Simulate User B renaming the first task via the shared signal
@@ -183,7 +183,7 @@ class MUC06ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Get the first date picker
-        DatePicker firstDatePicker = $view(DatePicker.class).first();
+        DatePicker firstDatePicker = findInView(DatePicker.class).first();
         LocalDate newDate = LocalDate.of(2030, 12, 25);
 
         // Simulate User B changing the due date via the shared signal

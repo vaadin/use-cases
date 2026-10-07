@@ -1,7 +1,5 @@
 package com.example.usecase34;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -15,6 +13,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -32,7 +31,7 @@ import com.vaadin.flow.signals.Signal;
 @PageTitle("Use Case 34: Feature flag service")
 @Route(value = "use-case-34", layout = MainLayout.class)
 @Menu(order = 34, title = "UC 34: Feature flags")
-@PermitAll
+@AnonymousAllowed
 public class UseCase34View extends VerticalLayout {
 
     final FeatureFlagService flags;

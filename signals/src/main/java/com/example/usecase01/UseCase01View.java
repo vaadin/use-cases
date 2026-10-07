@@ -1,7 +1,5 @@
 package com.example.usecase01;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.concurrent.CompletableFuture;
 
 import com.example.views.MainLayout;
@@ -21,13 +19,14 @@ import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-01", layout = MainLayout.class)
 @PageTitle("Use Case 1: Dynamic Button State")
 @Menu(order = 1, title = "UC 1: Dynamic Button State")
-@PermitAll
+@AnonymousAllowed
 public class UseCase01View extends VerticalLayout {
 
     public enum SubmissionState {
@@ -137,9 +136,9 @@ public class UseCase01View extends VerticalLayout {
                 }));
 
         // Bind theme variant
-        submitButton.bindThemeVariant(ButtonVariant.LUMO_SUCCESS,
+        submitButton.bindThemeVariant(ButtonVariant.SUCCESS,
                 submissionStateSignal.map(SubmissionState.SUCCESS::equals));
-        submitButton.bindThemeVariant(ButtonVariant.LUMO_PRIMARY, Signal.not(
+        submitButton.bindThemeVariant(ButtonVariant.PRIMARY, Signal.not(
                 submissionStateSignal.map(SubmissionState.SUCCESS::equals)));
 
         submitButton.addClickListener(e -> {
@@ -164,8 +163,8 @@ public class UseCase01View extends VerticalLayout {
 
                         Notification notification = Notification
                                 .show("Account created successfully!");
-                        notification.addThemeVariants(
-                                NotificationVariant.LUMO_SUCCESS);
+                        notification
+                                .addThemeVariants(NotificationVariant.SUCCESS);
                         notification.setDuration(3000);
                     });
 

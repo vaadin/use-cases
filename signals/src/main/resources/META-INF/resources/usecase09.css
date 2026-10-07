@@ -1,0 +1,10 @@
+.usecase09-view {
+    .status-label {
+        color: orange;
+        font-weight: normal;
+    }
+    .status-label.is-valid {
+        color: green;
+        font-weight: bold;
+    }
+}

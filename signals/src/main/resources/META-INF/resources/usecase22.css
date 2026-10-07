@@ -1,0 +1,52 @@
+.usecase22-view {
+    .personal-section {
+        background-color: #e3f2fd;
+        border-radius: 8px;
+    }
+    .address-section {
+        background-color: #fff3e0;
+        border-radius: 8px;
+    }
+    .section-title {
+        margin-top: 0;
+    }
+    .full-name-label {
+        font-weight: bold;
+        color: var(--aura-accent-color);
+    }
+    .formatted-address-label {
+        font-weight: bold;
+        color: var(--aura-accent-color);
+        word-break: break-word;
+    }
+    .state-box {
+        background-color: #e8f5e9;
+        padding: 1.5em;
+        border-radius: 8px;
+        margin-top: 1em;
+    }
+    .state-display {
+        background-color: #f5f5f5;
+        padding: 1em;
+        border-radius: 4px;
+        overflow-x: auto;
+        font-size: 0.9em;
+    }
+    .info-box {
+        background-color: #e0f7fa;
+        padding: 1.5em;
+        border-radius: 8px;
+        margin-top: 1em;
+    }
+    .code-example {
+        background-color: #263238;
+        color: #aed581;
+        padding: 1em;
+        border-radius: 4px;
+        overflow-x: auto;
+        font-size: 0.85em;
+    }
+    .when-to-use {
+        margin-bottom: 0.5em;
+    }
+}

@@ -21,9 +21,9 @@ class NotificationGatingViewTest extends SpringBrowserlessTest {
     void viewRendersWithSubscribeAndSendButtons() {
         navigate(NotificationGatingView.class);
 
-        assertTrue($view(Button.class).all().stream().anyMatch(
+        assertTrue(findInView(Button.class).all().stream().anyMatch(
                 b -> "Enable browser notifications".equals(b.getText())));
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Send me a notification in 5 seconds"
                         .equals(b.getText())));
     }
@@ -48,7 +48,7 @@ class NotificationGatingViewTest extends SpringBrowserlessTest {
 
     private void assertLogContains(String fragment) {
         assertTrue(
-                $view(Div.class).all().stream()
+                findInView(Div.class).all().stream()
                         .anyMatch(d -> d.getText() != null
                                 && d.getText().contains(fragment)),
                 "expected delivery log to contain \"" + fragment + "\"");

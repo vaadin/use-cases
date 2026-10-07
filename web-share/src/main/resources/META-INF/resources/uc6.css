@@ -1,0 +1,10 @@
+.uc6-view {
+    .invite-code {
+        font-family: monospace;
+        font-size: 1.1rem;
+        padding: 0.25rem 0.6rem;
+        background: var(--vaadin-background-container);
+        border-radius: var(--vaadin-radius-s);
+        border: 1px solid var(--vaadin-border-color);
+    }
+}

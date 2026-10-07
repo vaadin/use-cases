@@ -1,0 +1,12 @@
+.uc21-view {
+    .preview {
+        font-family: monospace;
+        font-size: 0.9rem;
+        background: var(--vaadin-background-container);
+        border: 1px solid var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
+        padding: 0.75rem 1rem;
+        max-width: 32rem;
+        margin: 0;
+    }
+}

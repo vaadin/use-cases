@@ -22,7 +22,7 @@ class UseCase10ViewTest extends SpringBrowserlessTest {
     void viewRendersWithUploadComponent() {
         navigate(UseCase10View.class);
 
-        assertEquals(1, $view(Upload.class).all().size());
+        assertEquals(1, findInView(Upload.class).all().size());
     }
 
     @Test
@@ -30,7 +30,7 @@ class UseCase10ViewTest extends SpringBrowserlessTest {
         navigate(UseCase10View.class);
         runPendingSignalsTasks();
 
-        assertTrue($view(Paragraph.class).all().stream()
+        assertTrue(findInView(Paragraph.class).all().stream()
                 .anyMatch(p -> p.getText() != null && p.getText()
                         .contains("Idle — no upload in progress")));
     }
@@ -40,7 +40,7 @@ class UseCase10ViewTest extends SpringBrowserlessTest {
         navigate(UseCase10View.class);
         runPendingSignalsTasks();
 
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> "None pressed yet".equals(s.getText())));
     }
 
@@ -50,7 +50,7 @@ class UseCase10ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Initially light mode
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> "Light Mode".equals(s.getText())));
 
         // Simulate OS dark mode change via @ClientCallable
@@ -58,7 +58,7 @@ class UseCase10ViewTest extends SpringBrowserlessTest {
         view.onDarkModeChange(true);
         runPendingSignalsTasks();
 
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> "Dark Mode".equals(s.getText())));
     }
 
@@ -70,12 +70,12 @@ class UseCase10ViewTest extends SpringBrowserlessTest {
         UseCase10View view = (UseCase10View) getCurrentView();
         view.onDarkModeChange(true);
         runPendingSignalsTasks();
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> "Dark Mode".equals(s.getText())));
 
         view.onDarkModeChange(false);
         runPendingSignalsTasks();
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> "Light Mode".equals(s.getText())));
     }
 
@@ -85,7 +85,7 @@ class UseCase10ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Default summary should contain "Theme: light"
-        assertTrue($view(Paragraph.class).all().stream()
+        assertTrue(findInView(Paragraph.class).all().stream()
                 .anyMatch(p -> p.getText() != null
                         && p.getText().contains("Theme: light")));
 
@@ -94,7 +94,7 @@ class UseCase10ViewTest extends SpringBrowserlessTest {
         view.onDarkModeChange(true);
         runPendingSignalsTasks();
 
-        assertTrue($view(Paragraph.class).all().stream()
+        assertTrue(findInView(Paragraph.class).all().stream()
                 .anyMatch(p -> p.getText() != null
                         && p.getText().contains("Theme: dark")));
     }
@@ -104,7 +104,7 @@ class UseCase10ViewTest extends SpringBrowserlessTest {
         navigate(UseCase10View.class);
         runPendingSignalsTasks();
 
-        assertTrue($view(Paragraph.class).all().stream()
+        assertTrue(findInView(Paragraph.class).all().stream()
                 .anyMatch(p -> p.getText() != null
                         && p.getText().contains("Upload:")
                         && p.getText().contains("Shortcut:")

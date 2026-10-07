@@ -19,10 +19,11 @@ public class HomeView extends BaseHomeView {
 
     public HomeView() {
         super("Web Share API — use cases",
-                "Each card below exercises one use case of Page#share(...) and "
-                        + "Page#shareSupportSignal(). The signal reports "
-                        + "SUPPORTED, UNSUPPORTED, or UNKNOWN, and share() "
-                        + "invokes the browser's native share sheet on "
+                "Each card below exercises one use case of "
+                        + "WebShare.onClick(button).share(...) and "
+                        + "WebShare.supportSignal(). The signal reports "
+                        + "SUPPORTED, UNSUPPORTED, or UNKNOWN, and the bound "
+                        + "share invokes the browser's native share sheet on "
                         + "platforms that expose navigator.share (most "
                         + "mobile browsers and recent desktop Safari/Edge).");
 

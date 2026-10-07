@@ -1,7 +1,5 @@
 package com.example.muc02;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
@@ -12,6 +10,7 @@ import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -21,6 +20,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 
@@ -38,7 +38,8 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @Route(value = "muc-02", layout = MainLayout.class)
 @PageTitle("Multi-User Case 2: Collaborative Cursors")
 @Menu(order = 51, title = "MUC 2: Collaborative Cursors")
-@PermitAll
+@StyleSheet("muc02.css")
+@AnonymousAllowed
 public class MUC02View extends VerticalLayout {
 
     private final String currentUser;
@@ -51,16 +52,12 @@ public class MUC02View extends VerticalLayout {
     public MUC02View(CurrentUserSignal currentUserSignal,
             MUC02Signals muc02Signals,
             UserSessionRegistry userSessionRegistry) {
-        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .peek();
-        if (userInfo == null || !userInfo.isAuthenticated()) {
-            throw new IllegalStateException(
-                    "User must be authenticated to access this view");
-        }
-        this.currentUser = userInfo.getUsername();
+        this.currentUser = currentUserSignal.getUserSignal().peek()
+                .getUsername();
         this.muc02Signals = muc02Signals;
         this.userSessionRegistry = userSessionRegistry;
 
+        addClassName("muc02-view");
         setSpacing(true);
         setPadding(true);
 
@@ -75,15 +72,11 @@ public class MUC02View extends VerticalLayout {
         Div canvas = new Div();
         canvas.setId("cursor-canvas");
         canvas.setWidthFull();
-        canvas.getStyle().set("position", "relative")
-                .set("background-color", "#f5f5f5")
-                .set("outline", "2px solid #e0e0e0").set("border-radius", "4px")
-                .set("height", "400px").set("margin", "1em 0")
-                .set("cursor", "crosshair");
+        canvas.addClassName("cursor-canvas");
 
         // Add cursor indicators for all users
         Div cursorsContainer = new Div();
-        cursorsContainer.getStyle().set("position", "relative");
+        cursorsContainer.addClassName("cursors-container");
         canvas.add(cursorsContainer);
 
         // Render cursor indicators for all users
@@ -110,8 +103,7 @@ public class MUC02View extends VerticalLayout {
         // Current users list (cursor tracking)
         H3 usersTitle = new H3("Cursor Tracking");
         Div usersList = new Div();
-        usersList.getStyle().set("background-color", "#e3f2fd")
-                .set("padding", "1em").set("border-radius", "4px");
+        usersList.addClassName("users-list");
 
         // Display cursor positions per session - reactive
         usersList.bindChildren(
@@ -124,9 +116,7 @@ public class MUC02View extends VerticalLayout {
 
         // Info box
         Div infoBox = new Div();
-        infoBox.getStyle().set("background-color", "#fff3e0")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-top", "1em").set("font-style", "italic");
+        infoBox.addClassName("info-box");
         infoBox.add(new Paragraph(
                 "💡 Each user's cursor position is stored in a SharedValueSignal in a shared Map. "
                         + "All users read all signals to display cursor indicators. This pattern enables "
@@ -189,25 +179,23 @@ public class MUC02View extends VerticalLayout {
         userItem.setAlignItems(
                 com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
         userItem.setWidthFull();
-        userItem.getStyle().set("margin-bottom", "0.5em");
+        userItem.addClassName("cursor-list-item");
 
         Div colorDot = new Div();
-        colorDot.getStyle().set("width", "12px").set("height", "12px")
-                .set("border-radius", "50%").set("background-color", userColor)
-                .set("flex-shrink", "0");
+        colorDot.addClassName("color-dot");
+        // Per-user color is dynamic — keep inline
+        colorDot.getStyle().set("background-color", userColor);
 
         ColoredAvatar avatar = new ColoredAvatar(username, userColor, 32);
 
         Div userLabel = new Div();
         userLabel
                 .bindText(userSessionRegistry.getDisplayNameSignal(sessionKey));
-        userLabel.getStyle().set("font-weight", "500");
+        userLabel.addClassName("user-label");
 
         Div positionLabel = new Div(
                 positionSignal.map(MUC02Signals.CursorPosition::toString));
-        positionLabel.getStyle().set("font-family", "monospace")
-                .set("color", "var(--vaadin-text-color-secondary)")
-                .set("margin-left", "auto");
+        positionLabel.addClassName("position-label");
 
         userItem.add(colorDot, avatar, userLabel, positionLabel);
         return userItem;
@@ -219,12 +207,9 @@ public class MUC02View extends VerticalLayout {
         String userColor = buildColorMap().getOrDefault(sessionKey, "#9E9E9E");
 
         Div cursorIndicator = new Div();
-        cursorIndicator.getStyle().set("position", "absolute")
-                .set("width", "20px").set("height", "20px")
-                .set("background-color", userColor).set("border-radius", "50%")
-                .set("border", "2px solid white").set("pointer-events", "none")
-                .set("transform", "translate(-50%, -50%)")
-                .set("z-index", "1000");
+        cursorIndicator.addClassName("cursor-indicator");
+        // Per-user color is dynamic — keep inline
+        cursorIndicator.getStyle().set("background-color", userColor);
 
         cursorIndicator.getStyle().bind("left", positionSignal
                 .map(pos -> pos != null ? pos.x() + "px" : "0px"));
@@ -233,11 +218,9 @@ public class MUC02View extends VerticalLayout {
 
         Div label = new Div();
         label.bindText(userSessionRegistry.getDisplayNameSignal(sessionKey));
-        label.getStyle().set("position", "absolute").set("top", "25px")
-                .set("left", "0").set("white-space", "nowrap")
-                .set("background-color", userColor).set("color", "white")
-                .set("padding", "2px 6px").set("border-radius", "3px")
-                .set("font-size", "0.75em");
+        label.addClassName("cursor-indicator-label");
+        // Per-user color is dynamic — keep inline
+        label.getStyle().set("background-color", userColor);
 
         cursorIndicator.add(label);
         return cursorIndicator;

@@ -1,0 +1,83 @@
+.usecase24-view {
+    .count-label {
+        color: var(--vaadin-text-color-secondary);
+    }
+    .unread-badge {
+        background-color: var(--aura-accent-color);
+        color: white;
+        padding: 0.25em 0.75em;
+        border-radius: 1em;
+        font-size: var(--aura-font-size-s);
+        font-weight: bold;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 2em;
+        color: var(--vaadin-text-color-secondary);
+        font-style: italic;
+    }
+    .info-box {
+        background-color: #e0f7fa;
+        padding: 1em;
+        border-radius: 4px;
+        margin-top: 1em;
+        font-style: italic;
+    }
+    .notification-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 1em;
+        padding: 1em;
+        margin: 0.25em 0;
+        border-radius: 8px;
+    }
+    .notification-card.is-read {
+        background-color: #fafafa;
+    }
+    .notification-card.is-unread {
+        background-color: #e3f2fd;
+    }
+    .notification-icon {
+        flex-shrink: 0;
+        margin-top: 0.15em;
+    }
+    .notification-content {
+        flex-grow: 1;
+        min-width: 0;
+    }
+    .notification-title-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.25em;
+    }
+    .notification-title {
+        font-weight: normal;
+    }
+    .notification-title.is-unread {
+        font-weight: bold;
+    }
+    .type-badge {
+        color: white;
+        padding: 0.1em 0.5em;
+        border-radius: 0.75em;
+        font-size: var(--aura-font-size-xs);
+        margin-left: 0.5em;
+    }
+    .notification-message {
+        color: var(--vaadin-text-color-secondary);
+        font-size: var(--aura-font-size-s);
+        display: block;
+        margin-bottom: 0.5em;
+    }
+    .notification-timestamp {
+        color: var(--vaadin-text-color-secondary);
+        font-size: var(--aura-font-size-xs);
+        display: block;
+    }
+    .notification-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25em;
+        flex-shrink: 0;
+    }
+}

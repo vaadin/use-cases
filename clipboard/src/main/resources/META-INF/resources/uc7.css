@@ -1,16 +1,10 @@
 .uc7-view {
-    .availability-status {
-        padding: var(--aura-space-s);
-        border-radius: var(--aura-border-radius-m);
+    .file-log {
+        font-family: monospace;
+        white-space: pre-wrap;
+        padding: 8px;
+        background: #f4f4f4;
         display: block;
-        background: var(--aura-contrast-5pct);
-    }
-
-    .availability-status.available {
-        background: var(--aura-success-color-10pct);
-    }
-
-    .availability-status.unsupported {
-        background: var(--aura-error-color-10pct);
+        border-radius: 4px;
     }
 }

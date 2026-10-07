@@ -1,0 +1,11 @@
+.uc4-view {
+    .copy-target {
+        padding: 1rem 1.5rem;
+        background: var(--vaadin-background-container);
+        border: 1px dashed var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
+        width: fit-content;
+        cursor: pointer;
+        user-select: none;
+    }
+}

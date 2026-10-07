@@ -24,12 +24,12 @@ class RefreshStaleDataViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // The card shows a 4-decimal exchange rate.
-        assertTrue($view(Span.class).all().stream().anyMatch(s -> {
+        assertTrue(findInView(Span.class).all().stream().anyMatch(s -> {
             String t = s.getText();
             return t != null && t.matches("\\d+\\.\\d{4}");
         }), "rate value should be rendered as 0.0000-style number");
 
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Refresh now".equals(b.getText())));
     }
 
@@ -38,7 +38,7 @@ class RefreshStaleDataViewTest extends SpringBrowserlessTest {
         navigate(RefreshStaleDataView.class);
         runPendingSignalsTasks();
 
-        Span before = $view(Span.class).all().stream()
+        Span before = findInView(Span.class).all().stream()
                 .filter(s -> s.getText() != null
                         && s.getText().matches("\\d+\\.\\d{4}"))
                 .findFirst().orElseThrow();
@@ -48,7 +48,7 @@ class RefreshStaleDataViewTest extends SpringBrowserlessTest {
         // value (the random walk has a 50% chance per click of changing
         // direction, but the value differs from the previous one with very
         // high probability after a few clicks).
-        Button refresh = $view(Button.class).all().stream()
+        Button refresh = findInView(Button.class).all().stream()
                 .filter(b -> "Refresh now".equals(b.getText())).findFirst()
                 .orElseThrow();
         for (int i = 0; i < 10; i++) {
@@ -56,7 +56,7 @@ class RefreshStaleDataViewTest extends SpringBrowserlessTest {
             runPendingSignalsTasks();
         }
 
-        Span after = $view(Span.class).all().stream()
+        Span after = findInView(Span.class).all().stream()
                 .filter(s -> s.getText() != null
                         && s.getText().matches("\\d+\\.\\d{4}"))
                 .findFirst().orElseThrow();

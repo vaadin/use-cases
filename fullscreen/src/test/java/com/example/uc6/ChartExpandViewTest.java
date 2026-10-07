@@ -1,16 +1,16 @@
 package com.example.uc6;
 
+import com.example.FullscreenTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.example.FullscreenTestSupport;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.fullscreen.FullscreenState;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.page.FullscreenState;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,16 +23,14 @@ class ChartExpandViewTest extends SpringBrowserlessTest {
     void viewRendersWithThreeChartCardsAndExpandButtons() {
         navigate(ChartExpandView.class);
 
-        assertTrue($view(H1.class).all().stream()
-                .anyMatch(h -> "UC6 — Chart expand-to-fullscreen"
-                        .equals(h.getText())));
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h -> "UC6 — Chart expand-to-fullscreen".equals(h.getText())));
 
-        long chartCardCount = $view(Div.class).all().stream()
-                .filter(d -> d.getClassNames().contains("chart-card"))
-                .count();
+        long chartCardCount = findInView(Div.class).all().stream()
+                .filter(d -> d.getClassNames().contains("chart-card")).count();
         assertEquals(3, chartCardCount, "expected three chart cards");
 
-        long expandButtons = $view(Button.class).all().stream()
+        long expandButtons = findInView(Button.class).all().stream()
                 .filter(b -> "Expand".equals(b.getText())).count();
         assertEquals(3, expandButtons, "expected one Expand button per card");
     }
@@ -48,7 +46,7 @@ class ChartExpandViewTest extends SpringBrowserlessTest {
         // Click the Expand button next to the "Conversion" card. The middle
         // Expand button corresponds to it (cards are added in CHART_TITLES
         // order: Visitors, Conversion, Revenue).
-        Button conversionExpand = $view(Button.class).all().stream()
+        Button conversionExpand = findInView(Button.class).all().stream()
                 .filter(b -> "Expand".equals(b.getText())).skip(1).findFirst()
                 .orElseThrow();
         test(conversionExpand).click();
@@ -62,7 +60,7 @@ class ChartExpandViewTest extends SpringBrowserlessTest {
         navigate(ChartExpandView.class);
         runPendingSignalsTasks();
 
-        Button visitorsExpand = $view(Button.class).all().stream()
+        Button visitorsExpand = findInView(Button.class).all().stream()
                 .filter(b -> "Expand".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(visitorsExpand).click();
@@ -73,7 +71,8 @@ class ChartExpandViewTest extends SpringBrowserlessTest {
         // the open session as EXITED_BY_USER on the way back out.
         FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
         runPendingSignalsTasks();
-        FullscreenTestSupport.setFullscreenState(FullscreenState.NOT_FULLSCREEN);
+        FullscreenTestSupport
+                .setFullscreenState(FullscreenState.NOT_FULLSCREEN);
         runPendingSignalsTasks();
 
         assertExpandedTitles();
@@ -86,12 +85,11 @@ class ChartExpandViewTest extends SpringBrowserlessTest {
     private void assertExpandedTitles(String... titles) {
         java.util.Set<String> expected = java.util.Set.of(titles);
         java.util.Set<String> actual = new java.util.LinkedHashSet<>();
-        for (Div card : $view(Div.class).all().stream()
+        for (Div card : findInView(Div.class).all().stream()
                 .filter(d -> d.getClassNames().contains("chart-card"))
                 .toList()) {
             if (card.getClassNames().contains("expanded")) {
-                card.getChildren()
-                        .flatMap(c -> c.getChildren())
+                card.getChildren().flatMap(c -> c.getChildren())
                         .filter(c -> c instanceof Span)
                         .map(c -> ((Span) c).getText()).findFirst()
                         .ifPresent(actual::add);

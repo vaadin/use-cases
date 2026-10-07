@@ -1,7 +1,5 @@
 package com.example.usecase27;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -11,20 +9,21 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 /**
  * Use Case 27: Router state as a signal.
  * <p>
  * Demonstrates {@code UI.routerStateSignal()}: a read-only signal carrying the
  * current navigation target, location and route parameters. The breadcrumb in
- * {@link UseCase27Layout} is wired to that signal via {@code Signal.effect},
- * so it updates without an {@code AfterNavigationObserver} or manual seeding
- * on attach.
+ * {@link UseCase27Layout} is wired to that signal via {@code Signal.effect}, so
+ * it updates without an {@code AfterNavigationObserver} or manual seeding on
+ * attach.
  */
 @Route(value = "use-case-27", layout = UseCase27Layout.class)
 @PageTitle("Use Case 27: Router State Signal")
 @Menu(order = 27, title = "UC 27: Router State Signal")
-@PermitAll
+@AnonymousAllowed
 public class UseCase27View extends VerticalLayout {
 
     public UseCase27View() {

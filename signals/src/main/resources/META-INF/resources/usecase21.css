@@ -1,0 +1,17 @@
+.usecase21-view {
+    .card {
+        background-color: color-mix(in srgb, var(--vaadin-text-color) 5%, transparent);
+        border-radius: 8px;
+        padding: 1.5em;
+        margin-bottom: 1em;
+    }
+    .row-label {
+        font-weight: bold;
+    }
+    .locale-code {
+        font-family: monospace;
+        background-color: color-mix(in srgb, var(--vaadin-text-color) 10%, transparent);
+        padding: 0.25em 0.5em;
+        border-radius: 4px;
+    }
+}

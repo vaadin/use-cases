@@ -9,7 +9,7 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.page.WebShareSupport;
+import com.vaadin.flow.component.webshare.WebShareSupport;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -25,9 +25,9 @@ class ShareInviteLinkViewTest extends SpringBrowserlessTest {
     void viewRendersHeadingAndPlaceholders() {
         navigate(ShareInviteLinkView.class);
 
-        assertTrue($view(H1.class).all().stream().anyMatch(
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
                 h -> "UC6 — Share an invite link".equals(h.getText())));
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> "—".equals(s.getText())));
     }
 
@@ -39,8 +39,7 @@ class ShareInviteLinkViewTest extends SpringBrowserlessTest {
         clickGenerate();
         String first = view.currentCode();
         assertNotNull(first);
-        assertEquals(8, first.length(),
-                "expected 8-char code, was: " + first);
+        assertEquals(8, first.length(), "expected 8-char code, was: " + first);
     }
 
     @Test
@@ -81,14 +80,14 @@ class ShareInviteLinkViewTest extends SpringBrowserlessTest {
     }
 
     private void clickGenerate() {
-        Button generate = $view(Button.class).all().stream()
+        Button generate = findInView(Button.class).all().stream()
                 .filter(b -> "Generate invite".equals(b.getText())).findFirst()
                 .orElseThrow();
         generate.click();
     }
 
     private void assertShareButtonEnabled(boolean expected) {
-        Button share = $view(Button.class).all().stream()
+        Button share = findInView(Button.class).all().stream()
                 .filter(b -> "Share invite".equals(b.getText())).findFirst()
                 .orElseThrow();
         if (expected) {

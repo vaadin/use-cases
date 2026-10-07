@@ -1,0 +1,143 @@
+/* Component#requestFullscreen() moves the kiosk stage out of the view into
+   the UI's fullscreen wrapper, so rules for the stage and everything inside
+   it must not be scoped under .uc5-view — they would stop matching while the
+   kiosk is live. Only elements that never leave the view (the activity log)
+   are nested at the bottom. .unexpected-warning is used both in the view's
+   controls row and inside the staff panel, so it stays top-level too. */
+.kiosk-stage {
+    width: 100%;
+    min-height: 360px;
+    border-radius: var(--vaadin-radius-m);
+    background: linear-gradient(135deg, #0e1a2b 0%, #1a3358 100%);
+    color: white;
+    max-width: 960px;
+    overflow: hidden;
+    transition: background 300ms;
+}
+
+.kiosk-stage.live {
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(135deg, #02141a 0%, #053b48 100%);
+    max-width: none;
+    border-radius: 0;
+}
+
+.kiosk-shell {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 360px;
+    box-sizing: border-box;
+}
+
+.kiosk-stage.live .kiosk-shell {
+    min-height: 100vh;
+}
+
+.kiosk-header {
+    padding: 0.75rem 1.25rem;
+    background: rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
+}
+
+.kiosk-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+}
+
+.kiosk-staff-btn {
+    color: white;
+    background: transparent;
+}
+
+.kiosk-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    box-sizing: border-box;
+}
+
+.kiosk-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    text-align: center;
+    color: white;
+    width: 100%;
+    max-width: 480px;
+}
+
+/* Headings inherit a dark color from the platform theme; force them to be
+   readable on the kiosk's dark gradient. */
+.kiosk-panel h2,
+.kiosk-panel h3,
+.kiosk-panel p {
+    margin: 0;
+    color: white;
+}
+
+.kiosk-panel h2 {
+    font-size: 1.75rem;
+}
+
+.kiosk-stage.live .kiosk-panel h2 {
+    font-size: 2.5rem;
+}
+
+/* Lighten Vaadin input field labels and helpers so they stay legible
+   against the dark kiosk surface. The field's own input area keeps its
+   light background and dark value text — only the surrounding labels need
+   to flip. */
+.kiosk-panel vaadin-text-field,
+.kiosk-panel vaadin-password-field,
+.kiosk-panel vaadin-select {
+    --vaadin-input-field-label-color: rgba(255, 255, 255, 0.92);
+    --vaadin-input-field-helper-color: rgba(255, 255, 255, 0.7);
+    --vaadin-input-field-required-indicator-color:
+        rgba(255, 255, 255, 0.85);
+}
+
+.kiosk-staff-panel {
+    background: rgba(0, 0, 0, 0.35);
+    padding: 1.5rem;
+    border-radius: var(--vaadin-radius-m);
+}
+
+.kiosk-staff-hint {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.unexpected-warning {
+    color: var(--aura-red-text);
+    font-weight: 600;
+}
+
+.uc5-view {
+    .kiosk-log {
+        font-family: monospace;
+        font-size: 0.85rem;
+        background: var(--vaadin-background-container);
+        border: 1px solid var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
+        padding: 0.5rem 0.75rem;
+        max-height: 220px;
+        max-width: 720px;
+        overflow-y: auto;
+    }
+
+    .kiosk-log > div {
+        padding: 0.1rem 0;
+        border-bottom: 1px dashed var(--vaadin-border-color);
+    }
+
+    .kiosk-log > div:last-child {
+        border-bottom: none;
+    }
+}

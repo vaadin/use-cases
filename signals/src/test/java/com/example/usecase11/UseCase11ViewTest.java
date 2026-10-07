@@ -21,7 +21,7 @@ class UseCase11ViewTest extends SpringBrowserlessTest {
     @Test
     void viewRendersWithSplitLayout() {
         navigate(UseCase11View.class);
-        assertEquals(1, $view(SplitLayout.class).all().size());
+        assertEquals(1, findInView(SplitLayout.class).all().size());
     }
 
     @Test
@@ -31,14 +31,14 @@ class UseCase11ViewTest extends SpringBrowserlessTest {
 
         // Initial size from sizeSignal is (0, 0) which is small (< 400px)
         // until the ResizeObserver reports the actual size from the browser
-        assertTrue(
-                $view(H3.class).all().stream().anyMatch(h -> h.getText() != null
+        assertTrue(findInView(H3.class).all().stream()
+                .anyMatch(h -> h.getText() != null
                         && h.getText().contains("Small Width Layout")));
-        assertFalse(
-                $view(H3.class).all().stream().anyMatch(h -> h.getText() != null
+        assertFalse(findInView(H3.class).all().stream()
+                .anyMatch(h -> h.getText() != null
                         && h.getText().contains("Medium Width Layout")));
-        assertFalse(
-                $view(H3.class).all().stream().anyMatch(h -> h.getText() != null
+        assertFalse(findInView(H3.class).all().stream()
+                .anyMatch(h -> h.getText() != null
                         && h.getText().contains("Large Width Layout")));
     }
 }

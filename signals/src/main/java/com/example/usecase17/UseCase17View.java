@@ -1,7 +1,5 @@
 package com.example.usecase17;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
@@ -12,6 +10,7 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -22,6 +21,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -42,7 +42,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-17", layout = MainLayout.class)
 @PageTitle("Use Case 17: Custom PC Builder")
 @Menu(order = 17, title = "UC 17: PC Builder (70 signals)")
-@PermitAll
+@StyleSheet("usecase17.css")
+@AnonymousAllowed
 public class UseCase17View extends VerticalLayout {
 
     // ==================== Signal Declarations (~70 total) ====================
@@ -131,6 +132,7 @@ public class UseCase17View extends VerticalLayout {
             true);
 
     public UseCase17View() {
+        addClassName("usecase17-view");
         setSpacing(true);
         setPadding(true);
         setWidthFull();
@@ -473,9 +475,7 @@ public class UseCase17View extends VerticalLayout {
 
         // Signal count display
         Div signalCountBox = new Div();
-        signalCountBox.getStyle().set("background-color", "#e0f7fa")
-                .set("padding", "0.75em").set("border-radius", "4px")
-                .set("margin-bottom", "1em").set("font-size", "0.9em");
+        signalCountBox.addClassName("signal-count-box");
         signalCountBox.add(new Span(
                 "📊 Active Signals: 12 component selections + 40+ computed values + 15 compatibility checks + 8 performance metrics = ~70 total signals"));
 
@@ -509,7 +509,7 @@ public class UseCase17View extends VerticalLayout {
         resetButton.addThemeName("tertiary");
 
         Button addToCartButton = new Button("Add to Cart");
-        addToCartButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        addToCartButton.addThemeVariants(ButtonVariant.PRIMARY);
         addToCartButton.bindEnabled(canBuildSignal);
 
         Signal<String> cartButtonText = Signal.computed(() -> {
@@ -533,7 +533,7 @@ public class UseCase17View extends VerticalLayout {
         column.setPadding(false);
 
         H3 header = new H3("Component Selection");
-        header.getStyle().set("margin-top", "0");
+        header.addClassName("column-header");
 
         column.add(header);
         column.add(createComponentSelector("CPU", PCData.ALL_CPUS, cpuSignal));
@@ -570,12 +570,10 @@ public class UseCase17View extends VerticalLayout {
         column.setPadding(false);
 
         H3 header = new H3("Build Summary");
-        header.getStyle().set("margin-top", "0");
+        header.addClassName("column-header");
 
         Div summary = new Div();
-        summary.getStyle().set("background-color", "#f5f5f5")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("font-size", "0.9em");
+        summary.addClassName("summary-box");
 
         ListSignal<Component> selectedComponentsSignal = new ListSignal<>();
 
@@ -615,26 +613,24 @@ public class UseCase17View extends VerticalLayout {
         column.setPadding(false);
 
         H3 header = new H3("Statistics");
-        header.getStyle().set("margin-top", "0");
+        header.addClassName("column-header");
 
         // Price box
         Div priceBox = createStatBox("Total Price",
                 totalPriceSignal
                         .map(p -> "$" + p.setScale(0, RoundingMode.HALF_UP)),
-                "#e8f5e9");
+                "price-box");
 
         // Power box
         Div powerBox = new Div();
-        powerBox.getStyle().set("background-color", "#fff3e0")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-bottom", "0.5em");
+        powerBox.addClassName("stat-box");
+        powerBox.addClassName("power-box");
 
         Span powerLabel = new Span("Power Consumption");
-        powerLabel.getStyle().set("display", "block").set("font-weight", "bold")
-                .set("margin-bottom", "0.5em");
+        powerLabel.addClassName("stat-label");
 
         Span powerValue = new Span(totalPowerSignal.map(p -> p + "W total"));
-        powerValue.getStyle().set("display", "block");
+        powerValue.addClassName("power-value");
 
         Signal<String> psuStatusText = Signal.computed(() -> {
             PSU psu = psuSignal.get();
@@ -647,37 +643,35 @@ public class UseCase17View extends VerticalLayout {
                             : "⚠ Insufficient");
         });
         Span psuStatus = new Span(psuStatusText);
-        psuStatus.getStyle().set("display", "block");
+        psuStatus.addClassName("power-value");
 
         powerBox.add(powerLabel, powerValue, psuStatus);
 
-        // Compatibility box
+        // Compatibility box (color depends on compatibility signal)
         Div compatBox = createStatBox("Compatibility",
-                compatibilityCheckCountSignal
-                        .map(count -> count + "/13 checks passing"),
-                allCompatibleSignal.map(ok -> ok ? "#e8f5e9" : "#ffebee"));
+                compatibilityCheckCountSignal.map(
+                        count -> count + "/13 checks passing"),
+                "compat-box");
+        compatBox.getClassNames().bind("is-ok", allCompatibleSignal);
 
         // Performance box
         Div perfBox = new Div();
-        perfBox.getStyle().set("background-color", "#e3f2fd")
-                .set("padding", "1em").set("border-radius", "4px");
+        perfBox.addClassName("stat-box");
+        perfBox.addClassName("perf-box");
 
         Span perfLabel = new Span("Performance");
-        perfLabel.getStyle().set("display", "block").set("font-weight", "bold")
-                .set("margin-bottom", "0.5em");
+        perfLabel.addClassName("stat-label");
 
         Span perfRating = new Span(performanceRatingSignal);
-        perfRating.getStyle().set("display", "block").set("font-size", "1.2em")
-                .set("color", "var(--aura-accent-color)");
+        perfRating.addClassName("perf-rating");
 
         Span perfGaming = new Span(
                 gamingScoreSignal.map(s -> "Gaming: " + s + "/100"));
-        perfGaming.getStyle().set("display", "block").set("font-size", "0.9em");
+        perfGaming.addClassName("perf-detail");
 
         Span perfBottleneck = new Span(
                 bottleneckSignal.map(b -> "Bottleneck: " + b));
-        perfBottleneck.getStyle().set("display", "block").set("font-size",
-                "0.9em");
+        perfBottleneck.addClassName("perf-detail");
 
         perfBox.add(perfLabel, perfRating, perfGaming, perfBottleneck);
 
@@ -686,35 +680,16 @@ public class UseCase17View extends VerticalLayout {
     }
 
     private Div createStatBox(String label, Signal<String> valueSignal,
-            String bgColor) {
+            String variantClass) {
         Div box = new Div();
-        box.getStyle().set("background-color", bgColor).set("padding", "1em")
-                .set("border-radius", "4px").set("margin-bottom", "0.5em");
+        box.addClassName("stat-box");
+        box.addClassName(variantClass);
 
         Span labelSpan = new Span(label);
-        labelSpan.getStyle().set("display", "block").set("font-weight", "bold")
-                .set("margin-bottom", "0.5em");
+        labelSpan.addClassName("stat-label");
 
         Span valueSpan = new Span(valueSignal);
-        valueSpan.getStyle().set("display", "block").set("font-size", "1.2em");
-
-        box.add(labelSpan, valueSpan);
-        return box;
-    }
-
-    private Div createStatBox(String label, Signal<String> valueSignal,
-            Signal<String> bgColorSignal) {
-        Div box = new Div();
-        box.getStyle().bind("background-color", bgColorSignal);
-        box.getStyle().set("padding", "1em").set("border-radius", "4px")
-                .set("margin-bottom", "0.5em");
-
-        Span labelSpan = new Span(label);
-        labelSpan.getStyle().set("display", "block").set("font-weight", "bold")
-                .set("margin-bottom", "0.5em");
-
-        Span valueSpan = new Span(valueSignal);
-        valueSpan.getStyle().set("display", "block").set("font-size", "1.2em");
+        valueSpan.addClassName("stat-value");
 
         box.add(labelSpan, valueSpan);
         return box;
@@ -722,12 +697,10 @@ public class UseCase17View extends VerticalLayout {
 
     private Div buildCompatibilitySection() {
         Div section = new Div();
-        section.getStyle().set("background-color", "#f5f5f5")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-top", "1em");
+        section.addClassName("compatibility-section");
 
         H3 header = new H3("Compatibility Checks");
-        header.getStyle().set("margin-top", "0");
+        header.addClassName("column-header");
 
         Div checksContainer = new Div();
 
@@ -776,16 +749,14 @@ public class UseCase17View extends VerticalLayout {
 
     private Div createComponentSummaryItem(ValueSignal<Component> compSignal) {
         Div item = new Div();
-        item.getStyle().set("margin-bottom", "0.5em").set("display", "flex")
-                .set("justify-content", "space-between");
+        item.addClassName("component-summary-item");
 
         Span name = new Span(() -> compSignal.get().getName());
-        name.getStyle().set("flex", "1");
+        name.addClassName("component-summary-name");
 
         Span price = new Span(() -> "$" + compSignal.get().getPrice()
                 .setScale(0, RoundingMode.HALF_UP));
-        price.getStyle().set("font-weight", "bold").set("color",
-                "var(--aura-accent-color)");
+        price.addClassName("component-summary-price");
 
         item.add(name, price);
         return item;
@@ -793,8 +764,7 @@ public class UseCase17View extends VerticalLayout {
 
     private Div createCompatibilityCheckDiv(ValueSignal<String> statusSignal) {
         Div checkDiv = new Div();
-        checkDiv.getStyle().set("padding", "0.25em 0").set("font-size",
-                "0.9em");
+        checkDiv.addClassName("compatibility-check-row");
         checkDiv.getElement().bindProperty("innerHTML", statusSignal, null);
         return checkDiv;
     }

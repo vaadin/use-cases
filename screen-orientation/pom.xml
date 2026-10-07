@@ -11,13 +11,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <!-- Use the named per-PR snapshot, matching the pattern other
-             modules in this repo follow. Switch to a release version once
-             vaadin/flow#23620 has merged. -->
-        <flow.version>25.2.screen-orientation-SNAPSHOT</flow.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.example</groupId>

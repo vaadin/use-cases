@@ -1,7 +1,5 @@
 package com.example.usecase28;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Random;
@@ -12,6 +10,7 @@ import com.example.usecase28.LogEntry.Severity;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -21,6 +20,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -39,7 +39,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 28: Server log viewer")
 @Route(value = "use-case-28", layout = MainLayout.class)
 @Menu(order = 28, title = "UC 28: Server log viewer")
-@PermitAll
+@AnonymousAllowed
+@StyleSheet("usecase28.css")
 public class UseCase28View extends VerticalLayout {
 
     private static final int MAX_ROWS = 20;
@@ -57,6 +58,7 @@ public class UseCase28View extends VerticalLayout {
 
     public UseCase28View(SchedulerService schedulerService) {
         setSpacing(true);
+        addClassName("usecase28-view");
         setPadding(true);
 
         add(new H2("Use Case 28: Server log viewer"), new Paragraph(

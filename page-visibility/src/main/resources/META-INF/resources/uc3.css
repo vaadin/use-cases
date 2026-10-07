@@ -1,0 +1,21 @@
+.uc3-view {
+    .notification-log {
+        font-family: monospace;
+        font-size: 0.85rem;
+        background: var(--vaadin-background-container);
+        border: 1px solid var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
+        padding: 0.5rem 0.75rem;
+        max-height: 220px;
+        overflow-y: auto;
+
+        > div {
+            padding: 0.1rem 0;
+            border-bottom: 1px dashed var(--vaadin-border-color);
+        }
+
+        > div:last-child {
+            border-bottom: none;
+        }
+    }
+}

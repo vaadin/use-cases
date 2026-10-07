@@ -1,0 +1,17 @@
+.usecase20-view {
+    .color-tile {
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        border: 1px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent);
+        min-width: 180px;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+    .color-tile-text {
+        margin: 0;
+        font-weight: 500;
+    }
+}

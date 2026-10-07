@@ -21,7 +21,7 @@ class SelectionToolbarViewTest extends SpringBrowserlessTest {
     void viewRenders() {
         navigate(SelectionToolbarView.class);
 
-        assertTrue($view(H1.class).all().stream().anyMatch(h -> h.getText()
+        assertTrue(findInView(H1.class).all().stream().anyMatch(h -> h.getText()
                 .equals("UC7 — Selection-driven transform toolbar")));
     }
 
@@ -30,13 +30,13 @@ class SelectionToolbarViewTest extends SpringBrowserlessTest {
         navigate(SelectionToolbarView.class);
         runPendingSignalsTasks();
 
-        Button upper = $(Button.class).withText("UPPERCASE").single();
-        Button lower = $(Button.class).withText("lowercase").single();
+        Button upper = find(Button.class).withText("UPPERCASE").single();
+        Button lower = find(Button.class).withText("lowercase").single();
         assertFalse(upper.isEnabled(),
                 "no selection: button should be disabled");
         assertFalse(lower.isEnabled());
 
-        TextArea editor = $(TextArea.class).single();
+        TextArea editor = find(TextArea.class).single();
         TextSelectionTestSupport.setSelection(editor, 0, 5);
         runPendingSignalsTasks();
 
@@ -48,13 +48,13 @@ class SelectionToolbarViewTest extends SpringBrowserlessTest {
     @Test
     void uppercaseTransformsTheSelection() {
         navigate(SelectionToolbarView.class);
-        TextArea editor = $(TextArea.class).single();
+        TextArea editor = find(TextArea.class).single();
 
         // Select "Click" (first 5 chars)
         TextSelectionTestSupport.setSelection(editor, 0, 5);
         runPendingSignalsTasks();
 
-        Button upper = $(Button.class).withText("UPPERCASE").single();
+        Button upper = find(Button.class).withText("UPPERCASE").single();
         test(upper).click();
         runPendingSignalsTasks();
 
@@ -65,11 +65,11 @@ class SelectionToolbarViewTest extends SpringBrowserlessTest {
     @Test
     void quoteTransformWrapsTheSelection() {
         navigate(SelectionToolbarView.class);
-        TextArea editor = $(TextArea.class).single();
+        TextArea editor = find(TextArea.class).single();
         TextSelectionTestSupport.setSelection(editor, 0, 5);
         runPendingSignalsTasks();
 
-        test($(Button.class).withText("\"Quote\"").single()).click();
+        test(find(Button.class).withText("\"Quote\"").single()).click();
         runPendingSignalsTasks();
 
         assertTrue(editor.getValue().startsWith("\"Click\""),

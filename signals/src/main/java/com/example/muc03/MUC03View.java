@@ -1,7 +1,5 @@
 package com.example.muc03;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.Random;
 
 import com.example.security.CurrentUserSignal;
@@ -14,6 +12,7 @@ import org.jspecify.annotations.Nullable;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -25,6 +24,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -40,7 +40,8 @@ import com.vaadin.flow.signals.Signal;
 @Route(value = "muc-03", layout = MainLayout.class)
 @PageTitle("Multi-User Case 3: Click Game")
 @Menu(order = 52, title = "MUC 3: Click Race Game")
-@PermitAll
+@StyleSheet("muc03.css")
+@AnonymousAllowed
 public class MUC03View extends VerticalLayout {
 
     private final String currentUser;
@@ -53,16 +54,12 @@ public class MUC03View extends VerticalLayout {
     public MUC03View(CurrentUserSignal currentUserSignal,
             MUC03Signals muc03Signals,
             UserSessionRegistry userSessionRegistry) {
-        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .peek();
-        if (userInfo == null || !userInfo.isAuthenticated()) {
-            throw new IllegalStateException(
-                    "User must be authenticated to access this view");
-        }
-        this.currentUser = userInfo.getUsername();
+        this.currentUser = currentUserSignal.getUserSignal().peek()
+                .getUsername();
         this.muc03Signals = muc03Signals;
         this.userSessionRegistry = userSessionRegistry;
 
+        addClassName("muc03-view");
         setSpacing(true);
         setPadding(true);
 
@@ -75,25 +72,20 @@ public class MUC03View extends VerticalLayout {
 
         // Round status
         Div roundStatus = new Div();
-        roundStatus.getStyle().set("font-size", "1.2em")
-                .set("font-weight", "bold").set("margin-bottom", "0.5em");
+        roundStatus.addClassName("round-status");
         roundStatus.bindText(muc03Signals.getRoundNumberSignal()
                 .map(round -> round == 0 ? "Click START to begin"
                         : "Round " + round));
 
         Div clicksStatus = new Div();
-        clicksStatus.getStyle().set("font-size", "1em").set("color",
-                "var(--vaadin-text-color-secondary)");
+        clicksStatus.addClassName("clicks-status");
         clicksStatus.bindText(muc03Signals.getClicksRemainingSignal().map(
                 clicks -> clicks > 0 ? "Targets remaining: " + clicks : ""));
 
         // Game area
         Div gameArea = new Div();
         gameArea.setWidthFull();
-        gameArea.getStyle().set("position", "relative")
-                .set("background-color", "#f5f5f5")
-                .set("border", "2px solid #e0e0e0").set("border-radius", "4px")
-                .set("height", "300px").set("margin", "1em 0");
+        gameArea.addClassName("game-area");
 
         // Target button
         Button targetButton = new Button("CLICK ME!", event -> {
@@ -101,8 +93,7 @@ public class MUC03View extends VerticalLayout {
         });
         targetButton.addThemeName("primary");
         targetButton.addThemeName("large");
-        targetButton.getStyle().set("position", "absolute").set("z-index",
-                "10");
+        targetButton.addClassName("target-button");
 
         // Bind button text to show clicks remaining
         targetButton.bindText(muc03Signals.getClicksRemainingSignal()
@@ -140,8 +131,7 @@ public class MUC03View extends VerticalLayout {
         // Leaderboard
         H3 leaderboardTitle = new H3("Leaderboard");
         Div leaderboardDiv = new Div();
-        leaderboardDiv.getStyle().set("background-color", "#e3f2fd")
-                .set("padding", "1em").set("border-radius", "4px");
+        leaderboardDiv.addClassName("leaderboard");
 
         // Bind leaderboard display - sorted by score descending
         leaderboardDiv
@@ -158,9 +148,7 @@ public class MUC03View extends VerticalLayout {
 
         // Info box
         Div infoBox = new Div();
-        infoBox.getStyle().set("background-color", "#fff3e0")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-top", "1em").set("font-style", "italic");
+        infoBox.addClassName("info-box");
         infoBox.add(new Paragraph(
                 "💡 This demonstrates atomic operations and conflict resolution in multi-user scenarios. "
                         + "Each round has 5 targets that appear with random delays (500-2000ms) at random positions. "
@@ -241,18 +229,16 @@ public class MUC03View extends VerticalLayout {
         item.setSpacing(true);
         item.setAlignItems(
                 com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-        item.getStyle().set("padding", "0.5em")
-                .set("background-color",
-                        isCurrentSession ? "#fff3e0" : "transparent")
-                .set("border-radius", "4px")
-                .set("font-weight", isCurrentSession ? "bold" : "normal");
+        item.addClassName("leaderboard-item");
+        if (isCurrentSession) {
+            item.addClassName("current-session");
+        }
 
         Image avatar = new Image(MainLayout.getProfilePicturePath(username),
                 "");
         avatar.setWidth("32px");
         avatar.setHeight("32px");
-        avatar.getStyle().set("border-radius", "50%").set("object-fit",
-                "cover");
+        avatar.addClassName("leaderboard-avatar");
 
         Span nameLabel = new Span();
         nameLabel.bindText(Signal.computed(() -> String.format("%s: %d points",

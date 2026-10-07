@@ -1,0 +1,10 @@
+.uc10-view {
+    .highlight-target {
+        padding: 1.5rem 2rem;
+        border: 1px solid var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
+        width: fit-content;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+}

@@ -26,7 +26,7 @@ class UseCase23ViewTest extends SpringBrowserlessTest {
     void viewRendersWithBoard() {
         navigate(UseCase23View.class);
 
-        assertEquals(1, $view(Board.class).all().size());
+        assertEquals(1, findInView(Board.class).all().size());
     }
 
     @Test
@@ -36,9 +36,9 @@ class UseCase23ViewTest extends SpringBrowserlessTest {
 
         // 4 highlight cards with H2 titles: "Current users", "View events",
         // "Conversion rate", "Custom metric"
-        assertTrue($view(H2.class).all().stream()
+        assertTrue(findInView(H2.class).all().stream()
                 .anyMatch(h -> "Current users".equals(h.getText())));
-        assertTrue($view(H2.class).all().stream()
+        assertTrue(findInView(H2.class).all().stream()
                 .anyMatch(h -> "View events".equals(h.getText())));
     }
 
@@ -48,7 +48,7 @@ class UseCase23ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Grid for service health should be present
-        assertTrue($view(Grid.class).all().size() >= 1);
+        assertTrue(findInView(Grid.class).all().size() >= 1);
     }
 
     @Test
@@ -56,7 +56,7 @@ class UseCase23ViewTest extends SpringBrowserlessTest {
         navigate(UseCase23View.class);
         runPendingSignalsTasks();
 
-        UseCase23View view = $view(UseCase23View.class).first();
+        UseCase23View view = findInView(UseCase23View.class).first();
 
         // Push data update with known values
         view.onDataUpdate(createTestData(42, 1500, 3.5, 99));
@@ -64,7 +64,7 @@ class UseCase23ViewTest extends SpringBrowserlessTest {
 
         // "Current users" card should show "42"
         assertTrue(
-                $view(Span.class).all().stream()
+                findInView(Span.class).all().stream()
                         .anyMatch(s -> "42".equals(s.getText())),
                 "Expected a Span with text '42' for current users");
     }
@@ -74,7 +74,7 @@ class UseCase23ViewTest extends SpringBrowserlessTest {
         navigate(UseCase23View.class);
         runPendingSignalsTasks();
 
-        UseCase23View view = $view(UseCase23View.class).first();
+        UseCase23View view = findInView(UseCase23View.class).first();
 
         // First update: baseline
         view.onDataUpdate(createTestData(100, 1000, 2.0, 50));
@@ -86,7 +86,7 @@ class UseCase23ViewTest extends SpringBrowserlessTest {
 
         // Should show "+100.0" in the percentage badge
         assertTrue(
-                $view(Span.class).all().stream()
+                findInView(Span.class).all().stream()
                         .anyMatch(s -> s.getText() != null
                                 && s.getText().contains("+100.0")),
                 "Expected percentage badge showing +100.0");

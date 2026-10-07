@@ -23,7 +23,7 @@ class UseCase14ViewTest extends SpringBrowserlessTest {
     void viewRendersWithLoadButton() {
         navigate(UseCase14View.class);
 
-        assertTrue($view(Button.class).all().stream().anyMatch(
+        assertTrue(findInView(Button.class).all().stream().anyMatch(
                 b -> "Generate Analytics Report".equals(b.getText())));
     }
 
@@ -31,7 +31,7 @@ class UseCase14ViewTest extends SpringBrowserlessTest {
     void viewRendersWithErrorToggle() {
         navigate(UseCase14View.class);
 
-        assertTrue($view(Checkbox.class).all().stream()
+        assertTrue(findInView(Checkbox.class).all().stream()
                 .anyMatch(c -> "Simulate Error".equals(c.getLabel())));
     }
 
@@ -40,7 +40,7 @@ class UseCase14ViewTest extends SpringBrowserlessTest {
         navigate(UseCase14View.class);
         runPendingSignalsTasks();
 
-        Button loadButton = $view(Button.class).all().stream()
+        Button loadButton = findInView(Button.class).all().stream()
                 .filter(b -> "Generate Analytics Report".equals(b.getText()))
                 .findFirst().orElseThrow();
         assertTrue(loadButton.isEnabled());
@@ -52,7 +52,7 @@ class UseCase14ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Idle message should be visible
-        assertTrue($view(Paragraph.class).all().stream()
+        assertTrue(findInView(Paragraph.class).all().stream()
                 .anyMatch(p -> p.getText() != null
                         && p.getText().contains("Generate Analytics Report")));
     }
@@ -62,7 +62,7 @@ class UseCase14ViewTest extends SpringBrowserlessTest {
         navigate(UseCase14View.class);
         runPendingSignalsTasks();
 
-        Button loadButton = $view(Button.class).all().stream()
+        Button loadButton = findInView(Button.class).all().stream()
                 .filter(b -> "Generate Analytics Report".equals(b.getText()))
                 .findFirst().orElseThrow();
         test(loadButton).click();
@@ -72,7 +72,7 @@ class UseCase14ViewTest extends SpringBrowserlessTest {
         assertFalse(loadButton.isEnabled());
 
         // Loading ProgressBar should be visible
-        assertTrue($view(ProgressBar.class).all().stream()
+        assertTrue(findInView(ProgressBar.class).all().stream()
                 .anyMatch(ProgressBar::isIndeterminate));
     }
 
@@ -81,7 +81,7 @@ class UseCase14ViewTest extends SpringBrowserlessTest {
         navigate(UseCase14View.class);
         runPendingSignalsTasks();
 
-        Checkbox errorCheckbox = $view(Checkbox.class).all().stream()
+        Checkbox errorCheckbox = findInView(Checkbox.class).all().stream()
                 .filter(c -> "Simulate Error".equals(c.getLabel())).findFirst()
                 .orElseThrow();
 

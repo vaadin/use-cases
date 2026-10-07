@@ -1,0 +1,35 @@
+.uc5-view {
+    .uc5-error-log {
+        font-family: monospace;
+        font-size: 0.85rem;
+        background: var(--vaadin-background-container);
+        border: 1px solid var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
+        padding: 0.5rem 0.75rem;
+        max-height: 220px;
+        overflow-y: auto;
+        width: 100%;
+        max-width: 720px;
+    }
+
+    .uc5-error-log > div {
+        padding: 0.15rem 0;
+        border-bottom: 1px dashed var(--vaadin-border-color);
+    }
+
+    .uc5-error-log > div:last-child {
+        border-bottom: none;
+    }
+
+    .uc5-error-log .ok {
+        color: var(--aura-blue-text);
+    }
+
+    .uc5-error-log .err {
+        color: var(--aura-red-text);
+    }
+
+    .uc5-actions {
+        flex-wrap: wrap;
+    }
+}

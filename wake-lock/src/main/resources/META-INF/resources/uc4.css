@@ -1,0 +1,14 @@
+.uc4-view {
+    .timer-clock {
+        font-size: 3rem;
+        font-family: monospace;
+        font-weight: 600;
+    }
+
+    .timer-phase {
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--vaadin-text-color-secondary);
+    }
+}

@@ -22,10 +22,10 @@ class UseCase04ViewTest extends SpringBrowserlessTest {
     void viewRendersWithFilterAndGrid() {
         navigate(UseCase04View.class);
 
-        assertEquals(1, $view(ComboBox.class).all().size());
-        assertEquals(1, $view(TextField.class).all().size());
-        assertEquals(1, $view(Checkbox.class).all().size());
-        assertEquals(1, $view(Grid.class).all().size());
+        assertEquals(1, findInView(ComboBox.class).all().size());
+        assertEquals(1, findInView(TextField.class).all().size());
+        assertEquals(1, findInView(Checkbox.class).all().size());
+        assertEquals(1, findInView(Grid.class).all().size());
     }
 
     @SuppressWarnings("unchecked")
@@ -34,7 +34,7 @@ class UseCase04ViewTest extends SpringBrowserlessTest {
         navigate(UseCase04View.class);
         runPendingSignalsTasks();
 
-        Grid<Product> grid = $view(Grid.class).single();
+        Grid<Product> grid = findInView(Grid.class).single();
         assertEquals(10, test(grid).size());
     }
 
@@ -44,11 +44,11 @@ class UseCase04ViewTest extends SpringBrowserlessTest {
         navigate(UseCase04View.class);
         runPendingSignalsTasks();
 
-        ComboBox<String> categoryFilter = $view(ComboBox.class).single();
+        ComboBox<String> categoryFilter = findInView(ComboBox.class).single();
         test(categoryFilter).selectItem("Electronics");
         runPendingSignalsTasks();
 
-        Grid<Product> grid = $view(Grid.class).single();
+        Grid<Product> grid = findInView(Grid.class).single();
         assertEquals(3, test(grid).size());
     }
 
@@ -58,11 +58,11 @@ class UseCase04ViewTest extends SpringBrowserlessTest {
         navigate(UseCase04View.class);
         runPendingSignalsTasks();
 
-        TextField searchField = $view(TextField.class).single();
+        TextField searchField = findInView(TextField.class).single();
         test(searchField).setValue("laptop");
         runPendingSignalsTasks();
 
-        Grid<Product> grid = $view(Grid.class).single();
+        Grid<Product> grid = findInView(Grid.class).single();
         assertEquals(1, test(grid).size());
     }
 
@@ -72,11 +72,11 @@ class UseCase04ViewTest extends SpringBrowserlessTest {
         navigate(UseCase04View.class);
         runPendingSignalsTasks();
 
-        Checkbox inStockCheckbox = $view(Checkbox.class).single();
+        Checkbox inStockCheckbox = findInView(Checkbox.class).single();
         test(inStockCheckbox).click();
         runPendingSignalsTasks();
 
-        Grid<Product> grid = $view(Grid.class).single();
+        Grid<Product> grid = findInView(Grid.class).single();
         // P003 (stock=0) and P005 (stock=0) excluded -> 8 items
         assertEquals(8, test(grid).size());
     }
@@ -87,14 +87,14 @@ class UseCase04ViewTest extends SpringBrowserlessTest {
         navigate(UseCase04View.class);
         runPendingSignalsTasks();
 
-        ComboBox<String> categoryFilter = $view(ComboBox.class).single();
+        ComboBox<String> categoryFilter = findInView(ComboBox.class).single();
         test(categoryFilter).selectItem("Electronics");
 
-        Checkbox inStockCheckbox = $view(Checkbox.class).single();
+        Checkbox inStockCheckbox = findInView(Checkbox.class).single();
         test(inStockCheckbox).click();
         runPendingSignalsTasks();
 
-        Grid<Product> grid = $view(Grid.class).single();
+        Grid<Product> grid = findInView(Grid.class).single();
         // Electronics: Laptop(15), Mouse(0), Keyboard(8) -> in-stock: 2
         assertEquals(2, test(grid).size());
     }
@@ -105,15 +105,15 @@ class UseCase04ViewTest extends SpringBrowserlessTest {
         navigate(UseCase04View.class);
         runPendingSignalsTasks();
 
-        TextField searchField = $view(TextField.class).single();
+        TextField searchField = findInView(TextField.class).single();
         test(searchField).setValue("laptop");
         runPendingSignalsTasks();
         assertEquals(1,
-                test((Grid<Product>) $view(Grid.class).single()).size());
+                test((Grid<Product>) findInView(Grid.class).single()).size());
 
         test(searchField).setValue("");
         runPendingSignalsTasks();
         assertEquals(10,
-                test((Grid<Product>) $view(Grid.class).single()).size());
+                test((Grid<Product>) findInView(Grid.class).single()).size());
     }
 }

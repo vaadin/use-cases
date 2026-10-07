@@ -1,0 +1,57 @@
+/* Component#requestFullscreen() moves the editor pane out of the view into
+   the UI's fullscreen wrapper, so rules for the pane and everything inside
+   it (editor area, footer, stats) must not be scoped under .uc3-view — they
+   would stop matching while fullscreen. Only elements that never leave the
+   view are nested below. */
+.editor-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 720px;
+    transition: max-width 200ms;
+}
+
+.editor-pane.fullscreen {
+    max-width: none;
+    width: 100%;
+    /* 100vh, not 100% — while fullscreen the pane's parent is the UI
+       wrapper, which has no defined height. */
+    height: 100vh;
+    padding: 1.5rem;
+    box-sizing: border-box;
+    background: var(--vaadin-background-base);
+}
+
+.editor-area {
+    width: 100%;
+    min-height: 220px;
+    transition: min-height 200ms;
+}
+
+.editor-area.fullscreen {
+    flex: 1;
+    min-height: 0;
+    font-size: 1.15rem;
+}
+
+.editor-pane-footer {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.editor-stats {
+    margin-left: auto;
+    color: var(--vaadin-text-color-secondary);
+    font-size: 0.85rem;
+}
+
+.uc3-view {
+    .editor-toolbar {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+}

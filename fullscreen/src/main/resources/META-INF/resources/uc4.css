@@ -1,0 +1,38 @@
+.uc4-view {
+    .dashboard {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        max-width: 960px;
+    }
+
+    .dashboard.compact {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard.spacious {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .metric-card {
+        padding: 1rem 1.25rem;
+        border: 1px solid var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
+        background: var(--vaadin-background-container);
+    }
+
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 600;
+    }
+
+    .metric-label {
+        color: var(--vaadin-text-color-secondary);
+        font-size: 0.85rem;
+    }
+
+    .density-aside {
+        color: var(--vaadin-text-color-secondary);
+        font-size: 0.85rem;
+    }
+}

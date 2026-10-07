@@ -23,8 +23,8 @@ class UseCase18ViewTest extends SpringBrowserlessTest {
         navigate(UseCase18View.class);
         runPendingSignalsTasks();
 
-        assertEquals(1, $view(MessageList.class).all().size());
-        assertEquals(1, $view(MessageInput.class).all().size());
+        assertEquals(1, findInView(MessageList.class).all().size());
+        assertEquals(1, findInView(MessageInput.class).all().size());
     }
 
     @SuppressWarnings("unchecked")
@@ -33,7 +33,7 @@ class UseCase18ViewTest extends SpringBrowserlessTest {
         navigate(UseCase18View.class);
         runPendingSignalsTasks();
 
-        Grid<Task> grid = $view(Grid.class).single();
+        Grid<Task> grid = findInView(Grid.class).single();
         assertEquals(3, test(grid).size());
     }
 
@@ -64,7 +64,7 @@ class UseCase18ViewTest extends SpringBrowserlessTest {
         assertEquals(Task.TaskStatus.DONE, unitTestSignal.peek().status());
 
         // Verify the grid reflects the change
-        Grid<Task> grid = $view(Grid.class).single();
+        Grid<Task> grid = findInView(Grid.class).single();
         boolean found = false;
         for (int i = 0; i < test(grid).size(); i++) {
             Task task = test(grid).getRow(i);

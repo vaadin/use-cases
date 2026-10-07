@@ -1,0 +1,25 @@
+/* Shared paste-target styling for UC5 / UC7 drop zones. The element is
+   a focusable Div whose role is "the place Ctrl+V lands in". */
+.drop-zone {
+    border: 2px dashed #b0b8c0;
+    padding: 24px;
+    text-align: center;
+    border-radius: 8px;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 120ms, background-color 120ms;
+}
+
+/* `paste` fires on the focused element, so make the focus state visually
+   obvious — otherwise the user can't tell whether Ctrl+V will land here
+   or somewhere else on the page. The Aura accent tokens are defined at
+   :root in this build; the spacing / contrast tokens are not, so the
+   rest of the rule sticks to literal values. */
+.drop-zone:focus {
+    outline: none;
+    border-style: solid;
+    border-color: var(--aura-accent-color);
+    background: var(--aura-accent-surface);
+}

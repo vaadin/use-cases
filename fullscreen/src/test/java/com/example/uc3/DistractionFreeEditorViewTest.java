@@ -1,15 +1,15 @@
 package com.example.uc3;
 
+import com.example.FullscreenTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.example.FullscreenTestSupport;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.fullscreen.FullscreenState;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.page.FullscreenState;
 import com.vaadin.flow.component.textfield.TextArea;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -23,14 +23,14 @@ class DistractionFreeEditorViewTest extends SpringBrowserlessTest {
     void viewRendersWithEditorAndExpandButton() {
         navigate(DistractionFreeEditorView.class);
 
-        assertTrue($view(H1.class).all().stream().anyMatch(h -> h.getText()
-                .equals("UC3 — Distraction-free editor")));
-        assertTrue(!$view(TextArea.class).all().isEmpty());
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h -> h.getText().equals("UC3 — Distraction-free editor")));
+        assertTrue(!findInView(TextArea.class).all().isEmpty());
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Expand to fullscreen".equals(b.getText())));
         // Done is bindVisible(fullscreen), so it is hidden (and not surfaced
-        // by $view) while the page is not fullscreen.
-        assertFalse($view(Button.class).all().stream()
+        // by findInView) while the page is not fullscreen.
+        assertFalse(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Done".equals(b.getText())));
     }
 
@@ -41,14 +41,17 @@ class DistractionFreeEditorViewTest extends SpringBrowserlessTest {
 
         FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
         runPendingSignalsTasks();
-        assertTrue($view(Button.class).all().stream()
-                .anyMatch(b -> "Done".equals(b.getText())),
+        assertTrue(
+                findInView(Button.class).all().stream()
+                        .anyMatch(b -> "Done".equals(b.getText())),
                 "Done button should be visible while fullscreen");
 
-        FullscreenTestSupport.setFullscreenState(FullscreenState.NOT_FULLSCREEN);
+        FullscreenTestSupport
+                .setFullscreenState(FullscreenState.NOT_FULLSCREEN);
         runPendingSignalsTasks();
-        assertFalse($view(Button.class).all().stream()
-                .anyMatch(b -> "Done".equals(b.getText())),
+        assertFalse(
+                findInView(Button.class).all().stream()
+                        .anyMatch(b -> "Done".equals(b.getText())),
                 "Done button should hide again when leaving fullscreen");
     }
 
@@ -57,12 +60,12 @@ class DistractionFreeEditorViewTest extends SpringBrowserlessTest {
         navigate(DistractionFreeEditorView.class);
         runPendingSignalsTasks();
 
-        TextArea editor = $view(TextArea.class).all().getFirst();
+        TextArea editor = findInView(TextArea.class).single();
         test(editor).setValue("hello world this is fullscreen");
         runPendingSignalsTasks();
 
         assertTrue(
-                $view(Span.class).all().stream()
+                findInView(Span.class).all().stream()
                         .anyMatch(s -> "5 words".equals(s.getText())),
                 "word count should report 5 words after typing");
     }
@@ -84,7 +87,7 @@ class DistractionFreeEditorViewTest extends SpringBrowserlessTest {
     }
 
     private void assertBadgeContains(String fragment) {
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> s.getClassNames().contains("status-badge")
                         && s.getText() != null
                         && s.getText().contains(fragment)),

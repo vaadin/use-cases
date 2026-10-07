@@ -11,6 +11,7 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -35,6 +36,7 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @Menu(order = 2, title = "UC2 — Presence")
+@StyleSheet("uc2.css")
 public class PresenceAvatarsView extends VerticalLayout {
 
     private static final List<String> ANIMALS = List.of("Otter", "Falcon",
@@ -56,6 +58,7 @@ public class PresenceAvatarsView extends VerticalLayout {
                 + (100 + rnd.nextInt(900));
         this.color = COLORS.get(rnd.nextInt(COLORS.size()));
 
+        addClassName("uc2-view");
         add(new H1("UC2 — Presence avatars"));
         add(new Paragraph("Open this page in two or more browsers. Each "
                 + "tab gets a random colour and animal name. Hide a tab "
@@ -66,8 +69,9 @@ public class PresenceAvatarsView extends VerticalLayout {
         Span youLabel = new Span("Joined as ");
         Span youName = new Span(name);
         youName.addClassName("presence-you-name");
-        // Dynamic per-instance color is kept as an inline custom property.
-        youName.getStyle().set("color", color);
+        // Dynamic per-instance color is fed to the CSS rule as a custom
+        // property — the .presence-you-name rule consumes var(--you-color).
+        youName.getStyle().set("--you-color", color);
         Div youRow = new Div(youLabel, youName);
 
         H2 strip = new H2("In the room");

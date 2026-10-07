@@ -1,0 +1,47 @@
+.uc19-view {
+    .pickers {
+        gap: 1.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .picker-label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: flex-start;
+    }
+
+    .picker-label .label {
+        font-family: monospace;
+        font-size: 0.85rem;
+        color: var(--vaadin-text-color-secondary);
+    }
+
+    .color-picker {
+        width: 48px;
+        height: 36px;
+        padding: 0;
+        border: 1px solid var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
+        cursor: pointer;
+    }
+
+    .target {
+        margin-top: 1.5rem;
+        /* Stretch to the parent flex container; otherwise the target
+           collapses to its content's intrinsic width and the picker-event
+           fallback (getBoundingClientRect on the target) would always
+           land in the "narrow" breakpoint. */
+        width: 100%;
+        height: 240px;
+        border-radius: var(--vaadin-radius-l);
+        border: 1px solid var(--vaadin-border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.5);
+        transition: background-color 200ms;
+    }
+}

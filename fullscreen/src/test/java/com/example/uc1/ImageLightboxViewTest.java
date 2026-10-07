@@ -1,15 +1,15 @@
 package com.example.uc1;
 
+import com.example.FullscreenTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.example.FullscreenTestSupport;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.fullscreen.FullscreenState;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.page.FullscreenState;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,10 +22,10 @@ class ImageLightboxViewTest extends SpringBrowserlessTest {
     void viewRendersWithHeadingAndThumbnails() {
         navigate(ImageLightboxView.class);
 
-        assertTrue($view(H1.class).all().stream()
+        assertTrue(findInView(H1.class).all().stream()
                 .anyMatch(h -> "UC1 — Image lightbox".equals(h.getText())));
 
-        long thumbCount = $view(Div.class).all().stream()
+        long thumbCount = findInView(Div.class).all().stream()
                 .filter(d -> d.getClassNames().contains("lightbox-thumb"))
                 .count();
         assertEquals(6, thumbCount, "expected one thumb per photo");
@@ -36,15 +36,16 @@ class ImageLightboxViewTest extends SpringBrowserlessTest {
         navigate(ImageLightboxView.class);
         runPendingSignalsTasks();
 
-        Div ocean = $view(Div.class).all().stream()
+        Div ocean = findInView(Div.class).all().stream()
                 .filter(d -> d.getClassNames().contains("lightbox-thumb"))
                 .filter(d -> "Ocean".equals(d.getText())).findFirst()
                 .orElseThrow();
         test(ocean).click();
         runPendingSignalsTasks();
 
-        assertTrue($view(Span.class).all().stream()
-                .anyMatch(s -> "Ocean".equals(s.getText())),
+        assertTrue(
+                findInView(Span.class).all().stream()
+                        .anyMatch(s -> "Ocean".equals(s.getText())),
                 "selected name should update on thumbnail click");
     }
 
@@ -55,7 +56,8 @@ class ImageLightboxViewTest extends SpringBrowserlessTest {
 
         assertBadgeContains("Detecting");
 
-        FullscreenTestSupport.setFullscreenState(FullscreenState.NOT_FULLSCREEN);
+        FullscreenTestSupport
+                .setFullscreenState(FullscreenState.NOT_FULLSCREEN);
         runPendingSignalsTasks();
         assertBadgeContains("Click a thumbnail");
 
@@ -71,11 +73,10 @@ class ImageLightboxViewTest extends SpringBrowserlessTest {
     }
 
     private void assertBadgeContains(String fragment) {
-        assertTrue(
-                $view(Span.class).all().stream()
-                        .anyMatch(s -> s.getClassNames().contains("status-badge")
-                                && s.getText() != null
-                                && s.getText().contains(fragment)),
+        assertTrue(findInView(Span.class).all().stream()
+                .anyMatch(s -> s.getClassNames().contains("status-badge")
+                        && s.getText() != null
+                        && s.getText().contains(fragment)),
                 "expected status badge to contain \"" + fragment + "\"");
     }
 }

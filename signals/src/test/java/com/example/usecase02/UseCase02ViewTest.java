@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @WithMockUser
 class UseCase02ViewTest extends SpringBrowserlessTest {
 
-    // $view() only returns VISIBLE components. Hidden sections' children
+    // findInView() only returns VISIBLE components. Hidden sections' children
     // are not found. We test visibility by checking component presence.
 
     @Test
@@ -29,8 +29,8 @@ class UseCase02ViewTest extends SpringBrowserlessTest {
 
         // Only needsVisa checkbox visible; visa type ComboBox is in hidden
         // section
-        assertEquals(1, $view(Checkbox.class).all().size());
-        assertFalse($view(ComboBox.class).all().stream()
+        assertEquals(1, findInView(Checkbox.class).all().size());
+        assertFalse(findInView(ComboBox.class).all().stream()
                 .anyMatch(c -> "Visa Type".equals(c.getLabel())));
     }
 
@@ -38,26 +38,26 @@ class UseCase02ViewTest extends SpringBrowserlessTest {
     void checkingVisaShowsVisaSection() {
         navigate(UseCase02View.class);
 
-        test($view(Checkbox.class).single()).click();
+        test(findInView(Checkbox.class).single()).click();
         runPendingSignalsTasks();
 
         // Visa type ComboBox now visible (in visaSection)
-        assertTrue($view(ComboBox.class).all().stream()
+        assertTrue(findInView(ComboBox.class).all().stream()
                 .anyMatch(c -> "Visa Type".equals(c.getLabel())));
         // H1B section also visible (default type is H1B)
         // -> hasH1BPreviouslyCheckbox visible
-        assertEquals(2, $view(Checkbox.class).all().size());
+        assertEquals(2, findInView(Checkbox.class).all().size());
     }
 
     @Test
     void h1bFieldsVisibleWhenVisaCheckedAndH1BSelected() {
         navigate(UseCase02View.class);
 
-        test($view(Checkbox.class).single()).click();
+        test(findInView(Checkbox.class).single()).click();
         runPendingSignalsTasks();
 
         // H1B is default -> "Specialty Occupation" field should be visible
-        assertTrue($view(TextField.class).all().stream()
+        assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "Specialty Occupation".equals(f.getLabel())));
     }
 
@@ -65,11 +65,11 @@ class UseCase02ViewTest extends SpringBrowserlessTest {
     void previousH1BFieldsHiddenByDefault() {
         navigate(UseCase02View.class);
 
-        test($view(Checkbox.class).single()).click();
+        test(findInView(Checkbox.class).single()).click();
         runPendingSignalsTasks();
 
         // hasH1BPreviously is false -> previous employer fields hidden
-        assertFalse($view(TextField.class).all().stream()
+        assertFalse(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "Previous Employer".equals(f.getLabel())));
     }
 
@@ -78,20 +78,20 @@ class UseCase02ViewTest extends SpringBrowserlessTest {
         navigate(UseCase02View.class);
 
         // Check needsVisa
-        test($view(Checkbox.class).single()).click();
+        test(findInView(Checkbox.class).single()).click();
         runPendingSignalsTasks();
 
         // Check hasH1BPreviously
-        Checkbox hasH1BPreviously = $view(Checkbox.class).all().stream()
+        Checkbox hasH1BPreviously = findInView(Checkbox.class).all().stream()
                 .filter(c -> c.getLabel().contains("H1-B")).findFirst()
                 .orElseThrow();
         test(hasH1BPreviously).click();
         runPendingSignalsTasks();
 
         // Previous employer fields now visible
-        assertTrue($view(TextField.class).all().stream()
+        assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "Previous Employer".equals(f.getLabel())));
-        assertTrue($view(TextField.class).all().stream().anyMatch(
+        assertTrue(findInView(TextField.class).all().stream().anyMatch(
                 f -> "Previous Petition Number".equals(f.getLabel())));
     }
 
@@ -100,11 +100,11 @@ class UseCase02ViewTest extends SpringBrowserlessTest {
     void l1FieldsVisibleWhenL1Selected() {
         navigate(UseCase02View.class);
 
-        test($view(Checkbox.class).single()).click();
+        test(findInView(Checkbox.class).single()).click();
         runPendingSignalsTasks();
 
         // Change visa type to L1
-        ComboBox<VisaType> visaTypeSelect = (ComboBox<VisaType>) $view(
+        ComboBox<VisaType> visaTypeSelect = (ComboBox<VisaType>) findInView(
                 ComboBox.class).all().stream()
                 .filter(c -> "Visa Type".equals(c.getLabel())).findFirst()
                 .orElseThrow();
@@ -112,9 +112,9 @@ class UseCase02ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // L1 fields visible, H1B fields hidden
-        assertTrue($view(TextField.class).all().stream()
+        assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "Parent Company Name".equals(f.getLabel())));
-        assertFalse($view(TextField.class).all().stream()
+        assertFalse(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "Specialty Occupation".equals(f.getLabel())));
     }
 
@@ -123,17 +123,17 @@ class UseCase02ViewTest extends SpringBrowserlessTest {
     void o1FieldsVisibleWhenO1Selected() {
         navigate(UseCase02View.class);
 
-        test($view(Checkbox.class).single()).click();
+        test(findInView(Checkbox.class).single()).click();
         runPendingSignalsTasks();
 
-        ComboBox<VisaType> visaTypeSelect = (ComboBox<VisaType>) $view(
+        ComboBox<VisaType> visaTypeSelect = (ComboBox<VisaType>) findInView(
                 ComboBox.class).all().stream()
                 .filter(c -> "Visa Type".equals(c.getLabel())).findFirst()
                 .orElseThrow();
         test(visaTypeSelect).selectItem("O1");
         runPendingSignalsTasks();
 
-        assertTrue($view(TextField.class).all().stream().anyMatch(
+        assertTrue(findInView(TextField.class).all().stream().anyMatch(
                 f -> "Field of Extraordinary Ability".equals(f.getLabel())));
     }
 
@@ -142,21 +142,21 @@ class UseCase02ViewTest extends SpringBrowserlessTest {
         navigate(UseCase02View.class);
 
         // Check visa
-        test($view(Checkbox.class).single()).click();
+        test(findInView(Checkbox.class).single()).click();
         runPendingSignalsTasks();
-        assertTrue($view(ComboBox.class).all().size() > 0);
+        assertTrue(findInView(ComboBox.class).all().size() > 0);
 
         // Uncheck visa
-        Checkbox needsVisa = $view(Checkbox.class).all().stream()
+        Checkbox needsVisa = findInView(Checkbox.class).all().stream()
                 .filter(c -> c.getLabel().contains("visa sponsorship"))
                 .findFirst().orElseThrow();
         test(needsVisa).click();
         runPendingSignalsTasks();
 
         // No ComboBoxes visible (visa type is hidden)
-        assertFalse($view(ComboBox.class).all().stream()
+        assertFalse(findInView(ComboBox.class).all().stream()
                 .anyMatch(c -> "Visa Type".equals(c.getLabel())));
         // Only 1 checkbox remains visible
-        assertEquals(1, $view(Checkbox.class).all().size());
+        assertEquals(1, findInView(Checkbox.class).all().size());
     }
 }

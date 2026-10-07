@@ -30,7 +30,7 @@ class PresenceAvatarsViewTest extends SpringBrowserlessTest {
         assertEquals(1, registry.size(),
                 "the visiting user should be the sole presence");
         assertTrue(
-                $view(H2.class).all().stream()
+                findInView(H2.class).all().stream()
                         .anyMatch(h -> "In the room".equals(h.getText())),
                 "view should render the 'In the room' heading");
     }
@@ -54,7 +54,7 @@ class PresenceAvatarsViewTest extends SpringBrowserlessTest {
         PageVisibilityTestSupport.setPageVisibility(PageVisibility.VISIBLE);
         runPendingSignalsTasks();
 
-        ColoredAvatar avatar = $view(ColoredAvatar.class).all().stream()
+        ColoredAvatar avatar = findInView(ColoredAvatar.class).all().stream()
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("no avatar rendered"));
         assertTrue(

@@ -11,13 +11,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <!-- Web Share API support lives on the feature/web-share branch of
-             vaadin/flow (PR #24325); override flow.version to pull that
-             build while leaving vaadin.version on the regular release. -->
-        <flow.version>25.2.web-share-SNAPSHOT</flow.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.example</groupId>

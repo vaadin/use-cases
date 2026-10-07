@@ -1,0 +1,22 @@
+.uc4-view {
+    .uc4-stage {
+        background: #000;
+        color: #fff;
+        border-radius: var(--vaadin-radius-m);
+        padding: 1.5rem;
+        width: 100%;
+        max-width: 720px;
+        aspect-ratio: 16 / 9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 0.5rem;
+    }
+
+    .uc4-stage .big-icon {
+        font-size: 64px;
+        line-height: 1;
+    }
+}

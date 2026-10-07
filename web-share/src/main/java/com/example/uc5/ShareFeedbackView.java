@@ -8,15 +8,16 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Page;
-import com.vaadin.flow.component.page.PendingJavaScriptResult;
-import com.vaadin.flow.component.page.WebShareSupport;
+import com.vaadin.flow.component.webshare.ShareContent;
+import com.vaadin.flow.component.webshare.WebShare;
+import com.vaadin.flow.component.webshare.WebShareSupport;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
@@ -26,15 +27,14 @@ import com.vaadin.flow.signals.Signal;
  * <p>
  * The native share sheet has three possible outcomes: the user picks a target
  * (success), the user dismisses the sheet ({@code AbortError}), or the share
- * fails for some other reason. Flow already logs rejection at debug level
- * inside {@link Page#share(String, String, String)}, but if the UI wants to
- * react — show a thank-you toast, or retry the share — the
- * {@link PendingJavaScriptResult} returned from {@code share()} is the right
- * handle. This view attaches {@code .then(ok, err)} and surfaces every
- * outcome in a small log.
+ * fails for some other reason. The observed form of {@link WebShare#onClick}'s
+ * share binding takes an {@code onShared} runnable and an {@code onError}
+ * consumer, both invoked on the UI thread once the client-side share resolves.
+ * This view wires those callbacks into a small outcome log.
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @Menu(order = 5, title = "UC5 — Completion feedback")
+@StyleSheet("uc5.css")
 public class ShareFeedbackView extends VerticalLayout {
 
     private static final DateTimeFormatter TIME = DateTimeFormatter
@@ -45,15 +45,16 @@ public class ShareFeedbackView extends VerticalLayout {
     private final Div log = new Div();
 
     public ShareFeedbackView() {
+        addClassName("uc5-view");
         add(new H1("UC5 — Share with completion feedback"));
-        add(new Paragraph("Hooks .then(ok, err) on the PendingJavaScriptResult "
-                + "returned by Page.share(...). The browser resolves the "
-                + "promise on success and rejects with an AbortError when "
-                + "the user dismisses the sheet — we surface both in the "
-                + "log below. On desktop you can fake either branch with "
-                + "the buttons in the next section."));
+        add(new Paragraph("Wires the onShared / onError callbacks of "
+                + "WebShare.onClick(button).share(...). The browser resolves "
+                + "on success and rejects with an AbortError when the user "
+                + "dismisses the sheet — we surface both in the log below. "
+                + "On desktop you can fake either branch with the buttons in "
+                + "the next section."));
 
-        shareButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        shareButton.addThemeVariants(ButtonVariant.PRIMARY);
 
         add(shareButton, new H2("Outcome log"));
 
@@ -62,8 +63,7 @@ public class ShareFeedbackView extends VerticalLayout {
         appendLog("(no share invoked yet)");
 
         add(new H2("Simulate without a browser"));
-        Button fakeOk = new Button("Simulate success",
-                e -> handleSuccess());
+        Button fakeOk = new Button("Simulate success", e -> handleSuccess());
         Button fakeCancel = new Button("Simulate cancel",
                 e -> handleError("AbortError: Share canceled"));
         Button fakeFail = new Button("Simulate failure",
@@ -74,19 +74,21 @@ public class ShareFeedbackView extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        Page page = attachEvent.getUI().getPage();
-        Signal<WebShareSupport> support = page.shareSupportSignal();
+        Signal<WebShareSupport> support = WebShare.supportSignal();
 
         Signal.effect(this, () -> shareButton
                 .setEnabled(support.get() == WebShareSupport.SUPPORTED));
 
-        shareButton.addClickListener(e -> {
-            PendingJavaScriptResult result = page.share(
-                    "Web Share completion feedback demo",
-                    "Try cancelling the share sheet to see the AbortError path.",
-                    "https://vaadin.com/");
-            result.then(ok -> handleSuccess(), err -> handleError(err));
-        });
+        // Bind the share once; the observed callbacks run on the UI thread
+        // when the client-side share resolves or rejects.
+        WebShare.onClick(shareButton).share(
+                ShareContent.create()
+                        .title("Web Share completion feedback demo")
+                        .text("Try cancelling the share sheet to see the "
+                                + "AbortError path.")
+                        .url("https://vaadin.com/"),
+                this::handleSuccess,
+                err -> handleError(err.name() + ": " + err.message()));
     }
 
     // Package-private outcome handlers so a browserless test can drive the

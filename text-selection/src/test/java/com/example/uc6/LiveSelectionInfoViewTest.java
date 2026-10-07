@@ -20,7 +20,7 @@ class LiveSelectionInfoViewTest extends SpringBrowserlessTest {
     void viewRenders() {
         navigate(LiveSelectionInfoView.class);
 
-        assertTrue($view(H1.class).all().stream().anyMatch(
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
                 h -> "UC6 — Live selection info".equals(h.getText())));
     }
 
@@ -30,26 +30,26 @@ class LiveSelectionInfoViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Initially nothing selected
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> "0 chars".equals(s.getText())));
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> "0 words".equals(s.getText())));
 
-        TextArea text = $(TextArea.class).single();
+        TextArea text = find(TextArea.class).single();
         // "The quick brown fox" — 19 chars, 4 words
         TextSelectionTestSupport.setSelection(text, 0, 19);
         runPendingSignalsTasks();
 
         assertTrue(
-                $view(Span.class).all().stream()
+                findInView(Span.class).all().stream()
                         .anyMatch(s -> "19 chars".equals(s.getText())),
                 "expected selection length to update");
         assertTrue(
-                $view(Span.class).all().stream()
+                findInView(Span.class).all().stream()
                         .anyMatch(s -> "4 words".equals(s.getText())),
                 "expected word count to update");
         assertTrue(
-                $view(Span.class).all().stream()
+                findInView(Span.class).all().stream()
                         .anyMatch(s -> "0 – 19".equals(s.getText())),
                 "expected range to update");
     }

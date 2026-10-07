@@ -1,0 +1,24 @@
+.uc6-view {
+    .status-badge {
+        display: inline-block;
+        padding: 0.3rem 0.9rem;
+        border-radius: 999px;
+        font-family: monospace;
+        font-size: 0.95rem;
+        background: var(--vaadin-background-container);
+        border: 1px solid var(--vaadin-border-color);
+        transition: background-color 200ms, color 200ms, border-color 200ms;
+    }
+
+    .status-badge.online {
+        background: color-mix(in srgb, var(--aura-green) 18%, transparent);
+        color: var(--aura-green-text, var(--aura-green));
+        border-color: color-mix(in srgb, var(--aura-green) 35%, transparent);
+    }
+
+    .status-badge.offline {
+        background: color-mix(in srgb, var(--aura-red) 18%, transparent);
+        color: var(--aura-red-text, var(--aura-red));
+        border-color: color-mix(in srgb, var(--aura-red) 35%, transparent);
+    }
+}

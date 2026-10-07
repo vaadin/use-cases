@@ -1,12 +1,11 @@
 package com.example.usecase11;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.MissingAPI;
 import com.example.MissingAPI.ComponentSize;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -16,6 +15,7 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -34,7 +34,8 @@ import com.vaadin.flow.signals.Signal;
 @Route(value = "use-case-11", layout = MainLayout.class)
 @PageTitle("Use Case 11: Responsive Layout")
 @Menu(order = 11, title = "UC 11: Responsive Layout")
-@PermitAll
+@StyleSheet("usecase11.css")
+@AnonymousAllowed
 public class UseCase11View extends VerticalLayout {
 
     private static final int SMALL_BREAKPOINT = 400;
@@ -48,6 +49,7 @@ public class UseCase11View extends VerticalLayout {
     private Div responsiveContent;
 
     public UseCase11View() {
+        addClassName("usecase11-view");
         setSpacing(true);
         setPadding(true);
         setSizeFull();
@@ -55,8 +57,7 @@ public class UseCase11View extends VerticalLayout {
         // Create responsive content container first so we can set up the size
         // signal before building other panels that depend on it
         responsiveContent = new Div();
-        responsiveContent.getStyle().set("padding", "1em").set("height", "100%")
-                .set("overflow-y", "auto").set("background-color", "#ffffff");
+        responsiveContent.addClassName("responsive-content");
         containerSizeSignal = MissingAPI.sizeSignal(responsiveContent);
         isSmall = containerSizeSignal
                 .map(size -> size.width() < SMALL_BREAKPOINT);
@@ -92,9 +93,7 @@ public class UseCase11View extends VerticalLayout {
 
         // Info box
         Div tipBox = new Div();
-        tipBox.getStyle().set("background-color", "#e0f7fa")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-bottom", "1em").set("font-style", "italic");
+        tipBox.addClassName("tip-box");
         tipBox.add(new Paragraph(
                 "💡 Drag the splitter to resize the content area. "
                         + "The responsive content will adapt to different widths, "
@@ -106,12 +105,10 @@ public class UseCase11View extends VerticalLayout {
 
     private Div createInfoPanel() {
         Div panel = new Div();
-        panel.getStyle().set("padding", "1em")
-                .set("background-color", "#f5f5f5").set("height", "100%")
-                .set("overflow-y", "auto");
+        panel.addClassName("info-panel");
 
         H3 title = new H3("Info Panel");
-        title.getStyle().set("margin-top", "0");
+        title.addClassName("info-panel-title");
 
         Paragraph info = new Paragraph(
                 "This is a static side panel. The main content on the left adapts "
@@ -121,19 +118,15 @@ public class UseCase11View extends VerticalLayout {
 
         // Container size display
         Div sizeDisplay = new Div();
-        sizeDisplay.getStyle().set("background-color", "#ffffff")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin", "1em 0");
+        sizeDisplay.addClassName("size-display");
 
         Paragraph widthPara = new Paragraph(
                 () -> "Width: " + containerSizeSignal.get().width() + "px");
-        widthPara.getStyle().set("font-family", "monospace").set("margin",
-                "0.25em 0");
+        widthPara.addClassName("size-line");
 
         Paragraph heightPara = new Paragraph(
                 () -> "Height: " + containerSizeSignal.get().height() + "px");
-        heightPara.getStyle().set("font-family", "monospace").set("margin",
-                "0.25em 0");
+        heightPara.addClassName("size-line");
 
         Paragraph breakpointPara = new Paragraph(() -> {
             if (isSmall.get())
@@ -142,8 +135,7 @@ public class UseCase11View extends VerticalLayout {
                 return "💻 Medium (400-700px)";
             return "🖥️ Large (≥ 700px)";
         });
-        breakpointPara.getStyle().set("font-weight", "bold").set("margin",
-                "0.5em 0 0 0");
+        breakpointPara.addClassName("breakpoint-line");
 
         sizeDisplay.add(widthPara, heightPara, breakpointPara);
 
@@ -156,21 +148,21 @@ public class UseCase11View extends VerticalLayout {
         Div smallContent = createSection("📱 Small Width Layout",
                 "This is the mobile view (width < 400px). Navigation is stacked vertically, "
                         + "and complex UI elements are simplified or hidden.",
-                "#fff3e0");
+                "small-layout");
         smallContent.bindVisible(isSmall);
 
         // Medium width content
         Div mediumContent = createSection("💻 Medium Width Layout",
                 "This is the tablet view (400px ≤ width < 700px). Navigation can be horizontal, "
                         + "and more content is visible with a balanced layout.",
-                "#f3e5f5");
+                "medium-layout");
         mediumContent.bindVisible(isMedium);
 
         // Large width content
         Div largeContent = createSection("🖥️ Large Width Layout",
                 "This is the desktop view (width ≥ 700px). All features are visible, "
                         + "with multi-column layouts and detailed information.",
-                "#e8f5e9");
+                "large-layout");
         largeContent.bindVisible(isLarge);
 
         // Responsive card grid
@@ -182,18 +174,16 @@ public class UseCase11View extends VerticalLayout {
     }
 
     private Div createSection(String title, String content,
-            String backgroundColor) {
+            String variantClass) {
         Div section = new Div();
-        section.getStyle().set("background-color", backgroundColor)
-                .set("padding", "1.5em").set("border-radius", "8px")
-                .set("margin", "0.5em 0");
+        section.addClassName("section");
+        section.addClassName(variantClass);
 
         H3 sectionTitle = new H3(title);
-        sectionTitle.getStyle().set("margin-top", "0").set("margin-bottom",
-                "0.5em");
+        sectionTitle.addClassName("section-title");
 
         Paragraph sectionContent = new Paragraph(content);
-        sectionContent.getStyle().set("margin", "0");
+        sectionContent.addClassName("section-content");
 
         section.add(sectionTitle, sectionContent);
         return section;
@@ -201,35 +191,25 @@ public class UseCase11View extends VerticalLayout {
 
     private Component createResponsiveCardGrid() {
         Div gridContainer = new Div();
+        gridContainer.addClassName("card-grid");
 
         // Create sample cards
         for (int i = 1; i <= 6; i++) {
             Div card = new Div();
-            card.getStyle().set("background-color", "#f9f9f9")
-                    .set("border", "1px solid #e0e0e0")
-                    .set("border-radius", "4px").set("padding", "1em")
-                    .set("margin", "0.5em").set("flex", "1 1 150px")
-                    .set("min-width", "120px");
+            card.addClassName("grid-card");
 
             H3 cardTitle = new H3("Card " + i);
-            cardTitle.getStyle().set("margin", "0 0 0.5em 0").set("font-size",
-                    "1em");
+            cardTitle.addClassName("grid-card-title");
 
             Paragraph cardContent = new Paragraph("Content item " + i);
-            cardContent.getStyle().set("margin", "0").set("font-size",
-                    "0.875em");
+            cardContent.addClassName("grid-card-content");
 
             card.add(cardTitle, cardContent);
             gridContainer.add(card);
         }
 
-        // Set responsive flex layout based on container size
-        gridContainer.getStyle().set("display", "flex").set("margin", "1em 0");
-
-        gridContainer.getStyle().bind("flex-direction",
-                () -> isSmall.get() ? "column" : "row");
-        gridContainer.getStyle().bind("flex-wrap",
-                () -> isSmall.get() ? "nowrap" : "wrap");
+        // Toggle small layout class based on container size
+        gridContainer.getClassNames().bind("is-small", isSmall);
 
         return gridContainer;
     }

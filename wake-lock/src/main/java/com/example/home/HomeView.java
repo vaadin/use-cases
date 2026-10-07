@@ -17,7 +17,7 @@ public class HomeView extends BaseHomeView {
 
     public HomeView() {
         super("Screen Wake Lock API — use cases",
-                "Each card below exercises one use case of Page#getWakeLock(). "
+                "Each card below exercises one use case of the WakeLock API. "
                         + "WakeLock#request() asks the browser to keep the screen "
                         + "awake; WakeLock#activeSignal() reflects whether the "
                         + "browser is currently holding the lock. The client "

@@ -1,25 +1,30 @@
 # Wake Lock API — gaps observed while building the use cases
 
-The Screen Wake Lock API exposed in vaadin/flow#23619 carried all four
-use cases through to a green build. Nothing was *blocked* by missing
-API surface. The notes below are friction points where the use cases
-needed a workaround or where the surface felt thinner than the rest of
-the page-level facades in Flow (compare e.g. `Page#pageVisibilitySignal()`
-which has a paired `GeolocationSimulator`-style test simulator).
+Friction points hit while building the four use cases on the static
+`com.vaadin.flow.component.wakelock.WakeLock` API: `request()` /
+`request(SerializableConsumer<WakeLockError>)` / `release()`,
+`activeSignal()` → `Signal<Boolean>`, and `availabilitySignal()` →
+`Signal<WakeLockAvailability>` (`SUPPORTED / UNSUPPORTED / UNKNOWN`).
+
+Nothing is *blocked* by missing API surface. The notes below are places where
+the use cases needed a workaround or where the surface feels thinner than the
+rest of the page-level facades in Flow.
 
 ## No test simulator / no way to drive the signal from a browserless test
 
 **Where it bit us:** all four use cases, via
 `wake-lock/src/test/java/com/example/WakeLockTestSupport.java`.
-**Symptom:** `WakeLock#setActive(String)` is package-private — only the
-JS bridge calls it in production. A browserless test that wants to
-verify a status badge transitions to "Holding lock" has no way to
-simulate the browser confirming the lock without going through the
-client.
-**Workaround used:** reflective access to `WakeLock#setActive` via
-`WakeLockTestSupport.simulateAcquired() / simulateReleased()`. Mirrors
-`PageVisibilityTestSupport` in the page-visibility module, which uses
-the same trick for the same reason.
+**Symptom:** no dedicated `WakeLockSimulator` ships. A browserless
+test that wants to verify a status badge transitions to "Holding lock"
+has no purpose-built helper to simulate the browser confirming the
+lock without going through the client.
+**Workaround used:** the test drives the signals through the **public**
+`UI.getCurrent().getInternals().setWakeLockActive(boolean)` (and
+`setWakeLockAvailability(WakeLockAvailability)`) on `UIInternals`;
+`WakeLockTestSupport.simulateAcquired() / simulateReleased()` wrap
+those. That public seam works, but is a framework-internal entry point
+rather than a purpose-built testing helper. Mirrors
+`PageVisibilityTestSupport` in the page-visibility module.
 **Suggested API:** a `WakeLockSimulator` analogous to
 `GeolocationSimulator` in flow-server-test — `simulateAcquired()`,
 `simulateReleased()`, plus an `isLockRequested()` predicate so a test
@@ -29,39 +34,22 @@ wakeLock" assertion has to settle for "after clicking, the next
 simulated ACTIVE event is reflected on screen" — a cause-and-effect
 chain, not a direct observation.
 
-## No way to feature-detect support from the server
-
-**Where it bit us:** every use case, especially UC1 (the
-manual-toggle view) and UC2 (recipe view).
-**Symptom:** the Wake Lock API needs a secure context (HTTPS or
-`localhost`) and is gated behind Safari ≥ 16.4. A view that requests
-the lock on an unsupported browser is left with `activeSignal()`
-permanently false, but the user can't tell whether the lock was
-refused, never granted, or simply not yet confirmed.
-**Workaround used:** the badge label hedges ("Released — waiting for
-browser"). UC1 cannot grey out the toggle when the API is unsupported
-because the server has no way to know.
-**Suggested API:** `WakeLock#supportedSignal()` returning
-`Signal<Boolean>` (or a tri-state `WakeLockSupport` enum:
-`SUPPORTED / UNSUPPORTED / UNKNOWN`). The client already knows the
-answer — `'wakeLock' in navigator` — and could send it once during the
-first roundtrip.
-
-## `request()` and `release()` are fire-and-forget
+## No success result from `request()`; `release()` is fire-and-forget
 
 **Where it bit us:** UC1, UC3 (slideshow), UC4 (workout timer).
-**Symptom:** `request()` returns `void`. A caller cannot know whether
-the browser denied the request, was already holding the lock, or is
-still asking. The only signal of failure is the absence of an
-`activeSignal()` flip — there is no `WakeLockDeniedEvent` and no
-distinction between *not yet acquired* and *will never be acquired*.
-**Workaround used:** views observe `activeSignal()` only and present
-"Released" as the catch-all for "we asked but nothing came back".
-**Suggested API:** either a `request()` overload returning
-`CompletableFuture<Boolean>` (true = acquired, false = denied), or a
-separate read-only `lastErrorSignal()` that surfaces the most recent
-reason the lock failed (insecure context, low battery, user revoked,
-unsupported).
+**Symptom:** `request(onError)` reports a failure via `WakeLockError`
+(`WakeLockErrorCode` `UNSUPPORTED / NOT_ALLOWED / UNKNOWN`), but there is
+no success result — no `CompletableFuture<Boolean>`-style "true =
+acquired" return — and `release()` is fully fire-and-forget (no callback,
+no future, no confirmation that the release landed). A caller wanting to
+key UI off *acquired vs. denied* has to observe `activeSignal()`
+alongside the error callback rather than awaiting a single result.
+**Workaround used:** views observe `activeSignal()` for the success
+path and the `onError` callback for the failure path; "Released" is the
+catch-all for "we asked but nothing came back".
+**Suggested API:** a `request()` overload returning
+`CompletableFuture<Boolean>` (true = acquired, false = denied), and a
+completion callback / future on `release()` so callers can confirm it.
 
 ## No reason exposed when the browser drops the lock
 
@@ -71,7 +59,8 @@ client transparently re-acquires it on return. That's exactly what
 UC3 / UC4 want — but the signal flips false-true-false-true and the
 view has no way to distinguish "user revoked", "low battery", and
 "transient hide" without correlating with `pageVisibilitySignal()`.
-Apps that want to give up after N revocations cannot.
+`WakeLockError` covers request-time failures, but an unsolicited release
+carries no reason. Apps that want to give up after N revocations cannot.
 **Workaround used:** UC3 / UC4 simply re-issue `request()` from a
 Signal effect; the client's built-in auto-reacquire makes that mostly
 redundant but harmless.
@@ -101,8 +90,7 @@ side could distinguish them.
 
 **Where it bit us:** considered for UC4 (workout timer) — the spec
 allows `wakeLock.request('system')` in some browsers to keep CPU
-awake too. Out of scope for the PR, but worth noting if Flow ever
-exposes a richer set of lock types.
+awake too. Worth noting if Flow ever exposes a richer set of lock types.
 **Suggested API:** `WakeLock#request(WakeLockType)` overload with an
 enum (today only `SCREEN`; later `SYSTEM` or others if the spec
 expands).

@@ -21,20 +21,20 @@ class InsertTemplateViewTest extends SpringBrowserlessTest {
     void viewRenders() {
         navigate(InsertTemplateView.class);
 
-        assertTrue($view(H1.class).all().stream().anyMatch(
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
                 h -> "UC5 — Insert template at cursor".equals(h.getText())));
     }
 
     @Test
     void greetingInsertsAtCurrentCursor() {
         navigate(InsertTemplateView.class);
-        TextArea editor = $(TextArea.class).single();
+        TextArea editor = find(TextArea.class).single();
         // Position the cursor at offset 4 ("Hi,\n" + here)
         TextSelectionTestSupport.setSelection(editor, 4, 4);
         runPendingSignalsTasks();
 
         String original = editor.getValue();
-        Button greeting = $(Button.class).withText("Greeting").single();
+        Button greeting = find(Button.class).withText("Greeting").single();
         test(greeting).click();
         runPendingSignalsTasks();
 
@@ -46,13 +46,13 @@ class InsertTemplateViewTest extends SpringBrowserlessTest {
     @Test
     void snippetReplacesNonEmptySelection() {
         navigate(InsertTemplateView.class);
-        TextArea editor = $(TextArea.class).single();
+        TextArea editor = find(TextArea.class).single();
         // Default value is "Hi,\n\n\n\nThanks,\n". Select "Hi," (offsets 0..3).
         TextSelectionTestSupport.setSelection(editor, 0, 3);
         runPendingSignalsTasks();
 
         String original = editor.getValue();
-        Button greeting = $(Button.class).withText("Greeting").single();
+        Button greeting = find(Button.class).withText("Greeting").single();
         test(greeting).click();
         runPendingSignalsTasks();
 
@@ -63,12 +63,12 @@ class InsertTemplateViewTest extends SpringBrowserlessTest {
     @Test
     void signatureInsertsAtStart() {
         navigate(InsertTemplateView.class);
-        TextArea editor = $(TextArea.class).single();
+        TextArea editor = find(TextArea.class).single();
         TextSelectionTestSupport.setSelection(editor, 0, 0);
         runPendingSignalsTasks();
 
         String original = editor.getValue();
-        Button signature = $(Button.class).withText("Signature").single();
+        Button signature = find(Button.class).withText("Signature").single();
         test(signature).click();
         runPendingSignalsTasks();
 

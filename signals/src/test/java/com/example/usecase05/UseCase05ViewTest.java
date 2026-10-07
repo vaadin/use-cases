@@ -20,7 +20,7 @@ class UseCase05ViewTest extends SpringBrowserlessTest {
     @Test
     void viewRendersThreeComboBoxes() {
         navigate(UseCase05View.class);
-        assertEquals(3, $view(ComboBox.class).all().size());
+        assertEquals(3, findInView(ComboBox.class).all().size());
     }
 
     @SuppressWarnings("unchecked")
@@ -29,7 +29,7 @@ class UseCase05ViewTest extends SpringBrowserlessTest {
         navigate(UseCase05View.class);
         runPendingSignalsTasks();
 
-        ComboBox<String> countrySelect = $view(ComboBox.class).atIndex(1);
+        ComboBox<String> countrySelect = findInView(ComboBox.class).atIndex(1);
         assertEquals("United States", countrySelect.getValue());
     }
 
@@ -39,7 +39,7 @@ class UseCase05ViewTest extends SpringBrowserlessTest {
         navigate(UseCase05View.class);
         runPendingSignalsTasks();
 
-        ComboBox<String> stateSelect = $view(ComboBox.class).atIndex(2);
+        ComboBox<String> stateSelect = findInView(ComboBox.class).atIndex(2);
         assertTrue(stateSelect.isEnabled());
     }
 
@@ -49,7 +49,7 @@ class UseCase05ViewTest extends SpringBrowserlessTest {
         navigate(UseCase05View.class);
         runPendingSignalsTasks();
 
-        ComboBox<String> citySelect = $view(ComboBox.class).atIndex(3);
+        ComboBox<String> citySelect = findInView(ComboBox.class).atIndex(3);
         assertFalse(citySelect.isEnabled());
     }
 
@@ -59,11 +59,11 @@ class UseCase05ViewTest extends SpringBrowserlessTest {
         navigate(UseCase05View.class);
         runPendingSignalsTasks();
 
-        ComboBox<String> stateSelect = $view(ComboBox.class).atIndex(2);
+        ComboBox<String> stateSelect = findInView(ComboBox.class).atIndex(2);
         test(stateSelect).selectItem("California");
         runPendingSignalsTasks();
 
-        ComboBox<String> citySelect = $view(ComboBox.class).atIndex(3);
+        ComboBox<String> citySelect = findInView(ComboBox.class).atIndex(3);
         assertTrue(citySelect.isEnabled());
     }
 
@@ -74,12 +74,12 @@ class UseCase05ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Select a state first
-        ComboBox<String> stateSelect = $view(ComboBox.class).atIndex(2);
+        ComboBox<String> stateSelect = findInView(ComboBox.class).atIndex(2);
         test(stateSelect).selectItem("California");
         runPendingSignalsTasks();
 
         // Change country
-        ComboBox<String> countrySelect = $view(ComboBox.class).atIndex(1);
+        ComboBox<String> countrySelect = findInView(ComboBox.class).atIndex(1);
         test(countrySelect).selectItem("Canada");
         runPendingSignalsTasks();
 

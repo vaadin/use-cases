@@ -7,13 +7,14 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.WakeLock;
+import com.vaadin.flow.component.wakelock.WakeLock;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
@@ -35,6 +36,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @Menu(order = 3, title = "UC3 — Slideshow")
+@StyleSheet("uc3.css")
 public class SlideshowView extends VerticalLayout {
 
     private record Slide(String title, String body) {
@@ -67,6 +69,7 @@ public class SlideshowView extends VerticalLayout {
     private final Button nextButton = new Button("Next slide");
 
     public SlideshowView() {
+        addClassName("uc3-view");
         add(new H1("UC3 — Presentation slideshow"));
         add(new Paragraph("Click Start to begin presenting — the wake lock "
                 + "is requested while you advance through slides and "
@@ -110,8 +113,7 @@ public class SlideshowView extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        WakeLock wakeLock = attachEvent.getUI().getPage().getWakeLock();
-        Signal<Boolean> active = wakeLock.activeSignal();
+        Signal<Boolean> active = WakeLock.activeSignal();
 
         lockBadge.bindText(active.map(held -> Boolean.TRUE.equals(held)
                 ? "Holding — slide visible until you stop"
@@ -120,9 +122,9 @@ public class SlideshowView extends VerticalLayout {
 
         Signal.effect(this, () -> {
             if (Boolean.TRUE.equals(presenting.get())) {
-                wakeLock.request();
+                WakeLock.request();
             } else {
-                wakeLock.release();
+                WakeLock.release();
             }
         });
     }
@@ -132,7 +134,7 @@ public class SlideshowView extends VerticalLayout {
         // Defensive — the effect already released on stop, but a user who
         // navigates away mid-presentation would otherwise leave the want-lock
         // flag set on the client.
-        detachEvent.getUI().getPage().getWakeLock().release();
+        WakeLock.release();
         super.onDetach(detachEvent);
     }
 

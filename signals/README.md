@@ -4,7 +4,7 @@ This repository contains a collection of Vaadin views demonstrating the Signal A
 
 ## Overview
 
-The Vaadin Signal API provides reactive state management for Vaadin Flow applications. This project contains **29 implemented use cases** (23 single-user + 6 multi-user) showcasing various signal patterns and real-world UI scenarios.
+The Vaadin Signal API provides reactive state management for Vaadin Flow applications. This project contains **30 implemented use cases** (23 single-user + 7 multi-user) showcasing various signal patterns and real-world UI scenarios.
 
 ## Use Cases
 
@@ -32,7 +32,7 @@ The Vaadin Signal API provides reactive state management for Vaadin Flow applica
 23. **Real-time Dashboard** - Interactive dashboard with charts and live metrics
 24. **VirtualList Notifications** - Notification inbox with VirtualList bound to signal data source
 
-### Multi-User Collaboration (6 total)
+### Multi-User Collaboration (7 total)
 
 1. **Shared Chat** - Collaborative message list with append-only operations
 2. **Collaborative Cursors** - Real-time cursor position sharing
@@ -40,6 +40,7 @@ The Vaadin Signal API provides reactive state management for Vaadin Flow applica
 4. **Collaborative Editing** - Field-level locking for concurrent form editing
 6. **Shared Task List** - Real-time collaborative task management with inline editing
 7. **Shared LLM Task List** - Multi-user LLM-powered task management with chat
+8. **Broadcast Announcement** - Post an announcement that appears instantly in every open session (banner + notification)
 
 ## Project Structure
 
@@ -48,14 +49,13 @@ src/main/java/com/example/
 ├── usecase01/                       # UC01-UC23 (one package per use case)
 │   └── UseCase01View.java
 ├── usecase02/ ... usecase23/
-├── muc01/                           # MUC01-MUC07 (one package per use case)
+├── muc01/                           # MUC01-MUC08 (one package per use case)
 │   ├── MUC01View.java
 │   └── MUC01Signals.java           # Per-MUC shared signal class
-├── muc02/ ... muc07/
+├── muc02/ ... muc08/
 ├── security/
-│   ├── CurrentUserSignal.java       # Application-scoped user context signal
-│   ├── SecurityConfiguration.java   # Spring Security setup
-│   └── SecurityService.java
+│   ├── CurrentUserSignal.java       # Session-scoped user context signal
+│   └── SecurityConfiguration.java   # Spring Security setup
 ├── service/                         # Shared services (analytics, data loading)
 ├── signals/
 │   ├── UserSessionRegistry.java     # Active user tracking
@@ -81,6 +81,10 @@ src/main/java/com/example/
 4. **Access**: Open http://localhost:8080
 
 ### Login Credentials
+
+Logging in is optional: anonymous visitors can open every use case and are
+shown as a generated `guest-N` user. Use **Log in** in the navbar to switch
+to one of the demo users:
 
 - `viewer` / `password` (VIEWER role)
 - `editor` / `password` (EDITOR role)
@@ -118,9 +122,9 @@ Since the official Signal API is still in development, `MissingAPI.java` provide
 
 ## Multi-User Architecture
 
-Multi-user use cases (MUC 01-04, 06-07) demonstrate collaborative features using:
+Multi-user use cases (MUC 01-04, 06-08) demonstrate collaborative features using:
 
-- **Per-MUC Signal Classes** - Each MUC has its own application-scoped Spring component (MUC01Signals, MUC02Signals, MUC03Signals, MUC04Signals, MUC06Signals, MUC07Signals) holding shared signals
+- **Per-MUC Signal Classes** - Each MUC has its own application-scoped Spring component (MUC01Signals, MUC02Signals, MUC03Signals, MUC04Signals, MUC06Signals, MUC07Signals, MUC08Signals) holding shared signals
 - **UserSessionRegistry** - Tracks active users with reactive signal
 - **onAttach/onDetach** - Lifecycle hooks for user registration
 
@@ -128,11 +132,11 @@ All users see real-time updates via Vaadin's automatic UI synchronization.
 
 ## Documentation
 
-- **signal-use-cases.md** - Detailed descriptions and patterns for all 29 use cases
+- **signal-use-cases.md** - Detailed descriptions and patterns for all 30 use cases
 
 ## Technical Stack
 
-- **Vaadin 25.1-SNAPSHOT** - Web framework with Signal API
+- **Vaadin 25.2-SNAPSHOT** - Web framework with Signal API
 - **Spring Boot 4.0.1** - Application framework
 - **Spring Security** - Authentication and authorization
 - **Java 25** - Language and platform
@@ -148,4 +152,4 @@ All users see real-time updates via Vaadin's automatic UI synchronization.
 
 **Status**: Active development
 **Last Updated**: 2026-02-16
-**Total Use Cases**: 29 (23 single-user + 6 multi-user)
+**Total Use Cases**: 30 (23 single-user + 7 multi-user)

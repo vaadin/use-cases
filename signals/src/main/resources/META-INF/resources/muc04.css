@@ -1,0 +1,16 @@
+.muc04-view {
+    .editors-panel {
+        background-color: #e3f2fd;
+        padding: 1em;
+        border-radius: 4px;
+    }
+    .editors-panel-field-label {
+        font-weight: bold;
+    }
+    .editors-panel-names-container {
+        display: inline;
+    }
+    .editor-name {
+        margin-right: 0.5em;
+    }
+}

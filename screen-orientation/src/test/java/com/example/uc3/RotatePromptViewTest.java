@@ -9,8 +9,8 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.page.ScreenOrientation;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.screenorientation.ScreenOrientationType;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -23,10 +23,10 @@ class RotatePromptViewTest extends SpringBrowserlessTest {
         navigate(RotatePromptView.class);
         runPendingSignalsTasks();
 
-        assertTrue($view(H1.class).all().stream().anyMatch(h -> h.getText()
-                .equals("UC3 — Rotate-your-device overlay")));
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h -> h.getText().equals("UC3 — Rotate-your-device overlay")));
         assertTrue(hasOverlay());
-        assertTrue($view(RadioButtonGroup.class).all().size() >= 1,
+        assertTrue(findInView(RadioButtonGroup.class).all().size() >= 1,
                 "expected the required-orientation picker");
     }
 
@@ -38,15 +38,15 @@ class RotatePromptViewTest extends SpringBrowserlessTest {
         // Default required = LANDSCAPE; orientation UNKNOWN — overlay hidden.
         assertOverlayHidden(true);
 
-        ScreenOrientationTestSupport
-                .setScreenOrientation(ScreenOrientation.PORTRAIT_PRIMARY, 0);
+        ScreenOrientationTestSupport.setScreenOrientation(
+                ScreenOrientationType.PORTRAIT_PRIMARY, 0);
         runPendingSignalsTasks();
         // Portrait while landscape is required — overlay must show.
         assertOverlayHidden(false);
         assertStatusContains("rotate to landscape");
 
-        ScreenOrientationTestSupport
-                .setScreenOrientation(ScreenOrientation.LANDSCAPE_PRIMARY, 90);
+        ScreenOrientationTestSupport.setScreenOrientation(
+                ScreenOrientationType.LANDSCAPE_PRIMARY, 90);
         runPendingSignalsTasks();
         // Landscape — overlay hides.
         assertOverlayHidden(true);
@@ -59,7 +59,7 @@ class RotatePromptViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         ScreenOrientationTestSupport
-                .setScreenOrientation(ScreenOrientation.UNSUPPORTED, 0);
+                .setScreenOrientation(ScreenOrientationType.UNSUPPORTED, 0);
         runPendingSignalsTasks();
 
         assertOverlayHidden(true);
@@ -67,12 +67,12 @@ class RotatePromptViewTest extends SpringBrowserlessTest {
     }
 
     private boolean hasOverlay() {
-        return $view(Div.class).all().stream()
+        return findInView(Div.class).all().stream()
                 .anyMatch(d -> d.getClassNames().contains("uc3-overlay"));
     }
 
     private void assertOverlayHidden(boolean hidden) {
-        boolean carriesHiddenClass = $view(Div.class).all().stream()
+        boolean carriesHiddenClass = findInView(Div.class).all().stream()
                 .filter(d -> d.getClassNames().contains("uc3-overlay"))
                 .anyMatch(d -> d.getClassNames().contains("hidden"));
         if (hidden) {
@@ -86,7 +86,7 @@ class RotatePromptViewTest extends SpringBrowserlessTest {
 
     private void assertStatusContains(String fragment) {
         assertTrue(
-                $view(Span.class).all().stream()
+                findInView(Span.class).all().stream()
                         .anyMatch(s -> s.getText() != null
                                 && s.getText().contains(fragment)),
                 "expected status badge text containing \"" + fragment + "\"");

@@ -20,18 +20,20 @@ class LockErrorViewTest extends SpringBrowserlessTest {
         navigate(LockErrorView.class);
         runPendingSignalsTasks();
 
-        assertTrue($view(H1.class).all().stream()
+        assertTrue(findInView(H1.class).all().stream()
                 .anyMatch(h -> "UC5 — Lock error UX".equals(h.getText())));
-        assertTrue($view(Button.class).all().stream().anyMatch(
-                b -> b.getText().startsWith("Lock without fullscreen")),
+        assertTrue(
+                findInView(Button.class).all().stream().anyMatch(
+                        b -> b.getText().startsWith("Lock without fullscreen")),
                 "expected the SecurityError-style trigger button");
-        assertTrue($view(Button.class).all().stream()
-                .anyMatch(b -> b.getText().startsWith("Two locks in a row")),
+        assertTrue(
+                findInView(Button.class).all().stream().anyMatch(
+                        b -> b.getText().startsWith("Two locks in a row")),
                 "expected the AbortError-style trigger button");
 
         // The log starts with one info line so users see the area before
         // they click anything.
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .filter(d -> d.getClassNames().contains("uc5-error-log"))
                 .flatMap(d -> d.getChildren()).count() >= 1,
                 "expected the log to contain the initial info line");
@@ -44,7 +46,7 @@ class LockErrorViewTest extends SpringBrowserlessTest {
 
         long before = logLineCount();
 
-        Button portrait = $view(Button.class).all().stream()
+        Button portrait = findInView(Button.class).all().stream()
                 .filter(b -> "Lock to portrait".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(portrait).click();
@@ -59,7 +61,7 @@ class LockErrorViewTest extends SpringBrowserlessTest {
     }
 
     private long logLineCount() {
-        return $view(Div.class).all().stream()
+        return findInView(Div.class).all().stream()
                 .filter(d -> d.getClassNames().contains("uc5-error-log"))
                 .flatMap(d -> d.getChildren()).count();
     }

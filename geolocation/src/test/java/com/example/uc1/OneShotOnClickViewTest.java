@@ -20,10 +20,10 @@ class OneShotOnClickViewTest extends BrowserlessTest {
         geolocation.setLocation(60.1699, 24.9384, 25.0);
         navigate(OneShotOnClickView.class);
 
-        Button locate = $(Button.class).withText("Use my location").single();
+        Button locate = find(Button.class).withText("Use my location").single();
         test(locate).click();
 
-        Span result = $(Span.class).withTextContaining("lat=").single();
+        Span result = find(Span.class).withTextContaining("lat=").single();
         assertTrue(result.getText().contains("60.16990"),
                 "Result span should show latitude, was: " + result.getText());
         assertTrue(result.getText().contains("24.93840"),
@@ -36,10 +36,11 @@ class OneShotOnClickViewTest extends BrowserlessTest {
         geolocation.denyPermission();
         navigate(OneShotOnClickView.class);
 
-        Button locate = $(Button.class).withText("Use my location").single();
+        Button locate = find(Button.class).withText("Use my location").single();
         test(locate).click();
 
-        Span result = $(Span.class).withTextContaining("permission").single();
+        Span result = find(Span.class).withTextContaining("permission")
+                .single();
         assertTrue(result.getText().contains("denied"),
                 "Result span should explain that permission was denied, was: "
                         + result.getText());

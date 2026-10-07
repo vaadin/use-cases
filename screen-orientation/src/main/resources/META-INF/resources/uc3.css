@@ -1,0 +1,35 @@
+.uc3-view {
+    .uc3-stage {
+        position: relative;
+        min-height: 240px;
+        background: var(--vaadin-background-container);
+        border: 1px dashed var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
+        padding: 1rem;
+        max-width: 720px;
+    }
+
+    .uc3-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: center;
+        background: color-mix(in srgb, var(--aura-orange) 25%, transparent);
+        color: var(--aura-orange-text);
+        border-radius: var(--vaadin-radius-m);
+        font-weight: 600;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .uc3-overlay.hidden {
+        display: none;
+    }
+
+    .uc3-overlay-icon {
+        font-size: 48px;
+    }
+}

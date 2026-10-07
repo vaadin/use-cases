@@ -1,0 +1,75 @@
+.usecase10-view {
+    .cards-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1em;
+    }
+    .card {
+        border: 1px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent);
+        border-radius: 8px;
+        padding: 1.5em;
+        flex: 1 1 250px;
+        min-width: 250px;
+        background-color: var(--aura-background-color);
+    }
+    .card-title {
+        margin-top: 0;
+        margin-bottom: 0.25em;
+    }
+    .card-subtitle {
+        font-family: monospace;
+        font-size: 0.8em;
+        color: var(--vaadin-text-color-secondary);
+        margin-top: 0;
+        margin-bottom: 1em;
+    }
+    .upload-status-label {
+        font-weight: bold;
+    }
+    .shortcut-label {
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+    .hint-text {
+        font-size: 0.85em;
+        color: var(--vaadin-text-color-secondary);
+        font-style: italic;
+    }
+    .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+    }
+    .status-indicator-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        background-color: color-mix(in srgb, var(--vaadin-text-color) 30%, transparent);
+    }
+    .status-indicator-dot.is-active {
+        background-color: color-mix(in srgb, var(--vaadin-text-color) 80%, transparent);
+    }
+    .status-indicator-label {
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+    .composition-section {
+        margin-top: 1.5em;
+        padding: 1.5em;
+        background-color: color-mix(in srgb, var(--vaadin-text-color) 5%, transparent);
+        border-radius: 8px;
+    }
+    .composition-heading {
+        margin-top: 0;
+    }
+    .composition-summary-text {
+        font-family: monospace;
+        font-size: 1.1em;
+        font-weight: bold;
+        padding: 0.75em;
+        background-color: var(--aura-background-color);
+        border-radius: 4px;
+        border: 1px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent);
+    }
+}

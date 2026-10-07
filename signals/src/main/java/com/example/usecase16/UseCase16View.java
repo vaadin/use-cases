@@ -1,13 +1,12 @@
 package com.example.usecase16;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.List;
 import java.util.Map;
 
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -25,6 +24,7 @@ import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -43,7 +43,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-16", layout = MainLayout.class)
 @PageTitle("Use Case 16: URL State Integration")
 @Menu(order = 16, title = "UC 16: URL State Integration")
-@PermitAll
+@StyleSheet("usecase16.css")
+@AnonymousAllowed
 public class UseCase16View extends VerticalLayout
         implements BeforeEnterObserver {
 
@@ -90,6 +91,7 @@ public class UseCase16View extends VerticalLayout
     private boolean isInitializing = true;
 
     public UseCase16View() {
+        addClassName("usecase16-view");
         setSpacing(true);
         setPadding(true);
 
@@ -122,12 +124,10 @@ public class UseCase16View extends VerticalLayout
 
         // Current URL display
         Div urlBox = new Div();
-        urlBox.getStyle().set("background-color", "#e3f2fd")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin", "1em 0");
+        urlBox.addClassName("url-box");
 
         H3 urlTitle = new H3("Current URL");
-        urlTitle.getStyle().set("margin-top", "0");
+        urlTitle.addClassName("url-title");
 
         // Update URL display based on signals
         Signal<String> currentUrlSignal = Signal.computed(() -> {
@@ -139,10 +139,7 @@ public class UseCase16View extends VerticalLayout
         });
 
         Paragraph urlDisplay = new Paragraph(currentUrlSignal);
-        urlDisplay.getStyle().set("font-family", "monospace")
-                .set("word-break", "break-all")
-                .set("background-color", "#ffffff").set("padding", "0.5em")
-                .set("border-radius", "4px");
+        urlDisplay.addClassName("url-display");
 
         urlBox.add(urlTitle, urlDisplay);
 
@@ -172,18 +169,14 @@ public class UseCase16View extends VerticalLayout
         });
 
         Div resultsContainer = new Div();
-        resultsContainer.getStyle().set("display", "flex")
-                .set("flex-direction", "column").set("gap", "0.5em")
-                .set("margin-top", "1em");
+        resultsContainer.addClassName("results-container");
 
         resultsContainer.bindChildren(filteredArticlesSignal,
                 this::createArticleCard);
 
         // Info box
         Div infoBox = new Div();
-        infoBox.getStyle().set("background-color", "#e0f7fa")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-top", "1em").set("font-style", "italic");
+        infoBox.addClassName("info-box");
         infoBox.add(new Paragraph(
                 "💡 Router integration with signals enables deep linking and shareable URLs. "
                         + "This pattern is essential for SEO, bookmarking, and sharing specific app states. "
@@ -202,29 +195,21 @@ public class UseCase16View extends VerticalLayout
         // Articles are read-only so no need to create bindings
         var article = articleSignal.peek();
         Div card = new Div();
-        card.getStyle().set("background-color", "#ffffff").set("border",
-                "1px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)")
-                .set("border-radius", "4px").set("padding", "1em");
+        card.addClassName("article-card");
 
         Div headerDiv = new Div();
-        headerDiv.getStyle().set("display", "flex")
-                .set("justify-content", "space-between")
-                .set("align-items", "center").set("margin-bottom", "0.5em");
+        headerDiv.addClassName("article-header");
 
         Div titleDiv = new Div(article.title());
-        titleDiv.getStyle().set("font-weight", "bold").set("font-size",
-                "1.1em");
+        titleDiv.addClassName("article-title");
 
         Div categoryBadge = new Div(article.category());
-        categoryBadge.getStyle().set("background-color", "#e0e0e0")
-                .set("padding", "0.25em 0.5em").set("border-radius", "4px")
-                .set("font-size", "0.85em");
+        categoryBadge.addClassName("category-badge");
 
         headerDiv.add(titleDiv, categoryBadge);
 
         Div contentDiv = new Div(article.content());
-        contentDiv.getStyle().set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-size", "0.9em");
+        contentDiv.addClassName("article-content");
 
         card.add(headerDiv, contentDiv);
         return card;

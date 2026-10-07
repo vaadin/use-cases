@@ -1,0 +1,64 @@
+.usecase13-view {
+    .counter-box {
+        background: color-mix(in srgb, var(--aura-accent-color) 10%, transparent);
+        padding: 1em;
+        border-radius: 8px;
+        border-left: 4px solid var(--aura-accent-color);
+        margin: 1em 0;
+    }
+    .counter-title {
+        margin: 0;
+    }
+    .user-list-title {
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+    }
+    .user-list-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+    }
+    .info-box {
+        background: #e0f7fa;
+        padding: 1em;
+        border-radius: 8px;
+        border-left: 4px solid #00BCD4;
+        margin-top: 2em;
+    }
+    .info-title {
+        margin-top: 0;
+    }
+    .user-card.current-session {
+        border: 2px solid var(--aura-accent-color);
+        background: color-mix(in srgb, var(--aura-accent-color) 10%, transparent);
+    }
+    .user-card.tab-inactive {
+        opacity: 0.6;
+        filter: grayscale(30%);
+    }
+    .tab-indicator {
+        flex-shrink: 0;
+    }
+    .name-span {
+        font-weight: bold;
+        flex-grow: 1;
+    }
+    .row-with-gap {
+        gap: 0.5em;
+    }
+    .secondary-text {
+        font-size: var(--aura-font-size-s);
+    }
+    .secondary-muted {
+        font-size: var(--aura-font-size-s);
+        color: var(--vaadin-text-color-secondary);
+    }
+    .role-badge {
+        padding: 2px 6px;
+        border-radius: 4px;
+        color: white;
+        font-size: var(--aura-font-size-xs);
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+}

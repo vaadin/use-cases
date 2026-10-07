@@ -20,20 +20,20 @@ class FormatAndSelectViewTest extends SpringBrowserlessTest {
     void viewRendersWithDefaultTitle() {
         navigate(FormatAndSelectView.class);
 
-        assertTrue($view(H1.class).all().stream().anyMatch(
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
                 h -> "UC2 — Post-transform select-all".equals(h.getText())));
         assertEquals("Hello, Awesome World!",
-                $(TextField.class).single().getValue());
+                find(TextField.class).single().getValue());
     }
 
     @Test
     void formatSlugifiesTheValue() {
         navigate(FormatAndSelectView.class);
 
-        TextField title = $(TextField.class).single();
+        TextField title = find(TextField.class).single();
         test(title).setValue("Hello, Awesome World!!!");
 
-        test($(Button.class).withText("Format").single()).click();
+        test(find(Button.class).withText("Format").single()).click();
         runPendingSignalsTasks();
 
         assertEquals("hello-awesome-world", title.getValue());

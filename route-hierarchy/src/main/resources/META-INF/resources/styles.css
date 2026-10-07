@@ -1,0 +1,32 @@
+/* Route Hierarchy use cases — small visual polish */
+
+.app-title {
+    font-size: var(--aura-font-size-l);
+    margin: 0;
+}
+
+.home-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    max-width: 960px;
+}
+
+.home-card .home-card-tag {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary);
+    letter-spacing: 0.05em;
+}
+
+/* Sitemap tree (UC7). */
+.sitemap-tree,
+.sitemap-tree ul {
+    list-style: none;
+    padding-left: 1.25rem;
+    margin: 0.25rem 0;
+}
+
+.sitemap-tree .sitemap-node {
+    padding: 0.1rem 0;
+}

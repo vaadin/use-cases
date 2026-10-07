@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @WithMockUser
 class UseCase08ViewTest extends SpringBrowserlessTest {
 
-    // $view() only returns VISIBLE components. Hidden step layouts
+    // findInView() only returns VISIBLE components. Hidden step layouts
     // and hidden buttons (Previous, Submit) are not found.
 
     @Test
@@ -30,12 +30,12 @@ class UseCase08ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Step 1 fields visible
-        assertTrue($view(TextField.class).all().stream()
+        assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "First Name".equals(f.getLabel())));
-        assertEquals(1, $view(EmailField.class).all().size());
+        assertEquals(1, findInView(EmailField.class).all().size());
 
         // Step 2 fields NOT visible
-        assertFalse($view(TextField.class).all().stream()
+        assertFalse(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "Company Name".equals(f.getLabel())));
     }
 
@@ -44,7 +44,7 @@ class UseCase08ViewTest extends SpringBrowserlessTest {
         navigate(UseCase08View.class);
         runPendingSignalsTasks();
 
-        Span progress = $view(Span.class).all().stream()
+        Span progress = findInView(Span.class).all().stream()
                 .filter(s -> s.getText().contains("Step")).findFirst()
                 .orElseThrow();
         assertEquals("Step 1 of 4", progress.getText());
@@ -56,7 +56,7 @@ class UseCase08ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // On step 1: only "Next" button is visible (Previous/Submit are hidden)
-        Button nextButton = $view(Button.class).all().stream()
+        Button nextButton = findInView(Button.class).all().stream()
                 .filter(b -> "Next".equals(b.getText())).findFirst()
                 .orElseThrow();
         assertFalse(nextButton.isEnabled());
@@ -68,8 +68,8 @@ class UseCase08ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Previous button has bindVisible(step != PERSONAL_INFO),
-        // so it's hidden on step 1 and NOT found by $view()
-        assertFalse($view(Button.class).all().stream()
+        // so it's hidden on step 1 and NOT found by findInView()
+        assertFalse(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Previous".equals(b.getText())));
     }
 
@@ -78,7 +78,7 @@ class UseCase08ViewTest extends SpringBrowserlessTest {
         navigate(UseCase08View.class);
         fillStep1();
 
-        Button nextButton = $view(Button.class).all().stream()
+        Button nextButton = findInView(Button.class).all().stream()
                 .filter(b -> "Next".equals(b.getText())).findFirst()
                 .orElseThrow();
         assertTrue(nextButton.isEnabled());
@@ -91,13 +91,13 @@ class UseCase08ViewTest extends SpringBrowserlessTest {
         clickNext();
 
         // Step 2 fields visible
-        assertTrue($view(TextField.class).all().stream()
+        assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "Company Name".equals(f.getLabel())));
         // Step 1 fields hidden
-        assertFalse($view(TextField.class).all().stream()
+        assertFalse(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "First Name".equals(f.getLabel())));
         // Previous button now visible
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Previous".equals(b.getText())));
     }
 
@@ -107,14 +107,14 @@ class UseCase08ViewTest extends SpringBrowserlessTest {
         fillStep1();
         clickNext();
 
-        Button previousButton = $view(Button.class).all().stream()
+        Button previousButton = findInView(Button.class).all().stream()
                 .filter(b -> "Previous".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(previousButton).click();
         runPendingSignalsTasks();
 
         // Step 1 fields visible again
-        assertTrue($view(TextField.class).all().stream()
+        assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "First Name".equals(f.getLabel())));
     }
 
@@ -129,21 +129,21 @@ class UseCase08ViewTest extends SpringBrowserlessTest {
         clickNext();
 
         // Submit button visible on step 4
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Submit".equals(b.getText())));
         // Next button hidden on step 4
-        assertFalse($view(Button.class).all().stream()
+        assertFalse(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Next".equals(b.getText())));
     }
 
     private void fillStep1() {
-        TextField firstName = $view(TextField.class).all().stream()
+        TextField firstName = findInView(TextField.class).all().stream()
                 .filter(f -> "First Name".equals(f.getLabel())).findFirst()
                 .orElseThrow();
-        TextField lastName = $view(TextField.class).all().stream()
+        TextField lastName = findInView(TextField.class).all().stream()
                 .filter(f -> "Last Name".equals(f.getLabel())).findFirst()
                 .orElseThrow();
-        EmailField email = $view(EmailField.class).single();
+        EmailField email = findInView(EmailField.class).single();
 
         test(firstName).setValue("John");
         test(lastName).setValue("Doe");
@@ -153,17 +153,17 @@ class UseCase08ViewTest extends SpringBrowserlessTest {
 
     @SuppressWarnings("unchecked")
     private void fillStep2() {
-        TextField companyName = $view(TextField.class).all().stream()
+        TextField companyName = findInView(TextField.class).all().stream()
                 .filter(f -> "Company Name".equals(f.getLabel())).findFirst()
                 .orElseThrow();
         test(companyName).setValue("Acme Corp");
 
-        ComboBox<String> companySize = $view(ComboBox.class).all().stream()
+        ComboBox<String> companySize = findInView(ComboBox.class).all().stream()
                 .filter(c -> "Company Size".equals(c.getLabel())).findFirst()
                 .orElseThrow();
         test(companySize).selectItem("11-50");
 
-        ComboBox<String> industry = $view(ComboBox.class).all().stream()
+        ComboBox<String> industry = findInView(ComboBox.class).all().stream()
                 .filter(c -> "Industry".equals(c.getLabel())).findFirst()
                 .orElseThrow();
         test(industry).selectItem("Technology");
@@ -171,7 +171,7 @@ class UseCase08ViewTest extends SpringBrowserlessTest {
     }
 
     private void clickNext() {
-        Button nextButton = $view(Button.class).all().stream()
+        Button nextButton = findInView(Button.class).all().stream()
                 .filter(b -> "Next".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(nextButton).click();

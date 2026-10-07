@@ -1,13 +1,11 @@
 package com.example.usecase03;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.MissingAPI;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -23,13 +21,15 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-03", layout = MainLayout.class)
 @PageTitle("Use Case 3: Interactive SVG Shape Editor")
 @Menu(order = 3, title = "UC 3: Interactive SVG Shape Editor")
-@PermitAll
+@StyleSheet("usecase03.css")
+@AnonymousAllowed
 public class UseCase03View extends VerticalLayout {
 
     // Rectangle signals (green) - top left position
@@ -76,19 +76,20 @@ public class UseCase03View extends VerticalLayout {
     public UseCase03View() {
         resetAll();
 
+        addClassName("usecase03-view");
         setSpacing(true);
         setPadding(true);
         setWidthFull();
 
         H2 title = new H2("Use Case 3: Interactive SVG Shape Editor");
-        title.getStyle().set("margin-bottom", "0");
+        title.addClassName("view-title");
 
         Paragraph description = new Paragraph(
                 "Click on a shape to select it, or use the tabs below. "
                         + "Demonstrates extensive bindAttribute() usage with SVG elements. "
                         + "Each shape is controlled by multiple signals that bind to SVG attributes like position, size, colors, and transforms. "
                         + "(19 writable + 4 computed = 23 signals total).");
-        description.getStyle().set("margin-top", "0.5em");
+        description.addClassName("view-description");
 
         // Main content: controls on left, canvas on right
         HorizontalLayout mainContent = new HorizontalLayout();
@@ -98,11 +99,11 @@ public class UseCase03View extends VerticalLayout {
         // Left panel: shape selector and controls
         VerticalLayout leftPanel = createLeftPanel();
         leftPanel.setWidth("280px");
-        leftPanel.getStyle().set("flex-shrink", "0");
+        leftPanel.addClassName("left-panel");
 
         // Right panel: SVG canvas
         Div svgContainer = createSvgCanvas();
-        svgContainer.getStyle().set("flex", "1");
+        svgContainer.addClassName("svg-container");
 
         mainContent.add(leftPanel, svgContainer);
 
@@ -127,7 +128,6 @@ public class UseCase03View extends VerticalLayout {
 
         // Reset button
         Button resetButton = new Button("Reset to Defaults", e -> resetAll());
-        resetButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
         resetButton.setWidthFull();
 
         panel.add(tabsheet, resetButton);
@@ -136,18 +136,14 @@ public class UseCase03View extends VerticalLayout {
 
     private Div createSvgCanvas() {
         Div container = new Div();
-        container.getStyle().set("border",
-                "2px solid color-mix(in srgb, var(--vaadin-text-color) 10%, transparent)")
-                .set("padding", "20px").set("background", "white")
-                .set("border-radius", "8px")
-                .set("box-shadow", "0 2px 8px rgba(0,0,0,0.1)");
+        // .svg-container class is added on the wrapper by the caller
 
         Element svg = new Element("svg");
         svg.setAttribute("viewBox", "0 0 500 500");
         svg.setAttribute("width", "100%");
         svg.setAttribute("height", "500");
         svg.setAttribute("style", "max-width: 100%;");
-        svg.getStyle().set("background", "#fafafa").set("border-radius", "4px");
+        svg.getClassList().add("svg-canvas");
 
         // Add background grid for reference
         Element defs = new Element("defs");
@@ -190,8 +186,8 @@ public class UseCase03View extends VerticalLayout {
         });
 
         // Add cursor pointer style for shapes
-        rectElement.getStyle().set("cursor", "pointer");
-        starElement.getStyle().set("cursor", "pointer");
+        rectElement.getClassList().add("clickable-shape");
+        starElement.getClassList().add("clickable-shape");
 
         container.getElement().appendChild(svg);
         return container;
@@ -288,9 +284,7 @@ public class UseCase03View extends VerticalLayout {
 
         // Position section
         Span positionLabel = new Span("Position");
-        positionLabel.getStyle().set("font-size", "var(--aura-font-size-s)")
-                .set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-weight", "500");
+        positionLabel.addClassName("section-label");
 
         IntegerSlider xSlider = new IntegerSlider("X", 0, 500);
         bindSliderToInteger(xSlider, rectXSignal);
@@ -302,9 +296,8 @@ public class UseCase03View extends VerticalLayout {
 
         // Size section
         Span sizeLabel = new Span("Size");
-        sizeLabel.getStyle().set("font-size", "var(--aura-font-size-s)")
-                .set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-weight", "500").set("margin-top", "8px");
+        sizeLabel.addClassName("section-label");
+        sizeLabel.addClassName("section-label-with-margin");
 
         IntegerSlider widthSlider = new IntegerSlider("Width", 50, 250);
         bindSliderToInteger(widthSlider, rectWidthSignal);
@@ -321,9 +314,8 @@ public class UseCase03View extends VerticalLayout {
 
         // Appearance section
         Span appearanceLabel = new Span("Appearance");
-        appearanceLabel.getStyle().set("font-size", "var(--aura-font-size-s)")
-                .set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-weight", "500").set("margin-top", "8px");
+        appearanceLabel.addClassName("section-label");
+        appearanceLabel.addClassName("section-label-with-margin");
 
         ComboBox<String> fillColorField = createColorPicker("Fill");
         fillColorField.bindValue(rectFillSignal, rectFillSignal::set);
@@ -340,9 +332,8 @@ public class UseCase03View extends VerticalLayout {
 
         // Transform section
         Span transformLabel = new Span("Transform");
-        transformLabel.getStyle().set("font-size", "var(--aura-font-size-s)")
-                .set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-weight", "500").set("margin-top", "8px");
+        transformLabel.addClassName("section-label");
+        transformLabel.addClassName("section-label-with-margin");
 
         IntegerSlider rotationSlider = new IntegerSlider("Rotation", 0, 360);
         bindSliderToInteger(rotationSlider, rectRotationSignal);
@@ -368,9 +359,7 @@ public class UseCase03View extends VerticalLayout {
 
         // Position section
         Span positionLabel = new Span("Position");
-        positionLabel.getStyle().set("font-size", "var(--aura-font-size-s)")
-                .set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-weight", "500");
+        positionLabel.addClassName("section-label");
 
         IntegerSlider cxSlider = new IntegerSlider("Center X", 0, 500);
         bindSliderToInteger(cxSlider, starCxSignal);
@@ -382,9 +371,8 @@ public class UseCase03View extends VerticalLayout {
 
         // Shape section
         Span shapeLabel = new Span("Shape");
-        shapeLabel.getStyle().set("font-size", "var(--aura-font-size-s)")
-                .set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-weight", "500").set("margin-top", "8px");
+        shapeLabel.addClassName("section-label");
+        shapeLabel.addClassName("section-label-with-margin");
 
         IntegerSlider pointsSlider = new IntegerSlider("Points", 3, 10);
         bindSliderToInteger(pointsSlider, starPointsSignal);
@@ -396,9 +384,8 @@ public class UseCase03View extends VerticalLayout {
 
         // Appearance section
         Span appearanceLabel = new Span("Appearance");
-        appearanceLabel.getStyle().set("font-size", "var(--aura-font-size-s)")
-                .set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-weight", "500").set("margin-top", "8px");
+        appearanceLabel.addClassName("section-label");
+        appearanceLabel.addClassName("section-label-with-margin");
 
         ComboBox<String> fillColorField = createColorPicker("Fill");
         fillColorField.bindValue(starFillSignal, starFillSignal::set);
@@ -415,9 +402,8 @@ public class UseCase03View extends VerticalLayout {
 
         // Transform section
         Span transformLabel = new Span("Transform");
-        transformLabel.getStyle().set("font-size", "var(--aura-font-size-s)")
-                .set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-weight", "500").set("margin-top", "8px");
+        transformLabel.addClassName("section-label");
+        transformLabel.addClassName("section-label-with-margin");
 
         IntegerSlider rotationSlider = new IntegerSlider("Rotation", 0, 360);
         bindSliderToInteger(rotationSlider, starRotationSignal);
@@ -455,6 +441,8 @@ public class UseCase03View extends VerticalLayout {
             layout.setSpacing(true);
 
             Div swatch = new Div();
+            // ComboBox renders items into a popover outside the view, so
+            // nested CSS would not match — keep these styles inline.
             swatch.getStyle().set("width", "20px").set("height", "20px")
                     .set("background-color", color)
                     .set("border",

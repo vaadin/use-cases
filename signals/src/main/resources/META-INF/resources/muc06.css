@@ -1,0 +1,37 @@
+.muc06-view {
+    .stats-box {
+        background-color: #f5f5f5;
+        padding: 1em;
+        border-radius: 4px;
+        margin-bottom: 1em;
+        display: flex;
+        gap: 2em;
+    }
+    .stat-label {
+        font-weight: 500;
+    }
+    .stat-completed {
+        color: var(--aura-green);
+    }
+    .stat-pending {
+        color: var(--aura-accent-color);
+    }
+    .tasks-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5em;
+        margin-bottom: 1em;
+    }
+    .info-box {
+        background-color: #e0f7fa;
+        padding: 1em;
+        border-radius: 4px;
+        margin-top: 1em;
+        font-style: italic;
+    }
+    .task-row {
+        background-color: #ffffff;
+        border: 1px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent);
+        border-radius: 4px;
+    }
+}

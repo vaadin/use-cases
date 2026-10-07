@@ -21,18 +21,18 @@ class TrackingViewTest extends BrowserlessTest {
         geolocation.grantPermission();
         navigate(TrackingView.class);
 
-        Button toggle = $(Button.class).withText("Start tracking").single();
+        Button toggle = find(Button.class).withText("Start tracking").single();
         test(toggle).click();
 
         assertEquals(1, geolocation.activeTrackers().size(),
                 "Exactly one tracker session should be active after starting");
 
         geolocation.setLocation(60.1699, 24.9384, 15.0);
-        Span status = $(Span.class).withText("Update #1").single();
+        Span status = find(Span.class).withText("Update #1").single();
         assertEquals("Update #1", status.getText());
 
         geolocation.setLocation(60.1700, 24.9385, 12.0);
-        status = $(Span.class).withText("Update #2").single();
+        status = find(Span.class).withText("Update #2").single();
         assertEquals("Update #2", status.getText());
     }
 
@@ -42,13 +42,13 @@ class TrackingViewTest extends BrowserlessTest {
         geolocation.grantPermission();
         navigate(TrackingView.class);
 
-        Button toggle = $(Button.class).withText("Start tracking").single();
+        Button toggle = find(Button.class).withText("Start tracking").single();
         test(toggle).click();
 
         geolocation.setUnavailable(GeolocationErrorCode.POSITION_UNAVAILABLE,
                 "position unavailable");
 
-        Span status = $(Span.class).withTextContaining("Could not determine")
+        Span status = find(Span.class).withTextContaining("Could not determine")
                 .single();
         assertTrue(status.getText().contains("location"),
                 "Status should describe the location failure, was: "

@@ -15,6 +15,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.card.CardVariant;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
@@ -34,6 +35,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @Menu(order = 4, title = "UC4 — Refresh stale data")
+@StyleSheet("uc4.css")
 public class RefreshStaleDataView extends VerticalLayout {
 
     private static final long REFRESH_THRESHOLD_SECONDS = 5;
@@ -56,6 +58,7 @@ public class RefreshStaleDataView extends VerticalLayout {
     public RefreshStaleDataView(TaskScheduler taskScheduler) {
         this.taskScheduler = taskScheduler;
 
+        addClassName("uc4-view");
         add(new H1("UC4 — Refresh stale data on return"));
         add(new Paragraph("The card below shows a fake USD/EUR exchange "
                 + "rate. Switch away for more than 5 seconds and back — "

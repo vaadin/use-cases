@@ -1,0 +1,21 @@
+.uc12-view {
+    /* Visually hidden but reachable by screen readers — the canonical
+       sr-only utility. */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .badge {
+        font-family: monospace;
+        color: var(--vaadin-text-color-secondary);
+        align-self: center;
+    }
+}

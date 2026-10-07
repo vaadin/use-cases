@@ -1,0 +1,63 @@
+.muc02-view {
+    .cursor-canvas {
+        position: relative;
+        background-color: #f5f5f5;
+        outline: 2px solid #e0e0e0;
+        border-radius: 4px;
+        height: 400px;
+        margin: 1em 0;
+        cursor: crosshair;
+    }
+    .cursors-container {
+        position: relative;
+    }
+    .users-list {
+        background-color: #e3f2fd;
+        padding: 1em;
+        border-radius: 4px;
+    }
+    .info-box {
+        background-color: #fff3e0;
+        padding: 1em;
+        border-radius: 4px;
+        margin-top: 1em;
+        font-style: italic;
+    }
+    .cursor-list-item {
+        margin-bottom: 0.5em;
+    }
+    .color-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .user-label {
+        font-weight: 500;
+    }
+    .position-label {
+        font-family: monospace;
+        color: var(--vaadin-text-color-secondary);
+        margin-left: auto;
+    }
+    .cursor-indicator {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid white;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+    }
+    .cursor-indicator-label {
+        position: absolute;
+        top: 25px;
+        left: 0;
+        white-space: nowrap;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 0.75em;
+    }
+}

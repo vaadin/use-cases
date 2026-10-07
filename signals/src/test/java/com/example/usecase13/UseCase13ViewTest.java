@@ -30,8 +30,8 @@ class UseCase13ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // The counter box should show "Currently Online" text
-        assertTrue(
-                $view(H3.class).all().stream().anyMatch(h -> h.getText() != null
+        assertTrue(findInView(H3.class).all().stream()
+                .anyMatch(h -> h.getText() != null
                         && h.getText().contains("Currently Online")));
     }
 
@@ -41,7 +41,7 @@ class UseCase13ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // The mock user's own session is already registered by the framework
-        int initialCount = $view(Card.class).all().size();
+        int initialCount = findInView(Card.class).all().size();
 
         // Register 2 additional fake users
         userSessionRegistry.registerUser("alice", "session-a");
@@ -49,7 +49,7 @@ class UseCase13ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Should have 2 more cards than initial
-        assertEquals(initialCount + 2, $view(Card.class).all().size());
+        assertEquals(initialCount + 2, findInView(Card.class).all().size());
     }
 
     @Test
@@ -65,7 +65,7 @@ class UseCase13ViewTest extends SpringBrowserlessTest {
 
         int expectedCount = initialCount + 2;
         // Counter should show the expected count
-        assertTrue($view(H3.class).all().stream()
+        assertTrue(findInView(H3.class).all().stream()
                 .anyMatch(h -> h.getText() != null && h.getText()
                         .contains(String.valueOf(expectedCount))));
     }

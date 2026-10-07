@@ -1,7 +1,5 @@
 package com.example.usecase19;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.service.DataLoadingService;
 import com.example.views.MainLayout;
 
@@ -9,6 +7,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -21,6 +20,7 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -41,7 +41,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-19", layout = MainLayout.class)
 @PageTitle("Use Case 19: Parallel Loading")
 @Menu(order = 19, title = "UC 19: Parallel Loading")
-@PermitAll
+@StyleSheet("usecase19.css")
+@AnonymousAllowed
 public class UseCase19View extends VerticalLayout {
 
     /**
@@ -55,6 +56,7 @@ public class UseCase19View extends VerticalLayout {
 
     public UseCase19View(DataLoadingService dataLoadingService) {
         this.dataLoadingService = dataLoadingService;
+        addClassName("usecase19-view");
         setSpacing(true);
         setPadding(true);
 
@@ -76,7 +78,7 @@ public class UseCase19View extends VerticalLayout {
 
         Button loadButton = new Button("Load All Items",
                 event -> loadAllItems());
-        loadButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        loadButton.addThemeVariants(ButtonVariant.PRIMARY);
 
         Checkbox errorCheckbox = new Checkbox("Simulate Random Errors");
         errorCheckbox.bindValue(simulateErrorsSignal,
@@ -86,9 +88,7 @@ public class UseCase19View extends VerticalLayout {
 
         // Items container with flexbox
         Div itemsContainer = new Div();
-        itemsContainer.getStyle().set("display", "flex")
-                .set("flex-wrap", "wrap").set("gap", "1em")
-                .set("margin", "1em 0");
+        itemsContainer.addClassName("items-container");
 
         // Bind cards to items signal
         itemsContainer.bindChildren(itemsSignal, this::createDataItemCard);
@@ -191,9 +191,7 @@ public class UseCase19View extends VerticalLayout {
      */
     private Card createDataItemCard(ValueSignal<DataItem> itemSignal) {
         Card card = new Card();
-
-        // Set card size for flex layout
-        card.getStyle().set("flex", "1 1 300px").set("min-width", "300px");
+        card.addClassName("data-card");
 
         // Header with item name
         Signal<String> nameSignal = itemSignal.map(DataItem::name);
@@ -203,10 +201,7 @@ public class UseCase19View extends VerticalLayout {
 
         // IDLE state content
         Div idleContent = new Div();
-        idleContent.getStyle().set("display", "flex")
-                .set("flex-direction", "column").set("align-items", "center")
-                .set("gap", "0.5em").set("padding", "2em")
-                .set("color", "var(--vaadin-text-color-secondary)");
+        idleContent.addClassName("idle-content");
 
         Icon idleIcon = new Icon(VaadinIcon.CIRCLE);
         idleIcon.setColor(
@@ -214,7 +209,7 @@ public class UseCase19View extends VerticalLayout {
         idleIcon.setSize("2em");
 
         Span idleText = new Span("Ready to load");
-        idleText.getStyle().set("font-style", "italic");
+        idleText.addClassName("idle-text");
 
         idleContent.add(idleIcon, idleText);
         Signal<Boolean> isIdleSignal = itemSignal
@@ -223,16 +218,14 @@ public class UseCase19View extends VerticalLayout {
 
         // LOADING state content
         Div loadingContent = new Div();
-        loadingContent.getStyle().set("display", "flex")
-                .set("flex-direction", "column").set("align-items", "center")
-                .set("gap", "1em").set("padding", "2em");
+        loadingContent.addClassName("loading-content");
 
         ProgressBar progressBar = new ProgressBar();
         progressBar.setIndeterminate(true);
         progressBar.setWidth("80%");
 
         Span loadingText = new Span("Loading...");
-        loadingText.getStyle().set("color", "var(--aura-accent-color)");
+        loadingText.addClassName("loading-text");
 
         loadingContent.add(progressBar, loadingText);
         Signal<Boolean> isLoadingSignal = itemSignal
@@ -241,28 +234,21 @@ public class UseCase19View extends VerticalLayout {
 
         // SUCCESS state content
         Div successContent = new Div();
-        successContent.getStyle().set("padding", "1em");
+        successContent.addClassName("success-content");
 
         Div successHeader = new Div();
-        successHeader.getStyle().set("display", "flex")
-                .set("align-items", "center").set("gap", "0.5em")
-                .set("margin-bottom", "1em");
+        successHeader.addClassName("state-header");
 
         Icon successIcon = new Icon(VaadinIcon.CHECK_CIRCLE);
         successIcon.setColor("var(--aura-green)");
 
         Span successLabel = new Span("Loaded successfully");
-        successLabel.getStyle().set("color", "var(--aura-green)")
-                .set("font-weight", "500");
+        successLabel.addClassName("success-label");
 
         successHeader.add(successIcon, successLabel);
 
         Div dataContent = new Div();
-        dataContent.getStyle().set("background-color",
-                "color-mix(in srgb, var(--vaadin-text-color) 5%, transparent)")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("white-space", "pre-line").set("font-family", "monospace")
-                .set("font-size", "0.875em");
+        dataContent.addClassName("data-content");
 
         Span dataText = new Span();
         dataText.bindText(
@@ -276,27 +262,21 @@ public class UseCase19View extends VerticalLayout {
 
         // ERROR state content
         Div errorContent = new Div();
-        errorContent.getStyle().set("padding", "1em");
+        errorContent.addClassName("error-content");
 
         Div errorHeader = new Div();
-        errorHeader.getStyle().set("display", "flex")
-                .set("align-items", "center").set("gap", "0.5em")
-                .set("margin-bottom", "1em");
+        errorHeader.addClassName("state-header");
 
         Icon errorIcon = new Icon(VaadinIcon.CLOSE_CIRCLE);
         errorIcon.setColor("var(--aura-red)");
 
         Span errorLabel = new Span("Failed to load");
-        errorLabel.getStyle().set("color", "var(--aura-red)").set("font-weight",
-                "500");
+        errorLabel.addClassName("error-label");
 
         errorHeader.add(errorIcon, errorLabel);
 
         Div errorMessage = new Div();
-        errorMessage.getStyle().set("background-color", "#ffebee")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-bottom", "1em")
-                .set("color", "var(--aura-red-text)");
+        errorMessage.addClassName("error-message");
 
         Span errorText = new Span();
         errorText.bindText(itemSignal.map(
@@ -305,7 +285,7 @@ public class UseCase19View extends VerticalLayout {
 
         Button retryButton = new Button("Retry",
                 event -> retryItem(itemSignal));
-        retryButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        retryButton.addThemeVariants(ButtonVariant.PRIMARY);
 
         errorContent.add(errorHeader, errorMessage, retryButton);
         Signal<Boolean> isErrorSignal = itemSignal
@@ -315,17 +295,16 @@ public class UseCase19View extends VerticalLayout {
         // Add all state contents to card
         card.add(idleContent, loadingContent, successContent, errorContent);
 
-        // Card styling based on state - use direct style binding
-        card.getStyle().bind("border-left", itemSignal.map(item -> {
-            String color = switch (item.state()) {
-            case IDLE ->
-                "color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)";
-            case LOADING, GENERATING -> "var(--aura-accent-color)";
-            case SUCCESS -> "var(--aura-green)";
-            case ERROR -> "var(--aura-red)";
-            };
-            return "4px solid " + color;
-        }));
+        // Card styling based on state - swap state-* class
+        card.getClassNames().bind("state-idle",
+                itemSignal.map(i -> i.state() == LoadingState.IDLE));
+        card.getClassNames().bind("state-loading",
+                itemSignal.map(i -> i.state() == LoadingState.LOADING
+                        || i.state() == LoadingState.GENERATING));
+        card.getClassNames().bind("state-success",
+                itemSignal.map(i -> i.state() == LoadingState.SUCCESS));
+        card.getClassNames().bind("state-error",
+                itemSignal.map(i -> i.state() == LoadingState.ERROR));
 
         return card;
     }

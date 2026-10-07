@@ -1,0 +1,60 @@
+.usecase14-view {
+    .error-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+    }
+    .state-box {
+        border: 2px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent);
+        border-radius: 8px;
+        padding: 1.5em;
+        margin: 1em 0;
+        min-height: 300px;
+    }
+    .idle-message {
+        color: var(--vaadin-text-color-secondary);
+        font-style: italic;
+    }
+    .loading-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1em;
+    }
+    .loading-message {
+        color: var(--aura-accent-color);
+    }
+    .success-title {
+        margin-top: 0;
+        color: var(--aura-green);
+    }
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1em;
+        margin-top: 1em;
+    }
+    .error-content {
+        background-color: #ffebee;
+        padding: 1em;
+        border-radius: 4px;
+        border-left: 4px solid var(--aura-red);
+    }
+    .error-title {
+        margin-top: 0;
+        color: var(--aura-red);
+    }
+    .error-message {
+        margin: 0.5em 0;
+    }
+    .metric-label {
+        font-size: var(--aura-font-size-s);
+        color: var(--vaadin-text-color-secondary);
+        font-weight: 500;
+    }
+    .metric-value {
+        font-size: 2.5em;
+        font-weight: bold;
+        line-height: 1;
+    }
+}

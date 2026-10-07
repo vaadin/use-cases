@@ -52,7 +52,7 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
 
         // Verify userB's name appears in the leaderboard
         assertTrue(
-                $view(Span.class).all().stream()
+                findInView(Span.class).all().stream()
                         .anyMatch(s -> s.getText() != null
                                 && s.getText().contains("userB")
                                 && s.getText().contains("1 points")),
@@ -65,7 +65,7 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
 
         // The leaderboard should now show the nickname instead
         assertTrue(
-                $view(Span.class).all().stream()
+                findInView(Span.class).all().stream()
                         .anyMatch(s -> s.getText() != null
                                 && s.getText().contains("CoolPlayer")
                                 && s.getText().contains("1 points")),
@@ -74,7 +74,7 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
 
         // The old username should no longer appear in the score label
         assertTrue(
-                $view(Span.class).all().stream()
+                findInView(Span.class).all().stream()
                         .noneMatch(s -> s.getText() != null
                                 && s.getText().contains("userB")
                                 && s.getText().contains("1 points")),
@@ -106,7 +106,7 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
                         + diagnostics("after awardPoint"));
 
         assertTrue(
-                $view(Span.class).all().stream()
+                findInView(Span.class).all().stream()
                         .anyMatch(s -> s.getText() != null
                                 && s.getText().contains("CoolPlayer")
                                 && s.getText().contains("1 points")),
@@ -119,7 +119,7 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
 
         // Should revert to username
         assertTrue(
-                $view(Span.class).all().stream()
+                findInView(Span.class).all().stream()
                         .anyMatch(s -> s.getText() != null
                                 && s.getText().contains("userB")
                                 && s.getText().contains("1 points")),
@@ -140,15 +140,16 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
                 .append(k).append("=").append(v.peek()).append(" "));
         sb.append("\n");
 
-        sb.append("active users: ").append(userSessionRegistry
-                .getActiveUsersSignal().peek().stream()
-                .map(s -> s.peek().getCompositeKey() + "(nickname="
-                        + s.peek().nickname() + ")")
-                .collect(Collectors.joining(", ")))
+        sb.append("active users: ")
+                .append(userSessionRegistry.getActiveUsersSignal().peek()
+                        .stream()
+                        .map(s -> s.peek().getCompositeKey() + "(nickname="
+                                + s.peek().nickname() + ")")
+                        .collect(Collectors.joining(", ")))
                 .append("\n");
 
-        sb.append("display names: ").append(userSessionRegistry
-                .getDisplayNamesSignal().peek())
+        sb.append("display names: ")
+                .append(userSessionRegistry.getDisplayNamesSignal().peek())
                 .append("\n");
 
         sb.append("buttonVisible=")
@@ -158,8 +159,8 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
                 .append("\n");
 
         sb.append("spans on view:\n");
-        $view(Span.class).all().forEach(s -> sb.append("  [")
-                .append(s.getText()).append("]\n"));
+        findInView(Span.class).all().forEach(
+                s -> sb.append("  [").append(s.getText()).append("]\n"));
 
         return sb.toString();
     }

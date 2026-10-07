@@ -11,12 +11,13 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.WakeLock;
+import com.vaadin.flow.component.wakelock.WakeLock;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
@@ -27,13 +28,14 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * <p>
  * A simple HIIT-style interval timer alternating between <em>Work</em> and
  * <em>Rest</em> phases. While the timer is running the screen must not dim —
- * the user has their hands full and won't tap the screen for tens of seconds
- * at a time. The lock is coupled to a {@code running} {@link Signal} via
+ * the user has their hands full and won't tap the screen for tens of seconds at
+ * a time. The lock is coupled to a {@code running} {@link Signal} via
  * {@link Signal#effect(Object, Runnable)}, so the lock is requested whenever
  * the timer starts and released whenever the timer pauses or resets.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @Menu(order = 4, title = "UC4 — Workout timer")
+@StyleSheet("uc4.css")
 public class WorkoutTimerView extends VerticalLayout {
 
     private static final int WORK_SECONDS = 30;
@@ -62,6 +64,7 @@ public class WorkoutTimerView extends VerticalLayout {
     public WorkoutTimerView(TaskScheduler taskScheduler) {
         this.taskScheduler = taskScheduler;
 
+        addClassName("uc4-view");
         add(new H1("UC4 — Workout interval timer"));
         add(new Paragraph("30s Work, 10s Rest, repeat. The wake lock is "
                 + "requested while the timer is running and released the "
@@ -78,9 +81,8 @@ public class WorkoutTimerView extends VerticalLayout {
 
         clockLabel.bindText(remaining.map(WorkoutTimerView::formatSeconds));
         phaseLabel.bindText(phase.map(p -> p.name()));
-        startPauseButton.bindText(running.map(r -> Boolean.TRUE.equals(r)
-                ? "Pause"
-                : "Start"));
+        startPauseButton.bindText(
+                running.map(r -> Boolean.TRUE.equals(r) ? "Pause" : "Start"));
 
         startPauseButton.addClickListener(
                 e -> running.set(!Boolean.TRUE.equals(running.peek())));
@@ -95,8 +97,7 @@ public class WorkoutTimerView extends VerticalLayout {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         UI ui = attachEvent.getUI();
-        WakeLock wakeLock = ui.getPage().getWakeLock();
-        Signal<Boolean> active = wakeLock.activeSignal();
+        Signal<Boolean> active = WakeLock.activeSignal();
 
         lockBadge.bindText(active.map(held -> Boolean.TRUE.equals(held)
                 ? "Holding — screen will stay on between sets"
@@ -105,10 +106,10 @@ public class WorkoutTimerView extends VerticalLayout {
 
         Signal.effect(this, () -> {
             if (Boolean.TRUE.equals(running.get())) {
-                wakeLock.request();
+                WakeLock.request();
                 startTicking(ui);
             } else {
-                wakeLock.release();
+                WakeLock.release();
                 stopTicking();
             }
         });
@@ -117,7 +118,7 @@ public class WorkoutTimerView extends VerticalLayout {
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         stopTicking();
-        detachEvent.getUI().getPage().getWakeLock().release();
+        WakeLock.release();
         super.onDetach(detachEvent);
     }
 
@@ -125,8 +126,8 @@ public class WorkoutTimerView extends VerticalLayout {
         if (tickTask != null && !tickTask.isCancelled()) {
             return;
         }
-        tickTask = taskScheduler.scheduleAtFixedRate(ui.accessLater(this::tick,
-                null), Duration.ofSeconds(1));
+        tickTask = taskScheduler.scheduleAtFixedRate(
+                ui.accessLater(this::tick, null), Duration.ofSeconds(1));
     }
 
     private void stopTicking() {

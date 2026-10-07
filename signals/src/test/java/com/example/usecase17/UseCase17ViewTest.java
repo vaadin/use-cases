@@ -23,7 +23,7 @@ class UseCase17ViewTest extends SpringBrowserlessTest {
 
         // CPU, Motherboard, RAM, GPU, Primary Storage, Secondary Storage,
         // PSU, Case, CPU Cooler = 9
-        assertEquals(9, $view(ComboBox.class).all().size());
+        assertEquals(9, findInView(ComboBox.class).all().size());
     }
 
     @Test
@@ -32,7 +32,7 @@ class UseCase17ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Total price formatted as "$0" (using %.0f format)
-        Span totalLabel = $view(Span.class).all().stream()
+        Span totalLabel = findInView(Span.class).all().stream()
                 .filter(s -> "$0".equals(s.getText())).findFirst()
                 .orElseThrow();
         assertEquals("$0", totalLabel.getText());
@@ -44,14 +44,14 @@ class UseCase17ViewTest extends SpringBrowserlessTest {
         navigate(UseCase17View.class);
         runPendingSignalsTasks();
 
-        ComboBox<CPU> cpuSelect = (ComboBox<CPU>) $view(ComboBox.class).all()
-                .stream().filter(c -> "CPU".equals(c.getLabel())).findFirst()
-                .orElseThrow();
+        ComboBox<CPU> cpuSelect = (ComboBox<CPU>) findInView(ComboBox.class)
+                .all().stream().filter(c -> "CPU".equals(c.getLabel()))
+                .findFirst().orElseThrow();
         test(cpuSelect).selectItem("Intel Core i5-14600K");
         runPendingSignalsTasks();
 
         // Total price should now be $319 (i5-14600K price)
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> "$319".equals(s.getText())));
     }
 
@@ -62,13 +62,13 @@ class UseCase17ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Select Intel CPU (LGA1700)
-        ComboBox<CPU> cpuSelect = (ComboBox<CPU>) $view(ComboBox.class).all()
-                .stream().filter(c -> "CPU".equals(c.getLabel())).findFirst()
-                .orElseThrow();
+        ComboBox<CPU> cpuSelect = (ComboBox<CPU>) findInView(ComboBox.class)
+                .all().stream().filter(c -> "CPU".equals(c.getLabel()))
+                .findFirst().orElseThrow();
         test(cpuSelect).selectItem("Intel Core i5-14600K");
 
         // Select AMD motherboard (AM5 socket) - socket mismatch
-        ComboBox<Motherboard> mbSelect = (ComboBox<Motherboard>) $view(
+        ComboBox<Motherboard> mbSelect = (ComboBox<Motherboard>) findInView(
                 ComboBox.class).all().stream()
                 .filter(c -> "Motherboard".equals(c.getLabel())).findFirst()
                 .orElseThrow();
@@ -77,7 +77,7 @@ class UseCase17ViewTest extends SpringBrowserlessTest {
 
         // Compatibility count should drop below 13 - find the checks passing
         // span
-        assertTrue($view(Span.class).all().stream().anyMatch(s -> {
+        assertTrue(findInView(Span.class).all().stream().anyMatch(s -> {
             String text = s.getText();
             return text != null && text.contains("checks passing")
                     && !text.contains("13/13");
@@ -89,7 +89,7 @@ class UseCase17ViewTest extends SpringBrowserlessTest {
         navigate(UseCase17View.class);
         runPendingSignalsTasks();
 
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> "Power Consumption".equals(s.getText())));
     }
 }

@@ -88,11 +88,11 @@ class UseCase27ViewTest extends SpringBrowserlessTest {
     void parentLayoutInstanceIsReusedAcrossSiblingNavigations() {
         navigate(UseCase27View.class);
         runPendingSignalsTasks();
-        UseCase27Layout firstLayout = $(UseCase27Layout.class).single();
+        UseCase27Layout firstLayout = find(UseCase27Layout.class).single();
 
         navigate(UseCase27DetailsView.class, Map.of("id", "7"));
         runPendingSignalsTasks();
-        UseCase27Layout secondLayout = $(UseCase27Layout.class).single();
+        UseCase27Layout secondLayout = find(UseCase27Layout.class).single();
 
         assertEquals(firstLayout, secondLayout,
                 "UseCase27Layout must be reused across sibling navigations — "
@@ -101,13 +101,13 @@ class UseCase27ViewTest extends SpringBrowserlessTest {
     }
 
     private String breadcrumbText() {
-        Div breadcrumb = $(Div.class).withId(UseCase27Layout.BREADCRUMB_ID)
+        Div breadcrumb = find(Div.class).withId(UseCase27Layout.BREADCRUMB_ID)
                 .single();
         return breadcrumb.getElement().getTextRecursively();
     }
 
     private int updateCount() {
-        Span badge = $(Span.class).withId(UseCase27Layout.UPDATE_COUNT_ID)
+        Span badge = find(Span.class).withId(UseCase27Layout.UPDATE_COUNT_ID)
                 .single();
         String text = badge.getText();
         int colon = text.lastIndexOf(':');

@@ -9,9 +9,9 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.page.WebShareSupport;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.webshare.WebShareSupport;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,15 +24,15 @@ class CustomMessageViewTest extends SpringBrowserlessTest {
     void viewRendersWithFormAndButton() {
         navigate(CustomMessageView.class);
 
-        assertTrue($view(H1.class).all().stream().anyMatch(
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
                 h -> "UC3 — Share a custom message".equals(h.getText())));
-        assertTrue($view(TextField.class).all().stream()
+        assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "Title".equals(f.getLabel())));
-        assertTrue($view(TextArea.class).all().stream()
+        assertTrue(findInView(TextArea.class).all().stream()
                 .anyMatch(f -> "Text".equals(f.getLabel())));
-        assertTrue($view(TextField.class).all().stream()
+        assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "URL".equals(f.getLabel())));
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Share".equals(b.getText())));
     }
 
@@ -70,8 +70,7 @@ class CustomMessageViewTest extends SpringBrowserlessTest {
 
         WebShareTestSupport.setSupport(WebShareSupport.SUPPORTED);
         runPendingSignalsTasks();
-        assertTrue(share.isEnabled(),
-                "should enable once SUPPORTED arrives");
+        assertTrue(share.isEnabled(), "should enable once SUPPORTED arrives");
 
         WebShareTestSupport.setSupport(WebShareSupport.UNSUPPORTED);
         runPendingSignalsTasks();
@@ -80,25 +79,25 @@ class CustomMessageViewTest extends SpringBrowserlessTest {
     }
 
     private TextField findTextField(String label) {
-        return $view(TextField.class).all().stream()
+        return findInView(TextField.class).all().stream()
                 .filter(f -> label.equals(f.getLabel())).findFirst()
                 .orElseThrow();
     }
 
     private TextArea findTextArea(String label) {
-        return $view(TextArea.class).all().stream()
+        return findInView(TextArea.class).all().stream()
                 .filter(f -> label.equals(f.getLabel())).findFirst()
                 .orElseThrow();
     }
 
     private Div findPreview() {
-        return $view(Div.class).all().stream()
+        return findInView(Div.class).all().stream()
                 .filter(d -> d.getClassNames().contains("share-preview"))
                 .findFirst().orElseThrow();
     }
 
     private Button findButton() {
-        return $view(Button.class).all().stream()
+        return findInView(Button.class).all().stream()
                 .filter(b -> "Share".equals(b.getText())).findFirst()
                 .orElseThrow();
     }

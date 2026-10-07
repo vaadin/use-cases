@@ -1,7 +1,5 @@
 package com.example.usecase29;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.time.LocalTime;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -20,6 +18,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
@@ -41,7 +40,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 29: Profile auto-save")
 @Route(value = "use-case-29", layout = MainLayout.class)
 @Menu(order = 29, title = "UC 29: Profile auto-save")
-@PermitAll
+@AnonymousAllowed
 public class UseCase29View extends VerticalLayout {
 
     final ValueSignal<UserProfile> profile = new ValueSignal<>(new UserProfile(

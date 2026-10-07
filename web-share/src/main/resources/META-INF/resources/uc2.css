@@ -1,0 +1,10 @@
+.uc2-view {
+    .action-slot {
+        margin-top: 0.5rem;
+    }
+
+    .hint {
+        color: var(--vaadin-text-color-secondary);
+        margin-top: 0.5rem;
+    }
+}

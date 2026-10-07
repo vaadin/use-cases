@@ -27,9 +27,9 @@ class MUC03ViewTest extends SpringBrowserlessTest {
     void viewRendersWithGameControls() {
         navigate(MUC03View.class);
 
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "START ROUND".equals(b.getText())));
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Reset Scores".equals(b.getText())));
     }
 
@@ -38,7 +38,7 @@ class MUC03ViewTest extends SpringBrowserlessTest {
         navigate(MUC03View.class);
         runPendingSignalsTasks();
 
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> "Click START to begin".equals(d.getText())));
     }
 
@@ -48,18 +48,18 @@ class MUC03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Click START ROUND
-        Button startButton = $view(Button.class).all().stream()
+        Button startButton = findInView(Button.class).all().stream()
                 .filter(b -> "START ROUND".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(startButton).click();
         runPendingSignalsTasks();
 
         // Round number should update to 1
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> "Round 1".equals(d.getText())));
 
         // Target button should become visible with clicks remaining
-        assertTrue($view(Button.class).all().stream().anyMatch(
+        assertTrue(findInView(Button.class).all().stream().anyMatch(
                 b -> b.getText() != null && b.getText().contains("CLICK ME!")));
     }
 
@@ -81,12 +81,12 @@ class MUC03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Clicks remaining should be 4
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> d.getText() != null
                         && d.getText().contains("Targets remaining: 4")));
 
         // User B's score should appear in leaderboard
-        assertTrue($view(Span.class).all().stream().anyMatch(
+        assertTrue(findInView(Span.class).all().stream().anyMatch(
                 s -> s.getText() != null && s.getText().contains("1 points")));
     }
 
@@ -102,14 +102,14 @@ class MUC03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Reset scores
-        Button resetButton = $view(Button.class).all().stream()
+        Button resetButton = findInView(Button.class).all().stream()
                 .filter(b -> "Reset Scores".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(resetButton).click();
         runPendingSignalsTasks();
 
         // No score spans should remain (leaderboard cleared)
-        assertTrue($view(Span.class).all().stream().noneMatch(
+        assertTrue(findInView(Span.class).all().stream().noneMatch(
                 s -> s.getText() != null && s.getText().contains("points")));
     }
 
@@ -124,14 +124,14 @@ class MUC03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Target button should be visible — click it via the UI
-        Button targetButton = $view(Button.class).all().stream().filter(
+        Button targetButton = findInView(Button.class).all().stream().filter(
                 b -> b.getText() != null && b.getText().contains("CLICK ME!"))
                 .findFirst().orElseThrow();
         test(targetButton).click();
         runPendingSignalsTasks();
 
         // After click, clicks remaining should be 4
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> d.getText() != null
                         && d.getText().contains("Targets remaining: 4")));
     }

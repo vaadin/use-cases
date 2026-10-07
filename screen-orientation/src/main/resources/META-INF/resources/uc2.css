@@ -1,0 +1,29 @@
+.uc2-view {
+    .uc2-arrow {
+        width: 140px;
+        height: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 80px;
+        line-height: 1;
+        background: var(--vaadin-background-container);
+        border: 1px solid var(--vaadin-border-color);
+        border-radius: 50%;
+        transition: transform 250ms ease-out;
+    }
+
+    .uc2-table {
+        display: grid;
+        grid-template-columns: max-content auto;
+        gap: 0.25rem 1rem;
+        align-items: baseline;
+        font-family: monospace;
+        font-size: 0.95rem;
+        margin-top: 1rem;
+    }
+
+    .uc2-table > .label {
+        color: var(--vaadin-text-color-secondary);
+    }
+}

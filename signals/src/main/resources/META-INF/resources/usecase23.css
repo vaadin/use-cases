@@ -1,0 +1,27 @@
+.usecase23-view {
+    .panel-header-title {
+        font-size: var(--aura-font-size-xl);
+        margin: 0;
+    }
+    .panel-header-subtitle {
+        color: var(--vaadin-text-color-secondary);
+        font-size: var(--aura-font-size-xs);
+    }
+    .highlight-card {
+        gap: 5px;
+    }
+    .highlight-card-icon {
+        margin-right: 4px;
+        margin-left: 0;
+    }
+    .highlight-card-title {
+        font-weight: 400;
+        margin: 0;
+        color: var(--vaadin-text-color-secondary);
+        font-size: var(--aura-font-size-xs);
+    }
+    .highlight-card-value {
+        font-weight: 600;
+        font-size: 2.5em;
+    }
+}

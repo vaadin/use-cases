@@ -1,7 +1,5 @@
 package com.example.muc04;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.muc04.SignalFieldHighlighter.User;
 import com.example.security.CurrentUserSignal;
 import com.example.security.CurrentUserSignal.UserInfo;
@@ -12,6 +10,7 @@ import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -23,6 +22,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 
@@ -40,7 +40,8 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @Route(value = "muc-04", layout = MainLayout.class)
 @PageTitle("Multi-User Case 4: Collaborative Editing")
 @Menu(order = 53, title = "MUC 4: Collaborative Editing")
-@PermitAll
+@StyleSheet("muc04.css")
+@AnonymousAllowed
 public class MUC04View extends VerticalLayout {
 
     private final User currentUser;
@@ -64,6 +65,7 @@ public class MUC04View extends VerticalLayout {
         this.muc04Signals = muc04Signals;
         this.lockingEnabledSignal = muc04Signals.getLockingEnabledSignal();
 
+        addClassName("muc04-view");
         setSpacing(true);
         setPadding(true);
 
@@ -105,8 +107,7 @@ public class MUC04View extends VerticalLayout {
 
     private Div createEditorsPanel() {
         var editorsDiv = new Div();
-        editorsDiv.getStyle().set("background-color", "#e3f2fd")
-                .set("padding", "1em").set("border-radius", "4px");
+        editorsDiv.addClassName("editors-panel");
 
         addFieldEditorList(editorsDiv, "companyName", "Company Name");
         addFieldEditorList(editorsDiv, "address", "Address");
@@ -123,11 +124,11 @@ public class MUC04View extends VerticalLayout {
         fieldDiv.bindVisible(editors.map(list -> !list.isEmpty()));
 
         var fieldLabel = new Span(label + ": ");
-        fieldLabel.getStyle().set("font-weight", "bold");
+        fieldLabel.addClassName("editors-panel-field-label");
         fieldDiv.add(fieldLabel);
 
         var namesContainer = new Div();
-        namesContainer.getStyle().set("display", "inline");
+        namesContainer.addClassName("editors-panel-names-container");
         namesContainer.bindChildren(editors, this::createEditorName);
         fieldDiv.add(namesContainer);
 
@@ -137,7 +138,7 @@ public class MUC04View extends VerticalLayout {
     private Span createEditorName(SharedValueSignal<User> userSignal) {
         var user = userSignal.peek();
         var name = new Span(user.name());
-        name.getStyle().set("margin-right", "0.5em");
+        name.addClassName("editor-name");
         return name;
     }
 

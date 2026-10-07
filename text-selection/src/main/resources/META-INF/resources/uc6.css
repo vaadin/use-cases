@@ -1,0 +1,30 @@
+.uc6-view {
+    .uc-info-grid {
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        gap: 0.25rem 1rem;
+        align-items: baseline;
+        font-size: 0.95rem;
+    }
+
+    .uc-info-grid > .label {
+        color: var(--vaadin-text-color-secondary);
+    }
+
+    .uc-info-grid > .value {
+        font-weight: 600;
+        font-family: monospace;
+    }
+
+    .uc-mono {
+        font-family: monospace;
+        font-size: 0.9rem;
+        background: var(--vaadin-background-container);
+        border: 1px solid var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
+        padding: 0.4rem 0.6rem;
+        white-space: pre-wrap;
+        word-break: break-word;
+        min-height: 1.2em;
+    }
+}

@@ -25,8 +25,8 @@ class UseCase22ViewTest extends SpringBrowserlessTest {
 
         // Personal: First Name, Last Name, Email + Address: Street, City, ZIP,
         // Country = 7
-        assertTrue($view(TextField.class).all().size() >= 7);
-        assertEquals(1, $view(IntegerField.class).all().size());
+        assertTrue(findInView(TextField.class).all().size() >= 7);
+        assertEquals(1, findInView(IntegerField.class).all().size());
     }
 
     @Test
@@ -34,10 +34,10 @@ class UseCase22ViewTest extends SpringBrowserlessTest {
         navigate(UseCase22View.class);
         runPendingSignalsTasks();
 
-        TextField firstNameField = $view(TextField.class).all().stream()
+        TextField firstNameField = findInView(TextField.class).all().stream()
                 .filter(f -> "First Name".equals(f.getLabel())).findFirst()
                 .orElseThrow();
-        TextField lastNameField = $view(TextField.class).all().stream()
+        TextField lastNameField = findInView(TextField.class).all().stream()
                 .filter(f -> "Last Name".equals(f.getLabel())).findFirst()
                 .orElseThrow();
 
@@ -49,13 +49,13 @@ class UseCase22ViewTest extends SpringBrowserlessTest {
     void changingFirstNameUpdatesFullName() {
         navigate(UseCase22View.class);
 
-        TextField firstNameField = $view(TextField.class).all().stream()
+        TextField firstNameField = findInView(TextField.class).all().stream()
                 .filter(f -> "First Name".equals(f.getLabel())).findFirst()
                 .orElseThrow();
         test(firstNameField).setValue("Jane");
         runPendingSignalsTasks();
 
-        Span fullNameLabel = $view(Span.class).all().stream()
+        Span fullNameLabel = findInView(Span.class).all().stream()
                 .filter(s -> s.getText().startsWith("Full name:")).findFirst()
                 .orElseThrow();
         assertEquals("Full name: Jane Doe", fullNameLabel.getText());
@@ -65,13 +65,13 @@ class UseCase22ViewTest extends SpringBrowserlessTest {
     void changingLastNameUpdatesFullName() {
         navigate(UseCase22View.class);
 
-        TextField lastNameField = $view(TextField.class).all().stream()
+        TextField lastNameField = findInView(TextField.class).all().stream()
                 .filter(f -> "Last Name".equals(f.getLabel())).findFirst()
                 .orElseThrow();
         test(lastNameField).setValue("Smith");
         runPendingSignalsTasks();
 
-        Span fullNameLabel = $view(Span.class).all().stream()
+        Span fullNameLabel = findInView(Span.class).all().stream()
                 .filter(s -> s.getText().startsWith("Full name:")).findFirst()
                 .orElseThrow();
         assertEquals("Full name: John Smith", fullNameLabel.getText());
@@ -81,13 +81,13 @@ class UseCase22ViewTest extends SpringBrowserlessTest {
     void changingCityUpdatesFormattedAddress() {
         navigate(UseCase22View.class);
 
-        TextField cityField = $view(TextField.class).all().stream()
+        TextField cityField = findInView(TextField.class).all().stream()
                 .filter(f -> "City".equals(f.getLabel())).findFirst()
                 .orElseThrow();
         test(cityField).setValue("Portland");
         runPendingSignalsTasks();
 
-        Span addressLabel = $view(Span.class).all().stream()
+        Span addressLabel = findInView(Span.class).all().stream()
                 .filter(s -> s.getText().startsWith("Formatted:")).findFirst()
                 .orElseThrow();
         assertTrue(addressLabel.getText().contains("Portland"));
@@ -97,13 +97,13 @@ class UseCase22ViewTest extends SpringBrowserlessTest {
     void changingStreetUpdatesFormattedAddress() {
         navigate(UseCase22View.class);
 
-        TextField streetField = $view(TextField.class).all().stream()
+        TextField streetField = findInView(TextField.class).all().stream()
                 .filter(f -> "Street".equals(f.getLabel())).findFirst()
                 .orElseThrow();
         test(streetField).setValue("456 Oak Ave");
         runPendingSignalsTasks();
 
-        Span addressLabel = $view(Span.class).all().stream()
+        Span addressLabel = findInView(Span.class).all().stream()
                 .filter(s -> s.getText().startsWith("Formatted:")).findFirst()
                 .orElseThrow();
         assertTrue(addressLabel.getText().contains("456 Oak Ave"));
@@ -113,11 +113,11 @@ class UseCase22ViewTest extends SpringBrowserlessTest {
     void ageFieldUpdatesState() {
         navigate(UseCase22View.class);
 
-        IntegerField ageField = $view(IntegerField.class).single();
+        IntegerField ageField = findInView(IntegerField.class).single();
         test(ageField).setValue(25);
         runPendingSignalsTasks();
 
-        Pre stateDisplay = $view(Pre.class).atIndex(1);
+        Pre stateDisplay = findInView(Pre.class).atIndex(1);
         assertTrue(stateDisplay.getText().contains("\"age\": 25"));
     }
 
@@ -126,7 +126,7 @@ class UseCase22ViewTest extends SpringBrowserlessTest {
         navigate(UseCase22View.class);
         runPendingSignalsTasks();
 
-        Pre stateDisplay = $view(Pre.class).atIndex(1);
+        Pre stateDisplay = findInView(Pre.class).atIndex(1);
         String text = stateDisplay.getText();
         assertTrue(text.contains("\"firstName\": \"John\""));
         assertTrue(text.contains("\"lastName\": \"Doe\""));

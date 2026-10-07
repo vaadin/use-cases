@@ -11,6 +11,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -39,6 +40,7 @@ import com.vaadin.flow.server.webpush.WebPushSubscription;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @Menu(order = 3, title = "UC3 — Notification gating")
+@StyleSheet("uc3.css")
 public class NotificationGatingView extends VerticalLayout {
 
     private static final DateTimeFormatter TIME = DateTimeFormatter
@@ -55,6 +57,7 @@ public class NotificationGatingView extends VerticalLayout {
         this.webPush = webPush;
         this.taskScheduler = taskScheduler;
 
+        addClassName("uc3-view");
         add(new H1("UC3 — Notification gating with Web Push"));
         add(new Paragraph("Subscribe the browser, then click \"Send in 5 "
                 + "seconds\" and immediately switch tabs or hide the "
@@ -64,7 +67,7 @@ public class NotificationGatingView extends VerticalLayout {
                 + "notification via Web Push otherwise."));
 
         Button subscribe = new Button("Enable browser notifications");
-        subscribe.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        subscribe.addThemeVariants(ButtonVariant.PRIMARY);
         subscribe.addClickListener(e -> subscribe(UI.getCurrent()));
 
         Button unsubscribe = new Button("Disable",

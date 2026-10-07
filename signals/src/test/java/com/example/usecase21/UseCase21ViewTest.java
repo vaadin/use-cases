@@ -22,8 +22,8 @@ class UseCase21ViewTest extends SpringBrowserlessTest {
     void viewRendersWithFormFields() {
         navigate(UseCase21View.class);
 
-        assertEquals(1, $view(TextField.class).all().size());
-        assertEquals(1, $view(EmailField.class).all().size());
+        assertEquals(1, findInView(TextField.class).all().size());
+        assertEquals(1, findInView(EmailField.class).all().size());
     }
 
     @Test
@@ -32,7 +32,7 @@ class UseCase21ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Submit and Cancel buttons (text from i18n signals)
-        assertEquals(2, $view(Button.class).all().size());
+        assertEquals(2, findInView(Button.class).all().size());
     }
 
     @Test
@@ -40,9 +40,9 @@ class UseCase21ViewTest extends SpringBrowserlessTest {
         navigate(UseCase21View.class);
         runPendingSignalsTasks();
 
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Submit".equals(b.getText())));
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Cancel".equals(b.getText())));
     }
 
@@ -51,10 +51,10 @@ class UseCase21ViewTest extends SpringBrowserlessTest {
         navigate(UseCase21View.class);
         runPendingSignalsTasks();
 
-        TextField nameField = $view(TextField.class).single();
+        TextField nameField = findInView(TextField.class).single();
         assertEquals("Name", nameField.getLabel());
 
-        EmailField emailField = $view(EmailField.class).single();
+        EmailField emailField = findInView(EmailField.class).single();
         assertEquals("Email", emailField.getLabel());
     }
 
@@ -63,10 +63,10 @@ class UseCase21ViewTest extends SpringBrowserlessTest {
         navigate(UseCase21View.class);
         runPendingSignalsTasks();
 
-        TextField nameField = $view(TextField.class).single();
+        TextField nameField = findInView(TextField.class).single();
         assertEquals("Enter your name", nameField.getPlaceholder());
 
-        EmailField emailField = $view(EmailField.class).single();
+        EmailField emailField = findInView(EmailField.class).single();
         assertEquals("Enter your email address", emailField.getPlaceholder());
     }
 }

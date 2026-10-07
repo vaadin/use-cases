@@ -1,0 +1,24 @@
+.uc20-view {
+    .link-list {
+        max-width: 36rem;
+        margin-top: 0.5rem;
+        border: 1px solid var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
+        background: var(--vaadin-background-container);
+    }
+
+    .link-list .row {
+        padding: 0.6rem 1rem;
+        border-bottom: 1px solid var(--vaadin-border-color);
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .link-list .row:last-child {
+        border-bottom: none;
+    }
+
+    .link-list .row:hover {
+        background: color-mix(in srgb, var(--aura-accent) 8%, transparent);
+    }
+}

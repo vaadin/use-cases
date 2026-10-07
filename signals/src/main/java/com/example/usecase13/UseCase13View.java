@@ -1,7 +1,5 @@
 package com.example.usecase13;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +11,7 @@ import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.card.Card;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -24,6 +23,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
@@ -42,7 +42,8 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @Route(value = "use-case-13", layout = MainLayout.class)
 @PageTitle("Use Case 13: Real-Time Active Users")
 @Menu(order = 13, title = "UC 13: Real-Time Active Users")
-@PermitAll
+@StyleSheet("usecase13.css")
+@AnonymousAllowed
 public class UseCase13View extends VerticalLayout {
 
     private final UserSessionRegistry userSessionRegistry;
@@ -52,6 +53,7 @@ public class UseCase13View extends VerticalLayout {
         this.userSessionRegistry = userSessionRegistry;
         this.routeToTitleMap = buildRouteToTitleMap();
 
+        addClassName("usecase13-view");
         setSpacing(true);
         setPadding(true);
 
@@ -65,26 +67,20 @@ public class UseCase13View extends VerticalLayout {
                         + "Try opening multiple browser tabs with different users to see live synchronization!");
 
         Div counterBox = new Div();
-        counterBox.getStyle().set("background",
-                "color-mix(in srgb, var(--aura-accent-color) 10%, transparent)")
-                .set("padding", "1em").set("border-radius", "8px")
-                .set("border-left", "4px solid var(--aura-accent-color)")
-                .set("margin", "1em 0");
+        counterBox.addClassName("counter-box");
 
         H3 counterTitle = new H3(() -> "👥 Currently Online: "
                 + userSessionRegistry.getActiveUsersSignal().get().size());
-        counterTitle.getStyle().set("margin", "0");
+        counterTitle.addClassName("counter-title");
 
         counterBox.add(counterTitle);
 
         // User list container
         H3 userListTitle = new H3("Active Users");
-        userListTitle.getStyle().set("margin-top", "1.5em").set("margin-bottom",
-                "0.5em");
+        userListTitle.addClassName("user-list-title");
 
         Div userListContainer = new Div();
-        userListContainer.getStyle().set("display", "flex")
-                .set("flex-direction", "column").set("gap", "1em");
+        userListContainer.addClassName("user-list-container");
 
         // Get current session ID for highlighting
         String currentSessionId = SessionIdHelper.getCurrentSessionId();
@@ -96,13 +92,10 @@ public class UseCase13View extends VerticalLayout {
 
         // Educational info box
         Div infoBox = new Div();
-        infoBox.getStyle().set("background", "#e0f7fa").set("padding", "1em")
-                .set("border-radius", "8px")
-                .set("border-left", "4px solid #00BCD4")
-                .set("margin-top", "2em");
+        infoBox.addClassName("info-box");
 
         H3 infoTitle = new H3("💡 How This Works");
-        infoTitle.getStyle().set("margin-top", "0");
+        infoTitle.addClassName("info-title");
 
         VerticalLayout infoContent = new VerticalLayout();
         infoContent.setSpacing(false);
@@ -130,6 +123,7 @@ public class UseCase13View extends VerticalLayout {
     private Card createUserCard(SharedValueSignal<UserInfo> userSignal,
             String currentSessionId) {
         Card card = new Card();
+        card.addClassName("user-card");
 
         // These never change, so no need for signal bindings
         boolean isCurrentSession = userSignal.peek().sessionId()
@@ -138,16 +132,12 @@ public class UseCase13View extends VerticalLayout {
 
         // Highlight current user's session
         if (isCurrentSession) {
-            card.getStyle().set("border", "2px solid var(--aura-accent-color)")
-                    .set("background",
-                            "color-mix(in srgb, var(--aura-accent-color) 10%, transparent)");
+            card.addClassName("current-session");
         }
 
         // Dim inactive tabs
         var isTabActive = userSignal.map(info -> info.isTabActive());
-        card.getStyle().bind("opacity", () -> isTabActive.get() ? null : "0.6");
-        card.getStyle().bind("filter",
-                () -> isTabActive.get() ? null : "grayscale(30%)");
+        card.getClassNames().bind("tab-inactive", isTabActive.map(a -> !a));
 
         // Header: Tab Status + Avatar + Username/Nickname + Role Badge
         HorizontalLayout header = new HorizontalLayout();
@@ -158,7 +148,7 @@ public class UseCase13View extends VerticalLayout {
         Span tabIndicator = new Span(() -> isTabActive.get() ? "🟢" : "⚫");
         tabIndicator.getElement().bindAttribute("title",
                 () -> isTabActive.get() ? "Tab is active" : "Tab is inactive");
-        tabIndicator.getStyle().set("flex-shrink", "0");
+        tabIndicator.addClassName("tab-indicator");
 
         // Avatar with colored ring
         ColoredAvatar avatar = new ColoredAvatar(username,
@@ -202,7 +192,7 @@ public class UseCase13View extends VerticalLayout {
             }
             return displayName;
         });
-        nameSpan.getStyle().set("font-weight", "bold").set("flex-grow", "1");
+        nameSpan.addClassName("name-span");
 
         // Role badge
         Span roleBadge = createRoleBadge(username);
@@ -219,7 +209,7 @@ public class UseCase13View extends VerticalLayout {
         HorizontalLayout viewRow = new HorizontalLayout();
         viewRow.setAlignItems(FlexComponent.Alignment.CENTER);
         viewRow.setSpacing(false);
-        viewRow.getStyle().set("gap", "0.5em");
+        viewRow.addClassName("row-with-gap");
 
         Span viewIcon = new Span("📍");
         Signal<@Nullable String> currentView = userSignal
@@ -227,7 +217,7 @@ public class UseCase13View extends VerticalLayout {
         Span viewText = new Span(() -> "Viewing: "
                 + (currentView.get() != null ? formatViewName(currentView.get())
                         : "Unknown"));
-        viewText.getStyle().set("font-size", "var(--aura-font-size-s)");
+        viewText.addClassName("secondary-text");
 
         viewRow.add(viewIcon, viewText);
 
@@ -235,14 +225,13 @@ public class UseCase13View extends VerticalLayout {
         HorizontalLayout durationRow = new HorizontalLayout();
         durationRow.setAlignItems(FlexComponent.Alignment.CENTER);
         durationRow.setSpacing(false);
-        durationRow.getStyle().set("gap", "0.5em");
+        durationRow.addClassName("row-with-gap");
 
         Span durationIcon = new Span("🕐");
         Span durationTextSpan = new Span(
                 () -> "Online for " + formatDuration(System.currentTimeMillis()
                         - userSignal.get().sessionStartTime()));
-        durationTextSpan.getStyle().set("font-size", "var(--aura-font-size-s)")
-                .set("color", "var(--vaadin-text-color-secondary)");
+        durationTextSpan.addClassName("secondary-muted");
 
         durationRow.add(durationIcon, durationTextSpan);
 
@@ -250,7 +239,7 @@ public class UseCase13View extends VerticalLayout {
         HorizontalLayout interactionRow = new HorizontalLayout();
         interactionRow.setAlignItems(FlexComponent.Alignment.CENTER);
         interactionRow.setSpacing(false);
-        interactionRow.getStyle().set("gap", "0.5em");
+        interactionRow.addClassName("row-with-gap");
 
         Span interactionIcon = new Span("⚡");
         Span interactionTextSpan = new Span(() -> {
@@ -261,9 +250,7 @@ public class UseCase13View extends VerticalLayout {
                             + " ago";
             return interactionText;
         });
-        interactionTextSpan.getStyle()
-                .set("font-size", "var(--aura-font-size-s)")
-                .set("color", "var(--vaadin-text-color-secondary)");
+        interactionTextSpan.addClassName("secondary-muted");
 
         interactionRow.add(interactionIcon, interactionTextSpan);
 
@@ -293,10 +280,9 @@ public class UseCase13View extends VerticalLayout {
         };
 
         Span badge = new Span("[" + badgeLabel + "]");
-        badge.getStyle().set("padding", "2px 6px").set("border-radius", "4px")
-                .set("background", badgeColor).set("color", "white")
-                .set("font-size", "var(--aura-font-size-xs)")
-                .set("font-weight", "bold").set("flex-shrink", "0");
+        badge.addClassName("role-badge");
+        // Per-role color is dynamic — keep inline
+        badge.getStyle().set("background", badgeColor);
 
         return badge;
     }

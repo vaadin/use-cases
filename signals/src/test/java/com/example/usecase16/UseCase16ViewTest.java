@@ -22,8 +22,8 @@ class UseCase16ViewTest extends SpringBrowserlessTest {
     void viewRendersWithSearchAndCategory() {
         navigate(UseCase16View.class);
 
-        assertEquals(1, $view(TextField.class).all().size());
-        assertEquals(1, $view(Select.class).all().size());
+        assertEquals(1, findInView(TextField.class).all().size());
+        assertEquals(1, findInView(Select.class).all().size());
     }
 
     @Test
@@ -31,8 +31,8 @@ class UseCase16ViewTest extends SpringBrowserlessTest {
         navigate(UseCase16View.class);
         runPendingSignalsTasks();
 
-        assertTrue(
-                $view(H3.class).all().stream().anyMatch(h -> h.getText() != null
+        assertTrue(findInView(H3.class).all().stream()
+                .anyMatch(h -> h.getText() != null
                         && h.getText().contains("10 articles")));
     }
 
@@ -41,13 +41,13 @@ class UseCase16ViewTest extends SpringBrowserlessTest {
         navigate(UseCase16View.class);
         runPendingSignalsTasks();
 
-        TextField searchField = $view(TextField.class).single();
+        TextField searchField = findInView(TextField.class).single();
         test(searchField).setValue("signal");
         runPendingSignalsTasks();
 
         // Multiple articles mention "signal" in title or content
-        assertTrue(
-                $view(H3.class).all().stream().anyMatch(h -> h.getText() != null
+        assertTrue(findInView(H3.class).all().stream()
+                .anyMatch(h -> h.getText() != null
                         && h.getText().contains("articles found")));
     }
 
@@ -57,13 +57,13 @@ class UseCase16ViewTest extends SpringBrowserlessTest {
         navigate(UseCase16View.class);
         runPendingSignalsTasks();
 
-        Select<String> categorySelect = $view(Select.class).single();
+        Select<String> categorySelect = findInView(Select.class).single();
         test(categorySelect).selectItem("Tutorial");
         runPendingSignalsTasks();
 
         // 4 Tutorial articles
-        assertTrue(
-                $view(H3.class).all().stream().anyMatch(h -> h.getText() != null
+        assertTrue(findInView(H3.class).all().stream()
+                .anyMatch(h -> h.getText() != null
                         && h.getText().contains("4 articles")));
     }
 
@@ -73,16 +73,16 @@ class UseCase16ViewTest extends SpringBrowserlessTest {
         navigate(UseCase16View.class);
         runPendingSignalsTasks();
 
-        TextField searchField = $view(TextField.class).single();
+        TextField searchField = findInView(TextField.class).single();
         test(searchField).setValue("signal");
 
-        Select<String> categorySelect = $view(Select.class).single();
+        Select<String> categorySelect = findInView(Select.class).single();
         test(categorySelect).selectItem("Tutorial");
         runPendingSignalsTasks();
 
         // Articles matching "signal" in Tutorial category
-        assertTrue(
-                $view(H3.class).all().stream().anyMatch(h -> h.getText() != null
+        assertTrue(findInView(H3.class).all().stream()
+                .anyMatch(h -> h.getText() != null
                         && h.getText().contains("articles found")));
     }
 }

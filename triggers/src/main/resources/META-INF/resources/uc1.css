@@ -1,0 +1,22 @@
+.uc1-view {
+    .notes-field {
+        font-family: var(--aura-font-family);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.3rem 0.9rem;
+        border-radius: 999px;
+        font-family: monospace;
+        font-size: 0.9rem;
+        background: var(--vaadin-background-container);
+        border: 1px solid var(--vaadin-border-color);
+        transition: background-color 200ms, color 200ms, border-color 200ms;
+    }
+
+    .status-badge.copied {
+        background: var(--vaadin-color-success-container);
+        color: var(--vaadin-color-success);
+        border-color: var(--vaadin-color-success);
+    }
+}

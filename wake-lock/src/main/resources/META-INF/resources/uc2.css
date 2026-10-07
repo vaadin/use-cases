@@ -1,0 +1,19 @@
+.uc2-view {
+    .recipe-step {
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
+        margin-bottom: 0.5rem;
+        transition: background 200ms;
+    }
+
+    .recipe-step.current {
+        background: color-mix(in srgb, var(--aura-blue) 12%, transparent);
+        border-color: color-mix(in srgb, var(--aura-blue) 40%, transparent);
+    }
+
+    .recipe-step.done {
+        opacity: 0.55;
+        text-decoration: line-through;
+    }
+}

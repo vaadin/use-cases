@@ -22,7 +22,7 @@ class AutoFetchViewTest extends BrowserlessTest {
 
         navigate(AutoFetchView.class);
 
-        Span localContent = $(Span.class).withTextContaining("Local content")
+        Span localContent = find(Span.class).withTextContaining("Local content")
                 .single();
         assertTrue(localContent.getText().contains("60.1699"),
                 "Local content should show latitude, was: "
@@ -39,11 +39,11 @@ class AutoFetchViewTest extends BrowserlessTest {
         assertTrue(geolocation.requests().isEmpty(),
                 "No pending get() request should remain when permission is DENIED");
 
-        Button locate = $(Button.class).withText("Use my location").single();
+        Button locate = find(Button.class).withText("Use my location").single();
         assertTrue(locate.isVisible(),
                 "The explicit locate button should be visible for DENIED");
 
-        Span hint = $(Span.class)
+        Span hint = find(Span.class)
                 .withTextContaining("Location permission was denied").single();
         assertEquals("Location permission was denied for this site.",
                 hint.getText());

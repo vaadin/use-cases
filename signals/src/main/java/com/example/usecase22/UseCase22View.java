@@ -1,9 +1,8 @@
 package com.example.usecase22;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -17,16 +16,19 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-22", layout = MainLayout.class)
 @PageTitle("Use Case 22: Two-Way Mapped Signals")
 @Menu(order = 22, title = "UC 22: Two-Way Mapped Signals")
-@PermitAll
+@StyleSheet("usecase22.css")
+@AnonymousAllowed
 public class UseCase22View extends VerticalLayout {
 
     public UseCase22View() {
+        addClassName("usecase22-view");
         setSpacing(true);
         setPadding(true);
 
@@ -70,11 +72,10 @@ public class UseCase22View extends VerticalLayout {
         var section = new VerticalLayout();
         section.setSpacing(true);
         section.setPadding(true);
-        section.getStyle().set("background-color", "#e3f2fd")
-                .set("border-radius", "8px");
+        section.addClassName("personal-section");
 
         var sectionTitle = new H3("Personal Information");
-        sectionTitle.getStyle().set("margin-top", "0");
+        sectionTitle.addClassName("section-title");
 
         // First name - direct field mapping
         var firstNameField = new TextField("First Name");
@@ -109,8 +110,7 @@ public class UseCase22View extends VerticalLayout {
             Person p = personSignal.get();
             return "Full name: " + p.firstName() + " " + p.lastName();
         }));
-        fullNameLabel.getStyle().set("font-weight", "bold").set("color",
-                "var(--aura-accent-color)");
+        fullNameLabel.addClassName("full-name-label");
 
         section.add(sectionTitle, firstNameField, lastNameField, emailField,
                 ageField, fullNameLabel);
@@ -122,11 +122,10 @@ public class UseCase22View extends VerticalLayout {
         var section = new VerticalLayout();
         section.setSpacing(true);
         section.setPadding(true);
-        section.getStyle().set("background-color", "#fff3e0")
-                .set("border-radius", "8px");
+        section.addClassName("address-section");
 
         var sectionTitle = new H3("Address (Nested Mapping)");
-        sectionTitle.getStyle().set("margin-top", "0");
+        sectionTitle.addClassName("section-title");
 
         // Read-only mapped signal for Address
         Signal<Address> addressSignal = personSignal.map(Person::address);
@@ -163,9 +162,7 @@ public class UseCase22View extends VerticalLayout {
             return "Formatted: " + addr.street() + ", " + addr.city() + " "
                     + addr.zipCode() + ", " + addr.country();
         }));
-        formattedAddressLabel.getStyle().set("font-weight", "bold")
-                .set("color", "var(--aura-accent-color)")
-                .set("word-break", "break-word");
+        formattedAddressLabel.addClassName("formatted-address-label");
 
         section.add(sectionTitle, streetField, cityField, zipCodeField,
                 countryField, formattedAddressLabel);
@@ -174,17 +171,13 @@ public class UseCase22View extends VerticalLayout {
 
     private Div createStateDisplay(Signal<Person> personSignal) {
         var stateBox = new Div();
-        stateBox.getStyle().set("background-color", "#e8f5e9")
-                .set("padding", "1.5em").set("border-radius", "8px")
-                .set("margin-top", "1em");
+        stateBox.addClassName("state-box");
 
         var stateTitle = new H3("Live State (Single Source of Truth)");
-        stateTitle.getStyle().set("margin-top", "0");
+        stateTitle.addClassName("section-title");
 
         var stateDisplay = new Pre();
-        stateDisplay.getStyle().set("background-color", "#f5f5f5")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("overflow-x", "auto").set("font-size", "0.9em");
+        stateDisplay.addClassName("state-display");
         stateDisplay.bindText(
                 Signal.computed(() -> formatPersonAsJson(personSignal.get())));
 
@@ -194,18 +187,13 @@ public class UseCase22View extends VerticalLayout {
 
     private Div createPatternExplanation() {
         var infoBox = new Div();
-        infoBox.getStyle().set("background-color", "#e0f7fa")
-                .set("padding", "1.5em").set("border-radius", "8px")
-                .set("margin-top", "1em");
+        infoBox.addClassName("info-box");
 
         var patternTitle = new H3("Pattern: Two-Way Mapped Signals");
-        patternTitle.getStyle().set("margin-top", "0");
+        patternTitle.addClassName("section-title");
 
         var codeExample = new Pre();
-        codeExample.getStyle().set("background-color", "#263238")
-                .set("color", "#aed581").set("padding", "1em")
-                .set("border-radius", "4px").set("overflow-x", "auto")
-                .set("font-size", "0.85em");
+        codeExample.addClassName("code-example");
         codeExample.setText(
                 """
                         // Direct field binding with map + updater
@@ -229,7 +217,7 @@ public class UseCase22View extends VerticalLayout {
                         + "This eliminates manual synchronization code and keeps your data model immutable.");
 
         var whenToUse = new H3("When to Use");
-        whenToUse.getStyle().set("margin-bottom", "0.5em");
+        whenToUse.addClassName("when-to-use");
 
         var useCases = new Paragraph(
                 "Use two-way mapped signals for simple field-to-record binding without validation. "

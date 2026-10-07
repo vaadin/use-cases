@@ -9,7 +9,7 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.page.WebShareSupport;
+import com.vaadin.flow.component.webshare.WebShareSupport;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -21,9 +21,9 @@ class ShareThisPageViewTest extends SpringBrowserlessTest {
     void viewRendersHeadingAndButton() {
         navigate(ShareThisPageView.class);
 
-        assertTrue($view(H1.class).all().stream()
+        assertTrue(findInView(H1.class).all().stream()
                 .anyMatch(h -> "UC1 — Share this page".equals(h.getText())));
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Share this page".equals(b.getText())));
     }
 
@@ -48,7 +48,7 @@ class ShareThisPageViewTest extends SpringBrowserlessTest {
 
     private void assertBadgeContains(String fragment) {
         assertTrue(
-                $view(Span.class).all().stream()
+                findInView(Span.class).all().stream()
                         .anyMatch(s -> s.getText() != null
                                 && s.getText().contains(fragment)),
                 "expected status badge to contain \"" + fragment + "\"");
@@ -56,7 +56,7 @@ class ShareThisPageViewTest extends SpringBrowserlessTest {
 
     private void assertButtonEnabled(boolean expected) {
         assertTrue(
-                $view(Button.class).all().stream()
+                findInView(Button.class).all().stream()
                         .filter(b -> "Share this page".equals(b.getText()))
                         .anyMatch(b -> b.isEnabled() == expected),
                 "expected Share button enabled=" + expected);

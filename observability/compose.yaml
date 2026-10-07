@@ -1,0 +1,34 @@
+# Local monitoring stack for UC7: Prometheus scrapes the app's
+# /actuator/prometheus endpoint and Grafana charts what it collected.
+#
+# Run the app on the host, then `docker compose up -d` in this directory. The
+# hosted demo runs the same two services as sibling Fly apps, built from the
+# Dockerfiles in prometheus/ and grafana/ with the same Grafana provisioning
+# and dashboard; only the Prometheus scrape config differs (prometheus/fly.yaml
+# finds the app over Fly's private network, prometheus/local.yaml on the host).
+services:
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/local.yaml:/etc/prometheus/prometheus.yml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      PROMETHEUS_URL: http://prometheus:9090
+      # Anonymous admin: this is a throwaway local stack. The hosted Grafana
+      # (grafana/fly.toml) grants anonymous viewers only.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+    depends_on:
+      - prometheus

@@ -24,7 +24,7 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
         navigate(UseCase06View.class);
 
         // 4 "Add" buttons for products + "Empty cart" button
-        long addButtons = $view(Button.class).all().stream()
+        long addButtons = findInView(Button.class).all().stream()
                 .filter(b -> "Add".equals(b.getText())).count();
         assertEquals(4, addButtons);
     }
@@ -33,7 +33,7 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
     void emptyCartButtonPresent() {
         navigate(UseCase06View.class);
 
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Empty cart".equals(b.getText())));
     }
 
@@ -42,7 +42,7 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
         navigate(UseCase06View.class);
         runPendingSignalsTasks();
 
-        Span subtotalLabel = $view(Span.class).all().stream().filter(
+        Span subtotalLabel = findInView(Span.class).all().stream().filter(
                 s -> s.getText() != null && s.getText().startsWith("Subtotal:"))
                 .findFirst().orElseThrow();
         assertEquals("Subtotal: $0.00", subtotalLabel.getText());
@@ -54,13 +54,13 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Click first "Add" button (Laptop - $999.99)
-        Button addLaptop = $view(Button.class).all().stream()
+        Button addLaptop = findInView(Button.class).all().stream()
                 .filter(b -> "Add".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(addLaptop).click();
         runPendingSignalsTasks();
 
-        Span subtotalLabel = $view(Span.class).all().stream().filter(
+        Span subtotalLabel = findInView(Span.class).all().stream().filter(
                 s -> s.getText() != null && s.getText().startsWith("Subtotal:"))
                 .findFirst().orElseThrow();
         assertEquals("Subtotal: $999.99", subtotalLabel.getText());
@@ -70,7 +70,7 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
     void shippingSelectPresent() {
         navigate(UseCase06View.class);
 
-        assertTrue($view(ComboBox.class).all().stream()
+        assertTrue(findInView(ComboBox.class).all().stream()
                 .anyMatch(c -> "Shipping Method".equals(c.getLabel())));
     }
 
@@ -78,7 +78,7 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
     void discountCodeFieldPresent() {
         navigate(UseCase06View.class);
 
-        assertTrue($view(TextField.class).all().stream()
+        assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "Discount Code".equals(f.getLabel())));
     }
 
@@ -87,7 +87,7 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
         navigate(UseCase06View.class);
         runPendingSignalsTasks();
 
-        Span shippingLabel = $view(Span.class).all().stream().filter(
+        Span shippingLabel = findInView(Span.class).all().stream().filter(
                 s -> s.getText() != null && s.getText().startsWith("Shipping:"))
                 .findFirst().orElseThrow();
         assertEquals("Shipping: $5.99", shippingLabel.getText());
@@ -98,7 +98,7 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
         navigate(UseCase06View.class);
         runPendingSignalsTasks();
 
-        Span totalLabel = $view(Span.class).all().stream().filter(
+        Span totalLabel = findInView(Span.class).all().stream().filter(
                 s -> s.getText() != null && s.getText().startsWith("Total:"))
                 .findFirst().orElseThrow();
         // Subtotal $0 - discount $0 + shipping $5.99 + tax 8% of $0 = $5.99
@@ -111,21 +111,21 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Add Laptop ($999.99)
-        Button addLaptop = $view(Button.class).all().stream()
+        Button addLaptop = findInView(Button.class).all().stream()
                 .filter(b -> "Add".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(addLaptop).click();
         runPendingSignalsTasks();
 
         // Enter discount code
-        TextField discountField = $view(TextField.class).all().stream()
+        TextField discountField = findInView(TextField.class).all().stream()
                 .filter(f -> "Discount Code".equals(f.getLabel())).findFirst()
                 .orElseThrow();
         test(discountField).setValue("SAVE10");
         runPendingSignalsTasks();
 
         // Discount label should be visible (> $0)
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> s.getText() != null
                         && s.getText().startsWith("Discount:")));
     }
@@ -136,13 +136,13 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Add Laptop ($999.99) once
-        Button addLaptop = $view(Button.class).all().stream()
+        Button addLaptop = findInView(Button.class).all().stream()
                 .filter(b -> "Add".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(addLaptop).click();
         runPendingSignalsTasks();
 
-        Span subtotalLabel = $view(Span.class).all().stream().filter(
+        Span subtotalLabel = findInView(Span.class).all().stream().filter(
                 s -> s.getText() != null && s.getText().startsWith("Subtotal:"))
                 .findFirst().orElseThrow();
         assertEquals("Subtotal: $999.99", subtotalLabel.getText());
@@ -160,20 +160,20 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Add a product
-        Button addLaptop = $view(Button.class).all().stream()
+        Button addLaptop = findInView(Button.class).all().stream()
                 .filter(b -> "Add".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(addLaptop).click();
         runPendingSignalsTasks();
 
         // Click "Empty cart"
-        Button emptyCartButton = $view(Button.class).all().stream()
+        Button emptyCartButton = findInView(Button.class).all().stream()
                 .filter(b -> "Empty cart".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(emptyCartButton).click();
         runPendingSignalsTasks();
 
-        Span subtotalLabel = $view(Span.class).all().stream().filter(
+        Span subtotalLabel = findInView(Span.class).all().stream().filter(
                 s -> s.getText() != null && s.getText().startsWith("Subtotal:"))
                 .findFirst().orElseThrow();
         assertEquals("Subtotal: $0.00", subtotalLabel.getText());

@@ -1,0 +1,60 @@
+/* Component#requestFullscreen() moves the stage out of the view into the
+   UI's fullscreen wrapper, so rules for the stage (and its contents) must
+   not be scoped under .uc1-view — they would stop matching while fullscreen.
+   Only elements that never leave the view are nested below. */
+.lightbox-stage {
+    background: black;
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.lightbox-stage.active {
+    display: flex;
+    /* 100vh, not 100% — while fullscreen the stage's parent is the UI
+       wrapper, which has no defined height. */
+    height: 100vh;
+}
+
+.lightbox-stage > .lightbox-image {
+    width: 100%;
+    height: 100%;
+    background: var(--lightbox-image-bg);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.uc1-view {
+    .lightbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.75rem;
+        max-width: 960px;
+    }
+
+    .lightbox-thumb {
+        aspect-ratio: 4 / 3;
+        border-radius: var(--vaadin-radius-m);
+        background: var(--lightbox-thumb-bg);
+        background-size: cover;
+        background-position: center;
+        cursor: zoom-in;
+        border: 1px solid var(--vaadin-border-color);
+        transition: transform 200ms;
+        display: flex;
+        align-items: flex-end;
+        padding: 0.5rem 0.75rem;
+        color: white;
+        font-size: 0.85rem;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    }
+
+    .lightbox-thumb:hover {
+        transform: scale(1.02);
+    }
+}

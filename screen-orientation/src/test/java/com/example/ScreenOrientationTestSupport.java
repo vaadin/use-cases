@@ -1,36 +1,23 @@
 package com.example;
 
-import java.lang.reflect.Method;
-
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.page.Page;
-import com.vaadin.flow.component.page.ScreenOrientation;
+import com.vaadin.flow.component.screenorientation.ScreenOrientation;
+import com.vaadin.flow.component.screenorientation.ScreenOrientationType;
 
 /**
- * Shared helper for browserless tests that need to drive the screen
- * orientation signal on {@link Page#screenOrientationSignal()}. The setter on
- * Page is package-private (only the JS bridge calls it in production), so
- * tests reach through reflection. See {@code API-GAPS.md} — Flow has no
- * {@code ScreenOrientationSimulator} yet.
+ * Shared helper for browserless tests that need to drive the screen orientation
+ * signal on {@link ScreenOrientation#orientationSignal()}. In production the JS
+ * bridge feeds the value through {@code UIInternals}; tests call the same
+ * public seeding method directly.
  */
 public final class ScreenOrientationTestSupport {
 
     private ScreenOrientationTestSupport() {
     }
 
-    public static void setScreenOrientation(ScreenOrientation orientation,
+    public static void setScreenOrientation(ScreenOrientationType orientation,
             int angle) {
-        try {
-            Page page = UI.getCurrent().getPage();
-            Method setter = Page.class.getDeclaredMethod("setScreenOrientation",
-                    String.class, String.class);
-            setter.setAccessible(true);
-            setter.invoke(page, orientation.getClientValue(),
-                    Integer.toString(angle));
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException(
-                    "Failed to invoke Page#setScreenOrientation reflectively",
-                    e);
-        }
+        UI.getCurrent().getInternals().setScreenOrientationFromClient(
+                orientation.getClientValue(), Integer.toString(angle));
     }
 }

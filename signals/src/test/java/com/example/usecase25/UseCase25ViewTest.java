@@ -24,7 +24,7 @@ class UseCase25ViewTest extends SpringBrowserlessTest {
         for (String symbol : new String[] { "AAPL", "GOOGL", "MSFT", "AMZN",
                 "TSLA", "NVDA", "META", "NFLX" }) {
             assertTrue(
-                    $view(Span.class).all().stream()
+                    findInView(Span.class).all().stream()
                             .anyMatch(s -> symbol.equals(s.getText())),
                     "Missing stock symbol: " + symbol);
         }
@@ -36,9 +36,9 @@ class UseCase25ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Verify some initial prices are displayed
-        assertTrue($view(Span.class).all().stream().anyMatch(
+        assertTrue(findInView(Span.class).all().stream().anyMatch(
                 s -> s.getText() != null && s.getText().contains("$189.84")));
-        assertTrue($view(Span.class).all().stream().anyMatch(
+        assertTrue(findInView(Span.class).all().stream().anyMatch(
                 s -> s.getText() != null && s.getText().contains("$141.80")));
     }
 
@@ -48,7 +48,7 @@ class UseCase25ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // All initial change values should be +0.00
-        long zeroChanges = $view(Span.class).all().stream()
+        long zeroChanges = findInView(Span.class).all().stream()
                 .filter(s -> "+0.00".equals(s.getText())).count();
         // 8 stocks × 1 change column = 8 spans with "+0.00"
         assertTrue(zeroChanges >= 8,
@@ -70,13 +70,13 @@ class UseCase25ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // At least some change values should no longer be +0.00
-        long zeroChanges = $view(Span.class).all().stream()
+        long zeroChanges = findInView(Span.class).all().stream()
                 .filter(s -> "+0.00".equals(s.getText())).count();
         assertTrue(zeroChanges < 8,
                 "Expected some stocks to have non-zero changes after update");
 
         // At least some percentage changes should no longer be +0.00%
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> s.getText() != null && s.getText().endsWith("%")
                         && !"+0.00%".equals(s.getText())),
                 "Expected some non-zero percentage changes after update");

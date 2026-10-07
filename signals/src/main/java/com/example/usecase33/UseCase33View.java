@@ -1,7 +1,5 @@
 package com.example.usecase33;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -20,6 +18,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -41,7 +40,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 33: Order list with stable selection")
 @Route(value = "use-case-33", layout = MainLayout.class)
 @Menu(order = 33, title = "UC 33: Stable selection")
-@PermitAll
+@AnonymousAllowed
 public class UseCase33View extends VerticalLayout {
 
     final ListSignal<Order> orders = new ListSignal<>();

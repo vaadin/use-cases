@@ -23,9 +23,9 @@ class FindAndHighlightViewTest extends SpringBrowserlessTest {
     void viewRendersHeadingAndSampleContent() {
         navigate(FindAndHighlightView.class);
 
-        assertTrue($view(H1.class).all().stream().anyMatch(h -> h.getText()
+        assertTrue(findInView(H1.class).all().stream().anyMatch(h -> h.getText()
                 .equals("UC3 — Find and highlight in textarea")));
-        TextArea content = $(TextArea.class).single();
+        TextArea content = find(TextArea.class).single();
         assertTrue(content.getValue().contains("Lorem ipsum"));
     }
 
@@ -34,9 +34,9 @@ class FindAndHighlightViewTest extends SpringBrowserlessTest {
         navigate(FindAndHighlightView.class);
         runPendingSignalsTasks();
 
-        TextField search = $(TextField.class).single();
-        TextArea content = $(TextArea.class).single();
-        Button findNext = $(Button.class).withText("Find next").single();
+        TextField search = find(TextField.class).single();
+        TextArea content = find(TextArea.class).single();
+        Button findNext = find(Button.class).withText("Find next").single();
 
         test(search).setValue("dolor");
 
@@ -56,7 +56,7 @@ class FindAndHighlightViewTest extends SpringBrowserlessTest {
     }
 
     private int readMatchOffset() {
-        String status = $view(Span.class).all().stream().map(Span::getText)
+        String status = findInView(Span.class).all().stream().map(Span::getText)
                 .filter(t -> t != null && t.contains("Match at ")).findFirst()
                 .orElseThrow(() -> new AssertionError(
                         "Expected a 'Match at N' status span"));
@@ -70,15 +70,15 @@ class FindAndHighlightViewTest extends SpringBrowserlessTest {
         navigate(FindAndHighlightView.class);
         // Simulate the user clicking around in the textarea so a non-empty
         // selection signal value exists from a prior interaction.
-        TextArea content = $(TextArea.class).single();
+        TextArea content = find(TextArea.class).single();
         TextSelectionTestSupport.setSelection(content, 0, 0);
         runPendingSignalsTasks();
 
-        Button findNext = $(Button.class).withText("Find next").single();
+        Button findNext = find(Button.class).withText("Find next").single();
         test(findNext).click();
         runPendingSignalsTasks();
 
-        assertTrue($view(Span.class).all().stream().anyMatch(
+        assertTrue(findInView(Span.class).all().stream().anyMatch(
                 s -> "Enter a search term first".equals(s.getText())));
     }
 }

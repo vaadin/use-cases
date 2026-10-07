@@ -1,0 +1,57 @@
+.usecase16-view {
+    .url-box {
+        background-color: #e3f2fd;
+        padding: 1em;
+        border-radius: 4px;
+        margin: 1em 0;
+    }
+    .url-title {
+        margin-top: 0;
+    }
+    .url-display {
+        font-family: monospace;
+        word-break: break-all;
+        background-color: #ffffff;
+        padding: 0.5em;
+        border-radius: 4px;
+    }
+    .results-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5em;
+        margin-top: 1em;
+    }
+    .info-box {
+        background-color: #e0f7fa;
+        padding: 1em;
+        border-radius: 4px;
+        margin-top: 1em;
+        font-style: italic;
+    }
+    .article-card {
+        background-color: #ffffff;
+        border: 1px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent);
+        border-radius: 4px;
+        padding: 1em;
+    }
+    .article-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5em;
+    }
+    .article-title {
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+    .category-badge {
+        background-color: #e0e0e0;
+        padding: 0.25em 0.5em;
+        border-radius: 4px;
+        font-size: 0.85em;
+    }
+    .article-content {
+        color: var(--vaadin-text-color-secondary);
+        font-size: 0.9em;
+    }
+}

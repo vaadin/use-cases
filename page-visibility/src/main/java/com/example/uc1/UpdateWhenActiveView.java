@@ -12,6 +12,7 @@ import org.springframework.scheduling.TaskScheduler;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -33,6 +34,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @Menu(order = 1, title = "UC1 — Update when active")
+@StyleSheet("uc1.css")
 public class UpdateWhenActiveView extends VerticalLayout {
 
     private static final DateTimeFormatter TIME = DateTimeFormatter
@@ -50,6 +52,7 @@ public class UpdateWhenActiveView extends VerticalLayout {
     public UpdateWhenActiveView(TaskScheduler taskScheduler) {
         this.taskScheduler = taskScheduler;
 
+        addClassName("uc1-view");
         add(new H1("UC1 — Update when active"));
         add(new Paragraph("The card below updates the server clock every "
                 + "second only while the tab is visible. Hide the tab "

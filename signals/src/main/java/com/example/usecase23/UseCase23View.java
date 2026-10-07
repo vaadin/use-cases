@@ -1,7 +1,5 @@
 package com.example.usecase23;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -24,6 +22,7 @@ import com.vaadin.flow.component.charts.model.Marker;
 import com.vaadin.flow.component.charts.model.PlotOptionsAreaspline;
 import com.vaadin.flow.component.charts.model.PointPlacement;
 import com.vaadin.flow.component.charts.model.XAxis;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -39,6 +38,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -46,7 +46,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 23: Real-time Dashboard")
 @Route(value = "use-case-23", layout = MainLayout.class)
 @Menu(order = 23, title = "UC 23: Real-time Dashboard")
-@PermitAll
+@StyleSheet("usecase23.css")
+@AnonymousAllowed
 public class UseCase23View extends Main {
 
     private static final int TIMELINE_POINTS = 12;
@@ -69,7 +70,7 @@ public class UseCase23View extends Main {
     private @Nullable String taskId;
 
     public UseCase23View(SchedulerService schedulerService) {
-        addClassName("dashboard-view");
+        addClassName("usecase23-view");
 
         Board board = new Board();
         board.addRow(
@@ -172,7 +173,7 @@ public class UseCase23View extends Main {
 
         // Grid
         Grid<ValueSignal<ServiceHealth>> grid = new Grid<>();
-        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+        grid.addThemeVariants(GridVariant.NO_BORDER);
         grid.setAllRowsVisible(true);
 
         grid.addColumn(new ComponentRenderer<>(signal -> {
@@ -268,12 +269,10 @@ public class UseCase23View extends Main {
 
     private HorizontalLayout createHeader(String title, String subtitle) {
         H2 h2 = new H2(title);
-        h2.getStyle().set("font-size", "var(--aura-font-size-xl)").set("margin",
-                "0");
+        h2.addClassName("panel-header-title");
 
         Span span = new Span(subtitle);
-        span.getStyle().set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-size", "var(--aura-font-size-xs)");
+        span.addClassName("panel-header-subtitle");
 
         VerticalLayout column = new VerticalLayout(h2, span);
         column.setPadding(false);
@@ -401,13 +400,10 @@ public class UseCase23View extends Main {
                     .map(percentage -> percentage > 0);
 
             H2 h2 = new H2(title);
-            h2.getStyle().set("font-weight", "400").set("margin", "0")
-                    .set("color", "var(--vaadin-text-color-secondary)")
-                    .set("font-size", "var(--aura-font-size-xs)");
+            h2.addClassName("highlight-card-title");
 
             Span valueSpan = new Span();
-            valueSpan.getStyle().set("font-weight", "600").set("font-size",
-                    "2.5em");
+            valueSpan.addClassName("highlight-card-value");
             valueSpan.bindText(signal.map(format::apply));
 
             Span percentageSpan = new Span();
@@ -416,7 +412,7 @@ public class UseCase23View extends Main {
 
             Icon icon = new Icon(iconSignal);
             icon.setSize("10px");
-            icon.getStyle().setMarginRight("4px").setMarginLeft("0");
+            icon.addClassName("highlight-card-icon");
 
             Span badge = new Span();
             badge.add(icon, percentageSpan);
@@ -426,7 +422,7 @@ public class UseCase23View extends Main {
                             : List.of("badge", "error"));
 
             add(h2, valueSpan, badge);
-            getStyle().setGap("5px");
+            addClassName("highlight-card");
         }
 
         private String getPrefix(double percentage) {

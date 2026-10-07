@@ -110,13 +110,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
     }
 
     private String getCurrentDisplayName() {
-        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .get();
-        if (userInfo == null || !userInfo.isAuthenticated()) {
-            return "Anonymous";
-        }
-
-        String username = userInfo.getUsername();
+        String username = currentUserSignal.getUserSignal().get().getUsername();
         if (sessionId == null) {
             return username;
         }
@@ -141,7 +135,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         mainPanel.setHeightFull();
         mainPanel.setSpacing(true);
         mainPanel.setAlignItems(Alignment.STRETCH);
-        mainPanel.getStyle().set("min-height", "0");
+        mainPanel.addClassName("main-panel");
 
         // Left side: AI Chat
         VerticalLayout chatPanel = buildChatPanel();
@@ -161,10 +155,10 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         chatPanel.setHeightFull();
         chatPanel.setPadding(false);
         chatPanel.setSpacing(true);
-        chatPanel.getStyle().set("min-width", "0");
+        chatPanel.addClassName("chat-panel");
 
         H2 chatTitle = new H2("AI Task Assistant");
-        chatTitle.getStyle().set("margin", "0");
+        chatTitle.addClassName("panel-title");
 
         Paragraph chatDescription = new Paragraph(
                 "Chat with the AI to manage your tasks. Try commands like 'Add a task to buy groceries' or 'List my tasks'.");
@@ -181,16 +175,16 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         taskPanel.setHeightFull();
         taskPanel.setPadding(false);
         taskPanel.setSpacing(true);
-        taskPanel.getStyle().set("min-width", "0");
+        taskPanel.addClassName("task-panel");
 
         H2 title = new H2("Task Management");
-        title.getStyle().set("margin", "0");
+        title.addClassName("panel-title");
 
         VerticalLayout gridContainer = buildTaskGrid();
 
         Button addTaskButton = new Button("Add New Task",
                 VaadinIcon.PLUS.create());
-        addTaskButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        addTaskButton.addThemeVariants(ButtonVariant.PRIMARY);
         addTaskButton.addClickListener(e -> openAddTaskDialog());
 
         taskPanel.add(title, gridContainer, addTaskButton);
@@ -218,18 +212,16 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
     private Div createStatCard(String label, Signal<Integer> valueSignal,
             String color) {
         Div card = new Div();
-        card.getStyle().set("flex", "1").set("background-color", "#f5f5f5")
-                .set("padding", "1em").set("border-radius", "8px")
-                .set("text-align", "center");
+        card.addClassName("stat-card");
 
         Span valueLabel = new Span();
         valueLabel.bindText(valueSignal.map(String::valueOf));
-        valueLabel.getStyle().set("font-size", "2em").set("font-weight", "bold")
-                .set("color", color).set("display", "block");
+        valueLabel.addClassName("stat-card-value");
+        // Per-card color is dynamic — keep inline
+        valueLabel.getStyle().set("color", color);
 
         Span titleLabel = new Span(label);
-        titleLabel.getStyle().set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-size", "0.875em");
+        titleLabel.addClassName("stat-card-label");
 
         card.add(valueLabel, titleLabel);
         return card;
@@ -271,7 +263,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
                 dialog.close();
             }
         });
-        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        saveButton.addThemeVariants(ButtonVariant.PRIMARY);
 
         Button cancelButton = new Button("Cancel", e -> dialog.close());
 
@@ -285,7 +277,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         gridContainer.setWidthFull();
         gridContainer.setPadding(false);
         gridContainer.setSpacing(false);
-        gridContainer.getStyle().set("min-height", "0");
+        gridContainer.addClassName("grid-container");
 
         Grid<Task> grid = new Grid<>(Task.class, false);
         grid.addColumn(Task::title).setHeader("Title").setFlexGrow(2)
@@ -302,13 +294,13 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
             actions.setSpacing(true);
 
             Button editButton = new Button(VaadinIcon.EDIT.create());
-            editButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
-                    ButtonVariant.LUMO_SMALL);
+            editButton.addThemeVariants(ButtonVariant.TERTIARY,
+                    ButtonVariant.SMALL);
             editButton.addClickListener(e -> openEditDialog(task));
 
             Button deleteButton = new Button(VaadinIcon.TRASH.create());
-            deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR,
-                    ButtonVariant.LUMO_SMALL);
+            deleteButton.addThemeVariants(ButtonVariant.ERROR,
+                    ButtonVariant.SMALL);
             deleteButton.addClickListener(e -> {
                 tasksSignal.peek().stream()
                         .filter(sig -> sig.peek().equals(task)).findFirst()
@@ -319,8 +311,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
             return actions;
         }).setHeader("Actions").setFlexGrow(0).setAutoWidth(true);
 
-        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES,
-                GridVariant.LUMO_COMPACT);
+        grid.addThemeVariants(GridVariant.ROW_STRIPES);
 
         Signal.effect(grid,
                 () -> grid.setItems(tasksSignal.getValues().toList()));
@@ -375,7 +366,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
         // Changes are saved automatically via two-way binding
         Button closeButton = new Button("Close", e -> dialog.close());
-        closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        closeButton.addThemeVariants(ButtonVariant.PRIMARY);
 
         dialog.add(formLayout);
         dialog.getFooter().add(closeButton);
@@ -387,7 +378,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         chatContainer.setWidthFull();
         chatContainer.setPadding(false);
         chatContainer.setSpacing(true);
-        chatContainer.getStyle().set("min-height", "0");
+        chatContainer.addClassName("chat-container");
 
         // Message list
         messageList = new MessageList();
@@ -409,8 +400,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
                                     : msg.content(),
                             msg.timestamp(), msg.role());
 
-                    if (msg.role().equals("You") && userInfo != null
-                            && userInfo.isAuthenticated()) {
+                    if (msg.role().equals("You") && userInfo != null) {
                         item.setUserColorIndex(0);
                         String displayName = getCurrentDisplayName();
                         String username = userInfo.getUsername();

@@ -1,0 +1,78 @@
+.usecase19-view {
+    .items-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1em;
+        margin: 1em 0;
+    }
+    .data-card {
+        flex: 1 1 300px;
+        min-width: 300px;
+    }
+    .data-card.state-idle {
+        border-left: 4px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent);
+    }
+    .data-card.state-loading {
+        border-left: 4px solid var(--aura-accent-color);
+    }
+    .data-card.state-success {
+        border-left: 4px solid var(--aura-green);
+    }
+    .data-card.state-error {
+        border-left: 4px solid var(--aura-red);
+    }
+    .idle-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5em;
+        padding: 2em;
+        color: var(--vaadin-text-color-secondary);
+    }
+    .idle-text {
+        font-style: italic;
+    }
+    .loading-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1em;
+        padding: 2em;
+    }
+    .loading-text {
+        color: var(--aura-accent-color);
+    }
+    .success-content,
+    .error-content {
+        padding: 1em;
+    }
+    .state-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+        margin-bottom: 1em;
+    }
+    .success-label {
+        color: var(--aura-green);
+        font-weight: 500;
+    }
+    .error-label {
+        color: var(--aura-red);
+        font-weight: 500;
+    }
+    .data-content {
+        background-color: color-mix(in srgb, var(--vaadin-text-color) 5%, transparent);
+        padding: 1em;
+        border-radius: 4px;
+        white-space: pre-line;
+        font-family: monospace;
+        font-size: 0.875em;
+    }
+    .error-message {
+        background-color: #ffebee;
+        padding: 1em;
+        border-radius: 4px;
+        margin-bottom: 1em;
+        color: var(--aura-red-text);
+    }
+}

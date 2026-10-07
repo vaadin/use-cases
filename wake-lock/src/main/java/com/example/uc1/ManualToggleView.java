@@ -9,7 +9,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.WakeLock;
+import com.vaadin.flow.component.wakelock.WakeLock;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
@@ -18,11 +18,10 @@ import com.vaadin.flow.signals.Signal;
  * UC1 — Manual keep-awake toggle.
  * <p>
  * The simplest possible exercise of the API: a single button flips between
- * <em>Keep screen awake</em> and <em>Allow screen to sleep</em>. The badge
- * next to it is bound to {@link WakeLock#activeSignal()} so the user can see
- * exactly when the browser actually grants or drops the lock — which may lag
- * the click, or never happen at all on an insecure origin or an unsupported
- * browser.
+ * <em>Keep screen awake</em> and <em>Allow screen to sleep</em>. The badge next
+ * to it is bound to {@link WakeLock#activeSignal()} so the user can see exactly
+ * when the browser actually grants or drops the lock — which may lag the click,
+ * or never happen at all on an insecure origin or an unsupported browser.
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @Menu(order = 1, title = "UC1 — Manual toggle")
@@ -51,23 +50,22 @@ public class ManualToggleView extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        WakeLock wakeLock = attachEvent.getUI().getPage().getWakeLock();
-        Signal<Boolean> active = wakeLock.activeSignal();
+        Signal<Boolean> active = WakeLock.activeSignal();
 
-        statusBadge.bindText(active.map(
-                held -> Boolean.TRUE.equals(held) ? "Holding lock — screen "
-                        + "will stay on" : "Released — screen may sleep"));
+        statusBadge.bindText(active.map(held -> Boolean.TRUE.equals(held)
+                ? "Holding lock — screen " + "will stay on"
+                : "Released — screen may sleep"));
         statusBadge.bindClassName("active", active);
 
-        toggleButton.bindText(active.map(held -> Boolean.TRUE.equals(held)
-                ? "Allow screen to sleep"
-                : "Keep screen awake"));
+        toggleButton.bindText(active
+                .map(held -> Boolean.TRUE.equals(held) ? "Allow screen to sleep"
+                        : "Keep screen awake"));
 
         toggleButton.addClickListener(e -> {
             if (Boolean.TRUE.equals(active.peek())) {
-                wakeLock.release();
+                WakeLock.release();
             } else {
-                wakeLock.request();
+                WakeLock.request();
             }
         });
     }

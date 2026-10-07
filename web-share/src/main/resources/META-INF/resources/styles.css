@@ -19,36 +19,6 @@
     letter-spacing: 0.05em;
 }
 
-.share-preview {
-    font-family: monospace;
-    font-size: 0.85rem;
-    background: var(--vaadin-background-container);
-    border: 1px solid var(--vaadin-border-color);
-    border-radius: var(--vaadin-radius-m);
-    padding: 0.5rem 0.75rem;
-    white-space: pre-wrap;
-}
-
-.share-feedback-log {
-    font-family: monospace;
-    font-size: 0.85rem;
-    background: var(--vaadin-background-container);
-    border: 1px solid var(--vaadin-border-color);
-    border-radius: var(--vaadin-radius-m);
-    padding: 0.5rem 0.75rem;
-    max-height: 220px;
-    overflow-y: auto;
-}
-
-.share-feedback-log > div {
-    padding: 0.1rem 0;
-    border-bottom: 1px dashed var(--vaadin-border-color);
-}
-
-.share-feedback-log > div:last-child {
-    border-bottom: none;
-}
-
 .status-badge {
     display: inline-block;
     padding: 0.15rem 0.6rem;
@@ -69,40 +39,4 @@
     background: color-mix(in srgb, var(--aura-neutral) 18%, transparent);
     color: var(--vaadin-text-color-secondary);
     border-color: color-mix(in srgb, var(--aura-neutral) 35%, transparent);
-}
-
-.share-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    max-width: 640px;
-}
-
-.share-list-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--vaadin-border-color);
-    border-radius: var(--vaadin-radius-m);
-    background: var(--vaadin-background-container);
-}
-
-.share-list-item-title {
-    font-weight: 600;
-}
-
-.share-list-item-summary {
-    font-size: 0.85rem;
-    color: var(--vaadin-text-color-secondary);
-}
-
-.invite-code {
-    font-family: monospace;
-    font-size: 1.1rem;
-    padding: 0.25rem 0.6rem;
-    background: var(--vaadin-background-container);
-    border-radius: var(--vaadin-radius-s);
-    border: 1px solid var(--vaadin-border-color);
 }

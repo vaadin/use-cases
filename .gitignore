@@ -17,3 +17,4 @@
 .playwright-mcp
 .vaadin-node-tasks.lock
 .claude-contained/
+pr-info.md

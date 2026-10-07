@@ -1,7 +1,5 @@
 package com.example.muc01;
 
-import jakarta.annotation.security.PermitAll;
-
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
@@ -13,6 +11,7 @@ import org.jspecify.annotations.Nullable;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -22,6 +21,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 /**
  * Multi-User Case 1: Shared Chat/Message List
@@ -38,7 +38,8 @@ import com.vaadin.flow.router.Route;
 @Route(value = "muc-01", layout = MainLayout.class)
 @PageTitle("MUC 1: Shared Chat")
 @Menu(order = 50, title = "MUC 1: Shared Chat")
-@PermitAll
+@StyleSheet("muc01.css")
+@AnonymousAllowed
 public class MUC01View extends VerticalLayout {
 
     private final String currentUser;
@@ -49,16 +50,12 @@ public class MUC01View extends VerticalLayout {
     public MUC01View(CurrentUserSignal currentUserSignal,
             MUC01Signals muc01Signals,
             UserSessionRegistry userSessionRegistry) {
-        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .peek();
-        if (userInfo == null || !userInfo.isAuthenticated()) {
-            throw new IllegalStateException(
-                    "User must be authenticated to access this view");
-        }
-        this.currentUser = userInfo.getUsername();
+        this.currentUser = currentUserSignal.getUserSignal().peek()
+                .getUsername();
         this.muc01Signals = muc01Signals;
         this.userSessionRegistry = userSessionRegistry;
 
+        addClassName("muc01-view");
         setSpacing(true);
         setPadding(true);
         setHeight("100%");
@@ -77,10 +74,7 @@ public class MUC01View extends VerticalLayout {
         // Message display area
         Div messagesContainer = new Div();
         messagesContainer.setWidthFull();
-        messagesContainer.getStyle().set("background-color", "#f5f5f5")
-                .set("border", "1px solid #e0e0e0").set("border-radius", "4px")
-                .set("padding", "1em").set("min-height", "200px")
-                .set("overflow-y", "auto").set("max-height", "400px");
+        messagesContainer.addClassName("messages-container");
 
         // Bind message list to UI
         messagesContainer.bindChildren(muc01Signals.getMessagesSignal(),
@@ -118,9 +112,7 @@ public class MUC01View extends VerticalLayout {
         Div messageCount = new Div();
         messageCount.bindText(muc01Signals.getMessagesSignal()
                 .map(messages -> "Total messages: " + messages.size()));
-        messageCount.getStyle()
-                .set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-size", "var(--aura-font-size-s)");
+        messageCount.addClassName("message-count");
 
         add(title, description, activeUsersDisplay, new H3("Messages"),
                 messagesContainer, messageCount, messageInput, sendButton,
@@ -138,11 +130,9 @@ public class MUC01View extends VerticalLayout {
                 .getUserColorByUsername(message.username());
 
         Div messageDiv = new Div();
-        messageDiv.getStyle().set("background-color", "#ffffff")
-                .set("border-left", "3px solid " + senderColor)
-                .set("padding", "0.75em").set("margin-bottom", "0.5em")
-                .set("border-radius", "4px").set("display", "flex")
-                .set("gap", "0.75em");
+        messageDiv.addClassName("message-row");
+        // Per-user color is dynamic — keep inline
+        messageDiv.getStyle().set("border-left", "3px solid " + senderColor);
 
         // Avatar
         ColoredAvatar avatar = new ColoredAvatar(message.username(),
@@ -150,27 +140,26 @@ public class MUC01View extends VerticalLayout {
 
         // Content area (header + text)
         Div contentArea = new Div();
-        contentArea.getStyle().set("flex", "1");
+        contentArea.addClassName("message-content");
 
         Div header = new Div();
-        header.getStyle().set("display", "flex")
-                .set("justify-content", "space-between")
-                .set("margin-bottom", "0.5em");
+        header.addClassName("message-header");
 
         Div author = new Div();
         author.setText(message.author());
-        author.getStyle().set("font-weight", "bold").set("color", senderColor);
+        author.addClassName("message-author");
+        // Per-user color is dynamic — keep inline
+        author.getStyle().set("color", senderColor);
 
         Div timestamp = new Div();
         timestamp.setText(message.getFormattedTimestamp());
-        timestamp.getStyle().set("font-size", "0.85em").set("color",
-                "var(--vaadin-text-color-secondary)");
+        timestamp.addClassName("message-timestamp");
 
         header.add(author, timestamp);
 
         Div text = new Div();
         text.setText(message.text());
-        text.getStyle().set("color", "var(--vaadin-text-color)");
+        text.addClassName("message-text");
 
         contentArea.add(header, text);
         messageDiv.add(avatar, contentArea);

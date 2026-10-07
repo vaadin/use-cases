@@ -1,0 +1,34 @@
+.usecase03-view {
+    .view-title {
+        margin-bottom: 0;
+    }
+    .view-description {
+        margin-top: 0.5em;
+    }
+    .left-panel {
+        flex-shrink: 0;
+    }
+    .svg-container {
+        flex: 1;
+        border: 2px solid color-mix(in srgb, var(--vaadin-text-color) 10%, transparent);
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .svg-canvas {
+        background: #fafafa;
+        border-radius: 4px;
+    }
+    .clickable-shape {
+        cursor: pointer;
+    }
+    .section-label {
+        font-size: var(--aura-font-size-s);
+        color: var(--vaadin-text-color-secondary);
+        font-weight: 500;
+    }
+    .section-label-with-margin {
+        margin-top: 8px;
+    }
+}
