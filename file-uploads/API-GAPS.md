@@ -15,8 +15,15 @@ What works well and is used as is: `UploadButton#setCapture(UploadCapture)` and 
 
 **Where it bit us:** uc2 / `AttachDocumentsView.java`
 **Symptom:** A form whose files are processed together with its fields needs the files to wait in the browser until the user sends the form. `setAutoUpload(false)` makes them wait, but then only the user can start them, file by file: the server has no way to start the queued uploads when "Send claim" is clicked, and no way to ask whether any files are queued, which the "at least one receipt" check needs before starting. Upload's `AllFinishedEvent` cannot tell the form that its files are done either, because it fires whenever no upload happens to be running.
-**Workaround used:** `MissingAPI.startUpload(upload)` calls the web component's `uploadFiles()`, and `MissingAPI.addQueueSizeListener` tracks the number of unsent files from the browser's `files-changed` event. That event is not fired when a file completes, so after a failed attempt the view resets the count itself. The view counts arrivals against the number of files queued at Send instead of relying on `AllFinishedEvent`.
+**Workaround used:** `MissingAPI.startUpload(upload)` calls the web component's `uploadFiles()`, and `MissingAPI.addQueueSizeListener` tracks the number of unsent files from the browser's `files-changed` event. That event is not fired when a file completes, so after a failed attempt the view resets the count itself. The view counts arrivals against the number of files queued at Send instead of relying on `AllFinishedEvent`, including files the browser reports as cancelled or failed, so that a file that never reaches the server cannot leave the form waiting. Adding receipts is locked while sending by disabling the upload button and drop; disabling the upload itself would also stop the running uploads, because upload requests to a disabled component are refused.
 **Suggested API:** `Upload#startUpload()` / `UploadManager#startUpload()` returning something that completes once all the started files have finished, with the received and failed files, plus a read-only view of the queue. Tracked in vaadin/flow-components#1384 and #6858.
+
+## `whenComplete` does not say why an upload failed
+
+**Where it bit us:** uc2 / `AttachDocumentsView.java`
+**Symptom:** A file refused by a validator with `event.reject("dinner.pdf is not a PDF or a photo")` reaches `whenComplete((context, success) -> …)` with `success == false`, but `context.exception()` is `null`, so the form cannot tell a refused file from a broken connection or show the reason it gave.
+**Workaround used:** A `TransferProgressListener` passed to `UploadHandler.inMemory(callback, listener)`, whose `onError(context, reason)` receives the `UploadRejectedException` with the message.
+**Suggested API:** Fill `TransferContext#exception()` in the context handed to `whenComplete`, or offer `whenFailed((context, reason) -> …)`.
 
 ## Rejected files arrive one event at a time
 

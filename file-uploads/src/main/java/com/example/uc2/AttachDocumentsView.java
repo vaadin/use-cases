@@ -1,10 +1,11 @@
 package com.example.uc2;
 
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.example.Images;
 import com.example.MissingAPI;
@@ -27,13 +28,15 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.FileRejectedEvent;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.streams.TransferContext;
-import com.vaadin.flow.server.streams.UploadEvent;
+import com.vaadin.flow.server.streams.TransferProgressListener;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.server.streams.UploadMetadata;
+import com.vaadin.flow.server.streams.UploadRejectedException;
 
 /**
  * UC2 — Attach documents to a form.
@@ -66,6 +69,7 @@ public class AttachDocumentsView extends VerticalLayout {
 
     static final int MAX_RECEIPTS = 5;
     static final int MAX_RECEIPT_BYTES = 10 * 1024 * 1024;
+    private static final String FILE_NAME = "event.detail.file.name";
 
     record Receipt(String fileName, String contentType, byte[] bytes) {
     }
@@ -100,7 +104,8 @@ public class AttachDocumentsView extends VerticalLayout {
     private final Span receiptsError = new Span("Attach at least one receipt.");
     private final Button send = new Button("Send claim", e -> send());
     private final List<Receipt> received = new ArrayList<>();
-    private final List<String> failed = new ArrayList<>();
+    private final Map<String, String> failed = new LinkedHashMap<>();
+    private final Button addReceipts = new Button("Add receipts…");
     private final List<String> rejectedInThisRoundTrip = new ArrayList<>();
     private final List<Claim> claims = new ArrayList<>();
     private final Grid<Claim> grid = new Grid<>(Claim.class, false);
@@ -108,6 +113,7 @@ public class AttachDocumentsView extends VerticalLayout {
     private boolean sending;
     private int expected;
     private int finished;
+    private boolean dropAllowed;
 
     public AttachDocumentsView() {
         add(new H1("UC2 — Attach documents to a form"));
@@ -127,10 +133,25 @@ public class AttachDocumentsView extends VerticalLayout {
                 .bind(ClaimForm::getAmount, ClaimForm::setAmount);
         binder.setBean(new ClaimForm());
 
-        upload = new Upload(UploadHandler.inMemory(this::receiptReceived)
-                .validateHeader(Images.HEADER_SIZE,
-                        AttachDocumentsView::rejectUnlessReceipt)
-                .whenComplete(this::receiptFinished));
+        upload = new Upload(UploadHandler.inMemory(this::receiptReceived,
+                new TransferProgressListener() {
+                    // whenComplete only says that a file failed, not why
+                    @Override
+                    public void onError(TransferContext context,
+                            IOException reason) {
+                        receiptFailed(context.fileName(),
+                                reason instanceof UploadRejectedException
+                                        && reason.getMessage() != null
+                                                ? reason.getMessage()
+                                                : context.fileName()
+                                                        + " did not arrive");
+                    }
+                }).validateHeader(Images.HEADER_SIZE, (event, header) -> {
+                    if (!Images.isPdf(header) && !Images.isImage(header)) {
+                        event.reject(event.getFileName()
+                                + " is not a PDF or a photo");
+                    }
+                }));
         upload.setAutoUpload(false);
         upload.setAcceptedMimeTypes("application/pdf", "image/jpeg",
                 "image/png");
@@ -140,6 +161,16 @@ public class AttachDocumentsView extends VerticalLayout {
         upload.setWidthFull();
         upload.addFileRejectedListener(this::receiptRejected);
         upload.addFileRemovedListener(e -> receiptRemoved(e.getFileName()));
+        // Files that never reach the server: cancelled, or lost on the way.
+        upload.getElement().addEventListener("upload-abort",
+                e -> receiptFailed(fileName(e), fileName(e) + " was cancelled"))
+                .addEventData(FILE_NAME);
+        upload.getElement()
+                .addEventListener("upload-error",
+                        e -> receiptFailed(fileName(e),
+                                fileName(e) + " did not arrive"))
+                .addEventData(FILE_NAME);
+        upload.setUploadButton(addReceipts);
         MissingAPI.addQueueSizeListener(upload, count -> {
             queued = count;
             if (count > 0) {
@@ -170,17 +201,6 @@ public class AttachDocumentsView extends VerticalLayout {
         add(grid);
     }
 
-    private static void rejectUnlessReceipt(UploadEvent event,
-            ByteBuffer header) {
-        byte[] start = new byte[Math.min(4, header.remaining())];
-        header.duplicate().get(start);
-        boolean pdf = "%PDF"
-                .equals(new String(start, StandardCharsets.US_ASCII));
-        if (!pdf && !Images.isImage(header)) {
-            event.reject(event.getFileName() + " is not a PDF or a photo");
-        }
-    }
-
     private void send() {
         boolean fieldsValid = binder.validate().isOk();
         boolean hasReceipts = queued > 0 || !received.isEmpty();
@@ -188,6 +208,7 @@ public class AttachDocumentsView extends VerticalLayout {
         if (!fieldsValid || !hasReceipts) {
             return;
         }
+        failed.clear();
         if (queued == 0) {
             // Everything already arrived on an earlier attempt.
             process();
@@ -196,6 +217,11 @@ public class AttachDocumentsView extends VerticalLayout {
         sending = true;
         expected = queued;
         finished = 0;
+        // Files added now would not be part of this claim, so adding is locked.
+        // Disabling the upload itself would also stop the running uploads.
+        dropAllowed = upload.isDropAllowed();
+        upload.setDropAllowed(false);
+        addReceipts.setEnabled(false);
         binder.setReadOnly(true);
         send.setEnabled(false);
         send.setText("Sending receipts…");
@@ -205,22 +231,31 @@ public class AttachDocumentsView extends VerticalLayout {
     private void receiptReceived(UploadMetadata metadata, byte[] bytes) {
         received.add(new Receipt(metadata.fileName(), metadata.contentType(),
                 bytes));
-        arrived();
-    }
-
-    private void receiptFinished(TransferContext context, boolean success) {
-        if (!success) {
-            failed.add(context.fileName());
-            arrived();
+        if (sending) {
+            finished++;
+            processWhenAllArrived();
         }
     }
 
-    private void arrived() {
+    private void receiptFailed(String fileName, String reason) {
+        // A file refused by the server is reported twice: first here with the
+        // reason, then by the browser as an upload error. Keep the first.
+        if (sending && failed.putIfAbsent(fileName, reason) == null) {
+            finished++;
+            processWhenAllArrived();
+        }
+    }
+
+    private void processWhenAllArrived() {
         // Counted per file rather than with the all-finished event, which can
         // fire whenever no upload happens to be running.
-        if (sending && ++finished >= expected) {
+        if (finished >= expected) {
             process();
         }
+    }
+
+    private static String fileName(DomEvent event) {
+        return event.getEventData().get(FILE_NAME).asString();
     }
 
     private void receiptRemoved(String fileName) {
@@ -233,23 +268,23 @@ public class AttachDocumentsView extends VerticalLayout {
 
     /** Processes the claim and all of its receipts as one unit. */
     private void process() {
-        sending = false;
-        binder.setReadOnly(false);
-        send.setEnabled(true);
-        send.setText("Send claim");
+        if (sending) {
+            sending = false;
+            upload.setDropAllowed(dropAllowed);
+            addReceipts.setEnabled(true);
+            binder.setReadOnly(false);
+            send.setEnabled(true);
+            send.setText("Send claim");
+        }
 
         if (!failed.isEmpty()) {
-            Notification
-                    .show("The claim was not sent. " + String.join(", ", failed)
-                            + (failed.size() == 1
-                                    ? " is not a PDF or a photo; remove it"
-                                    : " are not PDFs or photos; remove them")
-                            + " and send again.");
+            Notification.show("The claim was not sent: "
+                    + String.join("; ", failed.values())
+                    + ". Remove or replace the file and send again.");
             // The browser reports the queue only when files are added or
-            // removed;
-            // right now only the failed files are still waiting.
+            // removed,
+            // and right now only the failed files are still waiting.
             queued = failed.size();
-            failed.clear();
             return;
         }
         ClaimForm form = binder.getBean();

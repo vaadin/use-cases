@@ -69,6 +69,15 @@ public final class Images {
     }
 
     /**
+     * Whether the given leading bytes start a PDF document.
+     */
+    public static boolean isPdf(ByteBuffer header) {
+        byte[] bytes = new byte[Math.min(header.remaining(), HEADER_SIZE)];
+        header.duplicate().get(bytes);
+        return startsWith(bytes, 0, '%', 'P', 'D', 'F');
+    }
+
+    /**
      * MP4, MOV and other ISO media files start with the same {@code ftyp} box
      * as HEIC; only the major brand that follows tells a photo from a video.
      */

@@ -3,7 +3,7 @@ package com.example.uc2;
 import java.math.BigDecimal;
 import java.util.List;
 
-import com.example.BrowserQueue;
+import com.example.BrowserUpload;
 import com.example.TestFiles;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,13 +35,18 @@ class AttachDocumentsViewTest extends SpringBrowserlessTest {
         queue("hotel.png", "image/png", TestFiles.png(10, 10));
         queue("wrong.pdf", "application/pdf", TestFiles.text("%PDF-1.7"));
         upload().removeFile("wrong.pdf");
-        browserQueue().reportQueued(2);
+        browser().reportQueued(2);
         assertEquals(0, test(claims()).size(), "Nothing is sent yet");
 
         clickSend();
         Button sending = find(Button.class).withText("Sending receipts…")
                 .single();
         assertFalse(sending.isEnabled());
+        assertFalse(
+                find(Button.class).withText("Add receipts…").single()
+                        .isEnabled(),
+                "Files added now would not be part of the claim");
+        assertFalse(findInView(Upload.class).single().isDropAllowed());
         assertEquals(0, test(claims()).size());
 
         // The browser runs the queued uploads that Send started
@@ -62,24 +67,56 @@ class AttachDocumentsViewTest extends SpringBrowserlessTest {
         fillInFields();
         queue("taxi.pdf", "application/pdf", TestFiles.text("%PDF-1.7"));
         queue("dinner.pdf", "application/pdf", TestFiles.text("not a pdf"));
-        browserQueue().reportQueued(2);
+        browser().reportQueued(2);
 
         clickSend();
         upload().startUpload("taxi.pdf");
         upload().startUpload("dinner.pdf");
 
         assertEquals(0, test(claims()).size());
-        assertTrue(test(find(Notification.class).single()).getText()
-                .contains("dinner.pdf is not a PDF or a photo"));
+        assertEquals(
+                "The claim was not sent: dinner.pdf is not a PDF or a photo. "
+                        + "Remove or replace the file and send again.",
+                test(find(Notification.class).single()).getText());
+        assertTrue(
+                find(Button.class).withText("Send claim").single().isEnabled());
+
+        // Sending again without fixing it retries only the bad file, which the
+        // browser reports as failed again
+        clickSend();
+        assertTrue(find(Button.class).withText("Sending receipts…").exists());
+        browser().reportFailed("dinner.pdf");
+        assertEquals(0, test(claims()).size());
         assertTrue(
                 find(Button.class).withText("Send claim").single().isEnabled());
 
         // The user removes the bad file; the good one has already arrived
         upload().removeFile("dinner.pdf");
-        browserQueue().reportQueued(0);
+        browser().reportQueued(0);
         clickSend();
 
         assertEquals(List.of("taxi.pdf"), test(claims()).getRow(0).receipts());
+    }
+
+    @Test
+    void receiptCancelledWhileSending_isReportedInsteadOfWaitingForever() {
+        navigate(AttachDocumentsView.class);
+        fillInFields();
+        queue("taxi.pdf", "application/pdf", TestFiles.text("%PDF-1.7"));
+        queue("hotel.png", "image/png", TestFiles.png(10, 10));
+        browser().reportQueued(2);
+
+        clickSend();
+        upload().startUpload("taxi.pdf");
+        browser().reportAborted("hotel.png");
+
+        assertEquals(0, test(claims()).size());
+        assertEquals(
+                "The claim was not sent: hotel.png was cancelled. "
+                        + "Remove or replace the file and send again.",
+                test(find(Notification.class).single()).getText());
+        assertTrue(find(Button.class).withText("Add receipts…").single()
+                .isEnabled());
     }
 
     @Test
@@ -94,6 +131,11 @@ class AttachDocumentsViewTest extends SpringBrowserlessTest {
         assertTrue(find(Span.class).withText("Attach at least one receipt.")
                 .exists());
         assertEquals(0, test(claims()).size());
+
+        queue("taxi.pdf", "application/pdf", TestFiles.text("%PDF-1.7"));
+        browser().reportQueued(1);
+        assertFalse(find(Span.class).withText("Attach at least one receipt.")
+                .exists(), "Picking a receipt clears the error");
     }
 
     @Test
@@ -121,8 +163,8 @@ class AttachDocumentsViewTest extends SpringBrowserlessTest {
         return test(findInView(Upload.class).single());
     }
 
-    private BrowserQueue browserQueue() {
-        return new BrowserQueue(findInView(Upload.class).single());
+    private BrowserUpload browser() {
+        return new BrowserUpload(findInView(Upload.class).single());
     }
 
     private void fillInFields() {
