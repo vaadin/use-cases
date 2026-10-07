@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Audio;
@@ -84,5 +85,35 @@ class PodcastPlaylistViewTest extends SpringBrowserlessTest {
                 findInView(Span.class).all().stream()
                         .anyMatch(s -> s.getText().contains(fragment)),
                 "expected now playing to contain \"" + fragment + "\"");
+    }
+
+    @Test
+    void episodeInTheUrlIsLoadedWithoutAutoplay() {
+        navigate("uc6/3", PodcastPlaylistView.class);
+        runPendingSignalsTasks();
+        Audio audio = findInView(Audio.class).single();
+
+        assertEquals(PodcastPlaylistView.EPISODES.get(2).file(),
+                audio.getSources().get(0).getSrc());
+        assertTrue(episodeButtons().get(2).hasClassName("current"));
+        // Browsers block autoplay on page load; the user presses play.
+        assertTrue(new MediaTester(audio).takeJavaScript().stream()
+                .noneMatch(js -> js.contains("play()")));
+    }
+
+    @Test
+    void pickingAnEpisodePutsItInTheUrl() {
+        navigate(PodcastPlaylistView.class);
+        runPendingSignalsTasks();
+
+        episodeButtons().get(1).click();
+        runPendingSignalsTasks();
+
+        assertEquals("uc6/2", location());
+    }
+
+    private static String location() {
+        return UI.getCurrent().getInternals().getActiveViewLocation()
+                .getPathWithQueryParameters();
     }
 }

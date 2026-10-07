@@ -1,0 +1,25 @@
+.muc08-view {
+    .announcement-banner {
+        background-color: color-mix(in srgb, var(--aura-accent-color) 15%, transparent);
+        border-left: 4px solid var(--aura-accent-color);
+        border-radius: 4px;
+        padding: 1em;
+        width: 100%;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25em;
+    }
+    .announcement-text {
+        font-weight: 600;
+        font-size: var(--aura-font-size-l);
+    }
+    .announcement-meta {
+        color: var(--vaadin-text-color-secondary);
+        font-size: var(--aura-font-size-s);
+    }
+    .no-announcement {
+        color: var(--vaadin-text-color-secondary);
+        font-style: italic;
+    }
+}
