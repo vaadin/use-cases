@@ -28,12 +28,13 @@ public class SecurityConfiguration {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
-        // Allow access to profile pictures without authentication
-        http.authorizeHttpRequests(
-                auth -> auth.requestMatchers("/profile-pictures/**").permitAll()
-                        .requestMatchers(request -> request
-                                .getParameter(LOGIN_PARAMETER) != null)
-                        .authenticated());
+        // Allow access to profile pictures and the per-view stylesheets
+        // (loaded via @StyleSheet) without authentication
+        http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/profile-pictures/**", "/*.css").permitAll()
+                .requestMatchers(request -> request
+                        .getParameter(LOGIN_PARAMETER) != null)
+                .authenticated());
 
         // Configure Vaadin's security using VaadinSecurityConfigurer
         http.with(VaadinSecurityConfigurer.vaadin(), configurer -> {
