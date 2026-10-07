@@ -3,6 +3,7 @@ package com.example.uc9;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.uc8.HierarchicalMenuView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
@@ -10,7 +11,6 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
-import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -56,13 +56,14 @@ public class ReportsView extends VerticalLayout {
                 + "Revenue forecast lives at /forecast and is pulled in "
                 + "here by @Menu(parent = ReportsView.class). Open it "
                 + "and its breadcrumb will not mention Reports at all — "
-                + "the menu was regrouped, the route hierarchy was " + "not."));
+                + "the menu was regrouped, the route hierarchy was not."));
 
         SideNav subtree = new SideNav();
         subtree.setId(MENU_ID);
         findEntry(MenuConfiguration.getMenuEntriesTree(), ReportsView.class)
-                .ifPresent(reports -> reports.children()
-                        .forEach(child -> subtree.addItem(toItem(child))));
+                .ifPresent(
+                        reports -> reports.children().forEach(child -> subtree
+                                .addItem(HierarchicalMenuView.toItem(child))));
         add(subtree);
 
         add(new RouterLink("Sales report →", SalesReportView.class));
@@ -81,11 +82,5 @@ public class ReportsView extends VerticalLayout {
             }
         }
         return Optional.empty();
-    }
-
-    private static SideNavItem toItem(MenuEntry entry) {
-        SideNavItem item = new SideNavItem(entry.title(), entry.path());
-        entry.children().forEach(child -> item.addItem(toItem(child)));
-        return item;
     }
 }

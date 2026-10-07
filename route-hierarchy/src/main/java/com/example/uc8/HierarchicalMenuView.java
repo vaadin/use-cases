@@ -55,7 +55,11 @@ public class HierarchicalMenuView extends VerticalLayout {
         add(tree);
     }
 
-    private static SideNavItem toItem(MenuEntry entry) {
+    /**
+     * Renders a menu entry and its children as a nested {@link SideNavItem}; an
+     * entry without a path (a menu-only grouping) becomes a plain label.
+     */
+    public static SideNavItem toItem(MenuEntry entry) {
         SideNavItem item = entry.path() != null
                 ? new SideNavItem(entry.title(), entry.path())
                 : new SideNavItem(entry.title());
