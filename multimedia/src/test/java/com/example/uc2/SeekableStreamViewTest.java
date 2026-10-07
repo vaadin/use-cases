@@ -30,6 +30,6 @@ class SeekableStreamViewTest extends SpringBrowserlessTest {
         String ranged = videos.get(1).getSources().get(0).getSrc();
         assertNotEquals(builtIn, ranged);
         videos.forEach(video -> assertEquals("video/mp4",
-                video.getSources().get(0).getType().orElseThrow()));
+                video.getSources().get(0).getType()));
     }
 }
