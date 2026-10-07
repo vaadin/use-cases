@@ -10,7 +10,8 @@ name: PR Preview
 # Unlike fly-deploy.yml, a change to a shared file (common/, the parent pom)
 # does not deploy everything: only the deployables (directories holding a
 # fly.toml) with a changed file under them are picked, at most
-# MAX_PREVIEW_APPS of them. Each one runs as its own Fly app named
+# MAX_PREVIEW_APPS of them: when more are changed, the ones with the most
+# changed lines are deployed. Each one runs as its own Fly app named
 # <production app>-pr-<number>, scaled to zero while idle. A preview always
 # uses the production sidecar apps of a module (observability's Prometheus and
 # Grafana): the apps address each other by their production names, fixed in
@@ -63,6 +64,7 @@ jobs:
     outputs:
       apps: ${{ steps.find.outputs.apps }}
       skipped: ${{ steps.find.outputs.skipped }}
+      omitted: ${{ steps.find.outputs.omitted }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -77,25 +79,38 @@ jobs:
             | sed 's|^\./||' \
             | sort)
 
-          # The files the pull request changes, as GitHub computes them against
-          # its base branch, which spares a full-history checkout
-          changed=$(gh api "repos/${{ github.repository }}/pulls/$_PR_NUMBER/files" --paginate --jq '.[].filename')
+          # The files the pull request changes, each with its number of
+          # changed lines, as GitHub computes them against its base branch,
+          # which spares a full-history checkout
+          changed=$(gh api "repos/${{ github.repository }}/pulls/$_PR_NUMBER/files" --paginate \
+            --jq '.[] | "\(.additions + .deletions) \(.filename)"')
           echo "Changed files:"
           echo "$changed"
 
+          # Every changed deployable with its changed lines and files, the
+          # most changed first, so that only the least changed ones are left
+          # out when there are too many
           selected=""
           for module in $all_modules; do
-            if echo "$changed" | grep -q "^$module/"; then
+            read -r files lines < <(echo "$changed" | awk -v prefix="$module/" '
+              { n = $1; sub(/^[0-9]+ /, "") }
+              index($0, prefix) == 1 { files++; lines += n }
+              END { print files + 0, lines + 0 }')
+            if [ "$files" -gt 0 ]; then
               app=$(sed -nE "s/^app *= *['\"]([^'\"]+)['\"].*/\1/p" "$module/fly.toml")
-              selected="$selected$module $app"$'\n'
+              selected="$selected$module $app $lines $files"$'\n'
             fi
           done
+          selected=$(printf '%s' "$selected" | sort -k3,3nr -k4,4nr -k1,1)
           count=$(printf '%s' "$selected" | grep -c . || true)
 
           skipped=""
+          omitted=""
           if [ "$count" -gt "$MAX_PREVIEW_APPS" ]; then
-            skipped="The pull request changes $count apps, more than the $MAX_PREVIEW_APPS a preview deploys."
-            selected=""
+            omitted=$(printf '%s\n' "$selected" | tail -n +$((MAX_PREVIEW_APPS + 1)) \
+              | awk '{ printf "%s`%s`", (NR > 1 ? ", " : ""), $1 }')
+            omitted="The pull request changes $count apps, more than the $MAX_PREVIEW_APPS a preview deploys, so the ones with the most changed lines are deployed. Not deployed: $omitted."
+            selected=$(printf '%s\n' "$selected" | head -n "$MAX_PREVIEW_APPS")
           elif [ "$count" -eq 0 ]; then
             skipped="The pull request changes no app directory (one holding a fly.toml)."
           fi
@@ -106,6 +121,7 @@ jobs:
           echo "Selected apps: $apps"
           echo "apps=$apps" >> "$GITHUB_OUTPUT"
           echo "skipped=$skipped" >> "$GITHUB_OUTPUT"
+          echo "omitted=$omitted" >> "$GITHUB_OUTPUT"
 
   deploy:
     needs: discover
@@ -178,6 +194,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPS: ${{ needs.discover.outputs.apps }}
           SKIPPED: ${{ needs.discover.outputs.skipped }}
+          OMITTED: ${{ needs.discover.outputs.omitted }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           marker='<!-- use-cases-pr-preview -->'
@@ -197,6 +214,10 @@ jobs:
                 | ($jobs | map(select(.name == "Deploy \($app.module)")) | first | .conclusion // "missing") as $result
                 | if $result == "success" then "- `\(.module)`: https://\(.app).fly.dev"
                   else "- `\(.module)`: deployment \($result), see [the workflow run](\($run))" end'
+              if [ -n "$OMITTED" ]; then
+                echo
+                echo "$OMITTED"
+              fi
             fi
             echo
             echo "Removing the \`deploy preview\` label or closing the pull request destroys the preview."
