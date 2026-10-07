@@ -1,0 +1,36 @@
+.uc5-view {
+    .hero {
+        position: relative;
+        width: 100%;
+        max-width: 960px;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        border-radius: var(--vaadin-radius-l);
+    }
+
+    .hero-video {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 2rem 3rem;
+        color: white;
+        background: linear-gradient(90deg, rgb(0 0 0 / 55%), transparent);
+    }
+
+    .hero-overlay h2 {
+        color: inherit;
+        margin: 0;
+    }
+}

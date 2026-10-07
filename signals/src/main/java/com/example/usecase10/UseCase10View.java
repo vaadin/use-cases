@@ -1,7 +1,5 @@
 package com.example.usecase10;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.UUID;
 
 import com.example.views.MainLayout;
@@ -23,6 +21,7 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.streams.TransferContext;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.signals.Signal;
@@ -46,7 +45,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 10: Bridging Events to Signals")
 @Menu(order = 10, title = "UC 10: Events to Signals")
 @StyleSheet("usecase10.css")
-@PermitAll
+@AnonymousAllowed
 public class UseCase10View extends VerticalLayout {
 
     // --- Signal fields: one per event source ---

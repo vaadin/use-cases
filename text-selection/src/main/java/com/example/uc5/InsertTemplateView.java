@@ -1,5 +1,6 @@
 package com.example.uc5;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -25,6 +26,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Insert template at cursor")
+@UseCaseDescription("Inserting a snippet at the cursor or over a selection")
 @Menu(order = 5, title = "UC5 — Insert template at cursor")
 public class InsertTemplateView extends VerticalLayout {
 

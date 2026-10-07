@@ -1,7 +1,5 @@
 package com.example.usecase05;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.List;
 import java.util.Map;
 
@@ -15,13 +13,14 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-05", layout = MainLayout.class)
 @PageTitle("Use Case 5: Cascading Location Selector")
 @Menu(order = 5, title = "UC 5: Cascading Selector")
-@PermitAll
+@AnonymousAllowed
 public class UseCase05View extends VerticalLayout {
 
     public UseCase05View() {

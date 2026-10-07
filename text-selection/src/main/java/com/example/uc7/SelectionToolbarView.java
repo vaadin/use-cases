@@ -2,6 +2,7 @@ package com.example.uc7;
 
 import java.util.function.UnaryOperator;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -26,6 +27,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Selection-driven transform toolbar")
+@UseCaseDescription("Enabling toolbar actions that transform the selection")
 @Menu(order = 7, title = "UC7 — Selection toolbar")
 public class SelectionToolbarView extends VerticalLayout {
 
