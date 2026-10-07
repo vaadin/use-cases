@@ -120,7 +120,7 @@ public class ChapterControlsView extends VerticalLayout
     public void beforeEnter(BeforeEnterEvent event) {
         event.getLocation().getQueryParameters().getSingleParameter("t")
                 .flatMap(ChapterControlsView::parseSeconds)
-                .filter(seconds -> seconds != position.peek())
+                .filter(seconds -> !seconds.equals(position.peek()))
                 .ifPresent(seconds -> {
                     position.set(seconds);
                     MissingAPI.startAt(video, seconds);

@@ -80,6 +80,7 @@ class ChapterControlsViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         List<String> js = media.takeJavaScript();
+        assertEquals(2, js.size(), "expected seek then play: " + js);
         assertTrue(js.get(0).contains("currentTime"), js.toString());
         assertTrue(js.get(1).contains("play"), js.toString());
         assertTrue(chapterButtons().get(3).hasClassName("current"));
