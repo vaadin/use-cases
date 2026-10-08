@@ -1,8 +1,8 @@
 package com.example.uc8;
 
 import com.example.Chapters;
+import com.example.MediaLibrary;
 import com.example.MissingAPI;
-import com.example.RangeDownloadHandler;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -16,6 +16,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -66,7 +67,8 @@ public class ResumePlaybackView extends VerticalLayout {
         video.setWidth("640px");
         video.setMaxWidth("100%");
         video.setAriaLabel("Quarterly product review");
-        video.addSource(RangeDownloadHandler.forMedia(RECORDING, "video/mp4"),
+        video.addSource(
+                DownloadHandler.forFile(MediaLibrary.file(RECORDING)).inline(),
                 "video/mp4");
         add(video);
 

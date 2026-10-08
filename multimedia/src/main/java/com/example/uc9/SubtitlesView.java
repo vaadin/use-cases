@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 
 import com.example.MediaLibrary;
 import com.example.MissingAPI;
-import com.example.RangeDownloadHandler;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -90,8 +89,9 @@ public class SubtitlesView extends VerticalLayout
         video.setWidth("640px");
         video.setMaxWidth("100%");
         video.setAriaLabel("Quarterly product review");
-        video.addSource(RangeDownloadHandler.forMedia("quarterly-review.mp4",
-                "video/mp4"), "video/mp4");
+        video.addSource(DownloadHandler
+                .forFile(MediaLibrary.file("quarterly-review.mp4")).inline(),
+                "video/mp4");
 
         VaadinRequest request = VaadinRequest.getCurrent();
         browserLanguage = initialLanguage(

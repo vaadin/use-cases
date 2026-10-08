@@ -14,38 +14,41 @@ The components cover the declarative part well: UC1 (private recording with a
 poster), UC4 (format fallback) and most of UC5 (background video) need nothing
 else. Everything that involves *playing* media from the server, *observing*
 playback, or serving media that is not a single small file needs a workaround.
-Those workarounds live in [`MissingAPI.java`](src/main/java/com/example/MissingAPI.java),
-[`RangeDownloadHandler.java`](src/main/java/com/example/RangeDownloadHandler.java)
+Those workarounds live in [`MissingAPI.java`](src/main/java/com/example/MissingAPI.java)
 and [`HlsDownloadHandler.java`](src/main/java/com/example/HlsDownloadHandler.java).
 
 The measurements quoted below come from headless Chromium 153 against the
 running app. Statements about iOS and Safari come from Apple's documentation
 and were not tested.
 
-## Built-in download handlers ignore `Range`, so served media cannot be seeked
+## Only file-backed download handlers honour `Range`
 
 **Where it bit us:** UC2 / `SeekableStreamView.java` (side by side), and UC7,
 UC8, UC9, which all serve the 60-second recording.
-**Symptom:** `DownloadHandler.fromInputStream`, `forFile`, `forClassResource`
-and `forServletResource` always answer `200` with the whole body and no
-`Accept-Ranges` header. The browser then reports `video.seekable` as empty:
-dragging the scrubber to 0:45 in the left-hand UC2 player snaps back to
-~0:01.5, while the same file served with range support seeks to 0:46.5.
-`preload="metadata"` also cannot save bandwidth, because there is no way to
-fetch only the header. Apple's Safari documentation requires byte-range
-support for video, so there such a response is not expected to play at all
-(not tested here). Static files are fine: `media/trailer.mp4` answers a
-`Range` request with `206`, and Flow's own `ResponseWriter` implements `Range`
-for the static resources it serves. Only the handler path lacks it.
-**Workaround used:** `RangeDownloadHandler`, a ~100-line handler that parses a
-single `bytes=` range and answers `206` with `Content-Range`, or `416`.
-**Suggested API:** honour `Range` in the built-in handlers whenever the length
-is known (`forFile`, `forClassResource`, and `fromInputStream` when the
-`DownloadResponse` has a content length), reusing `ResponseWriter`'s range
-logic. For custom sources, a seekable variant of `DownloadResponse` (for
-example one taking a `SeekableByteChannel` or a `(offset, length) ->
-InputStream` function) would let applications stream from object storage
-without implementing HTTP ranges themselves.
+**Status:** largely fixed by vaadin/flow#26198. `DownloadHandler.forFile`
+now sends `Accept-Ranges: bytes` and answers `Range` requests with `206`
+(single and multipart), sharing the range code with Flow's static file
+serving. `forClassResource` and `forServletResource` do the same, but only
+when the resource is a `file:` URL, so not from inside a packaged jar or war.
+UC2, UC7, UC8 and UC9 now use `forFile`, and the ~100-line
+`RangeDownloadHandler` workaround is gone.
+**Remaining symptom:** `DownloadHandler.fromInputStream` still always answers
+`200` with the whole body and no `Accept-Ranges`, even when the
+`DownloadResponse` has a content length. The browser then reports
+`video.seekable` as empty: dragging the scrubber to 0:45 in the left-hand UC2
+player snaps back to where playback was (~0:03), while the `forFile` player,
+measured from the packaged jar in Chromium 154, seeks to 0:47.6. Apple's
+Safari documentation requires byte-range support for video, so there such a
+response is not expected to play at all (not tested here). Media bundled in
+the application jar has the same problem through `forClassResource`, which a
+deployed application hits but development with exploded classes does not.
+**Workaround used:** `MediaLibrary.file(path)` copies a bundled file out of the
+jar to a temporary file once, so the views can serve it with `forFile`.
+**Suggested API:** for custom sources, a seekable variant of `DownloadResponse`
+(for example one taking a `SeekableByteChannel` or an `(offset, length) ->
+InputStream` function) would let applications stream from object storage, or
+from a jar entry, without implementing HTTP ranges or copying to disk
+themselves.
 
 ## `setMuted(true)` does not mute a player created from the server, so autoplay is blocked
 
