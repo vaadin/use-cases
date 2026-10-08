@@ -99,7 +99,7 @@ public class PrivateRecordingView extends VerticalLayout
         // A fresh player per recording: swapping the <source> of a player
         // that has already loaded does nothing without HTMLMediaElement.load().
         Video video = new Video();
-        video.setControls(true);
+        video.setControlsVisible(true);
         video.setPreload(Media.Preload.METADATA);
         video.setWidth("640px");
         video.setMaxWidth("100%");

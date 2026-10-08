@@ -77,7 +77,7 @@ public class PodcastPlaylistView extends VerticalLayout
         nowPlaying.bindText(current.map(i -> "Now playing: " + (i + 1) + ". "
                 + EPISODES.get(i).title()));
 
-        audio.setControls(true);
+        audio.setControlsVisible(true);
         audio.setAriaLabel("Podcast player");
         audio.setWidthFull();
         audio.addSource(EPISODES.get(0).file(), "audio/mpeg");

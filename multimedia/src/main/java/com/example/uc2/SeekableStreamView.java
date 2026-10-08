@@ -72,7 +72,7 @@ public class SeekableStreamView extends VerticalLayout {
 
     private static Video createPlayer(String label) {
         Video video = new Video();
-        video.setControls(true);
+        video.setControlsVisible(true);
         video.setPreload(Media.Preload.METADATA);
         video.setWidthFull();
         video.setAriaLabel(label);
