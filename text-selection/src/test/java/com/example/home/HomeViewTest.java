@@ -16,7 +16,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.card.Card;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.router.RouterLink;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,32 +34,45 @@ class HomeViewTest extends SpringBrowserlessTest {
             String href) {
     }
 
+    private record Group(String heading, List<UseCase> useCases) {
+    }
+
+    private static final UseCase UC1 = new UseCase("UC1", "Select all on focus",
+            "Selecting a field's value when it gets focus", "uc1");
+    private static final UseCase UC2 = new UseCase("UC2",
+            "Post-transform select-all",
+            "Selecting a value after the server reformats it", "uc2");
+    private static final UseCase UC3 = new UseCase("UC3", "Find & highlight",
+            "Stepping through search matches in a text area", "uc3");
+    private static final UseCase UC4 = new UseCase("UC4",
+            "Jump to validation error",
+            "Pointing the user to the exact invalid part of a value", "uc4");
+    private static final UseCase UC5 = new UseCase("UC5",
+            "Insert template at cursor",
+            "Inserting a snippet at the cursor or over a selection", "uc5");
+    private static final UseCase UC6 = new UseCase("UC6", "Live selection info",
+            "Showing live details about the selected text", "uc6");
+    private static final UseCase UC7 = new UseCase("UC7", "Selection toolbar",
+            "Enabling toolbar actions that transform the selection", "uc7");
+
     @Test
-    void cardsListTheUseCasesInMenuOrder() {
-        navigate(HomeView.class);
+    void cardsAreGroupedByKindOfProblemInMenuOrder() {
+        HomeView home = navigate(HomeView.class);
+
+        List<Group> groups = home.getChildren()
+                .filter(Section.class::isInstance)
+                .map(section -> new Group(
+                        find(H2.class).from(section).single().getText(),
+                        find(Card.class).from(section).all().stream()
+                                .map(HomeViewTest::useCaseOf).toList()))
+                .toList();
 
         assertEquals(List.of(
-                new UseCase("UC1", "Select all on focus",
-                        "Selecting a field's value when it gets focus", "uc1"),
-                new UseCase("UC2", "Post-transform select-all",
-                        "Selecting a value after the server reformats it",
-                        "uc2"),
-                new UseCase("UC3", "Find & highlight",
-                        "Stepping through search matches in a text area",
-                        "uc3"),
-                new UseCase("UC4", "Jump to validation error",
-                        "Pointing the user to the exact invalid part of a value",
-                        "uc4"),
-                new UseCase("UC5", "Insert template at cursor",
-                        "Inserting a snippet at the cursor or over a selection",
-                        "uc5"),
-                new UseCase("UC6", "Live selection info",
-                        "Showing live details about the selected text", "uc6"),
-                new UseCase("UC7", "Selection toolbar",
-                        "Enabling toolbar actions that transform the selection",
-                        "uc7")),
-                findInView(Card.class).all().stream()
-                        .map(HomeViewTest::useCaseOf).toList());
+                new Group("Selecting the whole value", List.of(UC1, UC2)),
+                new Group("Pointing at part of the text", List.of(UC3, UC4)),
+                new Group("Acting on the user's selection",
+                        List.of(UC5, UC6, UC7))),
+                groups);
     }
 
     private static UseCase useCaseOf(Card card) {

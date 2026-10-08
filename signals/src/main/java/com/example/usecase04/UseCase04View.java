@@ -3,6 +3,7 @@ package com.example.usecase04;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -22,7 +23,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-04", layout = MainLayout.class)
 @PageTitle("Use Case 4: Filtered and Sorted Data Grid")
-@Menu(order = 4, title = "UC 4: Filtered Data Grid")
+@Menu(order = 4, title = "UC4 — Filtered Data Grid")
+@UseCaseDescription("Filtering a grid from several search controls")
 @AnonymousAllowed
 public class UseCase04View extends VerticalLayout {
 

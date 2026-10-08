@@ -3,6 +3,7 @@ package com.example.uc2;
 import java.io.ByteArrayInputStream;
 
 import com.example.MissingAPI;
+import com.example.common.UseCaseDescription;
 import com.example.data.Invoice;
 import com.example.data.Invoices;
 import com.example.pdf.InvoicePdf;
@@ -47,6 +48,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Open it in a new tab")
+@UseCaseDescription("Opening a generated PDF in a new browser tab")
 @Menu(order = 2, title = "UC2 — Open it in a new tab")
 @StyleSheet("invoicing.css")
 public class OpenInNewTabView extends VerticalLayout {

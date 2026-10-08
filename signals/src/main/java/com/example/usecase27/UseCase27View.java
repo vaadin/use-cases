@@ -1,5 +1,7 @@
 package com.example.usecase27;
 
+import com.example.common.UseCaseDescription;
+
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -22,7 +24,8 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
  */
 @Route(value = "use-case-27", layout = UseCase27Layout.class)
 @PageTitle("Use Case 27: Router State Signal")
-@Menu(order = 27, title = "UC 27: Router State Signal")
+@Menu(order = 27, title = "UC27 — Router State Signal")
+@UseCaseDescription("Updating a breadcrumb whenever navigation completes")
 @AnonymousAllowed
 public class UseCase27View extends VerticalLayout {
 

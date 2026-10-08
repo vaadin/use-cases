@@ -2,6 +2,7 @@ package com.example.uc6;
 
 import java.security.SecureRandom;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -39,6 +40,7 @@ import com.vaadin.flow.signals.Signal;
  * single hard-coded URL.
  */
 @Route(value = "uc6", layout = MainLayout.class)
+@UseCaseDescription("Sharing a freshly generated invite link")
 @Menu(order = 6, title = "UC6 — Share invite link")
 @StyleSheet("uc6.css")
 public class ShareInviteLinkView extends VerticalLayout {

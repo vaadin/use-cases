@@ -1,5 +1,6 @@
 package com.example.uc1;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -30,6 +31,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Adaptive layout")
+@UseCaseDescription("Switching the layout between landscape and portrait")
 @Menu(order = 1, title = "UC1 — Adaptive layout")
 @StyleSheet("uc1.css")
 public class AdaptiveLayoutView extends VerticalLayout {

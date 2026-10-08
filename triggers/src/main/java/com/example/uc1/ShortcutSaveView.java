@@ -1,6 +1,7 @@
 package com.example.uc1;
 
 import com.example.ShortcutTrigger;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Key;
@@ -36,6 +37,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Ctrl+S snapshot to clipboard")
+@UseCaseDescription("Copying the notes to the clipboard with Ctrl+S")
 @Menu(order = 1, title = "UC1 — Ctrl+S snapshot")
 @StyleSheet("uc1.css")
 public class ShortcutSaveView extends VerticalLayout {

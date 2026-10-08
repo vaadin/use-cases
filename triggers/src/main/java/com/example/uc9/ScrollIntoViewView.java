@@ -1,5 +1,6 @@
 package com.example.uc9;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -35,6 +36,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc9", layout = MainLayout.class)
 @PageTitle("UC9 — Scroll into view")
+@UseCaseDescription("Scrolling to a section without a server round-trip")
 @Menu(order = 9, title = "UC9 — Scroll into view")
 @StyleSheet("uc9.css")
 public class ScrollIntoViewView extends VerticalLayout {

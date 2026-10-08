@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+import com.example.common.UseCaseDescription;
 import com.example.uc2.PresenceRegistry.Presence;
 import com.example.views.ColoredAvatar;
 import com.example.views.MainLayout;
@@ -35,6 +36,7 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
  * avatar; the change is broadcast to all other UIs through the registry signal.
  */
 @Route(value = "uc2", layout = MainLayout.class)
+@UseCaseDescription("Showing other users who has switched away")
 @Menu(order = 2, title = "UC2 — Presence")
 @StyleSheet("uc2.css")
 public class PresenceAvatarsView extends VerticalLayout {

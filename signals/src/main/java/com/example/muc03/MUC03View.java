@@ -2,6 +2,7 @@ package com.example.muc03;
 
 import java.util.Random;
 
+import com.example.common.UseCaseDescription;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
@@ -39,7 +40,8 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "muc-03", layout = MainLayout.class)
 @PageTitle("Multi-User Case 3: Click Game")
-@Menu(order = 52, title = "MUC 3: Click Race Game")
+@Menu(order = 52, title = "MUC3 — Click Race Game")
+@UseCaseDescription("Deciding fairly which user clicked first")
 @StyleSheet("muc03.css")
 @AnonymousAllowed
 public class MUC03View extends VerticalLayout {

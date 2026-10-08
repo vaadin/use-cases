@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -41,7 +42,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "use-case-17", layout = MainLayout.class)
 @PageTitle("Use Case 17: Custom PC Builder")
-@Menu(order = 17, title = "UC 17: PC Builder (70 signals)")
+@Menu(order = 17, title = "UC17 — PC Builder (70 signals)")
+@UseCaseDescription("Keeping dozens of interdependent values consistent")
 @StyleSheet("usecase17.css")
 @AnonymousAllowed
 public class UseCase17View extends VerticalLayout {

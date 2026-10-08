@@ -2,6 +2,7 @@ package com.example.uc3;
 
 import java.time.LocalTime;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -39,6 +40,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Copy a hidden share link")
+@UseCaseDescription("Copying a link the page never shows")
 @Menu(order = 3, title = "UC3 — Hidden share link")
 @StyleSheet("uc3.css")
 public class LiveSignalCounterView extends VerticalLayout {

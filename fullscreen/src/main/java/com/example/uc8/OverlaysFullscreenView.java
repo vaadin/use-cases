@@ -2,6 +2,7 @@ package com.example.uc8;
 
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -30,13 +31,13 @@ import com.vaadin.flow.signals.Signal;
  * The whole point of {@code Component#requestFullscreen()} (here through
  * {@link Fullscreen#onClick(com.vaadin.flow.component.Component)
  * Fullscreen.onClick(enter).enter(panel)}) over a page-level fullscreen is that
- * it wraps a single component <em>together with the UI's overlay container</em>.
- * The browser only paints the fullscreen element and its descendants, so an
- * overlay attached to {@code document.body} would vanish the moment you go
- * fullscreen. Because Vaadin moves the overlay container inside the fullscreen
- * wrapper, every flyout — {@link MenuBar} sub-menus, a {@link Popover}, a
- * right-click {@link ContextMenu}, a {@link Select} dropdown, tooltips — keeps
- * opening on top of the fullscreened panel.
+ * it wraps a single component <em>together with the UI's overlay
+ * container</em>. The browser only paints the fullscreen element and its
+ * descendants, so an overlay attached to {@code document.body} would vanish the
+ * moment you go fullscreen. Because Vaadin moves the overlay container inside
+ * the fullscreen wrapper, every flyout — {@link MenuBar} sub-menus, a
+ * {@link Popover}, a right-click {@link ContextMenu}, a {@link Select}
+ * dropdown, tooltips — keeps opening on top of the fullscreened panel.
  * <p>
  * This view fullscreens a {@code panel} that hosts one of each overlay-opening
  * component. Enter fullscreen, then open each control: they all appear. Every
@@ -44,6 +45,7 @@ import com.vaadin.flow.signals.Signal;
  * observable (and testable) without a real browser.
  */
 @Route(value = "uc8", layout = MainLayout.class)
+@UseCaseDescription("Keeping menus and popups working in fullscreen")
 @Menu(order = 8, title = "UC8 — Overlays in fullscreen")
 @StyleSheet("uc8.css")
 public class OverlaysFullscreenView extends VerticalLayout {
@@ -111,7 +113,8 @@ public class OverlaysFullscreenView extends VerticalLayout {
         Button trigger = new Button("Popover");
 
         Popover popover = new Popover();
-        VerticalLayout content = new VerticalLayout(new Span("Inside a popover"),
+        VerticalLayout content = new VerticalLayout(
+                new Span("Inside a popover"),
                 new Button("Action", e -> record("Popover: Action")));
         content.setSpacing(false);
         content.setPadding(false);
@@ -166,8 +169,8 @@ public class OverlaysFullscreenView extends VerticalLayout {
         // so a FULLSCREEN-specific message wouldn't be visible. Keep the idle
         // prompt instead.
         return switch (state) {
-        case FULLSCREEN, NOT_FULLSCREEN -> "Enter fullscreen, then open a "
-                + "menu, popover or dropdown";
+        case FULLSCREEN, NOT_FULLSCREEN ->
+            "Enter fullscreen, then open a " + "menu, popover or dropdown";
         case UNSUPPORTED -> "Fullscreen not supported in this browser";
         case UNKNOWN -> "Detecting fullscreen support…";
         };

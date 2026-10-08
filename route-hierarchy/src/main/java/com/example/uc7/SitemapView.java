@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.example.common.UseCaseDescription;
 import com.example.uc1.SubcategoryView;
 import com.example.uc2.OrdersView;
 import com.example.uc5.SessionsView;
@@ -42,6 +43,7 @@ import com.vaadin.flow.server.VaadinService;
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("Sitemap")
+@UseCaseDescription("Rendering a sitemap of all routes")
 @Menu(order = 7, title = "UC7 — Route-tree sitemap")
 public class SitemapView extends VerticalLayout {
 

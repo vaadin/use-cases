@@ -3,6 +3,7 @@ package com.example.muc06;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import com.example.common.UseCaseDescription;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.ActiveUsersDisplay;
@@ -45,7 +46,8 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
  */
 @Route(value = "muc-06", layout = MainLayout.class)
 @PageTitle("MUC 6: Shared Task List")
-@Menu(order = 55, title = "MUC 6: Shared Task List")
+@Menu(order = 55, title = "MUC6 — Shared Task List")
+@UseCaseDescription("Editing one task list together with other users")
 @StyleSheet("muc06.css")
 @AnonymousAllowed
 public class MUC06View extends VerticalLayout {

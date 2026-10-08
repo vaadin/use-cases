@@ -3,6 +3,7 @@ package com.example.usecase16;
 import java.util.List;
 import java.util.Map;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
@@ -42,7 +43,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "use-case-16", layout = MainLayout.class)
 @PageTitle("Use Case 16: URL State Integration")
-@Menu(order = 16, title = "UC 16: URL State Integration")
+@Menu(order = 16, title = "UC16 — URL State Integration")
+@UseCaseDescription("Keeping search filters in the URL to share and go back")
 @StyleSheet("usecase16.css")
 @AnonymousAllowed
 public class UseCase16View extends VerticalLayout

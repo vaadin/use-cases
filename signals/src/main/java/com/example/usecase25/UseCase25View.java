@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.example.common.UseCaseDescription;
 import com.example.usecase23.SchedulerService;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
@@ -26,7 +27,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 
 @PageTitle("Use Case 25: Stock Ticker")
 @Route(value = "use-case-25", layout = MainLayout.class)
-@Menu(order = 25, title = "UC 25: Stock Ticker")
+@Menu(order = 25, title = "UC25 — Stock Ticker")
+@UseCaseDescription("Flashing prices as they rise or fall in real time")
 @StyleSheet("usecase25.css")
 @AnonymousAllowed
 public class UseCase25View extends Main {

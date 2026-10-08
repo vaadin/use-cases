@@ -56,7 +56,7 @@ public abstract class BaseHomeView extends VerticalLayout {
     /**
      * Appends a section for a group of related use cases: a header with the
      * icon, the heading as an {@code h2} and the number of use cases, followed
-     * by the {@link #menuCards(Collection) cards} of the given views in menu
+     * by the {@link #addMenuCards(Collection) cards} of the given views in menu
      * order. On wide screens the header becomes a sticky rail beside the cards.
      */
     protected Section addGroup(String heading, VaadinIcon icon, Accent accent,
@@ -87,11 +87,7 @@ public abstract class BaseHomeView extends VerticalLayout {
         add(menuCards(views));
     }
 
-    /**
-     * Like {@link #addMenuCards(Collection)}, but returns the cards' container
-     * instead of appending it.
-     */
-    protected Div menuCards(Collection<Class<? extends Component>> views) {
+    private Div menuCards(Collection<Class<? extends Component>> views) {
         Div cards = new Div();
         cards.addClassName("home-cards");
         MenuConfiguration.getMenuEntries().stream()
@@ -110,7 +106,7 @@ public abstract class BaseHomeView extends VerticalLayout {
         return cards;
     }
 
-    protected static Card homeCard(String tag, String title, String description,
+    private static Card homeCard(String tag, String title, String description,
             Class<? extends Component> target) {
         Card card = new Card();
         card.addThemeVariants(CardVariant.OUTLINED);

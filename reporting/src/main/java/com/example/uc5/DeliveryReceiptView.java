@@ -2,6 +2,7 @@ package com.example.uc5;
 
 import java.io.ByteArrayInputStream;
 
+import com.example.common.UseCaseDescription;
 import com.example.data.Invoice;
 import com.example.data.InvoiceBook;
 import com.example.data.Invoices;
@@ -42,6 +43,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Know that it arrived")
+@UseCaseDescription("Marking an invoice sent only once it has arrived")
 @Menu(order = 5, title = "UC5 — Know that it arrived")
 @StyleSheet("invoicing.css")
 public class DeliveryReceiptView extends VerticalLayout {

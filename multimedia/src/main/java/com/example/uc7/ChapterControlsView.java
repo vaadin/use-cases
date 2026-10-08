@@ -6,6 +6,7 @@ import com.example.Chapters;
 import com.example.Chapters.Chapter;
 import com.example.MissingAPI;
 import com.example.RangeDownloadHandler;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
@@ -49,6 +50,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Chapters & controls")
+@UseCaseDescription("Controlling playback and chapters from the server")
 @Menu(order = 7, title = "UC7 — Chapters & controls")
 @StyleSheet("uc7.css")
 public class ChapterControlsView extends VerticalLayout

@@ -3,6 +3,7 @@ package com.example.uc20;
 import java.util.List;
 import java.util.Map;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -31,6 +32,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc20", layout = MainLayout.class)
 @PageTitle("UC20 — Double-click → new tab")
+@UseCaseDescription("Opening a row in a new tab on double-click")
 @Menu(order = 20, title = "UC20 — Double-click → new tab")
 @StyleSheet("uc20.css")
 public class DoubleClickOpenView extends VerticalLayout {

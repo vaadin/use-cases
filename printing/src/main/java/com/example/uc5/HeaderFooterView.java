@@ -3,6 +3,7 @@ package com.example.uc5;
 import java.util.List;
 
 import com.example.MissingAPI;
+import com.example.common.UseCaseDescription;
 import com.example.data.Order;
 import com.example.data.OrderLine;
 import com.example.data.Orders;
@@ -46,6 +47,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Letterhead and page numbers")
+@UseCaseDescription("Putting a letterhead and page numbers on every sheet")
 @Menu(order = 5, title = "UC5 — Letterhead and page numbers")
 @StyleSheet("uc5.css")
 public class HeaderFooterView extends VerticalLayout {

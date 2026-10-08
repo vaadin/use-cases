@@ -3,6 +3,7 @@ package com.example.uc3;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.data.Invoice;
 import com.example.data.Invoices;
 import com.example.pdf.InvoicePdf;
@@ -46,6 +47,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Check it before sending")
+@UseCaseDescription("Previewing the real document before it is sent")
 @Menu(order = 3, title = "UC3 — Check it before sending")
 @StyleSheet("invoicing.css")
 public class PreviewInvoiceView extends VerticalLayout {

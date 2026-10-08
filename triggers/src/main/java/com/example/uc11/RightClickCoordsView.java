@@ -1,6 +1,7 @@
 package com.example.uc11;
 
 import com.example.PreventDefaultAction;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -29,6 +30,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc11", layout = MainLayout.class)
 @PageTitle("UC11 — Right-click coords")
+@UseCaseDescription("Getting right-click coordinates on the server")
 @Menu(order = 11, title = "UC11 — Right-click coords")
 @StyleSheet("uc11.css")
 public class RightClickCoordsView extends VerticalLayout {

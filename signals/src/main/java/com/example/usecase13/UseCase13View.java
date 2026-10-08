@@ -3,6 +3,7 @@ package com.example.usecase13;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.example.common.UseCaseDescription;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserInfo;
 import com.example.signals.UserSessionRegistry;
@@ -41,7 +42,8 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
  */
 @Route(value = "use-case-13", layout = MainLayout.class)
 @PageTitle("Use Case 13: Real-Time Active Users")
-@Menu(order = 13, title = "UC 13: Real-Time Active Users")
+@Menu(order = 13, title = "UC13 — Real-Time Active Users")
+@UseCaseDescription("Showing who is online and which view they are on")
 @StyleSheet("usecase13.css")
 @AnonymousAllowed
 public class UseCase13View extends VerticalLayout {

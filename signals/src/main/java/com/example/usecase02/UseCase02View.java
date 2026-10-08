@@ -2,6 +2,7 @@ package com.example.usecase02;
 
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -25,7 +26,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-02", layout = MainLayout.class)
 @PageTitle("Use Case 2: Progressive Disclosure with Nested Conditions")
-@Menu(order = 2, title = "UC 2: Nested Conditions")
+@Menu(order = 2, title = "UC2 — Nested Conditions")
+@UseCaseDescription("Showing form fields only when earlier answers need them")
 @StyleSheet("usecase02.css")
 @AnonymousAllowed
 public class UseCase02View extends VerticalLayout {

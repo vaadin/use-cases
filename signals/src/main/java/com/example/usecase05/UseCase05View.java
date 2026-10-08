@@ -3,6 +3,7 @@ package com.example.usecase05;
 import java.util.List;
 import java.util.Map;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -19,7 +20,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-05", layout = MainLayout.class)
 @PageTitle("Use Case 5: Cascading Location Selector")
-@Menu(order = 5, title = "UC 5: Cascading Selector")
+@Menu(order = 5, title = "UC5 — Cascading Selector")
+@UseCaseDescription("Narrowing each dropdown by the previous selection")
 @AnonymousAllowed
 public class UseCase05View extends VerticalLayout {
 
