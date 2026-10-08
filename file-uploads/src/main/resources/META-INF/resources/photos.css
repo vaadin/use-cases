@@ -1,0 +1,68 @@
+/* Photo previews (UC1) and the photo album (UC4) */
+
+.photo-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--vaadin-gap-m, 0.75rem);
+}
+
+.photo-tile,
+.album-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.photo-thumbnail {
+    width: 160px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.album-drop-zone {
+    min-height: 240px;
+    border: 2px dashed var(--vaadin-border-color, #ccc);
+    border-radius: 8px;
+    padding: var(--vaadin-padding-m, 1rem);
+    box-sizing: border-box;
+}
+
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--vaadin-gap-m, 0.75rem);
+}
+
+.album-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--vaadin-text-color-secondary);
+}
+
+.album-thumbnail {
+    width: 180px;
+    height: 135px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.album-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.album-name {
+    font-size: var(--aura-font-size-s);
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.album-full-size {
+    max-width: min(90vw, 1200px);
+    max-height: 75vh;
+}
