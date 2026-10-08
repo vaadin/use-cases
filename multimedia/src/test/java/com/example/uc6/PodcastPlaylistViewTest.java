@@ -27,7 +27,7 @@ class PodcastPlaylistViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         Audio audio = findInView(Audio.class).single();
-        assertTrue(audio.isControls());
+        assertTrue(audio.isControlsVisible());
         assertEquals(PodcastPlaylistView.EPISODES.get(0).file(),
                 audio.getSources().get(0).getSrc());
         assertEquals(3, episodeButtons().size());

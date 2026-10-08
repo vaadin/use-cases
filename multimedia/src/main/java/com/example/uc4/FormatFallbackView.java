@@ -50,7 +50,7 @@ public class FormatFallbackView extends VerticalLayout {
         add(new HorizontalLayout(badge));
 
         Video video = new Video();
-        video.setControls(true);
+        video.setControlsVisible(true);
         video.setWidth("640px");
         video.setMaxWidth("100%");
         video.setAriaLabel("Product trailer");

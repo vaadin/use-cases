@@ -61,7 +61,7 @@ public class ResumePlaybackView extends VerticalLayout {
         bar.setAlignItems(Alignment.CENTER);
         add(bar);
 
-        video.setControls(true);
+        video.setControlsVisible(true);
         video.setPreload(Media.Preload.METADATA);
         video.setWidth("640px");
         video.setMaxWidth("100%");
