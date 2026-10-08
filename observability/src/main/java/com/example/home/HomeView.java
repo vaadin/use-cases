@@ -16,8 +16,13 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Section;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -32,21 +37,27 @@ public class HomeView extends BaseHomeView {
     /**
      * The use cases grouped by the kind of problem they are about. The side
      * navigation keeps the UC1 to UC8 order; within a group the cards follow it
-     * too.
+     * too. The accent is one of Aura's accent classes, so each kind of problem
+     * reads in its own color.
      */
-    private record Group(String heading,
+    private record Group(String heading, VaadinIcon icon, String accent,
             List<Class<? extends Component>> views) {
     }
 
-    private static final List<Group> GROUPS = List.of(new Group(
-            "Something is slow",
-            List.of(InteractionLatencyView.class, ApplicationHealthView.class,
-                    InteractionTraceView.class, LazyListLatencyView.class)),
-            new Group("Something fails",
+    private static final List<Group> GROUPS = List.of(
+            new Group("Something is slow", VaadinIcon.TIMER,
+                    "aura-accent-orange",
+                    List.of(InteractionLatencyView.class,
+                            ApplicationHealthView.class,
+                            InteractionTraceView.class,
+                            LazyListLatencyView.class)),
+            new Group("Something fails", VaadinIcon.EXCLAMATION_CIRCLE_O,
+                    "aura-accent-red",
                     List.of(ConnectionInsightsView.class,
                             FailureInsightsView.class)),
-            new Group("Running in production", List.of(ScalingSignalsView.class,
-                    MonitoringStackView.class)));
+            new Group("Running in production", VaadinIcon.SERVER,
+                    "aura-accent-blue", List.of(ScalingSignalsView.class,
+                            MonitoringStackView.class)));
 
     public HomeView() {
         super("Observability — use cases",
@@ -54,16 +65,29 @@ public class HomeView extends BaseHomeView {
                         + "failing actions, lost connections. Each card below is one "
                         + "problem a developer hits in production, and shows how "
                         + "Vaadin's observability kit helps find the cause.");
-        add(new Paragraph(new Text(
+        addClassName("home-view");
+        Paragraph howTo = new Paragraph(new Text(
                 "Open a card, use the Acme app at the top, and follow the steps "
                         + "that appear below it. Where the kit falls short, the use "
                         + "case says so and links to "),
-                new Anchor(API_GAPS_URL, "API-GAPS.md"), new Text(".")));
-        GROUPS.forEach(group -> {
-            H2 heading = new H2(group.heading());
-            heading.addClassName("home-group-heading");
-            add(heading);
-            addMenuCards(group.views());
-        });
+                new Anchor(API_GAPS_URL, "API-GAPS.md"), new Text("."));
+        howTo.addClassName("home-how-to");
+        add(howTo);
+        GROUPS.forEach(group -> add(groupSection(group)));
+    }
+
+    private Section groupSection(Group group) {
+        Icon icon = group.icon().create();
+        icon.addClassName("home-group-icon");
+        H2 heading = new H2(group.heading());
+        heading.addClassName("home-group-heading");
+        Span count = new Span(group.views().size() + " use cases");
+        count.addClassName("home-group-count");
+        Div header = new Div(icon, heading, count);
+        header.addClassName("home-group-header");
+
+        Section section = new Section(header, menuCards(group.views()));
+        section.addClassNames("home-group", group.accent());
+        return section;
     }
 }

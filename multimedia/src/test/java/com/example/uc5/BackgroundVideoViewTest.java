@@ -25,7 +25,7 @@ class BackgroundVideoViewTest extends SpringBrowserlessTest {
         assertTrue(video.isAutoplay());
         assertTrue(video.isMuted());
         assertTrue(video.isLoop());
-        assertFalse(video.isControls());
+        assertFalse(video.isControlsVisible());
         assertTrue(video.getElement().hasAttribute("playsinline"));
         assertEquals("true", video.getElement().getAttribute("aria-hidden"));
         assertEquals(BackgroundVideoView.CLIP,
