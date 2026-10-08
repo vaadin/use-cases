@@ -5,23 +5,195 @@
     margin: 0;
 }
 
-.home-cards {
+/* Home page: an intro that reads like a lead, then one section per kind of
+   problem. Each section carries an Aura accent class, which tints its icon,
+   tags and card hover so the three kinds of problem read apart. */
+.home-view {
+    container-type: inline-size;
+    box-sizing: border-box;
+    max-width: 72rem;
+    gap: 0;
+    padding: clamp(1rem, 4vw, 3rem) clamp(1rem, 4vw, 3rem) 4rem;
+}
+
+.home-view > h1 {
+    font-size: clamp(2rem, 1.4rem + 2.6vw, 3rem);
+    font-weight: var(--aura-font-weight-semibold);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+    margin: 0 0 1rem;
+}
+
+.home-view > p {
+    max-width: 62ch;
+    margin: 0;
+    text-wrap: pretty;
+}
+
+/* The first paragraph is the lead: what Acme is and what a card shows. */
+.home-view > h1 + p {
+    font-size: var(--aura-font-size-l);
+    line-height: var(--aura-line-height-l);
+    color: var(--vaadin-text-color);
+}
+
+.home-view > .home-how-to {
+    margin-top: 0.75rem;
+    color: var(--vaadin-text-color-secondary);
+}
+
+.home-group {
+    width: 100%;
+    margin-top: 3rem;
+}
+
+.home-group + .home-group {
+    margin-top: 2.5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--vaadin-border-color-secondary);
+}
+
+.home-group-header {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-    max-width: 960px;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.home-group-icon {
+    grid-row: span 2;
+    box-sizing: border-box;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0.625rem;
+    border-radius: var(--vaadin-radius-m);
+    color: var(--aura-accent-text-color);
+    background: color-mix(in srgb, var(--aura-accent-color) 14%, transparent);
 }
 
 .home-group-heading {
-    font-size: var(--aura-font-size-m);
-    margin: 1rem 0 0;
+    font-size: var(--aura-font-size-xl);
+    font-weight: var(--aura-font-weight-semibold);
+    line-height: 1.2;
+    margin: 0;
+}
+
+.home-group-count {
+    font-size: var(--aura-font-size-s);
+    color: var(--vaadin-text-color-secondary);
+}
+
+.home-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+    gap: 1rem;
+}
+
+/* Wide: the group header becomes a sticky rail beside its cards, so a group
+   of four and a group of two both fill the same two columns. */
+@container (min-width: 56rem) {
+    .home-group {
+        display: grid;
+        grid-template-columns: 12rem 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .home-group-header {
+        position: sticky;
+        top: 1rem;
+        grid-template-columns: 1fr;
+        row-gap: 0.75rem;
+        margin: 0;
+    }
+
+    .home-group-icon {
+        grid-row: auto;
+    }
+
+    .home-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Narrow: the fixed "View source" pill sits over the top of the content, so
+   the headline starts below it. */
+@container (max-width: 40rem) {
+    .home-view > h1 {
+        margin-top: 2.5rem;
+    }
+}
+
+/* The whole card is the link target; the footer link stretches over it. */
+.home-card {
+    position: relative;
+    transition: border-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1),
+        translate 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.home-card::part(content) {
+    flex-grow: 1;
+}
+
+.home-card p {
+    margin: 0;
+    color: var(--vaadin-text-color-secondary);
 }
 
 .home-card .home-card-tag {
-    font-size: 0.8125rem;
-    text-transform: uppercase;
-    color: var(--vaadin-text-color-secondary);
-    letter-spacing: 0.05em;
+    font-size: var(--aura-font-size-xs);
+    font-weight: var(--aura-font-weight-semibold);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    /* Pulled toward the body text so small tag text stays at 4.5:1 on its
+       tint, even for the lighter accents like orange. */
+    color: color-mix(in oklab, var(--aura-accent-text-color) 75%,
+        var(--vaadin-text-color));
+    background: color-mix(in srgb, var(--aura-accent-color) 12%, transparent);
+    border-radius: 999px;
+    padding: 0.125rem 0.5rem;
+}
+
+.home-card .home-card-link {
+    font-weight: var(--aura-font-weight-medium);
+    color: var(--aura-accent-text-color);
+    text-decoration: none;
+}
+
+.home-card .home-card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+}
+
+.home-card:hover {
+    --vaadin-card-border-color: color-mix(in srgb,
+        var(--aura-accent-color) 55%, var(--vaadin-border-color));
+    box-shadow: var(--aura-shadow-m);
+    translate: 0 -2px;
+}
+
+.home-card:has(.home-card-link:focus-visible) {
+    outline: 2px solid var(--aura-accent-color);
+    outline-offset: 2px;
+}
+
+.home-card .home-card-link:focus-visible {
+    outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-card {
+        transition: none;
+    }
+
+    .home-card:hover {
+        translate: none;
+    }
 }
 
 /* The Acme app window: what a user of the fictional app sees, framed as a
