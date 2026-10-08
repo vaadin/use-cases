@@ -57,24 +57,30 @@ public abstract class BaseHomeView extends VerticalLayout {
      * Appends a section for a group of related use cases: a header with the
      * icon, the heading as an {@code h2} and the number of use cases, followed
      * by the {@link #addMenuCards(Collection) cards} of the given views in menu
-     * order. On wide screens the header becomes a sticky rail beside the cards.
+     * order. Only views in the current user's menu get a card, and the count
+     * follows the cards; a group with no card is left out. On wide screens the
+     * header becomes a sticky rail beside the cards.
      */
-    protected Section addGroup(String heading, VaadinIcon icon, Accent accent,
+    protected void addGroup(String heading, VaadinIcon icon, Accent accent,
             Collection<Class<? extends Component>> views) {
+        Div cards = menuCards(views);
+        int cardCount = cards.getComponentCount();
+        if (cardCount == 0) {
+            return;
+        }
         Icon groupIcon = icon.create();
         groupIcon.addClassName("home-group-icon");
         H2 groupHeading = new H2(heading);
         groupHeading.addClassName("home-group-heading");
-        Span count = new Span(views.size()
-                + (views.size() == 1 ? " use case" : " use cases"));
+        Span count = new Span(
+                cardCount + (cardCount == 1 ? " use case" : " use cases"));
         count.addClassName("home-group-count");
         Div header = new Div(groupIcon, groupHeading, count);
         header.addClassName("home-group-header");
 
-        Section section = new Section(header, menuCards(views));
+        Section section = new Section(header, cards);
         section.addClassNames("home-group", accent.className());
         add(section);
-        return section;
     }
 
     /**

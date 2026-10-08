@@ -4,6 +4,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.example.common.AppCatalog;
+import com.example.common.BaseMainLayout;
 import com.example.common.UseCaseDescription;
 import com.example.preferences.UserPreferences;
 import com.example.security.CurrentUserSignal;
@@ -239,8 +240,8 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         SideNav nav = new SideNav();
         MenuConfiguration.getMenuEntries().forEach(entry -> {
             SideNavItem item = new SideNavItem(entry.title(), entry.path());
-            UseCaseDescription description = entry.menuClass() == null ? null
-                    : entry.menuClass().getAnnotation(UseCaseDescription.class);
+            UseCaseDescription description = BaseMainLayout
+                    .descriptionOf(entry);
             if (description != null) {
                 item.setTooltipText(description.value());
             }

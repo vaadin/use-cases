@@ -22,6 +22,7 @@ import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -88,6 +89,29 @@ class HomeViewTest extends SpringBrowserlessTest {
                 card.getChildren().filter(Paragraph.class::isInstance)
                         .map(p -> ((Paragraph) p).getText()).findFirst()
                         .orElse(null));
+    }
+
+    private record GroupHeader(String count, String accent) {
+    }
+
+    @Test
+    void groupHeadersCountTheirCardsAndCarryTheirAccent() {
+        HomeView home = navigate(HomeView.class);
+
+        List<GroupHeader> headers = home.getChildren()
+                .filter(Section.class::isInstance)
+                .map(section -> new GroupHeader(find(Span.class).from(section)
+                        .withClassName("home-group-count").single().getText(),
+                        section.getClassNames().stream()
+                                .filter(name -> name.startsWith("aura-accent-"))
+                                .findFirst().orElse(null)))
+                .toList();
+
+        assertEquals(
+                List.of(new GroupHeader("4 use cases", "aura-accent-orange"),
+                        new GroupHeader("2 use cases", "aura-accent-red"),
+                        new GroupHeader("2 use cases", "aura-accent-blue")),
+                headers);
     }
 
     @Test
