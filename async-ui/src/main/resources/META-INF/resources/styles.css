@@ -1,0 +1,37 @@
+/* Async UI & Performance use cases — shared polish */
+
+.home-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    max-width: 960px;
+}
+
+.home-card .home-card-tag {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary);
+    letter-spacing: 0.05em;
+}
+
+/* A shimmering block standing in for content that is still loading. */
+.skeleton {
+    min-height: 2.4rem;
+    border-radius: var(--vaadin-radius-m, 6px);
+    background: linear-gradient(90deg,
+            color-mix(in srgb, var(--vaadin-text-color) 6%, transparent) 25%,
+            color-mix(in srgb, var(--vaadin-text-color) 12%, transparent) 50%,
+            color-mix(in srgb, var(--vaadin-text-color) 6%, transparent) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.2s linear infinite;
+}
+
+@keyframes skeleton-shimmer {
+    from {
+        background-position: 200% 0;
+    }
+
+    to {
+        background-position: -200% 0;
+    }
+}
