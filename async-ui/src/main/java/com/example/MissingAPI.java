@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -53,14 +54,23 @@ public final class MissingAPI {
         UI ui = Objects.requireNonNull(owner.getUI().orElseGet(UI::getCurrent),
                 "load() needs an attached owner or a current UI");
         target.set(AsyncState.loading());
+        // Cancelling the future is not enough: it may already have completed
+        // with its UI update still queued. The flag is checked when that
+        // update runs, on the UI thread.
+        AtomicBoolean active = new AtomicBoolean(true);
         CompletableFuture<T> future = loader.get();
-        Registration detach = owner
-                .addDetachListener(event -> future.cancel(false));
+        Registration detach = owner.addDetachListener(event -> {
+            active.set(false);
+            future.cancel(false);
+        });
         future.whenComplete((value, error) -> {
             if (future.isCancelled()) {
                 return;
             }
             ui.accessLater(() -> {
+                if (!active.get()) {
+                    return;
+                }
                 detach.remove();
                 if (error == null) {
                     target.set(new AsyncState.Loaded<>(value));
@@ -70,6 +80,7 @@ public final class MissingAPI {
             }, null).run();
         });
         return () -> {
+            active.set(false);
             detach.remove();
             future.cancel(false);
         };

@@ -91,6 +91,22 @@ class OrderDetailViewTest extends SpringBrowserlessTest {
         assertFalse(visibleWithClass("order-fields"));
     }
 
+    @Test
+    void answerArrivingJustBeforeSwitchingIsNotShown() {
+        navigate(OrderDetailView.class, 42L);
+
+        // The lookup for #42 has answered and its UI update is queued, but
+        // the user switches orders before that update runs.
+        latency.completeNext();
+        navigate(OrderDetailView.class, 9_999_999L);
+        runPendingSignalsTasks();
+
+        assertEquals("Order #9999999", findInView(H2.class).single().getText());
+        assertTrue(visibleWithClass("skeleton"));
+        assertFalse(visibleWithClass("order-fields"),
+                "order #42 must not be shown under another order's heading");
+    }
+
     private boolean visibleWithClass(String className) {
         return findInView(Div.class).all().stream()
                 .anyMatch(div -> div.getClassNames().contains(className)

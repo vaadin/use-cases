@@ -74,6 +74,15 @@ public class ManualLatency implements SimulatedLatency {
         call.complete();
     }
 
+    /** Makes the oldest pending call fail with {@code error}. */
+    public void failNext(RuntimeException error) {
+        Call<?> call;
+        synchronized (this) {
+            call = pending.removeFirst();
+        }
+        call.future().completeExceptionally(error);
+    }
+
     /** Answers the oldest pending call. */
     public void completeNext() {
         complete(0);

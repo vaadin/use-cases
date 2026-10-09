@@ -48,7 +48,7 @@ public class LongRunningJobView extends VerticalLayout {
     static final Duration BATCH_DELAY = Duration.ofMillis(400);
 
     enum JobState {
-        IDLE, RUNNING, CANCELLED, DONE
+        IDLE, RUNNING, CANCELLED, FAILED, DONE
     }
 
     private final SimulatedLatency latency;
@@ -84,6 +84,7 @@ public class LongRunningJobView extends VerticalLayout {
         case RUNNING ->
             "Imported %,d of %,d rows…".formatted(imported.get(), TOTAL_ROWS);
         case CANCELLED -> "Cancelled after %,d rows".formatted(imported.get());
+        case FAILED -> "Failed after %,d rows".formatted(imported.get());
         case DONE -> "Done: %,d rows imported".formatted(imported.get());
         });
 
@@ -112,6 +113,10 @@ public class LongRunningJobView extends VerticalLayout {
                     return;
                 }
                 currentBatch = null;
+                if (error != null || count == null) {
+                    state.set(JobState.FAILED);
+                    return;
+                }
                 imported.set(from + count);
                 if (from + count >= TOTAL_ROWS) {
                     state.set(JobState.DONE);

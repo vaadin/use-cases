@@ -94,6 +94,21 @@ class LongRunningJobViewTest extends SpringBrowserlessTest {
         assertTrue(latency.pending().isEmpty(), "no further batch starts");
     }
 
+    @Test
+    void failingBatchEndsTheJob() {
+        LongRunningJobView view = navigate(LongRunningJobView.class);
+        test(button("Import price list")).click();
+        completeBatches(1);
+
+        latency.failNext(new IllegalStateException("Disk full"));
+        runPendingSignalsTasks();
+
+        assertEquals(JobState.FAILED, view.jobState());
+        assertTrue(latency.pending().isEmpty(), "no further batch starts");
+        assertTrue(button("Import price list").isEnabled());
+        assertTrue(hasText("Failed after 100 rows"));
+    }
+
     private void completeBatches(int count) {
         for (int i = 0; i < count; i++) {
             latency.completeNext();
