@@ -1,5 +1,6 @@
 package com.example.uc16;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -29,6 +30,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc16", layout = MainLayout.class)
 @PageTitle("UC16 — Pointer tracker")
+@UseCaseDescription("Showing live pointer coordinates without server round-trips")
 @Menu(order = 16, title = "UC16 — Pointer tracker")
 @StyleSheet("uc16.css")
 public class PointerTrackerView extends VerticalLayout {

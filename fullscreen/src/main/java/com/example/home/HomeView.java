@@ -1,6 +1,7 @@
 package com.example.home;
 
 import com.example.common.BaseHomeView;
+import com.example.common.UseCaseDescription;
 import com.example.uc1.ImageLightboxView;
 import com.example.uc2.SlideshowView;
 import com.example.uc3.DistractionFreeEditorView;
@@ -16,6 +17,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
+@UseCaseDescription("Taking a component or the whole app fullscreen and reacting when it changes")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 

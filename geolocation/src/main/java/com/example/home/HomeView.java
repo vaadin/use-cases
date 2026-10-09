@@ -3,6 +3,7 @@ package com.example.home;
 import java.util.List;
 
 import com.example.common.BaseHomeView;
+import com.example.common.UseCaseDescription;
 import com.example.uc1.OneShotOnClickView;
 import com.example.uc2.TrackingView;
 import com.example.uc3.AutoFetchView;
@@ -19,6 +20,7 @@ import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
 @PageTitle("Geolocation API Use Cases")
+@UseCaseDescription("Reading, tracking and handling the user's location with the Geolocation API")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 

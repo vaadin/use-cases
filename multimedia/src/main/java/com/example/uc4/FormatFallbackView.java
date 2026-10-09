@@ -1,6 +1,7 @@
 package com.example.uc4;
 
 import com.example.MissingAPI;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.html.H1;
@@ -27,6 +28,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Format fallback")
+@UseCaseDescription("Offering a video in a modern codec with a fallback that plays everywhere")
 @Menu(order = 4, title = "UC4 — Format fallback")
 public class FormatFallbackView extends VerticalLayout {
 

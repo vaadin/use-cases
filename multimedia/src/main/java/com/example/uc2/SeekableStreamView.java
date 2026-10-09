@@ -4,6 +4,7 @@ import com.example.Chapters;
 import com.example.Chapters.Chapter;
 import com.example.MediaLibrary;
 import com.example.RangeDownloadHandler;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.html.Div;
@@ -32,6 +33,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Seekable streaming")
+@UseCaseDescription("Making a long recording seekable by serving byte ranges")
 @Menu(order = 2, title = "UC2 — Seekable streaming")
 public class SeekableStreamView extends VerticalLayout {
 

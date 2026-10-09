@@ -1,5 +1,6 @@
 package com.example.usecase19;
 
+import com.example.common.UseCaseDescription;
 import com.example.service.DataLoadingService;
 import com.example.views.MainLayout;
 
@@ -40,6 +41,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "use-case-19", layout = MainLayout.class)
 @PageTitle("Use Case 19: Parallel Loading")
+@UseCaseDescription("Loading several items in parallel with per-item progress and retry")
 @Menu(order = 19, title = "UC 19: Parallel Loading")
 @StyleSheet("usecase19.css")
 @AnonymousAllowed

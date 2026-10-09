@@ -2,6 +2,7 @@ package com.example.usecase26;
 
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -25,6 +26,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-26", layout = MainLayout.class)
 @PageTitle("Use Case 26: Lazy Component Creation")
+@UseCaseDescription("Creating expensive components only when they are first needed")
 @Menu(order = 26, title = "UC 26: Lazy Creation")
 @StyleSheet("usecase26.css")
 @AnonymousAllowed

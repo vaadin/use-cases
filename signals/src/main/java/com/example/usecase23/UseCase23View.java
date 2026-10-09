@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import com.example.common.UseCaseDescription;
 import com.example.usecase23.ServiceHealth.Status;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
@@ -44,6 +45,7 @@ import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @PageTitle("Use Case 23: Real-time Dashboard")
+@UseCaseDescription("Updating a live service-health dashboard from background data")
 @Route(value = "use-case-23", layout = MainLayout.class)
 @Menu(order = 23, title = "UC 23: Real-time Dashboard")
 @StyleSheet("usecase23.css")
