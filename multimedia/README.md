@@ -7,7 +7,7 @@ from vaadin/flow#25900. Each view exercises one realistic scenario;
 | # | View | What it shows |
 | - | ---- | ------------- |
 | UC1 | Private recording | Per-user recordings whose video and poster are served through `DownloadHandler`s, so they have no public URL. |
-| UC2 | Seekable streaming | The same recording served by a built-in handler and by a range-aware one; only the second can be scrubbed. |
+| UC2 | Seekable streaming | The same recording served by `DownloadHandler.fromInputStream` and by `forFile`; only the second answers byte-range requests and can be scrubbed. |
 | UC3 | Adaptive streaming | HLS with 240p / 360p / 720p renditions served from a single handler, with an `hls.js` fallback for browsers without native HLS. |
 | UC4 | Format fallback | AV1 listed before H.264; the browser plays the first one it supports (Safari without a hardware AV1 decoder falls back), and the view reports which. |
 | UC5 | Background video | A muted, looping hero clip that autoplays inline, with a pause button for accessibility. |
