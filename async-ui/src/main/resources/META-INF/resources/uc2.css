@@ -1,0 +1,25 @@
+.uc2-view {
+    .widget-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        width: 100%;
+        max-width: 960px;
+    }
+
+    .widget-value {
+        font-size: 1.6rem;
+        font-weight: 600;
+    }
+
+    .widget-failure {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .widget-error {
+        color: var(--aura-red-text);
+    }
+}

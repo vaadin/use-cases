@@ -1,0 +1,12 @@
+.uc8-view {
+    .task-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .save-status {
+        font-size: 0.8rem;
+        color: var(--vaadin-text-color-secondary);
+    }
+}
