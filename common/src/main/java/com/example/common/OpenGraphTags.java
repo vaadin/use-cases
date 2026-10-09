@@ -5,9 +5,9 @@ import java.util.Optional;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.ServiceInitEvent;
@@ -43,36 +43,36 @@ public class OpenGraphTags implements VaadinServiceInitListener {
         VaadinRequest request = response.getVaadinRequest();
         String path = Optional.ofNullable(request.getPathInfo()).orElse("")
                 .replaceFirst("^/", "");
-        RouteConfiguration routes = RouteConfiguration.forApplicationScope();
-        Optional<Class<? extends Component>> target = routes.getRoute(path);
-        if (target.isEmpty()) {
-            return;
-        }
-        String baseUrl = baseUrl(request);
-        Document document = response.getDocument();
+        RouteConfiguration.forApplicationScope().getRoute(path)
+                .ifPresent(target -> addTags(response.getDocument(), path,
+                        target, baseUrl(request), hasImage));
+    }
 
-        Optional<String> siteName = siteName(target.get());
+    static void addTags(Document document, String path, Class<?> target,
+            Optional<String> baseUrl, boolean hasImage) {
+        Optional<String> siteName = siteName(target);
 
         property(document, "og:type", "website");
-        property(document, "og:url", baseUrl + path);
+        baseUrl.ifPresent(url -> property(document, "og:url", url + path));
         siteName.ifPresent(name -> property(document, "og:site_name", name));
-        title(target.get()).or(() -> siteName).ifPresent(title -> {
+        title(target).or(() -> siteName).ifPresent(title -> {
             property(document, "og:title", title);
             name(document, "twitter:title", title);
         });
-        UseCaseDescription description = target.get()
+        UseCaseDescription description = target
                 .getAnnotation(UseCaseDescription.class);
         if (description != null) {
             name(document, "description", description.value());
             property(document, "og:description", description.value());
             name(document, "twitter:description", description.value());
         }
-        if (hasImage) {
-            property(document, "og:image", baseUrl + IMAGE);
+        if (hasImage && baseUrl.isPresent()) {
+            String image = baseUrl.get() + IMAGE;
+            property(document, "og:image", image);
             property(document, "og:image:width", "1200");
             property(document, "og:image:height", "630");
             name(document, "twitter:card", "summary_large_image");
-            name(document, "twitter:image", baseUrl + IMAGE);
+            name(document, "twitter:image", image);
         }
     }
 
@@ -91,24 +91,42 @@ public class OpenGraphTags implements VaadinServiceInitListener {
                         : Optional.of(menu.title());
     }
 
-    /** The {@link PageTitle} of the layout the view is shown in. */
+    /**
+     * The {@link PageTitle} of the closest layout around the view that has one,
+     * following {@link ParentLayout} up from the {@link Route} layout.
+     */
     private static Optional<String> siteName(Class<?> view) {
-        return Optional.ofNullable(view.getAnnotation(Route.class))
-                .map(route -> route.layout().getAnnotation(PageTitle.class))
-                .map(PageTitle::value);
+        Route route = view.getAnnotation(Route.class);
+        Class<?> layout = route == null ? null : route.layout();
+        while (layout != null) {
+            PageTitle pageTitle = layout.getAnnotation(PageTitle.class);
+            if (pageTitle != null) {
+                return Optional.of(pageTitle.value());
+            }
+            ParentLayout parent = layout.getAnnotation(ParentLayout.class);
+            layout = parent == null ? null : parent.value();
+        }
+        return Optional.empty();
     }
 
     /**
-     * The app's absolute URL, ending with a slash. Crawlers need absolute URLs,
-     * and behind a TLS-terminating proxy such as Fly.io the server only sees
-     * plain HTTP, so the proxy's {@code X-Forwarded-Proto} wins.
+     * The app's absolute URL, ending with a slash, or empty when the request
+     * does not say which host it was sent to. Crawlers need absolute URLs, and
+     * behind a TLS-terminating proxy such as Fly.io the server only sees plain
+     * HTTP, so the first protocol in the proxy's {@code X-Forwarded-Proto}
+     * wins.
      */
-    private static String baseUrl(VaadinRequest request) {
-        String scheme = Optional
-                .ofNullable(request.getHeader("X-Forwarded-Proto"))
-                .orElse(request.isSecure() ? "https" : "http");
-        return scheme + "://" + request.getHeader("Host")
-                + request.getContextPath() + "/";
+    static Optional<String> baseUrl(VaadinRequest request) {
+        String host = request.getHeader("Host");
+        if (host == null || host.isBlank()) {
+            return Optional.empty();
+        }
+        String forwardedProto = request.getHeader("X-Forwarded-Proto");
+        String scheme = forwardedProto == null || forwardedProto.isBlank()
+                ? (request.isSecure() ? "https" : "http")
+                : forwardedProto.split(",", 2)[0].trim();
+        return Optional.of(
+                scheme + "://" + host.trim() + request.getContextPath() + "/");
     }
 
     private static void property(Document document, String property,
