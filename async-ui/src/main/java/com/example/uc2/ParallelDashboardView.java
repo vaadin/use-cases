@@ -1,5 +1,6 @@
 package com.example.uc2;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,11 +60,6 @@ public class ParallelDashboardView extends VerticalLayout {
         addClassName("uc2-view");
 
         add(new H1("UC2 — Parallel dashboard"));
-        add(new Paragraph("Four widgets, four slow queries: 2 s, 1 s, 1 s "
-                + "and 3 s, as each card says. All four start together, so "
-                + "the two 1-second cards fill in at the same moment, before "
-                + "the first card, and the whole page is complete after 3 s "
-                + "instead of the 7 s it would take one query at a time."));
 
         Div cards = new Div();
         cards.addClassName("widget-cards");
@@ -79,10 +75,27 @@ public class ParallelDashboardView extends VerticalLayout {
                 "27 tickets", true));
         widgets.forEach(cards::add);
 
+        Duration slowest = widgets.stream().map(widget -> widget.delay)
+                .max(Duration::compareTo).orElseThrow();
+        Duration sequential = widgets.stream().map(widget -> widget.delay)
+                .reduce(Duration.ZERO, Duration::plus);
+        add(new Paragraph("Four widgets, four slow queries, each card saying "
+                + "how long its own takes. All four start together, so "
+                + "cards with the same query time fill in at the same "
+                + "moment, and the whole page is complete after "
+                + seconds(slowest) + " instead of the " + seconds(sequential)
+                + " it would take one query at a time."));
+
         Button reload = new Button("Reload all", event -> loadAll());
         add(new HorizontalLayout(reload, failBacklog), cards);
 
         loadAll();
+    }
+
+    /** "1 s", "0.8 s", "2.5 s": a delay as the cards and the intro show it. */
+    static String seconds(Duration duration) {
+        return BigDecimal.valueOf(duration.toMillis(), 3).stripTrailingZeros()
+                .toPlainString() + " s";
     }
 
     private void loadAll() {
@@ -112,7 +125,7 @@ public class ParallelDashboardView extends VerticalLayout {
             addClassName("widget");
             addThemeVariants(CardVariant.OUTLINED);
             setTitle(title);
-            setSubtitle("Query takes %d s".formatted(delay.toSeconds()));
+            setSubtitle("Query takes " + seconds(delay));
 
             Div skeleton = new Div();
             skeleton.addClassName("skeleton");

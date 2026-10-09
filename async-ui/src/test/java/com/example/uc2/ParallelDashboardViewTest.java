@@ -1,5 +1,6 @@
 package com.example.uc2;
 
+import java.time.Duration;
 import java.util.List;
 
 import com.example.AsyncState;
@@ -14,6 +15,7 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,7 +49,8 @@ class ParallelDashboardViewTest extends SpringBrowserlessTest {
     void eachWidgetFillsInWhenItsOwnQueryAnswers() {
         ParallelDashboardView view = navigate(ParallelDashboardView.class);
 
-        // The third widget answers first.
+        // The two 1-second widgets answer before the first one; complete
+        // the third.
         latency.complete(2);
         runPendingSignalsTasks();
 
@@ -62,6 +65,17 @@ class ParallelDashboardViewTest extends SpringBrowserlessTest {
         assertTrue(view.widgets().stream()
                 .allMatch(widget -> widget.state().isLoaded()));
         assertTrue(spanTexts().contains("€ 18,240"));
+    }
+
+    @Test
+    void introAndCardsShowTheQueryTimes() {
+        navigate(ParallelDashboardView.class);
+
+        assertTrue(findInView(Paragraph.class).all().stream()
+                .anyMatch(p -> p.getText().contains(
+                        "complete after 3 s " + "instead of the 7 s")));
+        assertEquals("0.8 s",
+                ParallelDashboardView.seconds(Duration.ofMillis(800)));
     }
 
     @Test
