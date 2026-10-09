@@ -2,6 +2,7 @@ package com.example.uc2;
 
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -31,6 +32,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * toggle for the user to forget.
  */
 @Route(value = "uc2", layout = MainLayout.class)
+@UseCaseDescription("Keeping the screen on while someone follows step-by-step instructions")
 @Menu(order = 2, title = "UC2 — Recipe")
 @StyleSheet("uc2.css")
 public class RecipeView extends VerticalLayout {

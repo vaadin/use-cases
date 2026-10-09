@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import com.example.MediaLibrary;
 import com.example.MissingAPI;
 import com.example.RangeDownloadHandler;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -49,6 +50,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  */
 @Route(value = "uc9", layout = MainLayout.class)
 @PageTitle("UC9 — Subtitles")
+@UseCaseDescription("Offering subtitles in several languages and keeping the choice in the URL")
 @Menu(order = 9, title = "UC9 — Subtitles")
 public class SubtitlesView extends VerticalLayout
         implements BeforeEnterObserver {

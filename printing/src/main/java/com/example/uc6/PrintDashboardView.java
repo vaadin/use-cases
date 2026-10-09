@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.example.MissingAPI;
+import com.example.common.UseCaseDescription;
 import com.example.data.Order;
 import com.example.data.Orders;
 import com.example.print.OrderDocument;
@@ -64,6 +65,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Printing a dashboard")
+@UseCaseDescription("Printing a dashboard of charts without clipping")
 @Menu(order = 6, title = "UC6 — Printing a dashboard")
 @StyleSheet("uc6.css")
 public class PrintDashboardView extends VerticalLayout {

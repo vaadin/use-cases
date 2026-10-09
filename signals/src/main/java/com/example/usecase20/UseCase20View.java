@@ -3,6 +3,7 @@ package com.example.usecase20;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.example.common.UseCaseDescription;
 import com.example.preferences.UserPreferences;
 import com.example.views.MainLayout;
 
@@ -21,6 +22,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-20", layout = MainLayout.class)
 @PageTitle("Use Case 20: Session-scoped User Preferences")
+@UseCaseDescription("Keeping user preferences in a session-scoped signal across views")
 @Menu(order = 20, title = "UC 20: User Preferences")
 @StyleSheet("usecase20.css")
 @AnonymousAllowed

@@ -2,6 +2,7 @@ package com.example.uc4;
 
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -33,6 +34,7 @@ import com.vaadin.flow.signals.Signal;
  * unavailable.
  */
 @Route(value = "uc4", layout = MainLayout.class)
+@UseCaseDescription("Sharing a specific list item from its own button")
 @Menu(order = 4, title = "UC4 — Per-item share")
 @StyleSheet("uc4.css")
 public class ShareListItemsView extends VerticalLayout {

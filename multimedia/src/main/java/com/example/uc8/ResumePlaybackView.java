@@ -3,6 +3,7 @@ package com.example.uc8;
 import com.example.Chapters;
 import com.example.MissingAPI;
 import com.example.RangeDownloadHandler;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -32,6 +33,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc8", layout = MainLayout.class)
 @PageTitle("UC8 — Resume playback")
+@UseCaseDescription("Resuming a recording where the user left off")
 @Menu(order = 8, title = "UC8 — Resume playback")
 public class ResumePlaybackView extends VerticalLayout {
 

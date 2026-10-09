@@ -2,6 +2,7 @@ package com.example.uc13;
 
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -29,6 +30,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc13", layout = MainLayout.class)
 @PageTitle("UC13 — Client-side filter")
+@UseCaseDescription("Filtering a server-loaded list in the browser on every keystroke")
 @Menu(order = 13, title = "UC13 — Client-side filter")
 @StyleSheet("uc13.css")
 public class ClientFilterView extends VerticalLayout {

@@ -3,6 +3,7 @@ package com.example.usecase18;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import com.example.common.UseCaseDescription;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.MainLayout;
@@ -16,6 +17,7 @@ import com.vaadin.flow.signals.shared.SharedListSignal;
 
 @Route(value = "use-case-18", layout = MainLayout.class)
 @PageTitle("Use Case 18: LLM-Powered Task List")
+@UseCaseDescription("Letting an LLM chat edit a task list through signals")
 @Menu(order = 18, title = "UC 18: LLM Task List")
 @StyleSheet("usecase18.css")
 @AnonymousAllowed

@@ -1,5 +1,7 @@
 package com.example.views;
 
+import com.example.common.UseCaseDescription;
+
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -14,6 +16,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @Route(value = "", layout = MainLayout.class)
 @PageTitle("Signal API Use Cases - Home")
+@UseCaseDescription("Building reactive and collaborative UIs with the Signal API")
 @Menu(order = 0, title = "Home")
 @AnonymousAllowed
 public class HomeView extends VerticalLayout {

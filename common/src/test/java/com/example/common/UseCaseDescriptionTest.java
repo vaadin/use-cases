@@ -13,25 +13,32 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Guards that every use case can describe itself outside the app: the
- * {@link UseCaseDescription} is what a link preview (Open Graph tags) shows
- * for a use case, so a view listed in the menu without one would unfurl with
- * no description.
+ * {@link UseCaseDescription} is what a link preview (Open Graph tags) shows for
+ * a use case, so a view listed in the menu without one would unfurl with no
+ * description. The home views are included: theirs describes the app.
  */
 class UseCaseDescriptionTest {
 
     private static final Path ROOT = Path.of("..");
     private static final Pattern MENU = Pattern.compile("@Menu\\s*\\(");
-    private static final Pattern HOME_MENU = Pattern
-            .compile("@Menu\\s*\\([^)]*title\\s*=\\s*\"Home\"");
+
+    @Test
+    void everyAppHasALinkPreviewImage() throws IOException {
+        List<String> missing = AppCatalog.APPS.stream().map(AppCatalog.App::id)
+                .filter(id -> !Files.exists(ROOT.resolve(id)
+                        .resolve("src/main/resources/META-INF/resources/"
+                                + OpenGraphTags.IMAGE)))
+                .toList();
+        assertTrue(missing.isEmpty(), "Apps without a " + OpenGraphTags.IMAGE
+                + " link preview image: " + missing);
+    }
 
     @Test
     void everyUseCaseViewHasADescription() throws IOException {
         List<Path> missing;
         try (Stream<Path> files = Files.walk(ROOT)) {
-            missing = files
-                    .filter(path -> path.toString().endsWith(".java"))
-                    .filter(path -> path.toString()
-                            .contains("/src/main/java/"))
+            missing = files.filter(path -> path.toString().endsWith(".java"))
+                    .filter(path -> path.toString().contains("/src/main/java/"))
                     .filter(UseCaseDescriptionTest::isUseCaseView)
                     .map(ROOT::relativize).sorted().toList();
         }
@@ -43,7 +50,6 @@ class UseCaseDescriptionTest {
         try {
             String code = Files.readString(source);
             return MENU.matcher(code).find()
-                    && !HOME_MENU.matcher(code).find()
                     && !code.contains("@UseCaseDescription(");
         } catch (IOException e) {
             throw new IllegalStateException(e);

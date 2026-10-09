@@ -28,10 +28,12 @@ public class SecurityConfiguration {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
-        // Allow access to profile pictures and the per-view stylesheets
-        // (loaded via @StyleSheet) without authentication
+        // Allow access to profile pictures, the per-view stylesheets (loaded
+        // via @StyleSheet) and the link-preview image without authentication
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/profile-pictures/**", "/*.css").permitAll()
+                .requestMatchers(
+                        "/profile-pictures/**", "/*.css", "/og-image.jpg")
+                .permitAll()
                 .requestMatchers(request -> request
                         .getParameter(LOGIN_PARAMETER) != null)
                 .authenticated());
