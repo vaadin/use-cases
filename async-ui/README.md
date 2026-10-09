@@ -15,6 +15,10 @@ A standalone Spring Boot demo of keeping a Vaadin Flow UI fast while the work be
 | UC9 | Slow request feedback | Disable-on-click against double submits, the loading indicator's delay, and lazy versus eager value change mode. |
 | UC10 | 100,000 cards | A `VirtualList` with a `LitRenderer` next to 2,000 cards built as server-side components. |
 | UC11 | Grid search loading | A slow Grid search that shows a spinner, a progress bar and dimmed previous results while it runs, skeleton rows on the first load, and its own states for no matches and failure. |
+| UC12 | Skeleton that fills in | A review summary whose structure is known up front: the card shows placeholder bars in that shape at once, and each part replaces its bars as it streams in, with list placeholders adapting to the real length. |
+| UC13 | Slow images with a preview | Photos served over a slow connection, each painted first as a preview decoded from its BlurHash and faded in once loaded, next to the average-colour and no-placeholder alternatives. |
+
+The UC13 photos in `src/main/resources/uc13/` are AI-generated sample images.
 
 All slow backend calls go through `com.example.backend.SimulatedLatency`. The tests replace it with `ManualLatency`, so each test decides when, and in what order, the "slow" answers arrive.
 
