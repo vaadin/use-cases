@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
@@ -48,7 +49,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "use-case-15", layout = MainLayout.class)
 @PageTitle("Use Case 15: Debounced Search")
-@Menu(order = 15, title = "UC 15: Debounced Search")
+@Menu(order = 15, title = "UC15 — Debounced Search")
+@UseCaseDescription("Searching as the user types without a call per keystroke")
 @StyleSheet("usecase15.css")
 @AnonymousAllowed
 public class UseCase15View extends VerticalLayout {

@@ -1,5 +1,6 @@
 package com.example.uc3;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -32,6 +33,7 @@ import com.vaadin.flow.signals.Signal;
  * gesture, so it is a plain click listener.
  */
 @Route(value = "uc3", layout = MainLayout.class)
+@UseCaseDescription("Giving a writer the whole screen to write in")
 @Menu(order = 3, title = "UC3 — Distraction-free editor")
 @StyleSheet("uc3.css")
 public class DistractionFreeEditorView extends VerticalLayout {

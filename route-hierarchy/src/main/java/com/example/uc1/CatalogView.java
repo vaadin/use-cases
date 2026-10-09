@@ -1,5 +1,6 @@
 package com.example.uc1;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
@@ -29,6 +30,7 @@ import com.vaadin.flow.router.RouterLink;
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("Catalog")
+@UseCaseDescription("Getting breadcrumbs for nested URLs with no setup")
 @Menu(order = 1, title = "UC1 — URL-prefix trail")
 public class CatalogView extends VerticalLayout {
 

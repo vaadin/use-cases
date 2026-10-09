@@ -1,5 +1,6 @@
 package com.example.uc8;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -26,6 +27,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc8", layout = MainLayout.class)
 @PageTitle("UC8 — Long-press to delete")
+@UseCaseDescription("Guarding a delete behind a long press")
 @Menu(order = 8, title = "UC8 — Long-press to delete")
 @StyleSheet("uc8.css")
 public class LongPressDeleteView extends VerticalLayout {

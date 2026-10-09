@@ -3,6 +3,7 @@ package com.example.uc6;
 import java.util.List;
 
 import com.example.MissingAPI;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
@@ -41,6 +42,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc6/:episode?", layout = MainLayout.class)
 @PageTitle("UC6 — Podcast playlist")
+@UseCaseDescription("Playing a list of episodes one after another")
 @Menu(order = 6, title = "UC6 — Podcast playlist")
 @StyleSheet("uc6.css")
 public class PodcastPlaylistView extends VerticalLayout

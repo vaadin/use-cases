@@ -3,6 +3,7 @@ package com.example.uc1;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.data.Invoice;
 import com.example.data.Invoices;
 import com.example.pdf.InvoicePdf;
@@ -40,6 +41,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Download the invoice")
+@UseCaseDescription("Generating a PDF and letting the user download it")
 @Menu(order = 1, title = "UC1 — Download the invoice")
 @StyleSheet("invoicing.css")
 public class DownloadInvoiceView extends VerticalLayout {

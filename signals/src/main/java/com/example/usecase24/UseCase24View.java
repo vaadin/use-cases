@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -30,7 +31,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-24", layout = MainLayout.class)
 @PageTitle("Use Case 24: VirtualList with Signal Data Source")
-@Menu(order = 24, title = "UC 24: VirtualList Notifications")
+@Menu(order = 24, title = "UC24 — VirtualList Notifications")
+@UseCaseDescription("Showing a filtered notification inbox in a virtual list")
 @StyleSheet("usecase24.css")
 @AnonymousAllowed
 public class UseCase24View extends VerticalLayout {

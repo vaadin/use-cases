@@ -1,5 +1,6 @@
 package com.example.muc02;
 
+import com.example.common.UseCaseDescription;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
@@ -37,7 +38,8 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
  */
 @Route(value = "muc-02", layout = MainLayout.class)
 @PageTitle("Multi-User Case 2: Collaborative Cursors")
-@Menu(order = 51, title = "MUC 2: Collaborative Cursors")
+@Menu(order = 51, title = "MUC2 — Collaborative Cursors")
+@UseCaseDescription("Showing where other users point in a shared area")
 @StyleSheet("muc02.css")
 @AnonymousAllowed
 public class MUC02View extends VerticalLayout {

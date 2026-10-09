@@ -1,5 +1,6 @@
 package com.example.muc08;
 
+import com.example.common.UseCaseDescription;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.ActiveUsersDisplay;
@@ -41,7 +42,8 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
  */
 @Route(value = "muc-08", layout = MainLayout.class)
 @PageTitle("MUC 8: Broadcast Announcement")
-@Menu(order = 57, title = "MUC 8: Broadcast Announcement")
+@Menu(order = 57, title = "MUC8 — Broadcast Announcement")
+@UseCaseDescription("Broadcasting an announcement to all active users")
 @StyleSheet("muc08.css")
 @AnonymousAllowed
 public class MUC08View extends VerticalLayout {

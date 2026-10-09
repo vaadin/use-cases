@@ -1,6 +1,7 @@
 package com.example.uc1;
 
 import com.example.MissingAPI;
+import com.example.common.UseCaseDescription;
 import com.example.data.Order;
 import com.example.data.Orders;
 import com.example.print.OrderDocument;
@@ -45,6 +46,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Print the current view")
+@UseCaseDescription("Printing the current view without the app shell")
 @Menu(order = 1, title = "UC1 — Print the current view")
 @StyleSheet("uc1.css")
 public class PrintCurrentViewView extends VerticalLayout {

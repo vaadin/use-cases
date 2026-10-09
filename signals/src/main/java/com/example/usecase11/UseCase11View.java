@@ -2,6 +2,7 @@ package com.example.usecase11;
 
 import com.example.MissingAPI;
 import com.example.MissingAPI.ComponentSize;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
@@ -33,7 +34,8 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "use-case-11", layout = MainLayout.class)
 @PageTitle("Use Case 11: Responsive Layout")
-@Menu(order = 11, title = "UC 11: Responsive Layout")
+@Menu(order = 11, title = "UC11 — Responsive Layout")
+@UseCaseDescription("Adapting content to the width of its container")
 @StyleSheet("usecase11.css")
 @AnonymousAllowed
 public class UseCase11View extends VerticalLayout {

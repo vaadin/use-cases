@@ -1,5 +1,6 @@
 package com.example.uc3;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
@@ -23,6 +24,7 @@ import com.vaadin.flow.router.RouterLink;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("Users")
+@UseCaseDescription("Showing the record's name in the last crumb")
 @Menu(order = 3, title = "UC3 — Dynamic leaf label")
 public class UsersView extends VerticalLayout {
 

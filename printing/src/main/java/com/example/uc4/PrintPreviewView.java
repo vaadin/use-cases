@@ -3,6 +3,7 @@ package com.example.uc4;
 import java.util.List;
 
 import com.example.MissingAPI;
+import com.example.common.UseCaseDescription;
 import com.example.data.Orders;
 import com.example.print.OrderDocument;
 import com.example.print.PageSetup;
@@ -46,6 +47,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Paper setup and preview")
+@UseCaseDescription("Letting users pick paper size and margins")
 @Menu(order = 4, title = "UC4 — Paper setup and preview")
 @StyleSheet("uc4.css")
 public class PrintPreviewView extends VerticalLayout {

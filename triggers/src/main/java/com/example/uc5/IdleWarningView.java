@@ -1,5 +1,6 @@
 package com.example.uc5;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -25,6 +26,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Idle warning")
+@UseCaseDescription("Warning users who have gone idle")
 @Menu(order = 5, title = "UC5 — Idle warning")
 @StyleSheet("uc5.css")
 public class IdleWarningView extends VerticalLayout {

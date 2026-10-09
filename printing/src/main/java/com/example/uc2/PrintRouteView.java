@@ -3,6 +3,7 @@ package com.example.uc2;
 import java.util.List;
 
 import com.example.MissingAPI;
+import com.example.common.UseCaseDescription;
 import com.example.data.Order;
 import com.example.data.Orders;
 import com.example.views.MainLayout;
@@ -37,6 +38,7 @@ import com.vaadin.flow.router.RouteParameters;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — A print-only route")
+@UseCaseDescription("Printing a document from a window of its own")
 @Menu(order = 2, title = "UC2 — A print-only route")
 public class PrintRouteView extends VerticalLayout {
 

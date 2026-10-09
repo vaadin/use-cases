@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -50,6 +51,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * the card shrink, not a separate bar re-tween.
  */
 @Route(value = "uc6", layout = MainLayout.class)
+@UseCaseDescription("Expanding one chart of a dashboard to fullscreen")
 @Menu(order = 6, title = "UC6 — Chart expand")
 @StyleSheet("uc6.css")
 public class ChartExpandView extends VerticalLayout {

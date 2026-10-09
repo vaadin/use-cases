@@ -1,5 +1,6 @@
 package com.example.uc1;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -24,6 +25,7 @@ import com.vaadin.flow.signals.Signal;
  * or never happen at all on an insecure origin or an unsupported browser.
  */
 @Route(value = "uc1", layout = MainLayout.class)
+@UseCaseDescription("Letting the user keep the screen awake on demand")
 @Menu(order = 1, title = "UC1 — Manual toggle")
 public class ManualToggleView extends VerticalLayout {
 

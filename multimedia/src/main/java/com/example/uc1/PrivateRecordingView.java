@@ -3,6 +3,7 @@ package com.example.uc1;
 import java.util.List;
 
 import com.example.MediaLibrary;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
@@ -41,6 +42,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc1/:recording?", layout = MainLayout.class)
 @PageTitle("UC1 — Private recording")
+@UseCaseDescription("Serving a video only its owner can watch")
 @Menu(order = 1, title = "UC1 — Private recording")
 public class PrivateRecordingView extends VerticalLayout
         implements BeforeEnterObserver {

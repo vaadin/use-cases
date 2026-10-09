@@ -1,5 +1,6 @@
 package com.example.uc14;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.card.Card;
@@ -32,6 +33,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc14", layout = MainLayout.class)
 @PageTitle("UC14 — Responsive cards")
+@UseCaseDescription("Fitting card columns to the container width")
 @Menu(order = 14, title = "UC14 — Responsive cards")
 @StyleSheet("uc14.css")
 public class ResponsiveCardsView extends VerticalLayout {

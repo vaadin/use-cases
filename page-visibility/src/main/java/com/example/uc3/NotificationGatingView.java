@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.springframework.scheduling.TaskScheduler;
 
@@ -39,6 +40,7 @@ import com.vaadin.flow.server.webpush.WebPushSubscription;
  * notification is needed when they aren't.
  */
 @Route(value = "uc3", layout = MainLayout.class)
+@UseCaseDescription("Choosing between an in-tab toast and Web Push")
 @Menu(order = 3, title = "UC3 — Notification gating")
 @StyleSheet("uc3.css")
 public class NotificationGatingView extends VerticalLayout {

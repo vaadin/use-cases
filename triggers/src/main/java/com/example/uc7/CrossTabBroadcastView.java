@@ -1,5 +1,6 @@
 package com.example.uc7;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -32,6 +33,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Cross-tab broadcast")
+@UseCaseDescription("Passing messages between open browser tabs")
 @Menu(order = 7, title = "UC7 — Cross-tab broadcast")
 @StyleSheet("uc7.css")
 public class CrossTabBroadcastView extends VerticalLayout {

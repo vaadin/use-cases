@@ -1,5 +1,6 @@
 package com.example.uc4;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -27,6 +28,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Double-click copy")
+@UseCaseDescription("Copying text on a double-click")
 @Menu(order = 4, title = "UC4 — Double-click copy")
 @StyleSheet("uc4.css")
 public class JsTriggerView extends VerticalLayout {

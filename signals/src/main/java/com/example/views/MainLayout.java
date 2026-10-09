@@ -4,6 +4,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.example.common.AppCatalog;
+import com.example.common.BaseMainLayout;
+import com.example.common.UseCaseDescription;
 import com.example.preferences.UserPreferences;
 import com.example.security.CurrentUserSignal;
 import com.example.security.SecurityConfiguration;
@@ -236,8 +238,15 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
         // Add auto-menu from @Menu annotations
         SideNav nav = new SideNav();
-        MenuConfiguration.getMenuEntries().forEach(entry -> nav
-                .addItem(new SideNavItem(entry.title(), entry.path())));
+        MenuConfiguration.getMenuEntries().forEach(entry -> {
+            SideNavItem item = new SideNavItem(entry.title(), entry.path());
+            UseCaseDescription description = BaseMainLayout
+                    .descriptionOf(entry);
+            if (description != null) {
+                item.setTooltipText(description.value());
+            }
+            nav.addItem(item);
+        });
         addToDrawer(nav);
 
         // Apply session-scoped background color reactively to the whole layout

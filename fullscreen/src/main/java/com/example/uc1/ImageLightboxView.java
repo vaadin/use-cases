@@ -2,6 +2,7 @@ package com.example.uc1;
 
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -27,6 +28,7 @@ import com.vaadin.flow.signals.Signal;
  * stage; pressing Escape returns to the gallery.
  */
 @Route(value = "uc1", layout = MainLayout.class)
+@UseCaseDescription("Showing a clicked image fullscreen")
 @Menu(order = 1, title = "UC1 — Image lightbox")
 @StyleSheet("uc1.css")
 public class ImageLightboxView extends VerticalLayout {

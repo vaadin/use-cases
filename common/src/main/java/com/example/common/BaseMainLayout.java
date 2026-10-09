@@ -59,7 +59,11 @@ public abstract class BaseMainLayout extends AppLayout
         addToDrawer(nav);
     }
 
-    static @Nullable UseCaseDescription descriptionOf(MenuEntry entry) {
+    /**
+     * The {@link UseCaseDescription} of a menu entry's view, or {@code null} if
+     * the entry has no view class or the view has no description.
+     */
+    public static @Nullable UseCaseDescription descriptionOf(MenuEntry entry) {
         return entry.menuClass() == null ? null
                 : entry.menuClass().getAnnotation(UseCaseDescription.class);
     }

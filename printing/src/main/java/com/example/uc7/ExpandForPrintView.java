@@ -3,6 +3,7 @@ package com.example.uc7;
 import java.util.List;
 
 import com.example.MissingAPI;
+import com.example.common.UseCaseDescription;
 import com.example.data.Order;
 import com.example.data.Orders;
 import com.example.print.OrderDocument;
@@ -46,6 +47,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Expand everything for print")
+@UseCaseDescription("Printing sections the user has folded away")
 @Menu(order = 7, title = "UC7 — Expand everything for print")
 public class ExpandForPrintView extends VerticalLayout {
 

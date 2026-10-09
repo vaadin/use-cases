@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ScheduledFuture;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 import org.springframework.scheduling.TaskScheduler;
@@ -33,6 +34,7 @@ import com.vaadin.flow.signals.Signal;
  * so the websocket stays quiet. On return, ticking resumes.
  */
 @Route(value = "uc1", layout = MainLayout.class)
+@UseCaseDescription("Pausing server work while the tab is hidden")
 @Menu(order = 1, title = "UC1 — Update when active")
 @StyleSheet("uc1.css")
 public class UpdateWhenActiveView extends VerticalLayout {

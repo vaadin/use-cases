@@ -1,5 +1,6 @@
 package com.example.usecase14;
 
+import com.example.common.UseCaseDescription;
 import com.example.service.AnalyticsService;
 import com.example.service.AnalyticsService.AnalyticsReport;
 import com.example.views.MainLayout;
@@ -44,7 +45,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "use-case-14", layout = MainLayout.class)
 @PageTitle("Use Case 14: Async Data Loading")
-@Menu(order = 14, title = "UC 14: Async Data Loading")
+@Menu(order = 14, title = "UC14 — Async Data Loading")
+@UseCaseDescription("Showing loading, success and error states of a background task")
 @StyleSheet("usecase14.css")
 @AnonymousAllowed
 public class UseCase14View extends VerticalLayout {
