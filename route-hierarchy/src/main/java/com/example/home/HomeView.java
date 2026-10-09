@@ -8,13 +8,17 @@ import com.example.uc4.ProjectsView;
 import com.example.uc5.SettingsView;
 import com.example.uc6.DashboardView;
 import com.example.uc7.SitemapView;
+import com.example.uc8.HierarchicalMenuView;
+import com.example.uc9.ReportsView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
+@PageTitle("Home")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 
@@ -58,6 +62,14 @@ public class HomeView extends BaseHomeView {
                 "getRouteHierarchy used as a graph-builder to render the whole "
                         + "hierarchy.",
                 SitemapView.class));
+        cards.add(homeCard("UC8", "Hierarchical menu",
+                "MenuConfiguration.getMenuEntriesTree() nests the @Menu entries "
+                        + "the flat nav lists.",
+                HierarchicalMenuView.class));
+        cards.add(homeCard("UC9", "Menu-only nesting",
+                "@Menu(parent = ...) groups a top-level route under another "
+                        + "entry in the menu without moving the route.",
+                ReportsView.class));
         add(cards);
     }
 }

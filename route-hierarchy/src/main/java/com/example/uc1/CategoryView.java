@@ -6,6 +6,7 @@ import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
@@ -18,6 +19,7 @@ import com.vaadin.flow.router.RouterLink;
  */
 @Route(value = "uc1/electronics", layout = MainLayout.class)
 @PageTitle("Electronics")
+@Menu(order = 10, title = "Electronics")
 public class CategoryView extends VerticalLayout {
 
     public CategoryView() {
