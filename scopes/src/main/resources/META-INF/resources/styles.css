@@ -1,0 +1,39 @@
+/* Scopes use cases — small visual polish */
+
+.home-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    max-width: 960px;
+}
+
+.home-card .home-card-tag {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary);
+    letter-spacing: 0.05em;
+}
+
+.scope-badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-family: monospace;
+    background: color-mix(in srgb, var(--aura-blue) 15%, transparent);
+    color: var(--aura-blue-text);
+    border: 1px solid color-mix(in srgb, var(--aura-blue) 35%, transparent);
+}
+
+.maintenance-banner {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--aura-orange) 18%, transparent);
+    color: var(--aura-orange-text);
+    border: 1px solid color-mix(in srgb, var(--aura-orange) 35%, transparent);
+}
+
+.hint {
+    color: var(--vaadin-text-color-secondary);
+    font-size: 0.9rem;
+}
