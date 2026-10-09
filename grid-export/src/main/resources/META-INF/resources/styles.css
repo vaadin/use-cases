@@ -1,0 +1,38 @@
+/* Grid data export use cases — small visual polish */
+
+.home-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    max-width: 960px;
+}
+
+.home-card .home-card-tag {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary);
+    letter-spacing: 0.05em;
+}
+
+/* The export preview: every view shows the bytes it would hand the browser,
+   so the export is observable without downloading a file. */
+.export-preview {
+    font-size: var(--aura-font-size-s);
+    background: var(--vaadin-background-color-alt, #f5f5f5);
+    border: 1px solid var(--vaadin-border-color, #ddd);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    max-height: 22rem;
+    overflow: auto;
+    white-space: pre;
+    margin: 0;
+}
+
+.export-note {
+    color: var(--vaadin-text-color-secondary);
+    font-size: var(--aura-font-size-s);
+}
+
+.export-grid {
+    max-height: 20rem;
+}

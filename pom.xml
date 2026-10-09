@@ -19,6 +19,7 @@
         <module>async-ui</module>
         <module>fullscreen</module>
         <module>geolocation</module>
+        <module>grid-export</module>
         <module>multimedia</module>
         <module>clipboard</module>
         <module>page-visibility</module>

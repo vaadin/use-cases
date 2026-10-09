@@ -20,6 +20,8 @@ public final class AppCatalog {
                     "https://fullscreen-cases.fly.dev/"),
             new App("geolocation", "Geolocation API",
                     "https://geo-cases.fly.dev/"),
+            new App("grid-export", "Grid Data Export",
+                    "https://grid-export-cases.fly.dev/"),
             new App("multimedia", "Video & Audio",
                     "https://multimedia-cases.fly.dev/"),
             new App("observability", "Observability",
