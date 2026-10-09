@@ -452,6 +452,41 @@ root span is the first row of its trail.
 is bound (the request thread always has one), or make the fallback legible — an
 explicit `_unknown` rather than a class name that impersonates a route.
 
+## 16. A client error's frame is reported minified — the sourcemaps are on the server
+
+**Where it bites:** UC5 (the stock chart's error, on the hosted demo or any production
+build).
+**Symptom:** a `client-error` insight names the first stack frame as the browser wrote
+it. In a production build that is the minified bundle — `frame` reads
+`https://…/VAADIN/build/indexhtml-<hash>.js:1:48213` and `function` a one-letter name —
+so the finding groups correctly and says nothing a developer can open. The payload is
+meant to be forwarded to an issue tracker or an AI agent, and neither can do anything
+with a column on line 1 of a hashed file that the next deploy renames. Nothing in the
+kit reads sourcemaps, on either side.
+**Why the kit is the place:** the maps and the reports end up in the same process.
+A Vite build with `build.sourcemap: 'hidden'` writes a `.map` beside every chunk, the
+Flow build packages them with the chunks under `META-INF/VAADIN/webapp/VAADIN/build/`,
+and the insight is assembled on that same server — so resolving is a classpath lookup
+and a VLQ decode, with no upload step, no external symbolication service, and no
+browser that ever needs a map.
+**Workaround used:** `com.example.acme.SourceMaps` resolves the retained frame against
+the map on the classpath, and UC5's card shows the original file and line
+under the kit's minified one, with the line of code quoted from `sourcesContent`. The
+broken features moved out of `executeJs` strings into a bundled module
+(`src/main/frontend/acme/stock-chart.ts`), because code compiled from a string in the
+browser has no map to be resolved against. What the workaround cannot fix is grouping:
+the kit groups by the minified frame, so one bug is one finding per build — a redeploy
+renames the chunk and starts a new group. Nor does the card name the function: a v3
+map's `names` hold the identifier at a position, not the function around it, so the
+kit's `function` stays the minified one.
+**Suggested API:** resolve `frame` against the build's maps when the insight is
+captured, keeping the minified location alongside it — e.g. an `original` object in
+the evidence with `source`, `line` and `column` — and group by the resolved
+location, so a finding survives a redeploy; the quoted line of code, if any, behind
+`insights-details` like the message, since `sourcesContent` is the application's code.
+And a documented recommendation for `build.sourcemap: 'hidden'`, which is what makes
+maps available without publishing them via a `sourceMappingURL`.
+
 ## Test-simulator note
 
 Most client-side gaps are where the repo's browserless tests cannot exercise the JS

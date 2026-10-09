@@ -473,6 +473,12 @@
     margin-block-end: 0.5rem;
 }
 
+/* A finding with more than one detail line (a message, then the source it maps
+   back to) reads as one block. */
+.verdict-detail:has(+ .verdict-detail) {
+    margin-block-end: 0.125rem;
+}
+
 /* The insights endpoint payload, verbatim. Capped to the viewport so it
    scrolls inside its own box instead of pushing the page. */
 .payload-scroller {

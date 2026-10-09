@@ -46,6 +46,7 @@
         <nullability.plugin.version>0.4.0</nullability.plugin.version>
         <spring-ai.version>2.0.1</spring-ai.version>
         <sentry.version>8.58.0</sentry.version>
+        <atlassian-sourcemap.version>3.0.1</atlassian-sourcemap.version>
     </properties>
 
     <dependencyManagement>
