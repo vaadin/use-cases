@@ -59,19 +59,23 @@ public class ParallelDashboardView extends VerticalLayout {
         addClassName("uc2-view");
 
         add(new H1("UC2 — Parallel dashboard"));
-        add(new Paragraph("Four widgets, four slow queries taking between "
-                + "0.8 and 4 seconds. All four start together; each card "
-                + "shows its value the moment its own query answers."));
+        add(new Paragraph("Four widgets, four slow queries: 2 s, 1 s, 1 s "
+                + "and 3 s, as each card says. All four start together, so "
+                + "the two 1-second cards fill in at the same moment, before "
+                + "the first card, and the whole page is complete after 3 s "
+                + "instead of the 7 s it would take one query at a time."));
 
         Div cards = new Div();
         cards.addClassName("widget-cards");
-        widgets.add(new Widget("Revenue today", Duration.ofMillis(800),
+        // Not in screen order, and two the same: the cards visibly do not
+        // load one after another.
+        widgets.add(new Widget("Revenue today", Duration.ofSeconds(2),
                 "€ 18,240", false));
-        widgets.add(new Widget("Open orders", Duration.ofMillis(1500), "312",
-                false));
-        widgets.add(new Widget("Top product", Duration.ofMillis(2500),
+        widgets.add(
+                new Widget("Open orders", Duration.ofSeconds(1), "312", false));
+        widgets.add(new Widget("Top product", Duration.ofSeconds(1),
                 "Espresso beans 1 kg", false));
-        widgets.add(new Widget("Support backlog", Duration.ofMillis(4000),
+        widgets.add(new Widget("Support backlog", Duration.ofSeconds(3),
                 "27 tickets", true));
         widgets.forEach(cards::add);
 
@@ -108,6 +112,7 @@ public class ParallelDashboardView extends VerticalLayout {
             addClassName("widget");
             addThemeVariants(CardVariant.OUTLINED);
             setTitle(title);
+            setSubtitle("Query takes %d s".formatted(delay.toSeconds()));
 
             Div skeleton = new Div();
             skeleton.addClassName("skeleton");
