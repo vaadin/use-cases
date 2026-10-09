@@ -182,8 +182,7 @@ public class MUC06View extends VerticalLayout {
 
         // Delete button
         Button deleteButton = new Button(new Icon(VaadinIcon.TRASH));
-        deleteButton.addThemeVariants(ButtonVariant.ERROR,
-                ButtonVariant.SMALL);
+        deleteButton.addThemeVariants(ButtonVariant.ERROR, ButtonVariant.SMALL);
         deleteButton.setAriaLabel("Delete task");
         deleteButton.addClickListener(e -> tasksSignal.remove(taskSignal));
 
