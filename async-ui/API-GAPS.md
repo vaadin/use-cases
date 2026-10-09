@@ -76,6 +76,27 @@ The short version: **every building block exists, but nothing connects them.** `
 **Workaround used:** the skeleton CSS class in `styles.css`, bound to `AsyncState::isLoading`.
 **Suggested API:** let background work report to the same indicator, e.g. `UI#trackBusy(CompletableFuture<?>)` / `Registration UI#showBusy()`.
 
+## No skeleton component
+
+**Where it bit us:** uc12 / StructuredSkeletonView.java, uc2 / ParallelDashboardView.java, uc4 / OrderDetailView.java, uc11 / GridSearchLoadingView.java
+**Symptom:** a skeleton is the usual way to show that content is on its way, but Flow and the component set have none. Every view assembles placeholder bars from `Div`s, a shared CSS class and per-view sizes, and pairs each one with a `bindVisible` on the content's state. UC12 needs a shape per section (a heading line, a text line, a rating, list lines) and has to size each bar by hand so the card does not jump when the content replaces it.
+**Workaround used:** the `skeleton` class in `styles.css`, plus `bar-*` variants in `uc12.css`, each bound to the matching part of the answer.
+**Suggested API:** a `Skeleton` component with common shapes (`Skeleton.text(int lines)`, `Skeleton.circle(size)`, `Skeleton.rectangle(width, height)`) that follows the theme's typography, and a way to swap it for the real content when a signal has a value, e.g. `Skeleton.until(Signal<?> value, Component content)`.
+
+## No streaming counterpart to the asynchronous signal
+
+**Where it bit us:** uc12 / StructuredSkeletonView.java
+**Symptom:** a structured answer that arrives part by part (a language model's output, a paged export, a server-sent event stream) is not a single `CompletableFuture`. Flow has nothing that feeds a stream into signals while the component is attached: the view has to capture the `UI`, hop onto it for every part, drop parts of a superseded request that are already queued, and stop the stream in `onDetach`.
+**Workaround used:** `ReviewSummaries` delivers parts to a callback and returns a `Registration`; the view wraps each part in `UI.accessLater`, checks a generation counter, and removes the registration when it starts again or detaches.
+**Suggested API:** `Signal.fromPublisher(Component owner, Flow.Publisher<T>)` / `ListSignal#appendFrom(Component owner, Flow.Publisher<T>)`, which deliver on the UI, cancel the subscription on detach, and expose a completed / failed state like the asynchronous signal above.
+
+## Image has no load event and no placeholder
+
+**Where it bit us:** uc13 / BlurHashPreviewView.java
+**Symptom:** `Image` has no `addLoadListener` / `addErrorListener` and no placeholder. Showing a preview until the real image is complete needs a second `Image` stacked under the first, CSS to hide and fade the real one, and a generic DOM `load` listener. Because that listener is on the server, the fade only starts after a round trip; doing it in the browser alone would need `executeJs`. Sending a tiny preview with the page is also manual: `new Image(byte[], alt)` serves the bytes through a separate request, so the preview is turned into a `data:` URL by hand.
+**Workaround used:** a frame with the photo's `aspect-ratio`, a preview `Image` with a `data:` URL decoded from the photo's BlurHash, the average colour as the frame's background, and a `loaded` class bound to a signal set by the `load` event.
+**Suggested API:** `Image#addLoadListener` / `addErrorListener`, and `Image#setPlaceholder(String src)` / `setPlaceholderColor(String)` that the browser shows until the image has loaded and then fades out without a round trip. Optionally, `Image#setBlurHash(String)` with the decoding done in the browser.
+
 ## Browserless tests cannot control time or background threads
 
 **Where it bit us:** every test in this module

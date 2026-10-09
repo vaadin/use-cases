@@ -6,6 +6,8 @@ import com.example.common.BaseHomeView;
 import com.example.uc1.MillionRowGridView;
 import com.example.uc10.VirtualScrollingView;
 import com.example.uc11.GridSearchLoadingView;
+import com.example.uc12.StructuredSkeletonView;
+import com.example.uc13.BlurHashPreviewView;
 import com.example.uc2.ParallelDashboardView;
 import com.example.uc3.LongRunningJobView;
 import com.example.uc4.OrderDetailView;
@@ -39,6 +41,7 @@ public class HomeView extends BaseHomeView {
                 OrderDetailView.class, LatestResponseWinsView.class,
                 DeferredSectionsView.class, ThrottledFeedView.class,
                 OptimisticSaveView.class, SlowRequestFeedbackView.class,
-                VirtualScrollingView.class, GridSearchLoadingView.class));
+                VirtualScrollingView.class, GridSearchLoadingView.class,
+                StructuredSkeletonView.class, BlurHashPreviewView.class));
     }
 }
