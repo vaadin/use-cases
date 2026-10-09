@@ -1,5 +1,6 @@
 package com.example.uc3;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.ObjectMapper;
@@ -37,6 +38,7 @@ import com.vaadin.flow.signals.Signal;
  * each click shares whatever the form currently holds.
  */
 @Route(value = "uc3", layout = MainLayout.class)
+@UseCaseDescription("Sharing a custom title, text and URL with a live preview")
 @Menu(order = 3, title = "UC3 — Share a custom message")
 @StyleSheet("uc3.css")
 public class CustomMessageView extends VerticalLayout {

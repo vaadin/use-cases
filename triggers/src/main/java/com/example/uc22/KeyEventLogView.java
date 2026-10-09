@@ -1,6 +1,7 @@
 package com.example.uc22;
 
 import com.example.KeyboardEventTrigger;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -29,6 +30,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc22", layout = MainLayout.class)
 @PageTitle("UC22 — Key event log")
+@UseCaseDescription("Logging every key press with its modifiers as it happens")
 @Menu(order = 22, title = "UC22 — Key event log")
 @StyleSheet("uc22.css")
 public class KeyEventLogView extends VerticalLayout {

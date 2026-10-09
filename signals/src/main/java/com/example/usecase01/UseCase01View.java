@@ -2,6 +2,7 @@ package com.example.usecase01;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
@@ -25,6 +26,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-01", layout = MainLayout.class)
 @PageTitle("Use Case 1: Dynamic Button State")
+@UseCaseDescription("Enabling and disabling a button from the state of a form")
 @Menu(order = 1, title = "UC 1: Dynamic Button State")
 @AnonymousAllowed
 public class UseCase01View extends VerticalLayout {

@@ -3,6 +3,7 @@ package com.example.home;
 import java.util.List;
 
 import com.example.common.BaseHomeView;
+import com.example.common.UseCaseDescription;
 import com.example.uc1.InteractionLatencyView;
 import com.example.uc2.ApplicationHealthView;
 import com.example.uc3.ScalingSignalsView;
@@ -29,6 +30,7 @@ import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
 @PageTitle("Observability Use Cases")
+@UseCaseDescription("Finding the cause of slow screens, failing actions and lost connections in production")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 

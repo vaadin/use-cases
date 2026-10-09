@@ -1,5 +1,6 @@
 package com.example.usecase22;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -22,6 +23,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-22", layout = MainLayout.class)
 @PageTitle("Use Case 22: Two-Way Mapped Signals")
+@UseCaseDescription("Editing one value through a two-way mapped view of another signal")
 @Menu(order = 22, title = "UC 22: Two-Way Mapped Signals")
 @StyleSheet("usecase22.css")
 @AnonymousAllowed

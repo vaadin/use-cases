@@ -2,6 +2,7 @@ package com.example.usecase09;
 
 import java.util.Objects;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -26,6 +27,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @Route(value = "use-case-09", layout = MainLayout.class)
 @PageTitle("Use Case 9: Form with Binder Integration and Signal Validation")
+@UseCaseDescription("Combining Binder validation with signal-driven form state")
 @Menu(order = 9, title = "UC 9: Binder Integration")
 @StyleSheet("usecase09.css")
 @AnonymousAllowed

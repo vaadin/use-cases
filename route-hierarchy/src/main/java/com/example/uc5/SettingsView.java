@@ -1,5 +1,6 @@
 package com.example.uc5;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
@@ -21,6 +22,7 @@ import com.vaadin.flow.router.RouterLink;
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("Settings")
+@UseCaseDescription("Adding an up-one-level button from the route parent")
 @Menu(order = 5, title = "UC5 — Up-one-level button")
 public class SettingsView extends VerticalLayout {
 

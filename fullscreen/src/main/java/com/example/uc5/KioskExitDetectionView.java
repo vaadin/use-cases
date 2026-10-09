@@ -3,6 +3,7 @@ package com.example.uc5;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -48,6 +49,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * a warning.
  */
 @Route(value = "uc5", layout = MainLayout.class)
+@UseCaseDescription("Running a fullscreen kiosk that only staff can exit with a PIN")
 @Menu(order = 5, title = "UC5 — Kiosk")
 @StyleSheet("uc5.css")
 public class KioskExitDetectionView extends VerticalLayout {

@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Comparator;
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.data.Invoice;
 import com.example.data.Invoices;
 import com.example.pdf.InvoicePdf;
@@ -46,6 +47,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — The monthly billing run")
+@UseCaseDescription("Building one combined document from the selected invoices on click")
 @Menu(order = 4, title = "UC4 — The monthly billing run")
 @StyleSheet("invoicing.css")
 public class BillingRunView extends VerticalLayout {

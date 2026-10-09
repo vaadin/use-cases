@@ -1,5 +1,6 @@
 package com.example.uc3;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -35,6 +36,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Rotate-your-device overlay")
+@UseCaseDescription("Asking users to rotate the device for content that needs it")
 @Menu(order = 3, title = "UC3 — Rotate prompt")
 @StyleSheet("uc3.css")
 public class RotatePromptView extends VerticalLayout {
