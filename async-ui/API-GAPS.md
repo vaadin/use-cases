@@ -8,7 +8,7 @@ The short version: **every building block exists, but nothing connects them.** `
 
 ## No asynchronous signal (loading / value / error)
 
-**Where it bit us:** uc2 / ParallelDashboardView.java, uc4 / OrderDetailView.java
+**Where it bit us:** uc2 / ParallelDashboardView.java, uc4 / OrderDetailView.java, uc11 / GridSearchLoadingView.java
 **Symptom:** a value that arrives later has three states (loading, loaded, failed), and the skeleton, the content and the error message all depend on them. Signals can hold such a state, but Flow has no type for it and nothing that fills a signal from a `CompletableFuture`. Each view would capture `UI.getCurrent()`, chain `whenComplete`, call `ui.access`, unwrap `CompletionException` and switch on the result.
 **Workaround used:** `AsyncState<T>` (a sealed `Loading` / `Loaded` / `Failed` type) and `MissingAPI.load(owner, signal, loader)`, which sets `Loading` at once and `Loaded` / `Failed` through `UI.access` later.
 **Suggested API:** a built-in async signal, e.g. `Signal<AsyncValue<T>> Signal.async(Component owner, Supplier<CompletableFuture<T>> loader)`, with `isLoading()`, `value()` and `error()`, and a `reload()`. Bindings such as `bindVisible(signal.map(AsyncValue::isLoading))` then come for free.
@@ -33,6 +33,13 @@ The short version: **every building block exists, but nothing connects them.** `
 **Symptom:** `CallbackDataProvider`'s fetch and count callbacks must return a `Stream` / `int` synchronously. A slow page therefore blocks the request thread and every other interaction of that user, and the Grid cannot show a per-page loading state or an error for a failed page. Applications with reactive or remote backends end up calling `.block()` / `.join()` in the callback ([vaadin/flow#21865](https://github.com/vaadin/flow/issues/21865)).
 **Workaround used:** none possible. UC1 blocks (`SimulatedLatency.block`) and keeps the cost down instead: an item count estimate removes the count query, and the backend does the sorting and filtering.
 **Suggested API:** `setItems(AsyncFetchCallback<T>)` returning `CompletableFuture<List<T>>` (and an async count), with the Grid showing placeholders for pages still in flight and a failure hook for pages that fail.
+
+## The Grid has no loading state the server can set
+
+**Where it bit us:** uc11 / GridSearchLoadingView.java
+**Symptom:** while a search runs in the background, the Grid should say so. The `<vaadin-grid>` web component has a `loading` attribute, but it only reflects the Grid's own page requests. The server cannot set it for data it is fetching itself, and the attribute only offers a styling hook, with no visual indicator. The Grid has an empty-state component, but there is no loading-state counterpart, and no built-in way to keep the previous rows visible but marked as outdated.
+**Workaround used:** a `loading` CSS class bound to the search's `AsyncState` dims the previous rows. An indeterminate `ProgressBar` sits over the Grid, a spinner sits in the search field's suffix, and the empty-state component is swapped between skeleton rows (first load) and a "no matches" message.
+**Suggested API:** `Grid#bindLoading(Signal<Boolean>)` / `setLoading(boolean)` with a built-in overlay and progress indicator, and `setLoadingStateComponent(Component)` next to `setEmptyStateComponent`. Together with an asynchronous data provider (see above), the Grid could manage all of this itself.
 
 ## No asynchronous navigation hook
 

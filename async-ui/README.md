@@ -14,6 +14,7 @@ A standalone Spring Boot demo of keeping a Vaadin Flow UI fast while the work be
 | UC8 | Optimistic save | Checkboxes that change at once and roll back with a notification when the background save fails. |
 | UC9 | Slow request feedback | Disable-on-click against double submits, the loading indicator's delay, and lazy versus eager value change mode. |
 | UC10 | 100,000 cards | A `VirtualList` with a `LitRenderer` next to 2,000 cards built as server-side components. |
+| UC11 | Grid search loading | A slow Grid search that shows a spinner, a progress bar and dimmed previous results while it runs, skeleton rows on the first load, and its own states for no matches and failure. |
 
 All slow backend calls go through `com.example.backend.SimulatedLatency`. The tests replace it with `ManualLatency`, so each test decides when, and in what order, the "slow" answers arrive.
 
