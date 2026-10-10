@@ -1,0 +1,34 @@
+/* Rows styled from their data through part names. */
+.uc7-view vaadin-grid::part(overdue) {
+    color: var(--aura-red-text, #b91c1c);
+    font-weight: 600;
+}
+
+.uc7-view vaadin-grid::part(paid) {
+    color: var(--vaadin-text-color-secondary);
+    text-decoration: line-through;
+}
+
+/* One field, through its class and its own part. */
+.uc7-view vaadin-text-field.needs-attention::part(input-field) {
+    background: color-mix(in srgb, var(--aura-yellow, #eab308) 18%, transparent);
+    border: 2px solid var(--aura-yellow, #eab308);
+}
+
+.uc7-view .stock-card {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 1rem;
+    border-radius: var(--vaadin-radius-m, 6px);
+    background: var(--vaadin-background-container);
+}
+
+.uc7-view .stock-card .stock-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.uc7-view .stock-card.low {
+    color: white;
+    background: var(--aura-red, #dc2626);
+}

@@ -1,0 +1,29 @@
+.uc2-view .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    width: 100%;
+    max-width: 960px;
+}
+
+.uc2-view .card {
+    padding: 0.5rem 1rem;
+    border-radius: var(--vaadin-radius-m, 6px);
+}
+
+.uc2-view .card p {
+    font-family: monospace;
+    font-size: 0.8125rem;
+}
+
+/* Stays light in dark mode. */
+.uc2-view .card.hardcoded {
+    background: #fff;
+    color: #222;
+}
+
+/* Follows light and dark mode. */
+.uc2-view .card.tokens {
+    background: var(--vaadin-background-container);
+    color: var(--vaadin-text-color);
+}
