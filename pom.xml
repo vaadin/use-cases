@@ -25,6 +25,7 @@
         <module>reporting</module>
         <module>printing</module>
         <module>route-hierarchy</module>
+        <module>testing</module>
         <module>text-selection</module>
         <module>web-share</module>
         <module>screen-orientation</module>

@@ -34,6 +34,7 @@ public final class AppCatalog {
             new App("screen-orientation", "Screen Orientation API",
                     "https://screen-orientation-cases.fly.dev/"),
             new App("signals", "Signal API", "https://signals-cases.fly.dev/"),
+            new App("testing", "Testing", "https://testing-cases.fly.dev/"),
             new App("text-selection", "Text Selection API",
                     "https://text-selection-cases.fly.dev/"),
             new App("triggers", "Trigger / Action API",
