@@ -1,0 +1,13 @@
+.uc10-view .editor,
+.uc10-view .users {
+    flex: 1 1 320px;
+    max-width: 480px;
+}
+
+.uc10-view .untranslated {
+    margin-inline-start: 0.5rem;
+    padding: 0 0.4rem;
+    border-radius: var(--vaadin-radius-s, 4px);
+    font-size: 0.75rem;
+    background: color-mix(in srgb, var(--aura-orange, #fb8c00) 20%, transparent);
+}

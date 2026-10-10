@@ -1,0 +1,70 @@
+/* Internationalization use cases — shared polish */
+
+.home-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    max-width: 960px;
+}
+
+.home-card .home-card-tag {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary);
+    letter-spacing: 0.05em;
+}
+
+.language-picker-wrapper {
+    margin-inline-start: 1rem;
+}
+
+.language-picker {
+    width: 10rem;
+}
+
+/* The part of a view that plays the translated application. Logical
+   properties, so that it mirrors in right-to-left languages. */
+.sample {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vaadin-gap-m, 0.75rem);
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 960px;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--vaadin-border-color-secondary, #ddd);
+    border-radius: var(--vaadin-radius-l, 12px);
+}
+
+/* Controls keep their natural width; lists and grids take the full width. */
+.sample {
+    align-items: flex-start;
+}
+
+.sample > vaadin-grid,
+.sample > vaadin-horizontal-layout,
+.sample > .cards {
+    align-self: stretch;
+}
+
+.sample > p,
+.sample > ul,
+.sample > h2 {
+    margin-block: 0;
+}
+
+.fallback {
+    color: var(--vaadin-text-color-secondary);
+}
+
+.missing {
+    color: var(--aura-red-text, #c62828);
+    font-family: monospace;
+}
+
+.facts .fact-value,
+.summary,
+.totals,
+.parsed {
+    font-variant-numeric: tabular-nums;
+}
