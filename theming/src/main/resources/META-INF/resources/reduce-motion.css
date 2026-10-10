@@ -1,0 +1,18 @@
+/*
+ * Turns off animations and transitions, for users who asked for less motion
+ * (UC8). The component tokens reach into the components' shadow DOM, which
+ * the universal selector does not.
+ */
+:root {
+    --vaadin-overlay-animation-duration: 0s;
+    --vaadin-overlay-animation-delay: 0s;
+}
+
+*,
+*::before,
+*::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+}

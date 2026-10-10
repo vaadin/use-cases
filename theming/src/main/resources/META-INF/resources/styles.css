@@ -1,0 +1,46 @@
+/* Theming use cases — shared polish. Only theme tokens and logical
+   properties, so it looks right in Aura, Lumo, light and dark. */
+
+.home-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    max-width: 960px;
+}
+
+.home-card .home-card-tag {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary);
+    letter-spacing: 0.05em;
+}
+
+/* The part of a view that shows the styled application. */
+.sample {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--vaadin-gap-m, 0.75rem);
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 960px;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--vaadin-border-color-secondary, #ddd);
+    border-radius: var(--vaadin-radius-l, 12px);
+}
+
+.sample > vaadin-grid,
+.sample > vaadin-horizontal-layout,
+.sample > vaadin-form-layout {
+    align-self: stretch;
+}
+
+.sample > h2,
+.sample > p {
+    margin-block: 0;
+}
+
+.status {
+    font-family: monospace;
+    color: var(--vaadin-text-color-secondary);
+}
