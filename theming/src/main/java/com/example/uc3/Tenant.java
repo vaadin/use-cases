@@ -28,6 +28,11 @@ public record Tenant(String id, String name, String accentLight,
     }
 
     public Tenant {
+        // Letters, digits, spaces and a little punctuation: nothing that can
+        // end the CSS comment the name goes into.
+        if (!name.matches("[\\p{L}\\p{N}][\\p{L}\\p{N} .&'-]*")) {
+            throw new IllegalArgumentException("Invalid tenant name: " + name);
+        }
         if (!id.matches("[a-z0-9-]+")) {
             throw new IllegalArgumentException("Invalid tenant id: " + id);
         }
@@ -67,8 +72,8 @@ public record Tenant(String id, String name, String accentLight,
                     --lumo-font-family: %s;
                     --tenant-color: light-dark(%s, %s);
                 }
-                """.formatted(name.replace("*/", ""), accentLight, accentDark,
-                background, radius, font.stack(), accentLight, accentLight,
-                radius * 2, font.stack(), accentLight, accentDark);
+                """.formatted(name, accentLight, accentDark, background, radius,
+                font.stack(), accentLight, accentLight, radius * 2,
+                font.stack(), accentLight, accentDark);
     }
 }

@@ -41,7 +41,7 @@ public final class Appearance {
     private final ValueSignal<Boolean> highContrast;
     private final ValueSignal<Boolean> reduceMotion;
 
-    private Appearance(Map<String, String> remembered) {
+    Appearance(Map<String, String> remembered) {
         theme = new ValueSignal<>(
                 parse(BaseTheme.class, remembered.get(THEME), BaseTheme.AURA));
         colorScheme = new ValueSignal<>(parse(ColorScheme.Value.class,
