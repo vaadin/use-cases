@@ -28,6 +28,7 @@ public class ReportService {
 
     public CompletableFuture<Report> build() {
         return CompletableFuture.supplyAsync(
-                () -> new Report(history.count(""), "Kestrel Air"), executor);
+                () -> new Report(history.count(""), history.topCustomer()),
+                executor);
     }
 }

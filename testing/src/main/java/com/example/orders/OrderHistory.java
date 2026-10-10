@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -47,6 +49,20 @@ public class OrderHistory {
     public Stream<Order> fetch(String filter, List<Sort> sorts, int offset,
             int limit) {
         return matching(filter, sorts).skip(offset).limit(limit);
+    }
+
+    /**
+     * The customer with the most orders; on a tie, the first one
+     * alphabetically.
+     */
+    public String topCustomer() {
+        return Stream.concat(store.all().stream(), past.stream())
+                .collect(Collectors
+                        .groupingBy(Order::customer, Collectors.counting()))
+                .entrySet().stream()
+                .max(Map.Entry.<String, Long> comparingByValue().thenComparing(
+                        Map.Entry.comparingByKey(Comparator.reverseOrder())))
+                .map(Map.Entry::getKey).orElse("nobody");
     }
 
     public int count(String filter) {
