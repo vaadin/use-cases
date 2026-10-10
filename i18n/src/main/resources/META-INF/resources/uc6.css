@@ -1,0 +1,43 @@
+.uc6-view .direction {
+    font-family: monospace;
+    align-self: center;
+}
+
+.uc6-view .step {
+    color: var(--vaadin-text-color-secondary);
+}
+
+.uc6-view .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.uc6-view .note-card {
+    padding: 0.5rem 1rem;
+    background: color-mix(in srgb, var(--vaadin-text-color) 4%, transparent);
+}
+
+.uc6-view .note-card h3 {
+    font-family: monospace;
+    font-size: 0.875rem;
+}
+
+/* Physical properties: stay on the left whatever the direction. */
+.uc6-view .note-card.physical {
+    margin-left: 1.5rem;
+    border-left: 4px solid var(--aura-red, #e53935);
+    text-align: left;
+}
+
+/* Logical properties: follow the reading direction. */
+.uc6-view .note-card.logical {
+    margin-inline-start: 1.5rem;
+    border-inline-start: 4px solid var(--aura-green, #43a047);
+    text-align: start;
+}
+
+/* Icons that point in the reading direction turn around with it. */
+.uc6-view .mirror-icons .mirror-rtl:dir(rtl) {
+    transform: scaleX(-1);
+}

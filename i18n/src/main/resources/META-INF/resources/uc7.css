@@ -1,0 +1,11 @@
+.uc7-view .example {
+    padding: 0.25rem 0.75rem;
+    border-inline-start: 3px solid var(--vaadin-border-color-secondary, #ddd);
+}
+
+.uc7-view .example h3 {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-family: monospace;
+    color: var(--vaadin-text-color-secondary);
+}
