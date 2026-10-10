@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>testing-use-cases</artifactId>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>com.example</groupId>
+        <artifactId>use-cases-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <properties>
+        <playwright.version>1.63.0</playwright.version>
+        <axe-core.version>4.13.0</axe-core.version>
+        <!-- Port of the application the browser and load tests run against. -->
+        <app.port>8090</app.port>
+        <management.port>8091</management.port>
+        <!-- Load test size; override with -Dk6.vus=50 -Dk6.duration=2m. -->
+        <k6.vus>5</k6.vus>
+        <k6.duration>20s</k6.duration>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>use-cases-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <!-- Health endpoint the load test plugin waits for, on its own port. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Unit and browserless view tests (always run) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>browserless-test-spring</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- End-to-end tests in a real browser (profile "it") -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-testbench-junit6</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.playwright</groupId>
+            <artifactId>playwright</artifactId>
+            <version>${playwright.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.deque.html.axe-core</groupId>
+            <artifactId>playwright</artifactId>
+            <version>${axe-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Lets the load test plugin record the end-to-end tests. -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>testbench-loadtest-support</artifactId>
+            <version>${vaadin.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <defaultGoal>spring-boot:run</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!--
+            Browser tests: mvn -pl testing -am verify -Pit
+            Starts the packaged application and runs the *IT classes
+            (TestBench and Playwright end-to-end, screenshot and
+            accessibility tests) against it.
+        -->
+        <profile>
+            <id>it</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>start-app</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>
+                                        <argument>--server.port=${app.port}</argument>
+                                        <argument>--vaadin.launch-browser=false</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>stop-app</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <!-- Read by LoadTestItHelper / PlaywrightHelper. -->
+                                <server.port>${app.port}</server.port>
+                                <com.vaadin.testbench.Parameters.headless>true</com.vaadin.testbench.Parameters.headless>
+                                <com.vaadin.testbench.Parameters.chromeOptions>--no-sandbox --disable-dev-shm-usage --window-size=1280,900</com.vaadin.testbench.Parameters.chromeOptions>
+                                <com.vaadin.testbench.Parameters.screenshotReferenceDirectory>${project.basedir}/src/test/screenshots</com.vaadin.testbench.Parameters.screenshotReferenceDirectory>
+                                <com.vaadin.testbench.Parameters.screenshotErrorDirectory>${project.build.directory}/screenshot-errors</com.vaadin.testbench.Parameters.screenshotErrorDirectory>
+                                <screenshots.reference>${project.basedir}/src/test/screenshots</screenshots.reference>
+                                <screenshots.errors>${project.build.directory}/screenshot-errors</screenshots.errors>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!--
+            Load test: mvn -pl testing -am verify -Pload
+            Starts the packaged application, records the Playwright checkout
+            test into a k6 script with Vaadin's load testing plugin, and runs
+            it with k6.vus virtual users for k6.duration. Needs k6 on the
+            PATH (or -Dk6.binary=...) and a Vaadin subscription.
+        -->
+        <profile>
+            <id>load</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.vaadin</groupId>
+                        <artifactId>testbench-converter-plugin</artifactId>
+                        <version>${vaadin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>start-app</id>
+                                <goals>
+                                    <goal>start-server</goal>
+                                </goals>
+                                <configuration>
+                                    <serverJar>${project.build.directory}/${project.build.finalName}.jar</serverJar>
+                                    <serverPort>${app.port}</serverPort>
+                                    <managementPort>${management.port}</managementPort>
+                                    <!-- Server metrics for the report, on the management port only. -->
+                                    <appArgs>
+                                        <appArg>--management.endpoints.web.exposure.include=health,metrics</appArg>
+                                    </appArgs>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>record-checkout</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>record-playwright</goal>
+                                </goals>
+                                <configuration>
+                                    <testClass>CheckoutPlaywrightIT</testClass>
+                                    <appPort>${app.port}</appPort>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>run-load-test</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <testDir>${project.build.directory}/k6/tests</testDir>
+                                    <virtualUsers>${k6.vus}</virtualUsers>
+                                    <duration>${k6.duration}</duration>
+                                    <appPort>${app.port}</appPort>
+                                    <managementPort>${management.port}</managementPort>
+                                    <collectVaadinMetrics>true</collectVaadinMetrics>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>stop-app</id>
+                                <goals>
+                                    <goal>stop-server</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
