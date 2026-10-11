@@ -10,7 +10,9 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Video;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ViewPackages(classes = SeekableStreamView.class)
@@ -31,5 +33,11 @@ class SeekableStreamViewTest extends SpringBrowserlessTest {
         assertNotEquals(whole, ranged);
         videos.forEach(video -> assertEquals("video/mp4",
                 video.getSources().get(0).getType()));
+    }
+
+    @Test
+    void onlyTheRightPlayerAnswersRangeRequests() {
+        assertFalse(SeekableStreamView.wholeHandler().isRangeRequestsEnabled());
+        assertTrue(SeekableStreamView.rangedHandler().isRangeRequestsEnabled());
     }
 }

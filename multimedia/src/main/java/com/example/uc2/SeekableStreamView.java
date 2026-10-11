@@ -56,12 +56,12 @@ public class SeekableStreamView extends VerticalLayout {
         players.addClassName("side-by-side");
 
         Video whole = createPlayer("Default stream handler");
-        whole.addSource(streamHandler(), "video/mp4");
+        whole.addSource(wholeHandler(), "video/mp4");
         players.add(new Div(new H2("fromInputStream"), whole,
                 new Paragraph("Always 200 OK with the whole recording.")));
 
         Video ranged = createPlayer("Stream handler with range requests");
-        ranged.addSource(streamHandler().enableRangeRequests(), "video/mp4");
+        ranged.addSource(rangedHandler(), "video/mp4");
         players.add(
                 new Div(new H2("enableRangeRequests()"), ranged, new Paragraph(
                         "206 Partial Content for each requested range.")));
@@ -69,8 +69,16 @@ public class SeekableStreamView extends VerticalLayout {
         add(players);
     }
 
-    private static InputStreamDownloadHandler streamHandler() {
+    static InputStreamDownloadHandler wholeHandler() {
+        return streamHandler();
+    }
+
+    static InputStreamDownloadHandler rangedHandler() {
         // The content length is required for range requests.
+        return streamHandler().enableRangeRequests();
+    }
+
+    private static InputStreamDownloadHandler streamHandler() {
         return DownloadHandler.fromInputStream(event -> new DownloadResponse(
                 MediaLibrary.open(RECORDING), RECORDING, "video/mp4",
                 MediaLibrary.bytes(RECORDING).length)).inline();

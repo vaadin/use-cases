@@ -65,8 +65,14 @@ public final class MediaLibrary {
      * @param path
      *            the path below {@code media/}
      * @return a download handler for the file
+     * @throws UncheckedIOException
+     *             if there is no such file
      */
     public static ClassDownloadHandler seekable(String path) {
+        if (!exists(path)) {
+            throw new UncheckedIOException(
+                    new IOException("No media file media/" + path));
+        }
         return DownloadHandler
                 .forClassResource(MediaLibrary.class, "/media/" + path)
                 .enableRangeRequests().inline();
