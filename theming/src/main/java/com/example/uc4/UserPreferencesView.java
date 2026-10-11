@@ -37,11 +37,12 @@ import com.vaadin.flow.router.Route;
  * the brand and the customer styling, and they are remembered for the next
  * visit.
  * <p>
- * The text size changes Aura's {@code --aura-base-font-size}, from which every
- * font size, line height and component size is derived; with Lumo, whose sizes
- * are in {@code rem}, it changes the root font size instead. That is different
+ * With Aura, the text size changes {@code --aura-base-font-size}, from which
+ * every font size, line height and component size is derived. That is different
  * from the browser's zoom: the layout keeps its width and only the text and
- * controls grow.
+ * controls grow. Lumo's sizes and spacing are all in {@code rem}, so there it
+ * changes the root font size, which also grows padding and gaps and works much
+ * like zooming the page.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — User's own look")
