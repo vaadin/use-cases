@@ -60,7 +60,7 @@ public class SignatureView extends VerticalLayout {
         Button clear = new Button("Clear", e -> pad.clear());
         confirm.addClickListener(e -> {
             status.setText("Delivery confirmed");
-            pad.setDisabled(true);
+            pad.setEnabled(false);
             confirm.setEnabled(false);
         });
 

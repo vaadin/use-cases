@@ -51,10 +51,6 @@ public class SignaturePad
         setValue("");
     }
 
-    public void setDisabled(boolean disabled) {
-        getElement().setProperty("disabled", disabled);
-    }
-
     public Registration addSignatureStartedListener(
             ComponentEventListener<SignatureStartedEvent> listener) {
         return addListener(SignatureStartedEvent.class, listener);

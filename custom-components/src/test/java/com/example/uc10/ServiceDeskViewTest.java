@@ -1,11 +1,11 @@
-package com.example.desk;
-
-import java.util.stream.Stream;
+package com.example.uc10;
 
 import com.example.components.Money;
 import com.example.components.RatingStars;
 import com.example.components.RatingStarsTester;
-import com.example.uc10.ServiceDeskView;
+import com.example.desk.Ticket;
+import com.example.desk.TicketDetail;
+import com.example.desk.TicketStore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,15 +14,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.vaadin.browserless.ComponentTesterPackages;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** UC10, from the outside: the view and the TicketDetail it is made of. */
 @SpringBootTest
 @ViewPackages(classes = ServiceDeskView.class)
 @ComponentTesterPackages("com.example.components")
@@ -36,29 +33,11 @@ class ServiceDeskViewTest extends SpringBrowserlessTest {
         store.reset();
     }
 
-    /**
-     * The detail starts hidden, and component queries only find visible
-     * components, so it is looked up in the component tree.
-     */
-    private TicketDetail detail() {
-        return descendants(
-                getCurrentView().getElement().getComponent().orElseThrow())
-                .filter(TicketDetail.class::isInstance)
-                .map(TicketDetail.class::cast).findFirst().orElseThrow();
-    }
-
-    private static Stream<Component> descendants(Component root) {
-        return Stream.concat(Stream.of(root),
-                root.getChildren().flatMap(ServiceDeskViewTest::descendants));
-    }
-
     @Test
     void rowsShowTheComponentsReadOnly() {
-        navigate(ServiceDeskView.class);
-        @SuppressWarnings("unchecked")
-        Grid<Ticket> grid = findInView(Grid.class).single();
+        ServiceDeskView view = navigate(ServiceDeskView.class);
 
-        RatingStars rating = (RatingStars) test(grid).getCellComponent(1,
+        RatingStars rating = (RatingStars) test(view.grid()).getCellComponent(1,
                 "rating");
 
         assertEquals(4, rating.getValue());
@@ -67,13 +46,11 @@ class ServiceDeskViewTest extends SpringBrowserlessTest {
 
     @Test
     void selectingARowFillsTheDetailAndSavingStoresIt() {
-        navigate(ServiceDeskView.class);
-        @SuppressWarnings("unchecked")
-        Grid<Ticket> grid = findInView(Grid.class).single();
-        TicketDetail detail = detail();
+        ServiceDeskView view = navigate(ServiceDeskView.class);
+        TicketDetail detail = view.detail();
         assertFalse(detail.getContent().isVisible());
 
-        test(grid).select(0);
+        test(view.grid()).select(0);
         assertTrue(detail.getContent().isVisible());
         assertEquals("https://example.com/track/4521",
                 detail.tracking().getData());
@@ -91,11 +68,9 @@ class ServiceDeskViewTest extends SpringBrowserlessTest {
 
     @Test
     void closingNeedsTheCustomersSignature() {
-        navigate(ServiceDeskView.class);
-        @SuppressWarnings("unchecked")
-        Grid<Ticket> grid = findInView(Grid.class).single();
-        TicketDetail detail = detail();
-        test(grid).select(2);
+        ServiceDeskView view = navigate(ServiceDeskView.class);
+        TicketDetail detail = view.detail();
+        test(view.grid()).select(2);
         assertFalse(detail.closeButton().isEnabled());
 
         detail.signature().setValue("data:image/png;base64,iVBORw0KGgo=");
@@ -103,7 +78,26 @@ class ServiceDeskViewTest extends SpringBrowserlessTest {
         test(detail.closeButton()).click();
 
         assertTrue(store.all().get(2).closed());
-        assertEquals("Closed", test(grid).getCellText(2, 5));
+        assertEquals("Closed", test(view.grid()).getCellText(2, 5));
         assertFalse(detail.saveButton().isEnabled());
+        // A closed ticket's pad ignores the browser, not just looks grey.
+        assertFalse(detail.signature().isEnabled());
+    }
+
+    @Test
+    void aSaveInOneSessionShowsInTheNext() {
+        ServiceDeskView first = navigate(ServiceDeskView.class);
+        test(first.grid()).select(0);
+        test(RatingStarsTester.class, first.detail().rating()).rate(3);
+        test(first.detail().saveButton()).click();
+
+        // Another user, in another session, opens the desk.
+        cleanVaadinEnvironment();
+        initVaadinEnvironment();
+        ServiceDeskView second = navigate(ServiceDeskView.class);
+
+        RatingStars rating = (RatingStars) test(second.grid())
+                .getCellComponent(0, "rating");
+        assertEquals(3, rating.getValue());
     }
 }

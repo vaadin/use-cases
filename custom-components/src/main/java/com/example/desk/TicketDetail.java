@@ -99,7 +99,7 @@ public class TicketDetail extends Composite<VerticalLayout> {
         label.setColor(ticket.labelColor());
         tracking.setData(ticket.trackingLink());
         signature.clear();
-        signature.setDisabled(ticket.closed());
+        signature.setEnabled(!ticket.closed());
         save.setEnabled(!ticket.closed());
         close.setEnabled(false);
         status.setText(ticket.closed() ? "Closed" : "Open");
@@ -120,28 +120,28 @@ public class TicketDetail extends Composite<VerticalLayout> {
         return addListener(TicketSavedEvent.class, listener);
     }
 
-    // Package-private test seams.
-    RatingStars rating() {
+    // Test seams, public because the view's test lives in another package.
+    public RatingStars rating() {
         return rating;
     }
 
-    MoneyField refund() {
+    public MoneyField refund() {
         return refund;
     }
 
-    SignaturePad signature() {
+    public SignaturePad signature() {
         return signature;
     }
 
-    Button saveButton() {
+    public Button saveButton() {
         return save;
     }
 
-    Button closeButton() {
+    public Button closeButton() {
         return close;
     }
 
-    QrCode tracking() {
+    public QrCode tracking() {
         return tracking;
     }
 }

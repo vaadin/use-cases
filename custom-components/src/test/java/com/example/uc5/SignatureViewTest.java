@@ -46,8 +46,7 @@ class SignatureViewTest extends SpringBrowserlessTest {
 
         test(view.confirm()).click();
         assertEquals("Delivery confirmed", view.status());
-        assertEquals(Boolean.TRUE,
-                view.pad().getElement().getProperty("disabled", false));
+        assertFalse(view.pad().isEnabled());
     }
 
     @Test

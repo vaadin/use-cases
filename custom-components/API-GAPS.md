@@ -50,7 +50,7 @@ The short version: **every kind of component can be built, but each has an edge 
 
 ## A component's tester has to be found and imported by every test
 
-**Where it bit us:** uc3 / RatingViewTest.java, uc9 / TestingViewTest.java, desk / ServiceDeskViewTest.java
-**Symptom:** a `@Tests` tester is only found when each test class lists its package with `@ComponentTesterPackages`, and `test(component)` returns the generic tester unless the test asks for `test(RatingStarsTester.class, component)`. A tester that needs the component's internals has to live in the component's package, which in practice means a separate tests jar for the add-on. Separately, component queries only find visible components, so a component that starts hidden (the service desk's detail) cannot be found with `findInView`.
-**Workaround used:** `@ComponentTesterPackages("com.example.components")` on each test, typed `test(...)` calls, and a walk of the component tree for the hidden detail.
-**Suggested API:** testers discovered through `ServiceLoader` (so an add-on's tests jar registers its own), and a query option that includes invisible components.
+**Where it bit us:** uc3 / RatingViewTest.java, uc9 / TestingViewTest.java
+**Symptom:** a `@Tests` tester is only found when each test class lists its package with `@ComponentTesterPackages`, and `test(component)` returns the generic tester unless the test asks for `test(RatingStarsTester.class, component)`. A tester that needs the component's internals has to live in the component's package, which in practice means a separate tests jar for the add-on.
+**Workaround used:** `@ComponentTesterPackages("com.example.components")` on each test, and typed `test(...)` calls.
+**Suggested API:** testers discovered through `ServiceLoader`, so an add-on's tests jar registers its own.
