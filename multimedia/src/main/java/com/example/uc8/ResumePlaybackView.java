@@ -68,7 +68,7 @@ public class ResumePlaybackView extends VerticalLayout {
         video.setWidth("640px");
         video.setMaxWidth("100%");
         video.setAriaLabel("Quarterly product review");
-        video.addSource(MediaLibrary.seekable(RECORDING), "video/mp4");
+        video.addSource(MediaLibrary.serve(RECORDING), "video/mp4");
         add(video);
 
         if (resumeFrom.peek() > 0) {

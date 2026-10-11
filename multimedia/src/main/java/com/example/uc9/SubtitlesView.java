@@ -28,8 +28,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.streams.DownloadHandler;
-import com.vaadin.flow.server.streams.DownloadResponse;
 
 /**
  * UC9 — Subtitles in several languages.
@@ -91,7 +89,7 @@ public class SubtitlesView extends VerticalLayout
         video.setWidth("640px");
         video.setMaxWidth("100%");
         video.setAriaLabel("Quarterly product review");
-        video.addSource(MediaLibrary.seekable("quarterly-review.mp4"),
+        video.addSource(MediaLibrary.serve("quarterly-review.mp4"),
                 "video/mp4");
 
         VaadinRequest request = VaadinRequest.getCurrent();
@@ -101,11 +99,7 @@ public class SubtitlesView extends VerticalLayout
             String file = "subtitles/" + subtitles.language() + ".vtt";
             Element track = MissingAPI.addTextTrack(video, "subtitles",
                     subtitles.language(), subtitles.label(),
-                    DownloadHandler
-                            .fromInputStream(event -> new DownloadResponse(
-                                    MediaLibrary.open(file),
-                                    subtitles.language() + ".vtt", "text/vtt",
-                                    MediaLibrary.bytes(file).length)));
+                    MediaLibrary.serve(file));
             tracks.put(subtitles.language(), track);
         }
         add(video);

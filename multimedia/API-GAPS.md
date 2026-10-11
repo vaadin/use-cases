@@ -23,30 +23,32 @@ and were not tested.
 
 ## Download handlers answer `Range` only for files, unless opted in
 
-**Where it bit us:** UC2 / `SeekableStreamView.java` (side by side), and UC7,
-UC8, UC9, which all serve the 60-second recording.
+**Where it bit us:** every view that plays bundled media through a handler:
+UC1, UC2, UC7, UC8 and UC9.
 **Status:** fixed by vaadin/flow#26198 and vaadin/flow#26255.
 `DownloadHandler.forFile` sends `Accept-Ranges: bytes` and answers `Range`
-requests with `206` (single and multipart). `forClassResource`,
-`forServletResource` and `fromInputStream` do the same after
-`enableRangeRequests()`, also for an entry inside the packaged jar (a stream
-needs a known content length). UC7, UC8 and UC9 serve the bundled recording
-with `forClassResource(...).enableRangeRequests()`, and both the ~100-line
-`RangeDownloadHandler` and the copy of the recording to a temporary file are
-gone.
+requests with `206` (single and multipart) by seeking in the file.
+`forClassResource`, `forServletResource` and `fromInputStream` do the same
+after `enableRangeRequests()`. All views now serve their media with `forFile`
+through `MediaLibrary.serve(path)`, so every player can seek and the
+~100-line `RangeDownloadHandler` is gone. The HLS segments of UC3 are streamed
+from the same files.
 **Remaining symptom:** ranges are off by default for everything but
-`forFile`, and nothing tells you. Without the opt-in a handler answers `200`
-with the whole body and no `Accept-Ranges`; the browser then reports
-`video.seekable` as empty, so dragging the scrubber to 0:45 in the left-hand
-UC2 player snaps back to where playback was. Apple's Safari documentation
-requires byte-range support for video, so there such a response is not
-expected to play at all (not tested here). For a compressed jar entry every
-seek inflates the entry from its start, which is fine for short clips but
-not for long recordings.
-**Workaround used:** none needed; `MediaLibrary.seekable(path)` enables range
-requests on the class resource.
+`forFile`, and nothing tells you. Without them a handler answers `200` with
+the whole body and no `Accept-Ranges`; the browser then reports
+`video.seekable` as empty, so dragging the scrubber snaps back to where
+playback was, and Safari, which requires byte-range support for video, is not
+expected to play it at all (not tested here). For a compressed jar entry the
+opt-in inflates the entry from its start on every seek, so it does not suit
+long recordings.
+**Workaround used:** the media is bundled in the jar, so `MediaLibrary`
+copies each file to a temporary directory once when the app runs from the
+packaged jar, and serves it from there with `forFile`. `forFile` takes the
+MIME type from the servlet container only, so `application.properties` maps
+`.vtt` to `text/vtt` for the subtitles of UC9.
 **Suggested API:** `Media#addSource(DownloadHandler, type)` could log a
-development-mode warning when `isRangeRequestsEnabled()` is `false`.
+development-mode warning when `isRangeRequestsEnabled()` is `false`, and
+`forFile` could accept a content type.
 
 ## `setMuted(true)` does not mute a player created from the server, so autoplay is blocked
 

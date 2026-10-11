@@ -73,7 +73,7 @@ public class ChapterControlsView extends VerticalLayout
         video.setWidth("640px");
         video.setMaxWidth("100%");
         video.setAriaLabel("Quarterly product review");
-        video.addSource(MediaLibrary.seekable("quarterly-review.mp4"),
+        video.addSource(MediaLibrary.serve("quarterly-review.mp4"),
                 "video/mp4");
         MissingAPI.addPlayingListener(video, playing::set);
         MissingAPI.addTimeUpdateListener(video, 500, position::set);

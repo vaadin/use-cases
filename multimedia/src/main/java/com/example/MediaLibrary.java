@@ -1,81 +1,66 @@
 package com.example;
 
-import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.vaadin.flow.server.streams.ClassDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.FileDownloadHandler;
 
 /**
- * Loads the private sample media bundled under
+ * Gives access to the private sample media bundled under
  * {@code src/main/resources/media}. Those files are not reachable through a
  * static URL; the views serve them through {@code DownloadHandler}s, the way an
  * application would serve recordings that belong to one user.
  * <p>
- * The samples are small, so they are read into memory once and cached. A real
- * application would stream from a file store or object storage instead.
- * {@link #seekable(String)} serves a file with byte-range support, which a
- * player needs to seek.
+ * The views serve the media as files on disk with
+ * {@code DownloadHandler.forFile}, which streams the file and answers
+ * byte-range requests by seeking in it. That is what a player needs to seek,
+ * and what Safari needs to play video at all. A real application would keep its
+ * media in a file store; this demo bundles it, so when it runs from the
+ * packaged jar the files are copied out to a temporary directory once.
  */
 public final class MediaLibrary {
 
-    private static final Map<String, byte[]> CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, File> FILES = new ConcurrentHashMap<>();
 
     private MediaLibrary() {
     }
 
     /**
-     * Returns the content of a bundled media file.
+     * Serves a bundled media file inline, with byte-range support.
      *
      * @param path
      *            the path below {@code media/}, for example
-     *            {@code "quarterly-review.mp4"} or {@code "hls/index.m3u8"}
-     * @return the file content
-     * @throws UncheckedIOException
-     *             if there is no such file
-     */
-    public static byte[] bytes(String path) {
-        return CACHE.computeIfAbsent(path, MediaLibrary::load);
-    }
-
-    /**
-     * Opens a bundled media file as a stream.
-     *
-     * @param path
-     *            the path below {@code media/}
-     * @return a stream over the file content
-     */
-    public static InputStream open(String path) {
-        return new ByteArrayInputStream(bytes(path));
-    }
-
-    /**
-     * Serves a bundled media file inline and answers byte-range requests, so
-     * that a player can seek in it.
-     * <p>
-     * Range requests are opt-in for class resources: inside the packaged jar
-     * every seek reads the entry from its start, which is fine for the short
-     * samples here. Large media is better served from disk with
-     * {@code DownloadHandler.forFile}.
-     *
-     * @param path
-     *            the path below {@code media/}
+     *            {@code "quarterly-review.mp4"}
      * @return a download handler for the file
      * @throws UncheckedIOException
      *             if there is no such file
      */
-    public static ClassDownloadHandler seekable(String path) {
-        if (!exists(path)) {
-            throw new UncheckedIOException(
-                    new IOException("No media file media/" + path));
-        }
-        return DownloadHandler
-                .forClassResource(MediaLibrary.class, "/media/" + path)
-                .enableRangeRequests().inline();
+    public static FileDownloadHandler serve(String path) {
+        return DownloadHandler.forFile(file(path)).inline();
+    }
+
+    /**
+     * Returns a bundled media file as a file on disk. The file keeps its name,
+     * so its MIME type can be derived from it.
+     *
+     * @param path
+     *            the path below {@code media/}, for example
+     *            {@code "quarterly-review.mp4"} or {@code "hls/index.m3u8"}
+     * @return the file
+     * @throws UncheckedIOException
+     *             if there is no such file or it cannot be copied
+     */
+    public static File file(String path) {
+        return FILES.computeIfAbsent(path, MediaLibrary::resolve);
     }
 
     /**
@@ -86,20 +71,51 @@ public final class MediaLibrary {
      * @return {@code true} if the file exists
      */
     public static boolean exists(String path) {
-        return CACHE.containsKey(path)
-                || MediaLibrary.class.getResource("/media/" + path) != null;
+        return FILES.containsKey(path) || resource(path) != null;
     }
 
-    private static byte[] load(String path) {
-        try (InputStream in = MediaLibrary.class
-                .getResourceAsStream("/media/" + path)) {
-            if (in == null) {
-                throw new UncheckedIOException(
-                        new IOException("No media file media/" + path));
+    private static URL resource(String path) {
+        return MediaLibrary.class.getResource("/media/" + path);
+    }
+
+    private static File resolve(String path) {
+        URL url = resource(path);
+        if (url == null) {
+            throw new UncheckedIOException(
+                    new IOException("No media file media/" + path));
+        }
+        try {
+            if ("file".equals(url.getProtocol())) {
+                return Path.of(url.toURI()).toFile();
             }
-            return in.readAllBytes();
+            // Keep the relative path: HLS renditions share segment names.
+            Path copy = Extracted.DIRECTORY.resolve(path);
+            Files.createDirectories(copy.getParent());
+            try (InputStream in = url.openStream()) {
+                Files.copy(in, copy);
+            }
+            copy.toFile().deleteOnExit();
+            return copy.toFile();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /** The temporary directory, created on first use. */
+    private static final class Extracted {
+
+        static final Path DIRECTORY = create();
+
+        private static Path create() {
+            try {
+                Path directory = Files.createTempDirectory("media");
+                directory.toFile().deleteOnExit();
+                return directory;
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
     }
 }
