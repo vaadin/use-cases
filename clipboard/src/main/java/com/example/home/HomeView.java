@@ -3,6 +3,7 @@ package com.example.home;
 import java.util.List;
 
 import com.example.common.BaseHomeView;
+import com.example.common.UseCaseDescription;
 import com.example.uc1.CopyStaticTextView;
 import com.example.uc2.CopyComponentValueView;
 import com.example.uc3.CopyRichContentView;
@@ -22,6 +23,7 @@ import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
 @PageTitle("Clipboard API Use Cases")
+@UseCaseDescription("Copying and pasting text, rich content, images and files with the Clipboard API")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 

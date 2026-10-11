@@ -1,0 +1,30 @@
+.uc7-view {
+    .feed-stats {
+        font-weight: 600;
+    }
+
+    .price-board {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.5rem;
+        width: 100%;
+        max-width: 760px;
+
+        > div {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0.6rem;
+            border: 1px solid color-mix(in srgb, var(--vaadin-text-color) 12%, transparent);
+            border-radius: 6px;
+        }
+    }
+
+    .symbol {
+        color: var(--vaadin-text-color-secondary);
+    }
+
+    .price {
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+    }
+}

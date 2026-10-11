@@ -17,6 +17,12 @@
             <artifactId>vaadin</artifactId>
         </dependency>
         <dependency>
+            <!-- Lets the tests stub VaadinRequest; the apps get it from their servlet container -->
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>

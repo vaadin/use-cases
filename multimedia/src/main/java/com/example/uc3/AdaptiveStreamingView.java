@@ -1,6 +1,7 @@
 package com.example.uc3;
 
 import com.example.HlsDownloadHandler;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.dependency.JsModule;
@@ -33,6 +34,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Adaptive streaming")
+@UseCaseDescription("Switching video quality as the connection changes with HLS")
 @Menu(order = 3, title = "UC3 — Adaptive streaming")
 @NpmPackage(value = "hls.js", version = "1.7.3")
 @JsModule("./hls-fallback.ts")

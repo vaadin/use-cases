@@ -1,5 +1,6 @@
 package com.example.muc02;
 
+import com.example.common.UseCaseDescription;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
@@ -37,6 +38,7 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
  */
 @Route(value = "muc-02", layout = MainLayout.class)
 @PageTitle("Multi-User Case 2: Collaborative Cursors")
+@UseCaseDescription("Showing every user's cursor position to all others in real time")
 @Menu(order = 51, title = "MUC 2: Collaborative Cursors")
 @StyleSheet("muc02.css")
 @AnonymousAllowed
