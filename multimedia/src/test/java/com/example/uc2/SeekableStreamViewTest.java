@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 class SeekableStreamViewTest extends SpringBrowserlessTest {
 
     @Test
-    void showsStreamAndFilePlayersSideBySide() {
+    void showsDefaultAndRangedPlayersSideBySide() {
         navigate(SeekableStreamView.class);
 
         assertEquals("UC2 — Seekable streaming",
@@ -26,9 +26,9 @@ class SeekableStreamViewTest extends SpringBrowserlessTest {
 
         var videos = findInView(Video.class).all();
         assertEquals(2, videos.size());
-        String stream = videos.get(0).getSources().get(0).getSrc();
-        String file = videos.get(1).getSources().get(0).getSrc();
-        assertNotEquals(stream, file);
+        String whole = videos.get(0).getSources().get(0).getSrc();
+        String ranged = videos.get(1).getSources().get(0).getSrc();
+        assertNotEquals(whole, ranged);
         videos.forEach(video -> assertEquals("video/mp4",
                 video.getSources().get(0).getType()));
     }

@@ -91,8 +91,7 @@ public class SubtitlesView extends VerticalLayout
         video.setWidth("640px");
         video.setMaxWidth("100%");
         video.setAriaLabel("Quarterly product review");
-        video.addSource(DownloadHandler
-                .forFile(MediaLibrary.file("quarterly-review.mp4")).inline(),
+        video.addSource(MediaLibrary.seekable("quarterly-review.mp4"),
                 "video/mp4");
 
         VaadinRequest request = VaadinRequest.getCurrent();

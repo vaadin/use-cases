@@ -17,7 +17,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -69,9 +68,7 @@ public class ResumePlaybackView extends VerticalLayout {
         video.setWidth("640px");
         video.setMaxWidth("100%");
         video.setAriaLabel("Quarterly product review");
-        video.addSource(
-                DownloadHandler.forFile(MediaLibrary.file(RECORDING)).inline(),
-                "video/mp4");
+        video.addSource(MediaLibrary.seekable(RECORDING), "video/mp4");
         add(video);
 
         if (resumeFrom.peek() > 0) {
