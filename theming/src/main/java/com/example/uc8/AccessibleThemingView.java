@@ -37,9 +37,9 @@ import com.vaadin.flow.signals.Signal;
  * keyboard users rely on a clearly visible focus ring. Operating systems have
  * settings for these; the browser exposes them as media queries, and the view
  * shows what it reports. The application offers its own switches as well (high
- * contrast raises Aura's contrast level and widens the focus ring; reduce
- * motion turns off animations), which a user can set from their system settings
- * with one click.
+ * contrast raises Aura's contrast level, or darkens Lumo's secondary text and
+ * borders, and widens the focus ring in both; reduce motion turns off
+ * animations), which a user can set from their system settings with one click.
  * <p>
  * Colors chosen for a brand, a customer or by a user have to stay readable: the
  * contrast check computes the WCAG ratio of each accent color against the white

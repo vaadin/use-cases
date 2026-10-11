@@ -55,7 +55,7 @@ public class BrandTokensView extends VerticalLayout {
                 + "theme. Six tokens change the accent, the background, the "
                 + "corners and the font of every component, in light and in "
                 + "dark mode. The brand sets Lumo's tokens too, so it also "
-                + "works after switching themes in UC9."));
+                + "works after switching to Lumo in the top bar."));
 
         brand.bindValue(appearance.brand(), appearance::setBrand);
         add(brand, new Pre(TOKENS), new ComponentShowcase());

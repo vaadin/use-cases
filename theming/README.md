@@ -14,7 +14,7 @@ A standalone Spring Boot demo of making a Vaadin Flow application look the way i
 | UC8 | Accessible theming | High contrast, reduced motion and a wider focus ring, taken over from the system settings in one click, and a WCAG contrast check of every accent color in the app. |
 | UC9 | Aura or Lumo | The running application switched between the two themes, with the most used tokens mapped between them. |
 
-The theme is not loaded with `@StyleSheet`: an annotation-loaded stylesheet cannot be removed, and UC9 switches themes at runtime. `AppearanceSetup` adds the theme, the brand and customer stylesheets and the user's overrides to every UI from the session's `Appearance`.
+A picker in the top bar switches between Aura and Lumo from every view, and every use case works in both; where a token exists only in one theme (Aura's base font size and contrast level), the other theme gets an equivalent override. The theme is not loaded with `@StyleSheet`: an annotation-loaded stylesheet cannot be removed, and UC9 switches themes at runtime. `AppearanceSetup` adds the theme, the brand and customer stylesheets and the user's overrides to every UI from the session's `Appearance`.
 
 ## Run
 

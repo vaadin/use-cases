@@ -12,6 +12,7 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.select.Select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -32,6 +33,23 @@ class ThemeSwitchViewTest extends SpringBrowserlessTest {
 
         assertEquals(List.of("lumo/lumo.css"),
                 AppearanceSetup.styleSheets(UI.getCurrent()));
+    }
+
+    @Test
+    void headerPickerSwitchesTheThemeFromAnyView() {
+        navigate(ThemeSwitchView.class);
+        @SuppressWarnings("unchecked")
+        Select<BaseTheme> header = find(Select.class).all().stream()
+                .filter(s -> s.hasClassName("theme-picker")).findFirst()
+                .orElseThrow();
+
+        test(header).selectItem("Lumo");
+        runPendingSignalsTasks();
+
+        assertEquals(List.of("lumo/lumo.css"),
+                AppearanceSetup.styleSheets(UI.getCurrent()));
+        assertEquals(BaseTheme.LUMO,
+                navigate(ThemeSwitchView.class).themeSelect().getValue());
     }
 
     @Test

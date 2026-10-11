@@ -3,6 +3,7 @@ package com.example;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
@@ -79,11 +80,28 @@ public class AppearanceSetup implements VaadinServiceInitListener {
         properties.put("--lumo-primary-color", accent);
         properties.put("--lumo-primary-text-color", accent);
         FontSize fontSize = appearance.fontSize().get();
+        boolean scaled = fontSize != FontSize.DEFAULT;
+        boolean lumo = appearance.theme().get() == BaseTheme.LUMO;
         properties.put("--aura-base-font-size",
-                fontSize == FontSize.DEFAULT ? null
-                        : String.valueOf(fontSize.baseSize()));
+                scaled ? String.valueOf(fontSize.baseSize()) : null);
+        // Lumo's sizes are in rem, so the root font size scales them; Aura
+        // derives its sizes from its own token and must not be scaled twice.
+        properties
+                .put("font-size",
+                        scaled && lumo
+                                ? String.format(Locale.ROOT, "%.2f%%",
+                                        fontSize.baseSize() * 100.0
+                                                / FontSize.DEFAULT.baseSize())
+                                : null);
         boolean highContrast = appearance.highContrast().get();
         properties.put("--aura-contrast-level", highContrast ? "3" : null);
+        // Lumo has no contrast level: secondary text and borders get darker.
+        properties.put("--lumo-secondary-text-color",
+                highContrast ? "var(--lumo-contrast-90pct)" : null);
+        properties.put("--lumo-tertiary-text-color",
+                highContrast ? "var(--lumo-contrast-80pct)" : null);
+        properties.put("--lumo-contrast-20pct",
+                highContrast ? "var(--lumo-contrast-50pct)" : null);
         properties.put("--vaadin-focus-ring-width",
                 highContrast ? "3px" : null);
         return properties;

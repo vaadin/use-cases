@@ -2,6 +2,8 @@ package com.example.uc4;
 
 import java.util.Map;
 
+import com.example.Appearance;
+import com.example.BaseTheme;
 import com.example.FontSize;
 import com.example.MissingAPI;
 import org.junit.jupiter.api.Test;
@@ -58,6 +60,26 @@ class UserPreferencesViewTest extends SpringBrowserlessTest {
 
         Map<String, String> root = MissingAPI.rootProperties(UI.getCurrent());
         assertEquals("#ff8800", root.get("--aura-accent-color-dark"));
+        assertEquals("16", root.get("--aura-base-font-size"));
+    }
+
+    @Test
+    void textSizeScalesLumoThroughTheRootFontSize() {
+        UserPreferencesView view = navigate(UserPreferencesView.class);
+        Appearance.current().setTheme(BaseTheme.LUMO);
+
+        test(view.fontSize()).selectItem("Large");
+        runPendingSignalsTasks();
+
+        Map<String, String> root = MissingAPI.rootProperties(UI.getCurrent());
+        assertEquals("114.29%", root.get("font-size"));
+
+        // Aura scales from its own token; the root font size would scale
+        // it twice.
+        Appearance.current().setTheme(BaseTheme.AURA);
+        runPendingSignalsTasks();
+        root = MissingAPI.rootProperties(UI.getCurrent());
+        assertEquals(null, root.get("font-size"));
         assertEquals("16", root.get("--aura-base-font-size"));
     }
 

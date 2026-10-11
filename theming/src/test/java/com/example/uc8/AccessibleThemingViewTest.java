@@ -36,6 +36,9 @@ class AccessibleThemingViewTest extends SpringBrowserlessTest {
         Map<String, String> root = MissingAPI.rootProperties(UI.getCurrent());
         assertEquals("3", root.get("--aura-contrast-level"));
         assertEquals("3px", root.get("--vaadin-focus-ring-width"));
+        // Lumo has no contrast level; its secondary text gets darker.
+        assertEquals("var(--lumo-contrast-90pct)",
+                root.get("--lumo-secondary-text-color"));
     }
 
     @Test

@@ -42,9 +42,10 @@ public class ThemeSwitchView extends VerticalLayout {
         Appearance appearance = Appearance.current();
 
         add(new H1("UC9 — Aura or Lumo"));
-        add(new Paragraph("Switch the theme and look around: every view "
-                + "follows, and the choice is remembered. The list below "
-                + "maps the most used tokens between the two."));
+        add(new Paragraph("Switch the theme here or in the top bar and look "
+                + "around: every view follows, and the choice is "
+                + "remembered. The list below maps the most used tokens "
+                + "between the two."));
 
         themeSelect.setLabel("Theme");
         themeSelect.setItems(BaseTheme.values());

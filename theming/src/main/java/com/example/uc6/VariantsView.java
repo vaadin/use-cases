@@ -38,7 +38,7 @@ import com.vaadin.flow.router.Route;
  * {@code ERROR}, {@code ROW_STRIPES}) work in every theme; the ones prefixed
  * with a theme name ({@code AURA_DANGER}, {@code LUMO_CONTRAST}) only look
  * different in that theme, which matters when an application might switch
- * themes (UC9).
+ * themes (with the picker in the top bar, see UC9).
  * <p>
  * For a look no variant offers, a CSS class with a few component tokens
  * ({@code --vaadin-button-background}) does the job without reaching into the
@@ -64,7 +64,7 @@ public class VariantsView extends VerticalLayout {
         theme.bindText(
                 appearance.theme().map(t -> "Current theme: " + t.title()));
         add(new Paragraph("Built-in variants first, custom CSS when no "
-                + "variant fits. Switch the theme in UC9 and come back: the "
+                + "variant fits. Switch the theme in the top bar: the "
                 + "generic variants keep their meaning, the theme-specific "
                 + "ones fall back to the default look."), theme);
 

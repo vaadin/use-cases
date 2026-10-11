@@ -44,3 +44,11 @@
     font-family: monospace;
     color: var(--vaadin-text-color-secondary);
 }
+
+.theme-picker-wrapper {
+    margin-inline-start: 1rem;
+}
+
+.theme-picker {
+    width: 7rem;
+}
