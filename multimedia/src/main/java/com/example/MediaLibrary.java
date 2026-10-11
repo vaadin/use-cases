@@ -88,19 +88,45 @@ public final class MediaLibrary {
             if ("file".equals(url.getProtocol())) {
                 return Path.of(url.toURI()).toFile();
             }
-            // Keep the relative path: HLS renditions share segment names.
-            Path copy = Extracted.DIRECTORY.resolve(path);
-            Files.createDirectories(copy.getParent());
-            try (InputStream in = url.openStream()) {
-                Files.copy(in, copy);
-            }
-            copy.toFile().deleteOnExit();
-            return copy.toFile();
+            return extract(url, Extracted.DIRECTORY, path);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } catch (URISyntaxException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    /**
+     * Copies a resource to a file below a directory, keeping its relative path
+     * because HLS renditions share segment names. The file and the directories
+     * created for it are deleted when the JVM exits.
+     *
+     * @param url
+     *            the resource to copy
+     * @param directory
+     *            the directory to copy to
+     * @param path
+     *            the relative path of the copy
+     * @return the copy
+     * @throws IOException
+     *             if the resource cannot be copied
+     */
+    static File extract(URL url, Path directory, String path)
+            throws IOException {
+        Path copy = directory.resolve(path);
+        // Registered parent first: deleteOnExit deletes in reverse order, so
+        // each directory is empty by the time it is deleted.
+        Path current = directory;
+        for (Path name : directory.relativize(copy.getParent())) {
+            current = current.resolve(name);
+            Files.createDirectories(current);
+            current.toFile().deleteOnExit();
+        }
+        try (InputStream in = url.openStream()) {
+            Files.copy(in, copy);
+        }
+        copy.toFile().deleteOnExit();
+        return copy.toFile();
     }
 
     /** The temporary directory, created on first use. */
