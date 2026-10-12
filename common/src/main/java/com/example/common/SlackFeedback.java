@@ -53,7 +53,8 @@ public class SlackFeedback {
      * @param message
      *            the feedback itself, as typed by the user
      * @param contact
-     *            how to reach the user, or blank to stay anonymous
+     *            whatever the user entered to say who they are, such as a name
+     *            or an email address, or blank to stay anonymous
      */
     public record Feedback(UseCase useCase, String message, String contact) {
     }

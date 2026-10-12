@@ -29,7 +29,7 @@ class FeedbackDialog extends Dialog {
             .getLogger(FeedbackDialog.class.getName());
 
     final TextArea message = new TextArea("Your feedback");
-    final TextField contact = new TextField("Contact (optional)");
+    final TextField contact = new TextField("Name or email (optional)");
     final Button send = new Button("Send");
 
     FeedbackDialog(SlackFeedback slack, UseCase useCase) {
@@ -44,8 +44,6 @@ class FeedbackDialog extends Dialog {
 
         contact.setWidthFull();
         contact.setMaxLength(SlackFeedback.MAX_CONTACT_LENGTH);
-        contact.setHelperText(
-                "Email or GitHub handle, if you would like an answer");
 
         VerticalLayout content = new VerticalLayout(new Paragraph(
                 "Is this use case wrong, could it be better, or is something "
