@@ -11,6 +11,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -37,6 +38,7 @@ import com.vaadin.flow.server.menu.MenuEntry;
  * button is only shown when {@link SlackFeedback} is enabled. Subclasses only
  * need to pass their module id and display title.
  */
+@StyleSheet("base-main-layout.css")
 public abstract class BaseMainLayout extends AppLayout
         implements BeforeEnterObserver {
 
@@ -103,8 +105,8 @@ public abstract class BaseMainLayout extends AppLayout
         container.getStyle().set("position", "fixed").set("top",
                 "calc(var(--vaadin-app-layout-navbar-offset-top) + 0.5em)")
                 .set("right", "1em").set("z-index", "100")
-                .set("pointer-events", "auto").set("display", "flex")
-                .set("gap", "0.5em");
+                .set("pointer-events", "auto");
+        container.addClassName("use-case-overlay");
 
         Icon codeIcon = overlayIcon(VaadinIcon.CODE);
 
@@ -120,7 +122,7 @@ public abstract class BaseMainLayout extends AppLayout
         feedbackButton.getStyle().set("border", "none").set("cursor",
                 "pointer");
 
-        container.add(feedbackButton, link);
+        container.add(link, feedbackButton);
         return container.getElement();
     }
 
