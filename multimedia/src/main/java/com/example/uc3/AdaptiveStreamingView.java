@@ -7,9 +7,11 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Media;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.html.Video;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -50,6 +52,17 @@ public class AdaptiveStreamingView extends VerticalLayout {
                 + "playlist and switches as bandwidth changes. Throttle the "
                 + "network in the browser's developer tools and watch the "
                 + "label in the top-left corner of the picture."));
+        add(new Paragraph("The stream comes in three renditions. The number "
+                + "is the height of the picture in pixels, and the p stands "
+                + "for progressive: every frame is drawn in full. A taller "
+                + "picture is sharper but needs a faster connection."));
+        add(new UnorderedList(
+                new ListItem("240p — 426 × 240 pixels at about 0.4 Mbit/s, "
+                        + "for slow mobile connections"),
+                new ListItem("360p — 640 × 360 pixels at about 0.8 Mbit/s, "
+                        + "for average connections"),
+                new ListItem("720p — 1280 × 720 pixels (HD) at about 1.7 "
+                        + "Mbit/s, for fast connections")));
 
         Span badge = new Span();
         badge.addClassName("status-badge");
