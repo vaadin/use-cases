@@ -9,6 +9,8 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.Code;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Video;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,11 +36,14 @@ class SeekableStreamViewTest extends SpringBrowserlessTest {
     void explainsWhichHandlersAnswerRanges() {
         navigate(SeekableStreamView.class);
 
-        List<String> apis = findInView(Code.class).all().stream()
-                .map(Code::getText).toList();
-        assertTrue(apis.contains("DownloadHandler.forFile(file)"));
-        assertTrue(apis.stream().anyMatch(
-                api -> api.startsWith("DownloadHandler.fromInputStream")
-                        && api.endsWith(".enableRangeRequests()")));
+        assertEquals("Which handlers can seek",
+                findInView(H2.class).single().getText());
+        assertEquals(List.of("DownloadHandler.forFile(file)",
+                "DownloadHandler.fromInputStream(...).enableRangeRequests()",
+                "forClassResource(...).enableRangeRequests()",
+                "META-INF/resources"),
+                findInView(Code.class).all().stream().map(Code::getText)
+                        .toList());
+        assertEquals(5, findInView(ListItem.class).all().size());
     }
 }
