@@ -11,7 +11,10 @@ name: PR Preview
 # does not deploy everything: only the deployables (directories holding a
 # fly.toml) with a changed file under them are picked, at most
 # MAX_PREVIEW_APPS of them: when more are changed, the ones with the most
-# changed lines are deployed. Each one runs as its own Fly app named
+# changed lines are deployed. When the pull request changes no deployable,
+# only files outside of them (common/, the parent pom, the workflows), the
+# first deployable is deployed, so that the shared change can still be tried
+# in one app. Each one runs as its own Fly app named
 # <production app>-pr-<number>, scaled to zero while idle. A preview always
 # uses the production sidecar apps of a module (observability's Prometheus and
 # Grafana): the apps address each other by their production names, fixed in
@@ -63,8 +66,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       apps: ${{ steps.find.outputs.apps }}
-      skipped: ${{ steps.find.outputs.skipped }}
-      omitted: ${{ steps.find.outputs.omitted }}
+      note: ${{ steps.find.outputs.note }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -106,15 +108,19 @@ jobs:
           selected=$(printf '%s' "$selected" | sort -k3,3nr -k4,4nr -k1,1)
           count=$(printf '%s' "$selected" | grep -c . || true)
 
-          skipped=""
-          omitted=""
+          note=""
           if [ "$count" -gt "$MAX_PREVIEW_APPS" ]; then
             omitted=$(printf '%s\n' "$selected" | tail -n +$((MAX_PREVIEW_APPS + 1)) \
               | awk '{ printf "%s`%s`", (NR > 1 ? ", " : ""), $1 }')
-            omitted="The pull request changes $count apps, more than the $MAX_PREVIEW_APPS a preview deploys, so the ones with the most changed lines are deployed. Not deployed: $omitted. A preview of one of them deployed for an earlier commit may still be running at that commit."
+            note="The pull request changes $count apps, more than the $MAX_PREVIEW_APPS a preview deploys, so the ones with the most changed lines are deployed. Not deployed: $omitted. A preview of one of them deployed for an earlier commit may still be running at that commit."
             selected=$(printf '%s\n' "$selected" | head -n "$MAX_PREVIEW_APPS")
           elif [ "$count" -eq 0 ]; then
-            skipped="The pull request changes no app directory (one holding a fly.toml)."
+            # Only files outside every deployable change, such as common/ or
+            # the parent pom, which every app uses: the first one shows them
+            module=${all_modules%%$'\n'*}
+            app=$(sed -nE "s/^app *= *['\"]([^'\"]+)['\"].*/\1/p" "$module/fly.toml")
+            selected="$module $app 0 0"
+            note="The pull request changes no app directory (one holding a fly.toml), only files shared by the apps, so the first app, \`$module\`, is deployed to try them."
           fi
 
           apps=$(printf '%s' "$selected" \
@@ -122,8 +128,7 @@ jobs:
                 | {module: .[0], production: .[1], app: "\(.[1])-pr-\(env._PR_NUMBER)"})')
           echo "Selected apps: $apps"
           echo "apps=$apps" >> "$GITHUB_OUTPUT"
-          echo "skipped=$skipped" >> "$GITHUB_OUTPUT"
-          echo "omitted=$omitted" >> "$GITHUB_OUTPUT"
+          echo "note=$note" >> "$GITHUB_OUTPUT"
 
   deploy:
     needs: discover
@@ -195,31 +200,26 @@ jobs:
       - env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPS: ${{ needs.discover.outputs.apps }}
-          SKIPPED: ${{ needs.discover.outputs.skipped }}
-          OMITTED: ${{ needs.discover.outputs.omitted }}
+          NOTE: ${{ needs.discover.outputs.note }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           marker='<!-- use-cases-pr-preview -->'
           {
             echo "$marker"
-            if [ -n "$SKIPPED" ]; then
-              echo "No preview deployed for ${_HEAD_SHA}: $SKIPPED"
-            else
-              # One app failing leaves the others deployed, so each one is
-              # listed with the outcome of its own job
-              jobs=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs" \
-                --paginate --jq '.jobs[] | {name, conclusion}' | jq -s -c .)
-              echo "Preview of ${_HEAD_SHA}:"
+            # One app failing leaves the others deployed, so each one is
+            # listed with the outcome of its own job
+            jobs=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs" \
+              --paginate --jq '.jobs[] | {name, conclusion}' | jq -s -c .)
+            echo "Preview of ${_HEAD_SHA}:"
+            echo
+            echo "$APPS" | jq -r --argjson jobs "$jobs" --arg run "$RUN_URL" '.[]
+              | . as $app
+              | ($jobs | map(select(.name == "Deploy \($app.module)")) | first | .conclusion // "missing") as $result
+              | if $result == "success" then "- `\(.module)`: https://\(.app).fly.dev"
+                else "- `\(.module)`: deployment \($result), see [the workflow run](\($run))" end'
+            if [ -n "$NOTE" ]; then
               echo
-              echo "$APPS" | jq -r --argjson jobs "$jobs" --arg run "$RUN_URL" '.[]
-                | . as $app
-                | ($jobs | map(select(.name == "Deploy \($app.module)")) | first | .conclusion // "missing") as $result
-                | if $result == "success" then "- `\(.module)`: https://\(.app).fly.dev"
-                  else "- `\(.module)`: deployment \($result), see [the workflow run](\($run))" end'
-              if [ -n "$OMITTED" ]; then
-                echo
-                echo "$OMITTED"
-              fi
+              echo "$NOTE"
             fi
             echo
             echo "Removing the \`deploy preview\` label or closing the pull request destroys the preview."
