@@ -1,5 +1,7 @@
 package com.example.common;
 
+import java.util.Optional;
+
 import com.example.common.SlackFeedback.UseCase;
 import org.jspecify.annotations.Nullable;
 
@@ -21,6 +23,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
 
@@ -185,8 +188,18 @@ public abstract class BaseMainLayout extends AppLayout
                 : viewClass.getSimpleName();
     }
 
+    /**
+     * The URL the app is served from, so feedback from a pull request preview
+     * links to the preview rather than to the production app. Falls back to the
+     * app's {@link AppCatalog} URL when the request does not say which host it
+     * was sent to.
+     */
     private String appUrl() {
-        return AppCatalog.APPS.stream().filter(app -> app.id().equals(moduleId))
-                .map(AppCatalog.App::url).findFirst().orElse("/");
+        VaadinRequest request = VaadinRequest.getCurrent();
+        return Optional.ofNullable(request).flatMap(OpenGraphTags::baseUrl)
+                .or(() -> AppCatalog.APPS.stream()
+                        .filter(app -> app.id().equals(moduleId))
+                        .map(AppCatalog.App::url).findFirst())
+                .orElse("/");
     }
 }
