@@ -1,6 +1,7 @@
 package com.example.common;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import com.example.common.SlackFeedback.UseCase;
 import org.jspecify.annotations.Nullable;
@@ -188,18 +189,32 @@ public abstract class BaseMainLayout extends AppLayout
                 : viewClass.getSimpleName();
     }
 
-    /**
-     * The URL the app is served from, so feedback from a pull request preview
-     * links to the preview rather than to the production app. Falls back to the
-     * app's {@link AppCatalog} URL when the request does not say which host it
-     * was sent to.
-     */
     private String appUrl() {
-        VaadinRequest request = VaadinRequest.getCurrent();
-        return Optional.ofNullable(request).flatMap(OpenGraphTags::baseUrl)
-                .or(() -> AppCatalog.APPS.stream()
-                        .filter(app -> app.id().equals(moduleId))
-                        .map(AppCatalog.App::url).findFirst())
-                .orElse("/");
+        String catalogUrl = AppCatalog.APPS.stream()
+                .filter(app -> app.id().equals(moduleId))
+                .map(AppCatalog.App::url).findFirst().orElse("/");
+        return appUrl(catalogUrl,
+                Optional.ofNullable(VaadinRequest.getCurrent())
+                        .flatMap(OpenGraphTags::baseUrl));
+    }
+
+    /**
+     * The URL feedback links to: the one the app is served from when that is a
+     * pull request preview of it, such as
+     * {@code https://signals-cases-pr-12.fly.dev/} for
+     * {@code https://signals-cases.fly.dev/}, so the feedback points to the
+     * preview, or else the app's {@link AppCatalog} URL. The served URL comes
+     * from request headers the client controls, so any other host is ignored
+     * rather than ending up as a link in the feedback.
+     */
+    static String appUrl(String catalogUrl, Optional<String> servedFrom) {
+        int dot = catalogUrl.indexOf('.');
+        if (dot < 0) {
+            return catalogUrl;
+        }
+        String preview = Pattern.quote(catalogUrl.substring(0, dot))
+                + "-pr-\\d+" + Pattern.quote(catalogUrl.substring(dot));
+        return servedFrom.filter(url -> url.matches(preview))
+                .orElse(catalogUrl);
     }
 }

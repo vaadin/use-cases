@@ -1,6 +1,7 @@
 package com.example.common;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import com.example.common.layout.About;
 import com.example.common.layout.ParallelLoadingView;
@@ -55,6 +56,26 @@ class BaseMainLayoutTest extends BrowserlessTest {
                 text);
         assertTrue(text.contains(ParallelLoadingView.class.getName()), text);
         assertTrue(text.endsWith("> Loading never finishes"), text);
+    }
+
+    @Test
+    void appUrl_trustsOnlyAPreviewOfTheApp() {
+        String production = "https://signals-cases.fly.dev/";
+
+        assertEquals("https://signals-cases-pr-12.fly.dev/",
+                BaseMainLayout.appUrl(production,
+                        Optional.of("https://signals-cases-pr-12.fly.dev/")));
+        for (String other : new String[] { "https://evil.example/",
+                "https://signals-cases-pr-12.fly.dev.evil.example/",
+                "https://signals-cases-pr-x.fly.dev/",
+                "https://web-share-cases-pr-12.fly.dev/",
+                "http://localhost:8080/" }) {
+            assertEquals(production,
+                    BaseMainLayout.appUrl(production, Optional.of(other)),
+                    other);
+        }
+        assertEquals(production,
+                BaseMainLayout.appUrl(production, Optional.empty()));
     }
 
     @Test
