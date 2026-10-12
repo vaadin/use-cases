@@ -9,7 +9,7 @@ on:
 jobs:
   discover:
     name: Discover modules
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       modules: ${{ steps.find.outputs.modules }}
     steps:
@@ -75,7 +75,7 @@ jobs:
     # An empty matrix fails the run, so skip when no deployable changed.
     if: needs.discover.outputs.modules != '[]'
     name: Deploy ${{ matrix.module }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     concurrency: deploy-${{ matrix.module }}
     strategy:
       fail-fast: false
