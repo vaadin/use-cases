@@ -10,7 +10,7 @@ from vaadin/flow#25900. Each view exercises one realistic scenario;
 | UC2 | Seekable streaming | A long recording served with `DownloadHandler.forFile`, which answers byte-range requests, so the player can jump anywhere without downloading what comes before. |
 | UC3 | Adaptive streaming | HLS with 240p / 360p / 720p renditions served from a single handler, with an `hls.js` fallback for browsers without native HLS. |
 | UC4 | Format fallback | AV1 listed before H.264; the browser plays the first one it supports (Safari without a hardware AV1 decoder falls back), and the view reports which. |
-| UC5 | Background video | A muted, looping hero clip that autoplays inline, with a pause button for accessibility. |
+| UC5 | Background video | A muted, looping hero clip that autoplays inline, with a pause button for accessibility and a select to switch between three clips. |
 | UC6 | Podcast playlist | One `Audio` player for a list of episodes, moving on to the next episode when one ends. |
 | UC7 | Chapters & controls | Vaadin buttons for play/pause, ±10 s and chapter jumps, with the current chapter following playback. |
 | UC8 | Resume playback | The playback position is remembered and restored after navigating away or reloading. |
