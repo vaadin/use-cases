@@ -1,9 +1,13 @@
 package com.example.common;
 
+import com.example.common.SlackFeedback.UseCase;
 import org.jspecify.annotations.Nullable;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -15,6 +19,8 @@ import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
 
@@ -22,17 +28,32 @@ import com.vaadin.flow.server.menu.MenuEntry;
  * Shared {@link AppLayout} for the use-case demo apps. Renders a navbar with
  * the module title, a drawer holding the cross-app {@link AppCatalog} selector
  * and the auto-generated side navigation, and a fixed-position "View source"
- * overlay that links the current route's view class to its source on GitHub.
- * Subclasses only need to pass their module id and display title.
+ * overlay that links the current route's view class to its source on GitHub
+ * next to a "Feedback" button that opens a {@link FeedbackDialog} for it. The
+ * button is only shown when {@link SlackFeedback} is enabled. Subclasses only
+ * need to pass their module id and display title.
  */
 public abstract class BaseMainLayout extends AppLayout
         implements BeforeEnterObserver {
 
+    private static final SlackFeedback SLACK_FEEDBACK = SlackFeedback
+            .fromEnvironment();
+
     private final String moduleId;
+    private final String title;
+    private final SlackFeedback slackFeedback;
     private final Anchor sourceCodeLink;
+    private final Button feedbackButton;
+    private @Nullable UseCase useCase;
 
     protected BaseMainLayout(String moduleId, String title) {
+        this(moduleId, title, SLACK_FEEDBACK);
+    }
+
+    BaseMainLayout(String moduleId, String title, SlackFeedback slackFeedback) {
         this.moduleId = moduleId;
+        this.title = title;
+        this.slackFeedback = slackFeedback;
 
         DrawerToggle toggle = new DrawerToggle();
 
@@ -43,7 +64,15 @@ public abstract class BaseMainLayout extends AppLayout
         addToNavbar(toggle, h1);
 
         sourceCodeLink = new Anchor("", "View source");
-        getElement().appendChild(buildSourceCodeOverlay(sourceCodeLink));
+        feedbackButton = new Button("Feedback", overlayIcon(VaadinIcon.COMMENT),
+                e -> {
+                    if (useCase != null) {
+                        new FeedbackDialog(slackFeedback, useCase).open();
+                    }
+                });
+        feedbackButton.setVisible(false);
+        getElement().appendChild(
+                buildSourceCodeOverlay(sourceCodeLink, feedbackButton));
 
         addToDrawer(AppCatalog.createSelector(moduleId));
 
@@ -64,20 +93,44 @@ public abstract class BaseMainLayout extends AppLayout
                 : entry.menuClass().getAnnotation(UseCaseDescription.class);
     }
 
-    private static Element buildSourceCodeOverlay(Anchor link) {
+    private static Element buildSourceCodeOverlay(Anchor link,
+            Button feedbackButton) {
         Div container = new Div();
         container.getStyle().set("position", "fixed").set("top",
                 "calc(var(--vaadin-app-layout-navbar-offset-top) + 0.5em)")
                 .set("right", "1em").set("z-index", "100")
-                .set("pointer-events", "auto");
+                .set("pointer-events", "auto").set("display", "flex")
+                .set("gap", "0.5em");
 
-        Icon codeIcon = VaadinIcon.CODE.create();
-        codeIcon.setSize("16px");
-        codeIcon.getStyle().set("color", "var(--vaadin-text-color-secondary)")
-                .set("margin-right", "0.5em");
+        Icon codeIcon = overlayIcon(VaadinIcon.CODE);
 
         link.setTarget("_blank");
-        link.getStyle().set("display", "inline-flex")
+        styleOverlayItem(link);
+
+        Span content = new Span(codeIcon);
+        content.add("View source");
+        link.removeAll();
+        link.add(content);
+
+        styleOverlayItem(feedbackButton);
+        feedbackButton.getStyle().set("border", "none").set("cursor",
+                "pointer");
+
+        container.add(feedbackButton, link);
+        return container.getElement();
+    }
+
+    private static Icon overlayIcon(VaadinIcon vaadinIcon) {
+        Icon icon = vaadinIcon.create();
+        icon.setSize("16px");
+        icon.getStyle().set("color", "var(--vaadin-text-color-secondary)")
+                .set("margin-right", "0.5em");
+        return icon;
+    }
+
+    private static <T extends Component & HasStyle> void styleOverlayItem(
+            T item) {
+        item.getStyle().set("display", "inline-flex")
                 .set("align-items", "center")
                 .set("background-color", "rgba(255, 255, 255, 0.95)")
                 .set("padding", "0.5em 0.75em").set("border-radius", "4px")
@@ -87,24 +140,16 @@ public abstract class BaseMainLayout extends AppLayout
                 .set("font-size", "var(--aura-font-size-s)")
                 .set("transition", "box-shadow 0.2s");
 
-        link.getElement()
+        item.getElement()
                 .addEventListener("mouseenter",
-                        e -> link.getStyle().set("box-shadow",
+                        e -> item.getStyle().set("box-shadow",
                                 "0 4px 8px rgba(0, 0, 0, 0.15)"))
                 .addEventData("event.preventDefault");
-        link.getElement()
+        item.getElement()
                 .addEventListener("mouseleave",
-                        e -> link.getStyle().set("box-shadow",
+                        e -> item.getStyle().set("box-shadow",
                                 "0 2px 4px rgba(0, 0, 0, 0.1)"))
                 .addEventData("event.preventDefault");
-
-        Span content = new Span(codeIcon);
-        content.add("View source");
-        link.removeAll();
-        link.add(content);
-
-        container.add(link);
-        return container.getElement();
     }
 
     @Override
@@ -118,6 +163,30 @@ public abstract class BaseMainLayout extends AppLayout
         sourceCodeLink.setHref("https://github.com/vaadin/use-cases/tree/main/"
                 + moduleId + "/src/main/java/" + packagePath + "/" + className
                 + ".java");
-        sourceCodeLink.setVisible(className.endsWith("View"));
+        boolean isUseCase = className.endsWith("View");
+        sourceCodeLink.setVisible(isUseCase);
+
+        useCase = isUseCase
+                ? new UseCase(title, useCaseTitle(viewClass),
+                        viewClass.getName(),
+                        appUrl() + event.getLocation()
+                                .getPathWithQueryParameters())
+                : null;
+        feedbackButton.setVisible(useCase != null && slackFeedback.isEnabled());
+    }
+
+    private static String useCaseTitle(Class<?> viewClass) {
+        PageTitle pageTitle = viewClass.getAnnotation(PageTitle.class);
+        if (pageTitle != null) {
+            return pageTitle.value();
+        }
+        Menu menu = viewClass.getAnnotation(Menu.class);
+        return menu != null && !menu.title().isEmpty() ? menu.title()
+                : viewClass.getSimpleName();
+    }
+
+    private String appUrl() {
+        return AppCatalog.APPS.stream().filter(app -> app.id().equals(moduleId))
+                .map(AppCatalog.App::url).findFirst().orElse("/");
     }
 }
