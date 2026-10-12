@@ -12,9 +12,9 @@ name: PR Preview
 # fly.toml) with a changed file under them are picked, at most
 # MAX_PREVIEW_APPS of them: when more are changed, the ones with the most
 # changed lines are deployed. When the pull request changes no deployable,
-# only files outside of them (common/, the parent pom, the workflows), the
-# first deployable is deployed, so that the shared change can still be tried
-# in one app. Each one runs as its own Fly app named
+# only files outside of them (common/, the parent pom, docs), the first
+# deployable is deployed, so that a shared change can still be tried in one
+# app. Each one runs as its own Fly app named
 # <production app>-pr-<number>, scaled to zero while idle. A preview always
 # uses the production sidecar apps of a module (observability's Prometheus and
 # Grafana): the apps address each other by their production names, fixed in
@@ -75,6 +75,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          app_name() {
+            sed -nE "s/^app *= *['\"]([^'\"]+)['\"].*/\1/p" "$1/fly.toml"
+          }
+
           # The deployables on the pull request's head, so that a module the
           # pull request adds is found too
           all_modules=$(find . -mindepth 2 -maxdepth 3 -name fly.toml -printf '%h\n' \
@@ -101,7 +105,7 @@ jobs:
               index($0, prefix) == 1 { files++; if ($0 !~ /\/package-lock\.json$/) lines += n }
               END { print files + 0, lines + 0 }')
             if [ "$files" -gt 0 ]; then
-              app=$(sed -nE "s/^app *= *['\"]([^'\"]+)['\"].*/\1/p" "$module/fly.toml")
+              app=$(app_name "$module")
               selected="$selected$module $app $lines $files"$'\n'
             fi
           done
@@ -116,11 +120,12 @@ jobs:
             selected=$(printf '%s\n' "$selected" | head -n "$MAX_PREVIEW_APPS")
           elif [ "$count" -eq 0 ]; then
             # Only files outside every deployable change, such as common/ or
-            # the parent pom, which every app uses: the first one shows them
+            # the parent pom, which every app uses, or docs: the first
+            # deployable stands in for all of them
             module=${all_modules%%$'\n'*}
-            app=$(sed -nE "s/^app *= *['\"]([^'\"]+)['\"].*/\1/p" "$module/fly.toml")
+            app=$(app_name "$module")
             selected="$module $app 0 0"
-            note="The pull request changes no app directory (one holding a fly.toml), only files shared by the apps, so the first app, \`$module\`, is deployed to try them."
+            note="The pull request changes no app directory (one holding a fly.toml), so the first app, \`$module\`, is deployed."
           fi
 
           apps=$(printf '%s' "$selected" \
@@ -132,7 +137,6 @@ jobs:
 
   deploy:
     needs: discover
-    if: needs.discover.outputs.apps != '[]'
     name: Deploy ${{ matrix.module }}
     timeout-minutes: 45
     runs-on: ubuntu-latest
