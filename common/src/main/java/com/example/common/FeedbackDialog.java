@@ -5,7 +5,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.example.common.SlackFeedback.Feedback;
-import com.example.common.SlackFeedback.Kind;
 import com.example.common.SlackFeedback.UseCase;
 
 import com.vaadin.flow.component.button.Button;
@@ -15,7 +14,6 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -30,8 +28,6 @@ class FeedbackDialog extends Dialog {
     private static final Logger LOGGER = Logger
             .getLogger(FeedbackDialog.class.getName());
 
-    final RadioButtonGroup<Kind> kind = new RadioButtonGroup<>(
-            "What is it about?");
     final TextArea message = new TextArea("Your feedback");
     final TextField contact = new TextField("Contact (optional)");
     final Button send = new Button("Send");
@@ -39,10 +35,6 @@ class FeedbackDialog extends Dialog {
     FeedbackDialog(SlackFeedback slack, UseCase useCase) {
         setHeaderTitle("Feedback on " + useCase.title());
         setWidth("min(32em, 100vw)");
-
-        kind.setItems(Kind.values());
-        kind.setItemLabelGenerator(Kind::label);
-        kind.setValue(Kind.WRONG);
 
         message.setWidthFull();
         message.setMinHeight("8em");
@@ -58,16 +50,16 @@ class FeedbackDialog extends Dialog {
         VerticalLayout content = new VerticalLayout(new Paragraph(
                 "Is this use case wrong, could it be better, or is something "
                         + "missing? Tell us, it goes straight to the team."),
-                kind, message, contact);
+                message, contact);
         content.setPadding(false);
         add(content);
 
         send.addThemeVariants(ButtonVariant.PRIMARY);
         send.setEnabled(false);
-        message.addValueChangeListener(e -> send.setEnabled(
-                !e.getValue().isBlank() && kind.getValue() != null));
-        send.addClickListener(e -> send(slack, new Feedback(useCase,
-                kind.getValue(), message.getValue(), contact.getValue())));
+        message.addValueChangeListener(
+                e -> send.setEnabled(!e.getValue().isBlank()));
+        send.addClickListener(e -> send(slack,
+                new Feedback(useCase, message.getValue(), contact.getValue())));
         getFooter().add(new Button("Cancel", e -> close()), send);
     }
 

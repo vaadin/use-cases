@@ -31,23 +31,6 @@ public class SlackFeedback {
 
     private static final Duration TIMEOUT = Duration.ofSeconds(10);
 
-    /** What the feedback is about. */
-    public enum Kind {
-        WRONG("Something is wrong"),
-        IMPROVEMENT("Could be improved"),
-        OTHER("Other");
-
-        private final String label;
-
-        Kind(String label) {
-            this.label = label;
-        }
-
-        public String label() {
-            return label;
-        }
-    }
-
     /**
      * The use case feedback is given on.
      *
@@ -67,15 +50,12 @@ public class SlackFeedback {
     /**
      * Feedback on one use case.
      *
-     * @param kind
-     *            what the feedback is about
      * @param message
      *            the feedback itself, as typed by the user
      * @param contact
      *            how to reach the user, or blank to stay anonymous
      */
-    public record Feedback(UseCase useCase, Kind kind, String message,
-            String contact) {
+    public record Feedback(UseCase useCase, String message, String contact) {
     }
 
     private final @Nullable URI webhook;
@@ -130,11 +110,10 @@ public class SlackFeedback {
                 .lines().map(line -> "> " + line)
                 .collect(Collectors.joining("\n"));
         UseCase useCase = feedback.useCase();
-        String text = "*Use-case feedback: " + feedback.kind().label() + "*\n"
-                + "*App:* " + escape(useCase.app()) + "\n" + "*Use case:* <"
-                + useCase.url() + "|" + escape(useCase.title()) + "> (`"
-                + useCase.viewClass() + "`)\n" + "*From:* " + contact + "\n"
-                + quote;
+        String text = "*Use-case feedback*\n" + "*App:* "
+                + escape(useCase.app()) + "\n" + "*Use case:* <" + useCase.url()
+                + "|" + escape(useCase.title()) + "> (`" + useCase.viewClass()
+                + "`)\n" + "*From:* " + contact + "\n" + quote;
         return JsonMapper.shared().writeValueAsString(
                 Map.of("text", text, "unfurl_links", false));
     }

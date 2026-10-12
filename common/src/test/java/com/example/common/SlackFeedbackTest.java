@@ -3,7 +3,6 @@ package com.example.common;
 import java.io.IOException;
 
 import com.example.common.SlackFeedback.Feedback;
-import com.example.common.SlackFeedback.Kind;
 import com.example.common.SlackFeedback.UseCase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +37,7 @@ class SlackFeedbackTest {
     @Test
     void send_postsTheFeedbackToTheWebhook() throws Exception {
         webhook.slackFeedback()
-                .send(new Feedback(USE_CASE, Kind.WRONG,
+                .send(new Feedback(USE_CASE,
                         "The button <!channel> is\nmisaligned & ugly",
                         "me@example.com"));
 
@@ -48,7 +47,7 @@ class SlackFeedbackTest {
         assertFalse(payload.get("unfurl_links").asBoolean());
         assertEquals(
                 """
-                        *Use-case feedback: Something is wrong*
+                        *Use-case feedback*
                         *App:* Signal API
                         *Use case:* <https://signals-cases.fly.dev/use-case-19|Use Case 19: Parallel Loading> (`com.example.usecase19.UseCase19View`)
                         *From:* me@example.com
@@ -60,7 +59,7 @@ class SlackFeedbackTest {
     @Test
     void send_withoutContact_isAnonymousAndTruncatesLongMessages()
             throws Exception {
-        webhook.slackFeedback().send(new Feedback(USE_CASE, Kind.OTHER,
+        webhook.slackFeedback().send(new Feedback(USE_CASE,
                 "x".repeat(SlackFeedback.MAX_MESSAGE_LENGTH + 100), " "));
 
         String text = webhook.texts().get(0);
@@ -76,8 +75,8 @@ class SlackFeedbackTest {
         webhook.respondWith(400);
 
         IOException e = assertThrows(IOException.class,
-                () -> webhook.slackFeedback().send(new Feedback(USE_CASE,
-                        Kind.IMPROVEMENT, "More examples please", "")));
+                () -> webhook.slackFeedback().send(
+                        new Feedback(USE_CASE, "More examples please", "")));
         assertTrue(e.getMessage().contains("invalid_payload"), e.getMessage());
     }
 
@@ -86,8 +85,8 @@ class SlackFeedbackTest {
         for (String url : new String[] { null, "", "  " }) {
             SlackFeedback slack = new SlackFeedback(url);
             assertFalse(slack.isEnabled());
-            assertThrows(IllegalStateException.class, () -> slack
-                    .send(new Feedback(USE_CASE, Kind.OTHER, "Hello", "")));
+            assertThrows(IllegalStateException.class,
+                    () -> slack.send(new Feedback(USE_CASE, "Hello", "")));
         }
         assertTrue(webhook.slackFeedback().isEnabled());
     }
