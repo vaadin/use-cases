@@ -1,6 +1,6 @@
-/* The "View source" and "Feedback" overlay of BaseMainLayout: side by side,
-   or stacked with "Feedback" below on narrow screens, where a row would cover
-   the navbar title. */
+/* The "Feedback" and "View source" overlay of BaseMainLayout: side by side,
+   with "View source" at the right edge, or stacked with "Feedback" below on
+   narrow screens, where a row would cover the navbar title. */
 .use-case-overlay {
     display: flex;
     gap: 0.5em;
@@ -8,7 +8,7 @@
 
 @media (max-width: 40em) {
     .use-case-overlay {
-        flex-direction: column;
+        flex-direction: column-reverse;
         align-items: flex-end;
     }
 }

@@ -122,7 +122,7 @@ public abstract class BaseMainLayout extends AppLayout
         feedbackButton.getStyle().set("border", "none").set("cursor",
                 "pointer");
 
-        container.add(link, feedbackButton);
+        container.add(feedbackButton, link);
         return container.getElement();
     }
 
