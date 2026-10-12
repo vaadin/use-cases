@@ -1,8 +1,8 @@
 package com.example.uc8;
 
 import com.example.Chapters;
+import com.example.MediaLibrary;
 import com.example.MissingAPI;
-import com.example.RangeDownloadHandler;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -68,8 +68,7 @@ public class ResumePlaybackView extends VerticalLayout {
         video.setWidth("640px");
         video.setMaxWidth("100%");
         video.setAriaLabel("Quarterly product review");
-        video.addSource(RangeDownloadHandler.forMedia(RECORDING, "video/mp4"),
-                "video/mp4");
+        video.addSource(MediaLibrary.serve(RECORDING), "video/mp4");
         add(video);
 
         if (resumeFrom.peek() > 0) {

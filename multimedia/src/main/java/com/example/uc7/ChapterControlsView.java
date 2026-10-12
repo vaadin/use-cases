@@ -4,8 +4,8 @@ import java.util.Optional;
 
 import com.example.Chapters;
 import com.example.Chapters.Chapter;
+import com.example.MediaLibrary;
 import com.example.MissingAPI;
-import com.example.RangeDownloadHandler;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -73,8 +73,8 @@ public class ChapterControlsView extends VerticalLayout
         video.setWidth("640px");
         video.setMaxWidth("100%");
         video.setAriaLabel("Quarterly product review");
-        video.addSource(RangeDownloadHandler.forMedia("quarterly-review.mp4",
-                "video/mp4"), "video/mp4");
+        video.addSource(MediaLibrary.serve("quarterly-review.mp4"),
+                "video/mp4");
         MissingAPI.addPlayingListener(video, playing::set);
         MissingAPI.addTimeUpdateListener(video, 500, position::set);
         MissingAPI.addDurationListener(video, duration::set);
