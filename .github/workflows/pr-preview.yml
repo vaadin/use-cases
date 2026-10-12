@@ -176,6 +176,18 @@ jobs:
             flyctl apps create "$APP" --org "$org"
           fi
           flyctl auth docker
+      - name: Stage the feedback webhook
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          APP: ${{ matrix.app }}
+          FEEDBACK_SLACK_WEBHOOK_URL: ${{ secrets.FEEDBACK_SLACK_WEBHOOK_URL }}
+        # Like in fly-deploy.yml, so the "Feedback" button can be tried in the
+        # preview too. Its messages link to the preview's URL.
+        run: |
+          if [ -n "$FEEDBACK_SLACK_WEBHOOK_URL" ]; then
+            flyctl secrets set --stage --app "$APP" \
+              FEEDBACK_SLACK_WEBHOOK_URL="$FEEDBACK_SLACK_WEBHOOK_URL"
+          fi
       - uses: docker/build-push-action@v5
         with:
           context: .
