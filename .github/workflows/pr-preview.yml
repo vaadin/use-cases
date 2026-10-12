@@ -63,7 +63,7 @@ jobs:
       && contains(github.event.pull_request.labels.*.name, 'deploy preview')
       && (github.event.action == 'synchronize' || github.event.action == 'reopened'
         || (github.event.action == 'labeled' && github.event.label.name == 'deploy preview'))
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       apps: ${{ steps.find.outputs.apps }}
       note: ${{ steps.find.outputs.note }}
@@ -139,7 +139,7 @@ jobs:
     needs: discover
     name: Deploy ${{ matrix.module }}
     timeout-minutes: 45
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -195,7 +195,7 @@ jobs:
     needs: [discover, deploy]
     if: always() && needs.discover.result == 'success'
     name: Comment the preview
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       # To read the outcome of each deploy job of the matrix
       actions: read
@@ -247,7 +247,7 @@ jobs:
       && ((github.event.action == 'closed' && contains(github.event.pull_request.labels.*.name, 'deploy preview'))
         || (github.event.action == 'unlabeled' && github.event.label.name == 'deploy preview'))
     timeout-minutes: 10
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - name: Destroy the Fly.io apps
