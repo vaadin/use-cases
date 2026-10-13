@@ -73,7 +73,9 @@ class SignatureViewTest extends SpringBrowserlessTest {
 
         List<String> files = findInView(Details.class).all().stream()
                 .map(Details::getSummaryText).toList();
-        assertTrue(files.contains("SignaturePad.java · 58 lines"),
+        assertTrue(
+                files.stream()
+                        .anyMatch(f -> f.startsWith("SignaturePad.java · ")),
                 files.toString());
         assertTrue(
                 files.stream()

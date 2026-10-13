@@ -23,7 +23,7 @@ import com.vaadin.flow.component.html.UnorderedList;
 public class BuiltWith extends Div {
 
     static final String SOURCE_ROOT = "https://github.com/vaadin/use-cases/"
-            + "blob/main/custom-components/src/main/";
+            + "blob/main/custom-components/src/";
 
     private final UnorderedList points = new UnorderedList();
     private final Div files = new Div();
@@ -54,7 +54,7 @@ public class BuiltWith extends Div {
      * {@code components/AddressForm}.
      */
     public BuiltWith java(String path) {
-        return file("java/com/example/" + path + ".java",
+        return file("main/java/com/example/" + path + ".java",
                 "component-sources/com/example/" + path + ".java");
     }
 
@@ -63,7 +63,7 @@ public class BuiltWith extends Div {
      * {@code components/RatingStarsTester}.
      */
     public BuiltWith testJava(String path) {
-        return file("../test/java/com/example/" + path + ".java",
+        return file("test/java/com/example/" + path + ".java",
                 "component-sources/com/example/" + path + ".java");
     }
 
@@ -72,7 +72,7 @@ public class BuiltWith extends Div {
      * {@code META-INF/resources/frontend/signature-pad.ts}.
      */
     public BuiltWith resource(String path) {
-        return file("resources/" + path, "component-sources/web/"
+        return file("main/resources/" + path, "component-sources/web/"
                 + path.substring("META-INF/resources/".length()));
     }
 
