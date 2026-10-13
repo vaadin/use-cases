@@ -24,7 +24,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.server.streams.DownloadHandler;
-import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -106,18 +105,9 @@ public class PrivateRecordingView extends VerticalLayout
         video.setWidth("640px");
         video.setMaxWidth("100%");
         video.setAriaLabel(recording.title());
-        video.addSource(
-                DownloadHandler.fromInputStream(event -> new DownloadResponse(
-                        MediaLibrary.open(recording.id() + ".mp4"),
-                        recording.id() + ".mp4", "video/mp4",
-                        MediaLibrary.bytes(recording.id() + ".mp4").length)),
+        video.addSource(MediaLibrary.serve(recording.id() + ".mp4"),
                 "video/mp4");
-        video.setPoster(
-                DownloadHandler.fromInputStream(event -> new DownloadResponse(
-                        MediaLibrary.open(recording.id() + "-poster.jpg"),
-                        recording.id() + "-poster.jpg", "image/jpeg",
-                        MediaLibrary.bytes(
-                                recording.id() + "-poster.jpg").length)));
+        video.setPoster(MediaLibrary.serve(recording.id() + "-poster.jpg"));
 
         return new Div(video, new Paragraph(recording.description()));
     }
