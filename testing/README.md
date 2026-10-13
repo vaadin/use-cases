@@ -16,6 +16,8 @@ A standalone Spring Boot demo of testing a Vaadin Flow application at every leve
 | UC10 | Accessibility checks | `uc10/AccessibilityPlaywrightIT`: axe-core over several views, a deliberately broken variant it must flag, and keyboard-only use of a form. |
 | UC11 | Load testing | Vaadin's load testing plugin records `CheckoutPlaywrightIT` into a k6 script and runs it with many virtual users; the view shows sessions, UIs and orders while it runs. |
 
+The tests can be read without cloning the project: each view lists its tests below the example, one line per test written out as a sentence, which opens to show that test's code (read from the test sources packaged with the application), with the kind of test, how long it takes and how to run it. UC9 also shows the reference screenshot its tests compare with.
+
 Demo users for UC5: `clerk` / `clerk` and `admin` / `admin`.
 
 ## Run

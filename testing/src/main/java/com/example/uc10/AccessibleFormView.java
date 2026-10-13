@@ -2,7 +2,7 @@ package com.example.uc10;
 
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
-import com.example.views.TestsNote;
+import com.example.views.TestShowcase;
 
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -76,11 +76,8 @@ public class AccessibleFormView extends VerticalLayout
         sample.setId("contact-form");
         sample.add(new H2("Contact us"), new FormLayout(name, email, message),
                 actions);
-        add(sample,
-                new TestsNote(
-                        "Playwright + axe-core: "
-                                + "uc10/AccessibilityPlaywrightIT",
-                        "Run: mvn -pl testing -am verify -Pit"));
+        add(sample, TestShowcase.playwright("uc10/AccessibilityPlaywrightIT"),
+                TestShowcase.browserless("uc10/AccessibleFormViewTest"));
     }
 
     @Override

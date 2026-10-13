@@ -4,7 +4,7 @@ import com.example.common.UseCaseDescription;
 import com.example.orders.OrderStore;
 import com.example.uc2.NewOrderView;
 import com.example.views.MainLayout;
-import com.example.views.TestsNote;
+import com.example.views.TestShowcase;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
@@ -56,10 +56,8 @@ public class EndToEndView extends VerticalLayout {
                 new RouterLink("Open the order form", NewOrderView.class),
                 count, reset);
         sample.addClassName("sample");
-        add(sample,
-                new TestsNote("TestBench: uc8/CheckoutIT",
-                        "Playwright: uc8/CheckoutPlaywrightIT",
-                        "Run: mvn -pl testing -am verify -Pit"));
+        add(sample, TestShowcase.testBench("uc8/CheckoutIT"),
+                TestShowcase.playwright("uc8/CheckoutPlaywrightIT"));
     }
 
     // Package-private test seam.

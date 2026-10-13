@@ -9,7 +9,7 @@ import com.example.orders.Product;
 import com.example.orders.QuoteCalculator;
 import com.example.uc4.OrdersView;
 import com.example.views.MainLayout;
-import com.example.views.TestsNote;
+import com.example.views.TestShowcase;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -94,9 +94,6 @@ public class NewOrderView extends VerticalLayout {
         Div sample = new Div(new H2("New order"),
                 new FormLayout(customer, product, quantity, delivery), place);
         sample.addClassName("sample");
-        add(sample, new TestsNote(
-                "View test: uc2/NewOrderViewTest (browserless)",
-                "Same flow in a real browser: uc8/CheckoutIT (TestBench), "
-                        + "uc8/CheckoutPlaywrightIT (Playwright)"));
+        add(sample, TestShowcase.browserless("uc2/NewOrderViewTest"));
     }
 }

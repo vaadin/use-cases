@@ -2,7 +2,7 @@ package com.example.uc5;
 
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
-import com.example.views.TestsNote;
+import com.example.views.TestShowcase;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -37,7 +37,6 @@ public class SecurityView extends VerticalLayout {
         Div sample = new Div(
                 new RouterLink("Open the staff desk", StaffDeskView.class));
         sample.addClassName("sample");
-        add(sample, new TestsNote("View test: uc5/StaffDeskViewTest "
-                + "(browserless, @WithMockUser per role)"));
+        add(sample, TestShowcase.browserless("uc5/StaffDeskViewTest"));
     }
 }

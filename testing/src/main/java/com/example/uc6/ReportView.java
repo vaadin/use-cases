@@ -3,7 +3,7 @@ package com.example.uc6;
 import com.example.common.UseCaseDescription;
 import com.example.orders.ReportService;
 import com.example.views.MainLayout;
-import com.example.views.TestsNote;
+import com.example.views.TestShowcase;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -68,8 +68,7 @@ public class ReportView extends VerticalLayout {
 
         Div sample = new Div(build, progress, result);
         sample.addClassName("sample");
-        add(sample, new TestsNote("View test: uc6/ReportViewTest (browserless, "
-                + "controlled executor, no sleeps)"));
+        add(sample, TestShowcase.browserless("uc6/ReportViewTest"));
     }
 
     // Package-private test seams.

@@ -97,6 +97,25 @@
 
     <build>
         <defaultGoal>spring-boot:run</defaultGoal>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <!-- The tests are what this module is about, so the views show
+                 their source and reference screenshots: both are packaged
+                 with the application. -->
+            <resource>
+                <directory>src/test/java</directory>
+                <targetPath>test-sources</targetPath>
+                <includes>
+                    <include>**/*.java</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/test/screenshots</directory>
+                <targetPath>META-INF/resources/screenshots</targetPath>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

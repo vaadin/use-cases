@@ -2,7 +2,7 @@ package com.example.uc3;
 
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
-import com.example.views.TestsNote;
+import com.example.views.TestShowcase;
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.button.Button;
@@ -159,8 +159,7 @@ public class RegistrationView extends VerticalLayout {
         Div sample = new Div(new H2("Create an account"),
                 new FormLayout(email, password, confirm, age), terms, create);
         sample.addClassName("sample");
-        add(sample, new TestsNote(
-                "View test: uc3/RegistrationViewTest (browserless)"));
+        add(sample, TestShowcase.browserless("uc3/RegistrationViewTest"));
     }
 
     // Package-private test seam.

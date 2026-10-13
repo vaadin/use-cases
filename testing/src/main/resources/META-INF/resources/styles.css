@@ -38,9 +38,45 @@
     margin-block: 0;
 }
 
-/* Where to find the tests of a use case and how to run them. */
+/* The tests of a use case, shown in the page. */
 .tests {
-    font-family: monospace;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 960px;
+}
+
+.tests h2 {
+    margin: 0.5rem 0 0;
+    font-size: 1.125rem;
+}
+
+.tests .test-kind {
+    color: var(--vaadin-text-color-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.tests .test-code {
+    margin: 0;
+    padding: 0.75rem;
+    overflow-x: auto;
     font-size: 0.8125rem;
+    border-radius: var(--vaadin-radius-m, 6px);
+    background: var(--vaadin-background-container, #f4f4f4);
+}
+
+.tests .test-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.tests .test-run {
+    font-family: monospace;
     color: var(--vaadin-text-color-secondary);
 }

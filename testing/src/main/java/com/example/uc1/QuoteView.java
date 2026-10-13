@@ -8,7 +8,7 @@ import com.example.orders.Product;
 import com.example.orders.QuoteCalculator;
 import com.example.orders.QuoteCalculator.Quote;
 import com.example.views.MainLayout;
-import com.example.views.TestsNote;
+import com.example.views.TestShowcase;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
@@ -95,10 +95,8 @@ public class QuoteView extends VerticalLayout {
                 new HorizontalLayout(productSelect, quantityField, businessBox),
                 total);
         sample.addClassName("sample");
-        add(sample, new TestsNote(
-                "Unit test: orders/QuoteCalculatorTest (plain JUnit, no Spring)",
-                "View test: uc1/QuoteViewTest (browserless)",
-                "Run: mvn -pl testing -am test"));
+        add(sample, TestShowcase.unit("orders/QuoteCalculatorTest"),
+                TestShowcase.browserless("uc1/QuoteViewTest"));
     }
 
     // Package-private test seam.

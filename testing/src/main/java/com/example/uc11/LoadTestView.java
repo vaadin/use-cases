@@ -3,7 +3,7 @@ package com.example.uc11;
 import com.example.common.UseCaseDescription;
 import com.example.orders.OrderStore;
 import com.example.views.MainLayout;
-import com.example.views.TestsNote;
+import com.example.views.TestShowcase;
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -56,11 +56,7 @@ public class LoadTestView extends VerticalLayout {
         update();
         Div sample = new Div(stats);
         sample.addClassName("sample");
-        add(sample,
-                new TestsNote("Scenario: uc8/CheckoutPlaywrightIT",
-                        "Run: mvn -pl testing -am verify -Pload "
-                                + "-Dk6.vus=20 -Dk6.duration=1m",
-                        "Scripts: testing/target/k6/tests"));
+        add(sample, TestShowcase.loadScenario("uc8/CheckoutPlaywrightIT"));
         addAttachListener(this::start);
         addDetachListener(this::stop);
     }

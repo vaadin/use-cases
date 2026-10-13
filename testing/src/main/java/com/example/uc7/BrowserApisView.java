@@ -7,7 +7,7 @@ import java.time.format.FormatStyle;
 
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
-import com.example.views.TestsNote;
+import com.example.views.TestShowcase;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -89,8 +89,7 @@ public class BrowserApisView extends VerticalLayout {
                 new ListItem(window), new ListItem(tracking));
         Div sample = new Div(facts);
         sample.addClassName("sample");
-        add(sample, new TestsNote(
-                "View test: uc7/BrowserApisViewTest (browserless)"));
+        add(sample, TestShowcase.browserless("uc7/BrowserApisViewTest"));
     }
 
     // Package-private test seams.

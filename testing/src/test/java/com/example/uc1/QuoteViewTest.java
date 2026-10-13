@@ -1,5 +1,7 @@
 package com.example.uc1;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithAnonymousUser;
@@ -7,6 +9,7 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.textfield.IntegerField;
 
@@ -36,5 +39,20 @@ class QuoteViewTest extends SpringBrowserlessTest {
 
         assertTrue(view.total().contains("5% off"), view.total());
         assertTrue(view.total().contains("shipping 7,90"), view.total());
+    }
+
+    @Test
+    void showsItsOwnTestsAsSentences() {
+        navigate(QuoteView.class);
+
+        List<String> tests = findInView(Details.class).all().stream()
+                .map(Details::getSummaryText).toList();
+
+        assertTrue(tests.contains("Small order pays shipping"),
+                tests.toString());
+        assertTrue(
+                tests.contains(
+                        "Shows the calculators quote and follows the inputs"),
+                tests.toString());
     }
 }

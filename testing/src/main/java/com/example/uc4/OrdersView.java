@@ -8,7 +8,7 @@ import com.example.orders.Order;
 import com.example.orders.OrderHistory;
 import com.example.orders.OrderStore;
 import com.example.views.MainLayout;
-import com.example.views.TestsNote;
+import com.example.views.TestShowcase;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -105,8 +105,7 @@ public class OrdersView extends VerticalLayout {
 
         Div sample = new Div(filter, grid, details);
         sample.addClassName("sample");
-        add(sample,
-                new TestsNote("View test: uc4/OrdersViewTest (browserless)"));
+        add(sample, TestShowcase.browserless("uc4/OrdersViewTest"));
     }
 
     // Package-private test seams.

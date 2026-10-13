@@ -4,7 +4,6 @@ import jakarta.annotation.security.RolesAllowed;
 
 import com.example.orders.OrderStore;
 import com.example.views.MainLayout;
-import com.example.views.TestsNote;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -54,8 +53,7 @@ public class StaffDeskView extends VerticalLayout {
 
         Div sample = new Div(new H2("Signed in as " + user), clear, logout);
         sample.addClassName("sample");
-        add(sample, new TestsNote("View test: uc5/StaffDeskViewTest "
-                + "(browserless, @WithMockUser per role)"));
+        add(sample);
     }
 
     // Package-private test seam.

@@ -6,13 +6,14 @@ import java.util.List;
 
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
-import com.example.views.TestsNote;
+import com.example.views.TestShowcase;
 
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -73,9 +74,16 @@ public class InvoiceView extends VerticalLayout {
                 total, printed);
         invoice.addClassNames("sample", "invoice");
         invoice.setId("invoice");
-        add(invoice,
-                new TestsNote("TestBench: uc9/InvoiceScreenshotIT",
-                        "Playwright: uc9/InvoiceScreenshotPlaywrightIT",
-                        "Reference images: src/test/screenshots"));
+        Image reference = new Image("screenshots/invoice-playwright.png",
+                "The reference screenshot the Playwright test compares with");
+        reference.setMaxWidth("720px");
+        Div references = new Div(new H2("The reference image"), new Paragraph(
+                "What the invoice must look like, checked in with the code. "
+                        + "The print time is masked (pink) before comparing."),
+                reference);
+        references.addClassName("tests");
+        add(invoice, references,
+                TestShowcase.playwright("uc9/InvoiceScreenshotPlaywrightIT"),
+                TestShowcase.testBench("uc9/InvoiceScreenshotIT"));
     }
 }
