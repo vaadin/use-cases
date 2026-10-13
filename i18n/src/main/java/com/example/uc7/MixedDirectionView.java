@@ -6,6 +6,7 @@ import com.example.LanguagePreference;
 import com.example.MissingAPI;
 import com.example.SupportedLocales;
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
@@ -118,6 +119,11 @@ public class MixedDirectionView extends VerticalLayout {
             ticketField.setLabel(getTranslation(locale, "uc7.ticket-id"));
             commentField.setLabel(getTranslation(locale, "uc7.comment"));
         });
+        add(new BuiltWith("Unicode isolates, <bdi> and dir=\"auto\"").point(
+                "The parameters of a translated message are wrapped in the Unicode isolate characters FSI and PDI.")
+                .point("A value shown on its own goes into a <bdi> element.")
+                .point("Free text gets dir=\"auto\", so it is aligned by its own first letter.")
+                .java("uc7/MixedDirectionView").java("MissingAPI"));
     }
 
     private static Div example(String title, Component content) {

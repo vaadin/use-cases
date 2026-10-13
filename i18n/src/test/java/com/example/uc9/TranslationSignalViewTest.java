@@ -21,7 +21,7 @@ class TranslationSignalViewTest extends SpringBrowserlessTest {
         TranslationSignalView view = navigate(TranslationSignalView.class);
         runPendingSignalsTasks();
 
-        assertEquals("UC9 — Translations as signals",
+        assertEquals("UC9 — Texts that follow the language",
                 findInView(H1.class).single().getText());
         assertEquals("Your basket", view.titleText());
         assertEquals("One item in the basket", view.itemsText());

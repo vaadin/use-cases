@@ -12,12 +12,16 @@ A standalone Spring Boot demo of making a Vaadin Flow application work for users
 | UC6 | Right-to-left layout | The whole application mirrors for Arabic and Hebrew; physical versus logical CSS side by side, and which icons mirror and which must not. |
 | UC7 | Mixed-direction text | A Latin company name and ticket number inside a Hebrew sentence, inserted naively and isolated with Unicode isolates, plus `<bdi>` and `dir="auto"` for values and free text. |
 | UC8 | Sorting and searching names | A list sorted with the language's `Collator` (Å, Ä, Ö after Z in Finnish) or plain `String.compareTo`, and a search that ignores accents and case. |
-| UC9 | Translations as signals | Texts bound once to translation signals that follow both the language and a count, without `LocaleChangeObserver` code. |
+| UC9 | Texts that follow the language | Texts bound once to translation signals that follow both the language and a count, without `LocaleChangeObserver` code. |
 | UC10 | Translated data | Categories an administrator names in every language, stored as a `LocalizedText` value of each category; users see their language or the English name marked as untranslated, and edits reach every session at once. |
 
 Translations live in `src/main/resources/vaadin-i18n/`. `translations.properties` holds the English texts and is the fallback for every other language. Only the sample part of each view (the bordered box) is translated; the explanations stay in English.
 
 The JDK's `Collator` used in UC8 predates CLDR, so it puts Ø and Ł after Z in every language. ICU4J's `Collator` follows CLDR, if an application needs that.
+
+Each view explains itself: an intro says what to try, the example shows the effect, and a "How it is built" section below it names the technique, the few points that make it work and the files involved, collapsed, each opening to the source packaged with the application.
+
+Where Flow falls short is recorded, with links to the upstream issues, in [API-GAPS.md](API-GAPS.md).
 
 ## Run
 

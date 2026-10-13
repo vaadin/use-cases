@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -154,6 +155,11 @@ public class NumbersAndCurrencyView extends VerticalLayout {
             currency.get();
             localize(locale);
         });
+        add(new BuiltWith("NumberFormat with the order's own currency").point(
+                "NumberFormat.getCurrencyInstance(locale) plus setCurrency(...): the currency is data, the format is the user's.")
+                .point("The currency's default fraction digits decide the decimals: two for euros, none for yen.")
+                .point("BigDecimalField reads the locale's decimal separator; NumberField always expects a dot.")
+                .java("uc4/NumbersAndCurrencyView"));
     }
 
     private void localize(Locale locale) {

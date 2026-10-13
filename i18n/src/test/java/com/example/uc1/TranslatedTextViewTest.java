@@ -1,5 +1,7 @@
 package com.example.uc1;
 
+import java.util.List;
+
 import com.example.SupportedLocales;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,9 +10,11 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.textfield.IntegerField;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -76,8 +80,23 @@ class TranslatedTextViewTest extends SpringBrowserlessTest {
         assertTrue(hasParagraph("!fi: uc1.newsletter"));
     }
 
+    @Test
+    void showsTheTranslationFilesItIsBuiltFrom() {
+        navigate(TranslatedTextView.class);
+
+        List<String> files = findInView(Details.class).all().stream()
+                .map(Details::getSummaryText).toList();
+        assertTrue(
+                files.stream().anyMatch(
+                        f -> f.startsWith("translations.properties · ")),
+                files.toString());
+        // The file as packaged, so the page cannot show stale texts.
+        assertTrue(findInView(Pre.class).all().stream().anyMatch(pre -> pre
+                .getText().contains("uc1.title=Thank you for your order")));
+    }
+
     private String sampleTitle() {
-        return findInView(H2.class).single().getText();
+        return findInView(H2.class).first().getText();
     }
 
     private boolean hasParagraph(String text) {

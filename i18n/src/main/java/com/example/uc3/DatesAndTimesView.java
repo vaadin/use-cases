@@ -11,6 +11,7 @@ import java.util.Locale;
 
 import com.example.MissingAPI;
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -76,6 +77,9 @@ public class DatesAndTimesView extends VerticalLayout {
         datePicker.bindValue(date, date::set);
         timePicker.bindValue(time, time::set);
         dateTimePicker.setValue(LocalDateTime.of(INITIAL_DATE, INITIAL_TIME));
+        // Fits a phone screen: the date and time parts share the width.
+        dateTimePicker.setWidthFull();
+        dateTimePicker.setMaxWidth("22rem");
 
         UnorderedList summary = new UnorderedList(
                 line(() -> format(FormatStyle.SHORT, ui.localeSignal().get())),
@@ -105,6 +109,11 @@ public class DatesAndTimesView extends VerticalLayout {
         add(sample);
 
         Signal.effect(this, () -> localize(ui.localeSignal().get()));
+        add(new BuiltWith("java.time formatters and pickers given the locale")
+                .point("DateTimeFormatter.ofLocalizedDate(style).withLocale(locale) formats the dates on the server.")
+                .point("Pickers only read the UI locale when they are attached, so an effect on UI.localeSignal() gives them the new one.")
+                .point("MissingAPI.datePickerI18n fills in month and weekday names and the first day of the week from the JDK.")
+                .java("uc3/DatesAndTimesView").java("MissingAPI"));
     }
 
     private void localize(Locale locale) {

@@ -7,6 +7,7 @@ import com.example.LanguagePreference;
 import com.example.MissingAPI;
 import com.example.SupportedLocales;
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
@@ -92,6 +93,13 @@ public class LanguageSwitcherView extends VerticalLayout {
         facts.addClassName("facts");
 
         add(languages, forget, sample, facts);
+        add(new BuiltWith(
+                "Session locale from the browser, remembered in a cookie")
+                .point("Flow picks the session's locale from the browser's Accept-Language header when the session starts.")
+                .point("A session init listener lets a remembered cookie override that choice.")
+                .point("Picking a language calls VaadinSession.setLocale, which switches every tab, and writes the cookie.")
+                .java("LanguagePreference").java("I18nConfig")
+                .java("uc2/LanguageSwitcherView"));
     }
 
     private static ListItem fact(String label, String value) {

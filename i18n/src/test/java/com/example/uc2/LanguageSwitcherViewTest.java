@@ -35,7 +35,7 @@ class LanguageSwitcherViewTest extends SpringBrowserlessTest {
             assertTrue(findInView(Button.class).all().stream()
                     .anyMatch(b -> name.equals(b.getText())), name);
         }
-        assertEquals("Welcome!", findInView(H2.class).single().getText());
+        assertEquals("Welcome!", findInView(H2.class).first().getText());
         assertFalse(button("Forget my choice").isEnabled());
         assertEquals(List.of("en-US", "en-US", "(none)", "en-US"), facts());
     }
@@ -50,7 +50,7 @@ class LanguageSwitcherViewTest extends SpringBrowserlessTest {
         assertEquals(SupportedLocales.FINNISH, UI.getCurrent().getLocale());
         assertEquals(SupportedLocales.FINNISH,
                 VaadinSession.getCurrent().getLocale());
-        assertEquals("Tervetuloa!", findInView(H2.class).single().getText());
+        assertEquals("Tervetuloa!", findInView(H2.class).first().getText());
         assertEquals(List.of("en-US", "en-US", "fi-FI", "fi-FI"), facts());
         assertTrue(button("Forget my choice").isEnabled());
     }

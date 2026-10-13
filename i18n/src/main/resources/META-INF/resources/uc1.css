@@ -1,0 +1,8 @@
+.uc1-fallback {
+    color: var(--vaadin-text-color-secondary);
+}
+
+.uc1-missing {
+    color: var(--aura-red-text, #c62828);
+    font-family: monospace;
+}

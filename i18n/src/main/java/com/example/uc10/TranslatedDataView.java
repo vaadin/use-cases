@@ -10,6 +10,7 @@ import com.example.MissingAPI;
 import com.example.SupportedLocales;
 import com.example.common.UseCaseDescription;
 import com.example.uc10.CategoryCatalog.Category;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -131,6 +132,13 @@ public class TranslatedDataView extends VerticalLayout {
             refreshEditor(entries);
         });
         edit(null);
+        add(new BuiltWith(
+                "A localized value on each item, shared across sessions")
+                .point("Each category stores its name as a LocalizedText: one text per language, with a fallback order.")
+                .point("The categories live in a SharedListSignal in an application-scoped bean, so every session sees an edit at once.")
+                .point("Users see each name in their own language, with a fallback marked as untranslated.")
+                .java("uc10/LocalizedText").java("uc10/CategoryCatalog")
+                .java("uc10/TranslatedDataView"));
     }
 
     private void show(Locale locale, List<Category> categories) {

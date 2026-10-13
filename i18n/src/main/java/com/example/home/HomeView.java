@@ -16,6 +16,7 @@ import com.example.uc8.LocaleAwareSortingView;
 import com.example.uc9.TranslationSignalView;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -37,11 +38,15 @@ public class HomeView extends BaseHomeView {
                         + "bar; every use case follows it. API-GAPS.md "
                         + "records where Flow made that harder than it "
                         + "should be.");
+        add(new H2("Texts and languages"));
         addMenuCards(
                 List.of(TranslatedTextView.class, LanguageSwitcherView.class,
-                        DatesAndTimesView.class, NumbersAndCurrencyView.class,
-                        TimeZonesView.class, RightToLeftView.class,
-                        MixedDirectionView.class, LocaleAwareSortingView.class,
                         TranslationSignalView.class, TranslatedDataView.class));
+        add(new H2("Dates, numbers and order"));
+        addMenuCards(
+                List.of(DatesAndTimesView.class, NumbersAndCurrencyView.class,
+                        TimeZonesView.class, LocaleAwareSortingView.class));
+        add(new H2("Writing direction"));
+        addMenuCards(List.of(RightToLeftView.class, MixedDirectionView.class));
     }
 }

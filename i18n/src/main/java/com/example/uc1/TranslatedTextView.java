@@ -5,9 +5,11 @@ import java.time.ZoneId;
 import java.util.Date;
 
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -37,6 +39,7 @@ import com.vaadin.flow.router.Route;
 @PageTitle("UC1 — Translated texts")
 @UseCaseDescription("Showing texts from translation files in the user's language")
 @Menu(order = 1, title = "UC1 — Translated texts")
+@StyleSheet("uc1.css")
 public class TranslatedTextView extends VerticalLayout
         implements LocaleChangeObserver {
 
@@ -67,13 +70,21 @@ public class TranslatedTextView extends VerticalLayout
         quantity.setStepButtonsVisible(true);
         quantity.addValueChangeListener(e -> updateItems());
 
-        returns.addClassName("fallback");
-        newsletter.addClassName("missing");
+        returns.addClassName("uc1-fallback");
+        newsletter.addClassName("uc1-missing");
 
         Div sample = new Div(title, greeting, quantity, items, delivery,
                 returns, newsletter, track);
         sample.addClassName("sample");
         add(sample);
+        add(new BuiltWith(
+                "Property files read by Flow's default I18NProvider, with LocaleChangeObserver")
+                .point("The texts live in vaadin-i18n/translations_<language>_<COUNTRY>.properties; translations.properties is the fallback for missing keys.")
+                .point("getTranslation(key, parameters) formats parameters, plurals ({0,choice,...}) and dates ({0,date,long}) with MessageFormat.")
+                .point("localeChange() sets every text again when the language changes.")
+                .java("uc1/TranslatedTextView")
+                .resource("vaadin-i18n/translations.properties")
+                .resource("vaadin-i18n/translations_de_DE.properties"));
     }
 
     @Override

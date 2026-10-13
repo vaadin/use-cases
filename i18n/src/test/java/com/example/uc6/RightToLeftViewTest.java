@@ -29,7 +29,7 @@ class RightToLeftViewTest extends SpringBrowserlessTest {
         assertEquals("UC6 — Right-to-left layout",
                 findInView(H1.class).single().getText());
         assertEquals("Shipping details",
-                findInView(H2.class).single().getText());
+                findInView(H2.class).first().getText());
         assertEquals("dir=\"ltr\"", view.direction());
         assertTrue(view.sample().hasClassName("mirror-icons"));
         // Only the arrows mirror; the check mark, phone and search do not.
@@ -45,7 +45,7 @@ class RightToLeftViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
         assertEquals("dir=\"rtl\"", view.direction());
         assertEquals(SupportedLocales.ARABIC, UI.getCurrent().getLocale());
-        assertEquals("بيانات الشحن", findInView(H2.class).single().getText());
+        assertEquals("بيانات الشحن", findInView(H2.class).first().getText());
 
         test(button("עברית")).click();
         runPendingSignalsTasks();

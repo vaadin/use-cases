@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
@@ -112,6 +113,11 @@ public class LocaleAwareSortingView extends VerticalLayout {
                     person -> fold(person.name(), locale).contains(term)
                             || fold(person.city(), locale).contains(term));
         });
+        add(new BuiltWith("Collator and Normalizer from the JDK").point(
+                "Collator.getInstance(locale) sorts by the language's alphabet, and is replaced when the language changes.")
+                .point("The search compares text without accents and in lowercase, using Normalizer.")
+                .point("Letters such as Ø and Ł are not a letter plus an accent, so they only match themselves.")
+                .java("uc8/LocaleAwareSortingView"));
     }
 
     static Comparator<Person> order(Locale locale, boolean localeAware) {

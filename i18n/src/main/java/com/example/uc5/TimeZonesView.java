@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
@@ -116,6 +117,9 @@ public class TimeZonesView extends VerticalLayout {
         grid.setAllRowsVisible(true);
 
         schedule.setValue(LocalDateTime.of(2026, 3, 30, 9, 0));
+        // Fits a phone screen: the date and time parts share the width.
+        schedule.setWidthFull();
+        schedule.setMaxWidth("22rem");
         add.addClickListener(e -> addCall());
         HorizontalLayout scheduling = new HorizontalLayout(schedule, add);
         scheduling.setAlignItems(Alignment.BASELINE);
@@ -147,6 +151,11 @@ public class TimeZonesView extends VerticalLayout {
             add.setText(getTranslation(locale, "uc5.add"));
             grid.getDataProvider().refreshAll();
         });
+        add(new BuiltWith("Instants stored, shown in the browser's time zone")
+                .point("Events are stored as Instant, a point in time without a time zone.")
+                .point("ExtendedClientDetails.getZoneId() gives the browser's zone from the first request; the picker overrides it.")
+                .point("A time picked in the form becomes an Instant only together with the chosen zone.")
+                .java("uc5/TimeZonesView"));
     }
 
     private void addCall() {

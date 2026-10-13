@@ -6,6 +6,7 @@ import com.example.LanguagePreference;
 import com.example.MissingAPI;
 import com.example.SupportedLocales;
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
@@ -122,6 +123,12 @@ public class RightToLeftView extends VerticalLayout {
         sample.add(title, step, form, buttons, cards);
 
         Signal.effect(this, () -> localize(ui.localeSignal().get()));
+        add(new BuiltWith("UI.setDirection kept in sync with the locale").point(
+                "A UI init listener runs an effect that calls UI.setDirection whenever the locale changes.")
+                .point("The Vaadin components mirror themselves; the application's own CSS uses logical properties such as margin-inline-start.")
+                .point("Icons that point in the reading direction get a class that flips them with :dir(rtl).")
+                .java("I18nConfig").java("uc6/RightToLeftView")
+                .resource("META-INF/resources/uc6.css"));
     }
 
     private void localize(Locale locale) {

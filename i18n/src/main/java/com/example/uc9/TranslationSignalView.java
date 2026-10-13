@@ -2,6 +2,7 @@ package com.example.uc9;
 
 import com.example.MissingAPI;
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
@@ -20,7 +21,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * UC9 — Translations as signals.
+ * UC9 — Texts that follow the language.
  * <p>
  * The same kind of texts as in UC1, without a {@code localeChange} method that
  * has to remember every text in the view. Each text is bound once to a
@@ -30,9 +31,9 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * them.
  */
 @Route(value = "uc9", layout = MainLayout.class)
-@PageTitle("UC9 — Translations as signals")
+@PageTitle("UC9 — Texts that follow the language")
 @UseCaseDescription("Binding texts to translations that follow the language by themselves")
-@Menu(order = 9, title = "UC9 — Translations as signals")
+@Menu(order = 9, title = "UC9 — Texts that follow the language")
 public class TranslationSignalView extends VerticalLayout {
 
     private final ValueSignal<Integer> count = new ValueSignal<>(1);
@@ -43,7 +44,7 @@ public class TranslationSignalView extends VerticalLayout {
     private final Button checkout = new Button();
 
     public TranslationSignalView() {
-        add(new H1("UC9 — Translations as signals"));
+        add(new H1("UC9 — Texts that follow the language"));
         add(new Paragraph("Each text below is bound once, and follows both "
                 + "the language and the number of items without any "
                 + "LocaleChangeObserver code."));
@@ -68,6 +69,11 @@ public class TranslationSignalView extends VerticalLayout {
                 items, checkout);
         sample.addClassName("sample");
         add(sample);
+        add(new BuiltWith("A computed signal over UI.localeSignal()").point(
+                "MissingAPI.translate returns Signal.computed over the locale signal and over any parameter that is a signal.")
+                .point("bindText(translate(\"uc9.items\", count)) follows both the language and the count.")
+                .point("There is no LocaleChangeObserver: each text is bound once.")
+                .java("uc9/TranslationSignalView").java("MissingAPI"));
     }
 
     // Package-private test seams.
