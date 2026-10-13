@@ -9,7 +9,7 @@ A standalone Spring Boot demo of testing a Vaadin Flow application at every leve
 | UC3 | Forms and validation | `uc3/RegistrationViewTest`: each Binder rule through the field's invalid state and message, a cross-field rule, the button enabled only for a valid form, the written bean. |
 | UC4 | Grids and lazy data | `uc4/OrdersViewTest`: a lazy Grid over 100,000 orders: size, cells, backend sorting and filtering, selection, a button inside a cell. |
 | UC5 | Security | `uc5/StaffDeskViewTest`: the login redirect for visitors, the desk for clerks, the admin-only button, with `@WithAnonymousUser` / `@WithMockUser`. |
-| UC6 | Async work and push | `uc6/ReportViewTest`: a background job on an executor bean that the test replaces (`@TestBean`) with one it runs by hand, then the queued `UI.access` commands; no sleeps. |
+| UC6 | Async work and push | `uc6/ReportViewTest`: a background job on an executor bean that the test replaces (`@TestBean`) with one it runs by hand; the job sets signals the view is bound to; no sleeps. |
 | UC7 | Browser APIs in tests | `uc7/BrowserApisViewTest`: geolocation through its simulator, the locale set directly, page visibility through a faked browser event, and the time zone that cannot be set. |
 | UC8 | End-to-end in a real browser | `uc8/CheckoutIT` (TestBench) and `uc8/CheckoutPlaywrightIT` (Playwright): place an order and find it in the list, in Chrome, against the packaged app. |
 | UC9 | Visual regression | `uc9/InvoiceScreenshotIT` (TestBench `compareScreen`) and `uc9/InvoiceScreenshotPlaywrightIT` (masked element screenshot and a small comparator), against `src/test/screenshots`. |
@@ -17,6 +17,8 @@ A standalone Spring Boot demo of testing a Vaadin Flow application at every leve
 | UC11 | Load testing | Vaadin's load testing plugin records `CheckoutPlaywrightIT` into a k6 script and runs it with many virtual users; the view shows sessions, UIs and orders while it runs. |
 
 The tests can be read without cloning the project: each view lists its tests below the example, one line per test written out as a sentence, which opens to show that test's code (read from the test sources packaged with the application), with the kind of test, how long it takes and how to run it. UC9 also shows the reference screenshot its tests compare with.
+
+Where the tools fall short is recorded, with links to the upstream issues, in [API-GAPS.md](API-GAPS.md).
 
 Demo users for UC5: `clerk` / `clerk` and `admin` / `admin`.
 

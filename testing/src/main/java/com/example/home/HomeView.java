@@ -17,6 +17,7 @@ import com.example.uc8.EndToEndView;
 import com.example.uc9.InvoiceView;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -41,10 +42,14 @@ public class HomeView extends BaseHomeView {
                         + "end-to-end test. The tests are in "
                         + "src/test/java; API-GAPS.md records where Flow "
                         + "made testing harder than it should be.");
+        add(new H2("Without a browser"));
         addMenuCards(List.of(QuoteView.class, NewOrderView.class,
                 RegistrationView.class, OrdersView.class, SecurityView.class,
-                ReportView.class, BrowserApisView.class, EndToEndView.class,
-                InvoiceView.class, AccessibleFormView.class,
-                LoadTestView.class));
+                ReportView.class, BrowserApisView.class));
+        add(new H2("In a real browser"));
+        addMenuCards(List.of(EndToEndView.class, InvoiceView.class,
+                AccessibleFormView.class));
+        add(new H2("Under load"));
+        addMenuCards(List.of(LoadTestView.class));
     }
 }

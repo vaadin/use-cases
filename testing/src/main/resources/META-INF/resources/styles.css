@@ -2,8 +2,9 @@
 
 .home-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
     gap: 1rem;
+    width: 100%;
     max-width: 960px;
 }
 
@@ -79,4 +80,25 @@
 .tests .test-run {
     font-family: monospace;
     color: var(--vaadin-text-color-secondary);
+}
+
+/* Long words wrap and code scrolls in its own box on narrow screens. */
+vaadin-vertical-layout h1 {
+    overflow-wrap: anywhere;
+}
+
+pre {
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+@media (max-width: 640px) {
+    .sample {
+        padding: 0.75rem;
+    }
+
+    .sample vaadin-horizontal-layout {
+        flex-wrap: wrap;
+    }
 }

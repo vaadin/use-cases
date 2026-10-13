@@ -18,7 +18,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
-import com.vaadin.browserless.internal.MockVaadin;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -63,17 +62,17 @@ class ReportViewTest extends SpringBrowserlessTest {
         ReportView view = navigate(ReportView.class);
 
         test(view.buildButton()).click();
+        runPendingSignalsTasks();
 
         assertFalse(view.buildButton().isEnabled());
         assertTrue(view.progress().isVisible());
         assertEquals("Building…", view.result());
         assertEquals(1, EXECUTOR.pending());
 
-        // The background job finishes now. Its UI.access command is queued
-        // until the queue runs; the public roundTrip() does not run it, so
-        // the internal helper does (see API-GAPS.md).
+        // The background job finishes now and sets the signals; the
+        // bindings update the view when the pending signal tasks run.
         EXECUTOR.runAll();
-        MockVaadin.runUIQueue();
+        runPendingSignalsTasks();
 
         assertTrue(view.buildButton().isEnabled());
         assertFalse(view.progress().isVisible());
@@ -90,7 +89,7 @@ class ReportViewTest extends SpringBrowserlessTest {
 
         test(view.buildButton()).click();
         EXECUTOR.runAll();
-        MockVaadin.runUIQueue();
+        runPendingSignalsTasks();
 
         assertTrue(view.buildButton().isEnabled());
         assertFalse(view.progress().isVisible());

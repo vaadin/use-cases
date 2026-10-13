@@ -4,10 +4,7 @@ import com.example.common.UseCaseDescription;
 import com.example.orders.OrderStore;
 import com.example.views.MainLayout;
 import com.example.views.TestShowcase;
-import org.jspecify.annotations.Nullable;
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -42,7 +39,6 @@ public class LoadTestView extends VerticalLayout {
     private final SessionCounter counter;
     private final OrderStore store;
     private final Span stats = new Span();
-    private @Nullable Registration polling;
 
     public LoadTestView(SessionCounter counter, OrderStore store) {
         this.counter = counter;
@@ -57,21 +53,15 @@ public class LoadTestView extends VerticalLayout {
         Div sample = new Div(stats);
         sample.addClassName("sample");
         add(sample, TestShowcase.loadScenario("uc8/CheckoutPlaywrightIT"));
-        addAttachListener(this::start);
-        addDetachListener(this::stop);
-    }
-
-    private void start(AttachEvent event) {
-        event.getUI().setPollInterval(1000);
-        polling = event.getUI().addPollListener(e -> update());
-    }
-
-    private void stop(DetachEvent event) {
-        event.getUI().setPollInterval(-1);
-        if (polling != null) {
-            polling.remove();
-            polling = null;
-        }
+        // Poll while the view is open, and stop when the user leaves.
+        whenAttached(ui -> {
+            ui.setPollInterval(1000);
+            Registration poll = ui.addPollListener(e -> update());
+            return () -> {
+                poll.remove();
+                ui.setPollInterval(-1);
+            };
+        });
     }
 
     void update() {
