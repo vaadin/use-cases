@@ -6,6 +6,7 @@ import com.example.components.Address;
 import com.example.components.Money;
 import org.springframework.stereotype.Component;
 
+import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.shared.SharedListSignal;
 
 /**
@@ -38,7 +39,12 @@ public class TicketStore {
                 .findFirst().ifPresent(t -> t.set(ticket));
     }
 
+    /** Restores the sample tickets, in one step for every open desk. */
     public void reset() {
+        Signal.runInTransaction(this::fill);
+    }
+
+    private void fill() {
         tickets.clear();
         tickets.insertLast(
                 new Ticket(4521, "Espresso machine leaks", "Kestrel Air",

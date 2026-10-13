@@ -1,5 +1,7 @@
 package com.example.uc10;
 
+import java.util.List;
+
 import com.example.components.Money;
 import com.example.components.RatingStars;
 import com.example.components.RatingStarsTester;
@@ -155,6 +157,35 @@ class ServiceDeskViewTest extends SpringBrowserlessTest {
         // The ticket being worked on here stays selected.
         assertEquals(4522, view.grid().asSingleSelect().getValue().id());
         assertTrue(view.detail().getContent().isVisible());
+    }
+
+    @Test
+    void anotherSessionsSaveOfTheOpenTicketRefreshesTheDetail() {
+        ServiceDeskView view = navigate(ServiceDeskView.class);
+        test(view.grid()).select(0);
+        assertEquals(0, view.detail().rating().getValue());
+
+        store.save(store.all().getFirst().withEdits(4, null, "#dc2626", false));
+        runAllPendingSignalsTasks();
+
+        // The form shows the stored ticket, so saving here can not undo
+        // the other session's change without the user seeing it.
+        assertEquals(4, view.detail().rating().getValue());
+        assertEquals("Ticket #4521 was changed in another session",
+                test($(Notification.class).last()).getText());
+    }
+
+    @Test
+    void ownSaveIsNotReportedAsAnotherSessions() {
+        ServiceDeskView view = navigate(ServiceDeskView.class);
+        test(view.grid()).select(0);
+
+        test(RatingStarsTester.class, view.detail().rating()).rate(2);
+        test(view.detail().saveButton()).click();
+        runAllPendingSignalsTasks();
+
+        assertEquals(List.of("Ticket #4521 saved"), $(Notification.class).all()
+                .stream().map(n -> test(n).getText()).toList());
     }
 
     @Test

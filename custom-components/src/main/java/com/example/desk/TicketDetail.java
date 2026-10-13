@@ -1,5 +1,7 @@
 package com.example.desk;
 
+import java.util.Objects;
+
 import com.example.components.AddressForm;
 import com.example.components.ColorPicker;
 import com.example.components.MoneyField;
@@ -113,6 +115,11 @@ public class TicketDetail extends Composite<VerticalLayout> {
                 label.getColor(), closing);
         setTicket(saved);
         fireEvent(new TicketSavedEvent(this, saved));
+    }
+
+    /** Whether this detail last showed or saved exactly this ticket. */
+    public boolean isShowing(@Nullable Ticket other) {
+        return Objects.equals(ticket, other);
     }
 
     public Registration addTicketSavedListener(

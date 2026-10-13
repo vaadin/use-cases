@@ -48,8 +48,8 @@ public class ServiceDeskView extends VerticalLayout {
 
     private final Grid<Ticket> grid = new Grid<>();
     private final SplitLayout split = new SplitLayout();
-    private boolean refreshing;
     private final TicketDetail detail = new TicketDetail();
+    private boolean refreshing;
 
     public ServiceDeskView(TicketStore store) {
         setSizeFull();
@@ -88,11 +88,24 @@ public class ServiceDeskView extends VerticalLayout {
             Ticket selected = grid.asSingleSelect().getValue();
             refreshing = true;
             grid.setItems(tickets);
-            if (selected != null) {
-                tickets.stream().filter(t -> t.id() == selected.id())
-                        .findFirst().ifPresent(grid::select);
+            Ticket current = selected == null ? null
+                    : tickets.stream().filter(t -> t.id() == selected.id())
+                            .findFirst().orElse(null);
+            if (current != null) {
+                grid.select(current);
             }
             refreshing = false;
+            // Changed or removed in another session (this detail's own save
+            // already shows the new ticket): show what is stored now, so a
+            // later save here does not quietly undo that change.
+            if (selected != null && !selected.equals(current)
+                    && !detail.isShowing(current)) {
+                detail.setTicket(current);
+                if (current != null) {
+                    Notification.show("Ticket #" + current.id()
+                            + " was changed in another session");
+                }
+            }
         });
 
         detail.addTicketSavedListener(e -> {
