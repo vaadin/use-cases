@@ -13,15 +13,17 @@ views: it is what the people building the feature read.
 **Symptom:** what the use case could not do, or had to work around.
 **Workaround used:** e.g. a helper in `MissingAPI`, an `executeJs` call.
 **Suggested API:** the signature or behaviour that would remove the gap.
-Upstream: https://github.com/vaadin/<repo>/issues/<n>
+Upstream: https://github.com/vaadin/<repo>/issues/<n>  (only if one exists)
 ```
 
 - Number the entries, so views, Javadoc and the README can refer to them
   (`API-GAPS.md #8`).
 - Ground each entry in the feature's source: name the class or method that
   falls short, not only the symptom.
-- Link the upstream issue. When none exists, open one in the feature's
-  repository and link it, so the gap gets fixed and not only documented.
+- Search the feature's repository for an upstream issue and link it when one
+  exists. When none exists, leave the `Upstream:` line out. Don't open an
+  issue just to have something to link: the `API-GAPS.md` entry is the
+  record of the gap.
 - Gap classes worth checking for every feature: no test simulator for the
   browserless tests, a missing signal-based binding where the rest of Flow has
   one, a one-shot API for a naturally continuous feature (or the other way
@@ -51,5 +53,6 @@ class, a route), update the entry in the same pull request.
 
 A workaround that a view needs until the real API exists lives in the module's
 `com.example.MissingAPI` class, or next to the one use case that needs it. Its
-Javadoc names the upstream issue and says how to migrate once the API lands, so
-it can be deleted without detective work.
+Javadoc names the `API-GAPS.md` entry (and the upstream issue, when one exists)
+and says how to migrate once the API lands, so it can be deleted without
+detective work.
