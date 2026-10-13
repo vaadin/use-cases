@@ -46,8 +46,9 @@ class FeedbackDialog extends Dialog {
         contact.setMaxLength(SlackFeedback.MAX_CONTACT_LENGTH);
 
         VerticalLayout content = new VerticalLayout(new Paragraph(
-                "Is this use case wrong, could it be better, or is something "
-                        + "missing? Tell us, it goes straight to the team."),
+                "Did this use case help you, or could it be better? We'd love "
+                        + "to hear what works, what doesn't and what's missing. "
+                        + "It goes straight to the team."),
                 message, contact);
         content.setPadding(false);
         add(content);
