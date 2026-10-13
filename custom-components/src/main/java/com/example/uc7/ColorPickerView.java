@@ -6,6 +6,7 @@ import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import com.example.views.Sample;
 
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -29,6 +30,7 @@ import com.vaadin.flow.router.Route;
 @PageTitle("UC7 — React component")
 @UseCaseDescription("Using a React component from npm as a Vaadin component")
 @Menu(order = 7, title = "UC7 — React component")
+@StyleSheet("uc7.css")
 public class ColorPickerView extends VerticalLayout {
 
     private final ColorPicker picker = new ColorPicker();
@@ -40,9 +42,7 @@ public class ColorPickerView extends VerticalLayout {
         add(new Paragraph("Drag in the picker or type a color: both stay "
                 + "in sync, and the label below uses the color."));
 
-        label.getStyle().set("padding", "0.25rem 0.75rem")
-                .set("border-radius", "999px").set("color", "white")
-                .set("font-weight", "600");
+        label.addClassName("uc7-label");
         hex.setValue(ColorPicker.DEFAULT);
         hex.setPattern("#[0-9a-fA-F]{6}");
         hex.addValueChangeListener(e -> {

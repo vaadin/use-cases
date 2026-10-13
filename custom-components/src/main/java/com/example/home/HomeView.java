@@ -17,6 +17,7 @@ import com.example.uc8.StylingView;
 import com.example.uc9.TestingView;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -38,9 +39,14 @@ public class HomeView extends BaseHomeView {
                         + "assembled from them, and how they would ship as "
                         + "an add-on. API-GAPS.md records where Flow made "
                         + "that harder than it should be.");
+        add(new H2("Built in Java"));
         addMenuCards(List.of(AddressFormView.class, MoneyFieldView.class,
-                RatingView.class, SparklineView.class, SignatureView.class,
-                QrCodeView.class, ColorPickerView.class, StylingView.class,
-                TestingView.class, ServiceDeskView.class, PackagingView.class));
+                RatingView.class, SparklineView.class));
+        add(new H2("Built on web components"));
+        addMenuCards(List.of(SignatureView.class, QrCodeView.class,
+                ColorPickerView.class));
+        add(new H2("Around the components"));
+        addMenuCards(List.of(StylingView.class, TestingView.class,
+                ServiceDeskView.class, PackagingView.class));
     }
 }

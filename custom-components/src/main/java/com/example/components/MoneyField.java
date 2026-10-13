@@ -44,7 +44,8 @@ public class MoneyField extends CustomField<@Nullable Money> {
         // CustomField takes its value from the browser's "change" event of
         // the whole field, so a change made to an inner field on the server
         // (or in a test) would never reach it. Updating on the inner fields'
-        // own value changes covers both.
+        // own value changes covers both (API-GAPS.md #1,
+        // vaadin/flow-components#10426).
         amount.addValueChangeListener(e -> updateValue());
         currency.addValueChangeListener(e -> updateValue());
     }

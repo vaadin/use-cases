@@ -85,7 +85,8 @@ public class RatingStars
             return;
         }
         // A value from the user is already "shown" as far as
-        // AbstractCompositeField is concerned, so the stars are drawn here.
+        // AbstractCompositeField is concerned, so the stars are drawn here
+        // (API-GAPS.md #2, vaadin/flow#11392).
         render(rating);
         setModelValue(rating, true);
         if (rating <= 2) {

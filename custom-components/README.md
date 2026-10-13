@@ -30,6 +30,10 @@ npm packages: declared with @NpmPackage on QrCode and ColorPicker
 
 Moved into a jar of their own, the components work in another application unchanged: Vaadin copies the frontend files out of the jar, adds the npm packages to the application's `package.json` and bundles everything when that application builds.
 
+The TypeScript of the components lives in `src/main/resources/META-INF/resources/frontend/` rather than `src/main/frontend/`, because that is where an add-on jar carries it (UC11).
+
+Where Flow falls short is recorded, with links to the upstream issues, in [API-GAPS.md](API-GAPS.md).
+
 ## Run
 
 ```

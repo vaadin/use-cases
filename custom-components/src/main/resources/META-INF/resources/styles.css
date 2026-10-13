@@ -2,8 +2,9 @@
 
 .home-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
     gap: 1rem;
+    width: 100%;
     max-width: 960px;
 }
 
@@ -90,4 +91,10 @@
 .sample pre {
     max-width: 100%;
     overflow-x: auto;
+}
+
+/* Long words wrap on narrow screens. */
+vaadin-vertical-layout h1,
+.built-with .points {
+    overflow-wrap: anywhere;
 }

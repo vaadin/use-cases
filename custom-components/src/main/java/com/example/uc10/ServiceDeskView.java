@@ -1,5 +1,7 @@
 package com.example.uc10;
 
+import java.util.List;
+
 import com.example.common.UseCaseDescription;
 import com.example.components.RatingStars;
 import com.example.components.RatingStarsVariant;
@@ -46,6 +48,7 @@ public class ServiceDeskView extends VerticalLayout {
 
     private final Grid<Ticket> grid = new Grid<>();
     private final SplitLayout split = new SplitLayout();
+    private boolean refreshing;
     private final TicketDetail detail = new TicketDetail();
 
     public ServiceDeskView(TicketStore store) {
@@ -73,13 +76,27 @@ public class ServiceDeskView extends VerticalLayout {
                 .setHeader("Response").setKey("trend").setAutoWidth(true);
         grid.addColumn(ticket -> ticket.closed() ? "Closed" : "Open")
                 .setHeader("Status").setKey("status");
-        grid.setItems(store.all());
-        grid.asSingleSelect()
-                .addValueChangeListener(e -> detail.setTicket(e.getValue()));
+        grid.asSingleSelect().addValueChangeListener(e -> {
+            if (!refreshing) {
+                detail.setTicket(e.getValue());
+            }
+        });
+        // The list follows the shared store, so a ticket saved in another
+        // session shows up here at once; the selected row stays selected.
+        Signal.effect(this, () -> {
+            List<Ticket> tickets = store.tickets().getValues().toList();
+            Ticket selected = grid.asSingleSelect().getValue();
+            refreshing = true;
+            grid.setItems(tickets);
+            if (selected != null) {
+                tickets.stream().filter(t -> t.id() == selected.id())
+                        .findFirst().ifPresent(grid::select);
+            }
+            refreshing = false;
+        });
 
         detail.addTicketSavedListener(e -> {
             store.save(e.getTicket());
-            grid.setItems(store.all());
             Notification.show("Ticket #" + e.getTicket().id()
                     + (e.getTicket().closed() ? " closed" : " saved"));
         });

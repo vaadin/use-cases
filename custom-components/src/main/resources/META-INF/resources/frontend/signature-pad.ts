@@ -71,7 +71,8 @@ export class SignaturePad extends LitElement {
 
   /**
    * Empties the pad. The server may call this before the element has
-   * rendered its canvas, so it waits for the first render.
+   * rendered its canvas, so it waits for the first render (API-GAPS.md #3,
+   * vaadin/flow#6007).
    */
   async clear() {
     await this.updateComplete;

@@ -6,7 +6,7 @@ import com.example.components.RatingStarsTester;
 import com.example.desk.Ticket;
 import com.example.desk.TicketDetail;
 import com.example.desk.TicketStore;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,9 +35,20 @@ class ServiceDeskViewTest extends SpringBrowserlessTest {
     @Autowired
     private TicketStore store;
 
-    @AfterEach
+    /**
+     * The store is shared by every test. It is reset inside the test's session,
+     * where a change to a shared signal applies with the pending signal tasks.
+     */
+    @BeforeEach
     void resetStore() {
         store.reset();
+        runAllPendingSignalsTasks();
+    }
+
+    private void runAllPendingSignalsTasks() {
+        while (runPendingSignalsTasks()) {
+            // until nothing is pending
+        }
     }
 
     @Test
@@ -122,6 +133,28 @@ class ServiceDeskViewTest extends SpringBrowserlessTest {
                 fireDomEvent("window-resize", data);
             }
         }.fire();
+    }
+
+    @Test
+    void aSaveInAnotherSessionShowsInAnOpenDesk() {
+        ServiceDeskView view = navigate(ServiceDeskView.class);
+        test(view.grid()).select(1);
+
+        // Another user, in another session, saves a ticket: the shared bean
+        // changes directly from the test thread.
+        Ticket edited = store.all().getFirst().withEdits(5, null, "#dc2626",
+                false);
+        store.save(edited);
+        // The change applies in one round of pending signal tasks, and the
+        // effect that redraws the list runs in the next.
+        runAllPendingSignalsTasks();
+
+        RatingStars rating = (RatingStars) test(view.grid()).getCellComponent(0,
+                "rating");
+        assertEquals(5, rating.getValue());
+        // The ticket being worked on here stays selected.
+        assertEquals(4522, view.grid().asSingleSelect().getValue().id());
+        assertTrue(view.detail().getContent().isVisible());
     }
 
     @Test
