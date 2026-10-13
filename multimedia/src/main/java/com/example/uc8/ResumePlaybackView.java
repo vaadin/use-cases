@@ -1,8 +1,8 @@
 package com.example.uc8;
 
 import com.example.Chapters;
+import com.example.MediaLibrary;
 import com.example.MissingAPI;
-import com.example.RangeDownloadHandler;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -24,9 +24,11 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * <p>
  * A learning platform remembers how far the user got in a recording. When they
  * come back — after navigating away or reloading — the player continues from
- * there, and a "Start over" button rewinds. The position is saved every few
- * seconds while playing and whenever playback pauses; finishing the recording
- * forgets it.
+ * there, and a "Start over" button rewinds. The player waits at that position
+ * instead of starting by itself: after a reload the page has no user gesture
+ * yet, so browsers block autoplay of a video with sound. The position is saved
+ * every few seconds while playing and whenever playback pauses; finishing the
+ * recording forgets it.
  * <p>
  * The server needs to read the playback position and set the start position,
  * neither of which the component exposes; {@link MissingAPI} fills in.
@@ -48,7 +50,10 @@ public class ResumePlaybackView extends VerticalLayout {
         add(new H1("UC8 — Resume playback"));
         add(new Paragraph("Play part of the recording, then open another use "
                 + "case or reload the page. When you return, the player "
-                + "continues where you stopped."));
+                + "is ready to continue where you stopped — press play. "
+                + "It does not start by itself, because browsers block a "
+                + "video with sound from playing before you have interacted "
+                + "with the page."));
 
         resumeFrom = new ValueSignal<>(positions.get(RECORDING).orElse(0.0));
 
@@ -68,8 +73,7 @@ public class ResumePlaybackView extends VerticalLayout {
         video.setWidth("640px");
         video.setMaxWidth("100%");
         video.setAriaLabel("Quarterly product review");
-        video.addSource(RangeDownloadHandler.forMedia(RECORDING, "video/mp4"),
-                "video/mp4");
+        video.addSource(MediaLibrary.serve(RECORDING), "video/mp4");
         add(video);
 
         if (resumeFrom.peek() > 0) {

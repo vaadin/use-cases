@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.Video;
 
@@ -29,6 +30,8 @@ class AdaptiveStreamingViewTest extends SpringBrowserlessTest {
         assertTrue(source.getSrc().endsWith("/index.m3u8"),
                 "handler URL should end with the playlist name, was "
                         + source.getSrc());
+        assertEquals(3, findInView(ListItem.class).all().size(),
+                "one explanation per rendition");
         // The playback path is only known once the browser has answered.
         assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> s.getText().equals("Playback: checking…")));

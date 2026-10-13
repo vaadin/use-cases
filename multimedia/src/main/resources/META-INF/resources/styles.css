@@ -35,16 +35,7 @@
     border-color: color-mix(in srgb, var(--aura-green) 40%, transparent);
 }
 
-.side-by-side {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    width: 100%;
-    max-width: 1100px;
-}
-
-.player-slot video,
-.side-by-side video {
+.player-slot video {
     display: block;
     border-radius: var(--vaadin-radius-m);
     background: black;
