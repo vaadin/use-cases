@@ -47,6 +47,28 @@
 
     <build>
         <defaultGoal>spring-boot:run</defaultGoal>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <!-- The views show how they are built, from the sources packaged
+                 with the application. The stylesheets are copied as written:
+                 the production build minifies the copies it serves. -->
+            <resource>
+                <directory>src/main/java</directory>
+                <targetPath>shown-sources</targetPath>
+                <includes>
+                    <include>**/*.java</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources/META-INF/resources</directory>
+                <targetPath>shown-sources/web</targetPath>
+                <includes>
+                    <include>*.css</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

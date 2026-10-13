@@ -3,6 +3,7 @@ package com.example.uc2;
 import com.example.Appearance;
 import com.example.MissingAPI;
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.ComponentShowcase;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
@@ -94,6 +95,12 @@ public class DarkModeView extends VerticalLayout {
         cards.addClassName("cards");
 
         add(scheme, status, cards, new ComponentShowcase());
+        add(new BuiltWith("Page.setColorScheme and a media query").point(
+                "Page.setColorScheme(LIGHT, DARK or SYSTEM) sets the page's CSS color-scheme, and the components follow it.")
+                .point("The server learns what the system prefers through matchMedia, reported back as an event.")
+                .point("The choice is kept in a cookie and read when the next session starts.")
+                .java("uc2/DarkModeView").java("MissingAPI").java("Appearance")
+                .css("uc2.css"));
     }
 
     private static Div card(String kind, String title, String css) {

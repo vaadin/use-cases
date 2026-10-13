@@ -10,7 +10,8 @@ import com.vaadin.flow.component.page.Push;
 @SpringBootApplication
 // The theme itself (Aura or Lumo) is not loaded here: an annotation-loaded
 // stylesheet cannot be removed again, and UC9 switches between the two at
-// runtime. AppearanceSetup adds it to every UI instead.
+// runtime. AppearanceSetup adds it to every UI instead (API-GAPS.md #1,
+// vaadin/flow#26389).
 @StyleSheet("styles.css")
 // An appearance change made in one tab is applied to every open tab of the
 // session, which only shows up there through server push.

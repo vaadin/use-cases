@@ -34,8 +34,8 @@ public final class MissingAPI {
      * <p>
      * Gap: the server cannot see the user's color scheme, contrast or motion
      * preferences. {@code ExtendedClientDetails#getColorScheme} only returns
-     * what the application itself set. Migrate to built-in signals for these
-     * preferences once Flow has them.
+     * what the application itself set (API-GAPS.md #2, vaadin/flow#26390).
+     * Migrate to built-in signals for these preferences once Flow has them.
      */
     public static Signal<@Nullable Boolean> mediaQuery(Component owner,
             String query) {
@@ -68,8 +68,9 @@ public final class MissingAPI {
      * Gap: {@code UI#getElement()} is the {@code <body>}. Tokens that the
      * themes compute from other tokens on {@code :root} (such as Aura's accent
      * color) do not pick up an override set on a descendant, so the override
-     * has to go on {@code <html>}, which the server cannot reach. Migrate to a
-     * server-side handle for the root element once there is one.
+     * has to go on {@code <html>}, which the server cannot reach (API-GAPS.md
+     * #5, vaadin/flow#26393). Migrate to a server-side handle for the root
+     * element's style once there is one.
      */
     public static void setRootProperties(UI ui,
             Map<String, @Nullable String> properties) {
@@ -117,7 +118,8 @@ public final class MissingAPI {
      * <p>
      * Gap: Flow has no API to persist a user's appearance choices, and with
      * WebSocket push there is no HTTP response to put a {@code Set-Cookie}
-     * header in.
+     * header in (API-GAPS.md #3, vaadin/flow#26391). Migrate to a built-in
+     * client preference store once there is one.
      */
     public static void writeCookie(String name, String value) {
         UI.getCurrent().getPage()

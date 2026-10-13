@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -121,6 +122,11 @@ public class SingleInstanceView extends VerticalLayout {
                 stockRow);
         sample.addClassName("sample");
         add(sample);
+        add(new BuiltWith("Part names, classes and inline properties").point(
+                "Grid.setPartNameGenerator gives each row a part name from its data, styled with vaadin-grid::part(overdue).")
+                .point("A class plus ::part(input-field) styles one field only.")
+                .point("bindClassName turns a class on and off from a signal.")
+                .java("uc7/SingleInstanceView").css("uc7.css"));
     }
 
     // Package-private test seams.

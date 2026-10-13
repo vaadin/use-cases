@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.example.Appearance;
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
@@ -101,6 +102,11 @@ public class VariantsView extends VerticalLayout {
         Div custom = section("Custom CSS", row(gradient, purple, pill));
 
         add(generic, specific, custom);
+        add(new BuiltWith("Theme variants and component custom properties")
+                .point("Generic variants such as ButtonVariant.PRIMARY or ERROR are styled by both themes.")
+                .point("Variants named after a theme (AURA_DANGER, LUMO_CONTRAST) are styled only by that theme.")
+                .point("A custom look sets the button's own properties, such as --vaadin-button-background, in a class.")
+                .java("uc6/VariantsView").css("uc6.css"));
     }
 
     private static Div section(String title, Component... content) {

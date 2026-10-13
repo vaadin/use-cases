@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.example.Appearance;
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.ComponentShowcase;
 import com.example.views.MainLayout;
 
@@ -79,6 +80,12 @@ public class TenantThemeView extends VerticalLayout {
         css.bindVisible(tenant.map(Optional::isPresent));
 
         add(tenantSelect, header, css, new ComponentShowcase());
+        add(new BuiltWith("A stylesheet generated from customer data").point(
+                "Each customer stores a few token values, validated so that they can not inject CSS.")
+                .point("A Spring endpoint serves the generated stylesheet at /tenant-theme/<id>.css.")
+                .point("Signing in adds that stylesheet after the theme; signing out removes it.")
+                .java("uc3/Tenant").java("uc3/TenantStyleSheetController")
+                .java("uc3/TenantThemeView"));
     }
 
     // Package-private test seams.

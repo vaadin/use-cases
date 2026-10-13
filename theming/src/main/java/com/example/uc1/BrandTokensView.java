@@ -2,6 +2,7 @@ package com.example.uc1;
 
 import com.example.Appearance;
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.ComponentShowcase;
 import com.example.views.MainLayout;
 
@@ -59,6 +60,11 @@ public class BrandTokensView extends VerticalLayout {
 
         brand.bindValue(appearance.brand(), appearance::setBrand);
         add(brand, new Pre(TOKENS), new ComponentShowcase());
+        add(new BuiltWith("A brand stylesheet of design tokens").point(
+                "brand.css overrides six of the theme's tokens on :root; the theme derives everything else from them.")
+                .point("It sets both Aura's and Lumo's tokens, so it works with either theme.")
+                .point("The checkbox adds or removes the stylesheet with Page.addStyleSheet and the Registration it returns.")
+                .css("brand.css").java("AppearanceSetup"));
     }
 
     // Package-private test seam.

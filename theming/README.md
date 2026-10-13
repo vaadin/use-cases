@@ -16,6 +16,10 @@ A standalone Spring Boot demo of making a Vaadin Flow application look the way i
 
 A picker in the top bar switches between Aura and Lumo from every view, and every use case works in both; where a token exists only in one theme (Aura's base font size and contrast level), the other theme gets an equivalent override. The theme is not loaded with `@StyleSheet`: an annotation-loaded stylesheet cannot be removed, and UC9 switches themes at runtime. `AppearanceSetup` adds the theme, the brand and customer stylesheets and the user's overrides to every UI from the session's `Appearance`.
 
+Each view explains itself: an intro says what to try, the example shows the effect, and a "How it is built" section below it names the technique, the few points that make it work and the files involved, collapsed, each opening to the source packaged with the application.
+
+Where Flow falls short is recorded, with links to the upstream issues, in [API-GAPS.md](API-GAPS.md).
+
 ## Run
 
 ```

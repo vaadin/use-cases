@@ -3,6 +3,7 @@ package com.example.uc9;
 import com.example.Appearance;
 import com.example.BaseTheme;
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.ComponentShowcase;
 import com.example.views.MainLayout;
 
@@ -69,6 +70,12 @@ public class ThemeSwitchView extends VerticalLayout {
         tokens.addClassName("status");
 
         add(themeSelect, tokens, new ComponentShowcase());
+        add(new BuiltWith("The theme stylesheet swapped at runtime").point(
+                "The theme is not on the app shell, where it could not be removed; each UI adds it with Page.addStyleSheet.")
+                .point("Switching removes it and adds the other theme, then adds again the stylesheets that must come after the theme.")
+                .point("The picker in the header and this one share the same session setting.")
+                .java("AppearanceSetup").java("Application")
+                .java("views/MainLayout"));
     }
 
     private static ListItem token(String what, String aura, String lumo) {

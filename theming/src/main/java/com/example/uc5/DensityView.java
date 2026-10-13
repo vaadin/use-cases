@@ -6,6 +6,7 @@ import java.util.stream.IntStream;
 import com.example.Appearance;
 import com.example.BaseTheme;
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -136,6 +137,10 @@ public class DensityView extends VerticalLayout {
                             + "comfortable preset" : "");
         });
         addDetachListener(e -> setLumoCompact(ui, false));
+        add(new BuiltWith("Aura's density theme names on one container").point(
+                "theme=\"small\" or theme=\"large\" on the work area scales Aura's sizes for that part only, bound with bindAttribute.")
+                .point("Lumo's compact preset redefines its sizes on :root, so with Lumo it shrinks the whole page while the view is open.")
+                .point("Lumo has no larger preset.").java("uc5/DensityView"));
     }
 
     private void setLumoCompact(UI ui, boolean on) {

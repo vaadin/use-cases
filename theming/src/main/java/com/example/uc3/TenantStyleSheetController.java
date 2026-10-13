@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>
  * Gap: {@code Page#addStyleSheet} only takes a URL, and Flow cannot serve a
  * stylesheet it generates itself (there is no stylesheet counterpart of a
- * {@code DownloadHandler}), so a plain Spring endpoint does it.
+ * {@code DownloadHandler}), so a plain Spring endpoint does it (API-GAPS.md #4,
+ * vaadin/flow#26392). Replace it with a Flow-served stylesheet once
+ * {@code addStyleSheet} accepts one.
  */
 @RestController
 public class TenantStyleSheetController {

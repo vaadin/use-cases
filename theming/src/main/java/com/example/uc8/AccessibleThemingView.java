@@ -9,6 +9,7 @@ import com.example.MissingAPI;
 import com.example.common.UseCaseDescription;
 import com.example.uc3.Tenant;
 import com.example.uc3.Tenants;
+import com.example.views.BuiltWith;
 import com.example.views.ComponentShowcase;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
@@ -115,6 +116,13 @@ public class AccessibleThemingView extends VerticalLayout {
         });
 
         add(settings, contrast, new ComponentShowcase());
+        add(new BuiltWith(
+                "Media queries, root overrides and a contrast calculation")
+                .point("The system settings come from matchMedia, reported to the server as events.")
+                .point("High contrast raises Aura's contrast level, or darkens Lumo's secondary text, and widens the focus ring; reduce motion adds a stylesheet that stops animations.")
+                .point("The contrast ratio is the WCAG formula, computed on the server for each accent color.")
+                .java("uc8/AccessibleThemingView").java("AppearanceSetup")
+                .java("Colors").css("reduce-motion.css"));
     }
 
     private static ListItem setting(String label,

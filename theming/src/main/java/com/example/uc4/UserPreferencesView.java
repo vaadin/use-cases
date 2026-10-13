@@ -7,6 +7,7 @@ import com.example.Appearance;
 import com.example.Colors;
 import com.example.FontSize;
 import com.example.common.UseCaseDescription;
+import com.example.views.BuiltWith;
 import com.example.views.ComponentShowcase;
 import com.example.views.MainLayout;
 
@@ -120,6 +121,12 @@ public class UserPreferencesView extends VerticalLayout {
                 contrast, fontSize, reset);
         settings.addClassName("settings");
         add(settings, new ComponentShowcase());
+        add(new BuiltWith("Inline token overrides on the root element").point(
+                "The chosen accent color and text size become CSS custom properties set inline on <html>, which win over every stylesheet.")
+                .point("With Aura the text size is --aura-base-font-size; with Lumo it is the root font size.")
+                .point("The choices are kept in cookies for the next visit.")
+                .java("uc4/UserPreferencesView").java("AppearanceSetup")
+                .java("MissingAPI"));
     }
 
     // Package-private test seams.

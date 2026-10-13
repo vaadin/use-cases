@@ -15,6 +15,7 @@ import com.example.uc8.AccessibleThemingView;
 import com.example.uc9.ThemeSwitchView;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -35,9 +36,13 @@ public class HomeView extends BaseHomeView {
                         + "Appearance changes apply to every view and tab. "
                         + "API-GAPS.md records where Flow made that harder "
                         + "than it should be.");
-        addMenuCards(List.of(BrandTokensView.class, DarkModeView.class,
-                TenantThemeView.class, UserPreferencesView.class,
-                DensityView.class, VariantsView.class, SingleInstanceView.class,
-                AccessibleThemingView.class, ThemeSwitchView.class));
+        add(new H2("The application's look"));
+        addMenuCards(List.of(BrandTokensView.class, TenantThemeView.class,
+                UserPreferencesView.class, ThemeSwitchView.class));
+        add(new H2("Light, dark and accessibility"));
+        addMenuCards(List.of(DarkModeView.class, AccessibleThemingView.class));
+        add(new H2("Styling components"));
+        addMenuCards(List.of(DensityView.class, VariantsView.class,
+                SingleInstanceView.class));
     }
 }

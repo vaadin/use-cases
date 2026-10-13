@@ -3,8 +3,9 @@
 
 .home-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
     gap: 1rem;
+    width: 100%;
     max-width: 960px;
 }
 
@@ -51,4 +52,58 @@
 
 .theme-picker {
     width: 7rem;
+}
+
+/* How a use case is built, shown in the page. */
+.built-with {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 960px;
+}
+
+.built-with h2 {
+    margin: 0.5rem 0 0;
+    font-size: 1.125rem;
+}
+
+.built-with .technique {
+    color: var(--vaadin-text-color-secondary);
+    font-size: 0.875rem;
+}
+
+.built-with .points {
+    margin: 0.5rem 0;
+    padding-inline-start: 1.25rem;
+}
+
+.built-with .source {
+    margin: 0 0 0.5rem;
+    padding: 0.75rem;
+    max-height: 28rem;
+    overflow: auto;
+    font-size: 0.8125rem;
+    border-radius: var(--vaadin-radius-m, 6px);
+    background: var(--vaadin-background-container, #f4f4f4);
+}
+
+/* Long words wrap and code scrolls in its own box on narrow screens. */
+vaadin-vertical-layout h1,
+.built-with .points {
+    overflow-wrap: anywhere;
+}
+
+pre {
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+@media (max-width: 640px) {
+    .sample {
+        padding: 0.75rem;
+    }
+
+    .sample vaadin-horizontal-layout {
+        flex-wrap: wrap;
+    }
 }
