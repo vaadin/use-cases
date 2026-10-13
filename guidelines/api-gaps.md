@@ -38,6 +38,9 @@ A gap that has been fixed upstream is wrong information. When a fix lands:
 - update every place that repeats the gap: view text, class Javadoc, README
   rows.
 
+Some older `API-GAPS.md` files still keep entries marked "closed"; remove
+them when you next touch the module.
+
 Removing an entry renumbers nothing: keep the numbers of the remaining
 entries, so references to them stay valid.
 

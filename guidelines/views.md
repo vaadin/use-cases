@@ -39,7 +39,7 @@ place, runs again on every re-attach, and needs no fields to carry state from
 `onAttach` to `onDetach`:
 
 ```java
-public UpdateWhenActiveView(TaskScheduler taskScheduler) {
+public LiveClockView(TaskScheduler taskScheduler) {
     timeLabel.bindText(time.map(TIME::format));
 
     whenAttached(ui -> {
@@ -54,7 +54,13 @@ public UpdateWhenActiveView(TaskScheduler taskScheduler) {
   `Registration` of a listener, the `ScheduledFuture` of a task.
 - `Signal.effect(this, ...)` and the `bind*` methods are tied to the
   component's attach state already and need no cleanup.
-- Override `onAttach`/`onDetach` only when `whenAttached` does not fit.
+- Override `onAttach`/`onDetach` only when `whenAttached` does not fit. Then
+  set a "scheduled" or "running" flag only once the work is actually
+  scheduled: if the view is not attached, nothing will ever clear the flag
+  again.
+- Many existing views still use `onAttach`/`onDetach` and `UI#access`. They
+  predate `whenAttached`; follow this chapter for new code and when you
+  rework a view, not the older views.
 - Write state-changing logic so it can be unit tested without a UI: a small
   package-private static method (e.g. deriving a status from two timestamps)
   is easier to test than the view that calls it.
