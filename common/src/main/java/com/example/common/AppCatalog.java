@@ -16,6 +16,8 @@ public final class AppCatalog {
                     "https://async-ui-cases.fly.dev/"),
             new App("clipboard", "Clipboard API",
                     "https://clipboard-cases.fly.dev/"),
+            new App("date-range-picker", "Date Range Picker",
+                    "https://date-range-picker-cases.fly.dev/"),
             new App("fullscreen", "Fullscreen API",
                     "https://fullscreen-cases.fly.dev/"),
             new App("geolocation", "Geolocation API",
