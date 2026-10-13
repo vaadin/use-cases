@@ -47,6 +47,10 @@ handler against the UI and read back its URL, as
 issue notes this was a one-liner with `StreamResource` before 24.8; the new
 API is better in every other respect, which makes this the one thing worth
 adding back.
+**Update:** Flow 25.4 adds `Download.onClick(component, DownloadHandler)`, which
+starts a download from a button click without an `Anchor`. It doesn't close this
+gap: it saves the file instead of opening it in a tab, and it is bound to a click
+rather than being a decision the server makes later. UC2 keeps the hidden anchor.
 
 ## There is no way to show a PDF inside the application
 

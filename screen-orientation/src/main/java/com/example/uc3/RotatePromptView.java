@@ -124,8 +124,9 @@ public class RotatePromptView extends VerticalLayout {
     }
 
     /**
-     * UNKNOWN and UNSUPPORTED never block: UNKNOWN is a brief pre-bootstrap gap
-     * and UNSUPPORTED platforms cannot be expected to rotate at all.
+     * UNKNOWN and UNSUPPORTED never block: UNKNOWN means the client has not
+     * reported yet (in practice only in tests, as the bootstrap seeds it) and
+     * UNSUPPORTED platforms cannot be expected to rotate at all.
      */
     private static boolean isMismatch(Required required,
             ScreenOrientationType type) {
