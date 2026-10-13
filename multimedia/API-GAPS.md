@@ -128,7 +128,10 @@ from the server.
 **Workaround used:** `MissingAPI.addTextTrack(media, kind, language, label,
 DownloadHandler)` appends a raw `<track>` element (with the VTT file served
 through a handler), and `MissingAPI.showTextTrack(media, language)` sets
-`textTrack.mode` with JavaScript.
+`textTrack.mode` with JavaScript. It has to wait for `loadedmetadata`:
+Chromium picks a track of its own when the metadata loads, ignoring a mode set
+before that, so setting `mode` right away left two subtitle languages showing
+at once on the first visit.
 **Suggested API:** a `Track` component (`kind`, `srclang`, `label`, `default`,
 `src` as URL or `DownloadHandler`), accepted by `Media` next to `Source`,
 plus `Media#setShowingTrack(String language)` or a signal for it.
