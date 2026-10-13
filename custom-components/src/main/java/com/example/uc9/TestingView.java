@@ -3,6 +3,7 @@ package com.example.uc9;
 import com.example.common.UseCaseDescription;
 import com.example.components.RatingStars;
 import com.example.components.SignaturePad;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import com.example.views.Sample;
 
@@ -60,6 +61,13 @@ public class TestingView extends VerticalLayout {
                         + "uc9/SignaturePadPlaywrightIT (Playwright). "
                         + "Run the browser tests with "
                         + "mvn -pl custom-components -am verify -Pit")));
+        add(new BuiltWith("the component's test support",
+                "Ships with the component, for the applications that use it")
+                .point("RatingStarsTester, registered with @Tests, lets any browserless test write test(...).rate(4).")
+                .point("RatingStarsElement, a TestBench element for <rating-stars>, lets end-to-end tests do the same in a real browser.")
+                .point("Both hide how the stars are built, so the component can change without breaking its users' tests.")
+                .testJava("components/RatingStarsTester")
+                .testJava("components/RatingStarsElement"));
     }
 
     // Package-private test seams.

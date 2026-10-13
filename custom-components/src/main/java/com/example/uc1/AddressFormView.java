@@ -3,6 +3,7 @@ package com.example.uc1;
 import com.example.common.UseCaseDescription;
 import com.example.components.Address;
 import com.example.components.AddressForm;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import com.example.views.Sample;
 
@@ -67,6 +68,12 @@ public class AddressFormView extends VerticalLayout {
 
         add(new Sample("Order addresses", new H3("Shipping"), shipping,
                 new H3("Billing"), sameAsShipping, billing, save, result));
+        add(new BuiltWith("AddressForm",
+                "Composite of existing components · Java only")
+                .point("Extends Composite<FormLayout>: callers get setAddress, getAddress, validate and setReadOnly, not the layout inside.")
+                .point("A Binder inside holds the rules, so every screen that asks for an address checks it the same way.")
+                .point("The view never touches the fields: \"Same as shipping\" copies one form's address into the other.")
+                .java("components/AddressForm").java("components/Address"));
     }
 
     // Package-private test seams.

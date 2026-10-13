@@ -16,6 +16,8 @@ A standalone Spring Boot demo of building your own Vaadin Flow components, in ea
 | UC10 | The composite app | A service desk from those components; `TicketDetail` is itself a component of components, talking to the view through `TicketSavedEvent`. |
 | UC11 | Packaging as an add-on | What each component brings (stylesheets, TypeScript, npm packages), read from its annotations and checked against the classpath. |
 
+Each view explains itself without opening the source: below the example, a "How it is built" section names the technique, gives the three points that make the component work, and lists the component's files, collapsed, each opening to its real source (packaged with the application at build time). The views also work on phones; the service desk stacks the ticket list above the detail on narrow screens.
+
 ## Add-on layout
 
 ```

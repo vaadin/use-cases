@@ -16,6 +16,7 @@ export class SignaturePad extends LitElement {
       display: inline-block;
       position: relative;
       width: 24rem;
+      max-width: 100%;
       height: 8rem;
       border: 1px solid var(--vaadin-border-color, #ccc);
       border-radius: var(--vaadin-radius-m, 6px);

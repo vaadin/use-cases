@@ -2,6 +2,7 @@ package com.example.uc6;
 
 import com.example.common.UseCaseDescription;
 import com.example.components.QrCode;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import com.example.views.Sample;
 
@@ -39,7 +40,8 @@ public class QrCodeView extends VerticalLayout {
         add(new Paragraph("Edit the link and the QR code follows. Scan it "
                 + "with a phone to check."));
 
-        data.setWidth("24rem");
+        data.setWidthFull();
+        data.setMaxWidth("24rem");
         data.setValueChangeMode(ValueChangeMode.EAGER);
         data.addValueChangeListener(e -> code.setData(e.getValue()));
         Select<QrCode.ErrorCorrection> correction = new Select<>();
@@ -50,6 +52,11 @@ public class QrCodeView extends VerticalLayout {
                 e -> code.setErrorCorrection(e.getValue()));
 
         add(new Sample("Tracking link", data, correction, code));
+        add(new BuiltWith("QrCode", "Wrapped npm web component · @NpmPackage")
+                .point("@NpmPackage adds webcomponent-qr-code to the application's package.json when it builds, and @JsModule imports it.")
+                .point("@Tag(\"qr-code\") makes the Java class render that element.")
+                .point("Typed setters, and an enum for the error correction level, replace the element's string attributes.")
+                .java("components/QrCode"));
     }
 
     // Package-private test seams.

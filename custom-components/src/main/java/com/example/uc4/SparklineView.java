@@ -7,6 +7,7 @@ import java.util.Random;
 import com.example.common.UseCaseDescription;
 import com.example.components.Sparkline;
 import com.example.components.SparklineVariant;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import com.example.views.Sample;
 
@@ -80,6 +81,14 @@ public class SparklineView extends VerticalLayout {
         });
 
         add(new Sample("Support metrics", grid, nextDay));
+        add(new BuiltWith("Sparkline",
+                "Server-side DOM · Element API, no JavaScript")
+                .point("@Tag(\"svg\") plus two child elements created with new Element(\"polyline\") and new Element(\"polygon\").")
+                .point("setValues rewrites one attribute, and Flow sends only that change to the browser.")
+                .point("The line is drawn in currentColor, so theme variants and CSS decide its color.")
+                .java("components/Sparkline")
+                .java("components/SparklineVariant")
+                .resource("META-INF/resources/sparkline.css"));
     }
 
     private List<Double> series(double start, double spread) {

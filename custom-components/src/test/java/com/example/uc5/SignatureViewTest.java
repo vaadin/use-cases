@@ -1,5 +1,7 @@
 package com.example.uc5;
 
+import java.util.List;
+
 import com.example.components.SignaturePad;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,6 +10,8 @@ import com.vaadin.browserless.ComponentTester;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.component.html.Pre;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -61,6 +65,23 @@ class SignatureViewTest extends SpringBrowserlessTest {
         assertFalse(view.pad().isSigned());
         assertEquals("Not signed", view.status());
         assertFalse(view.confirm().isEnabled());
+    }
+
+    @Test
+    void showsHowThePadIsBuilt() {
+        navigate(SignatureView.class);
+
+        List<String> files = findInView(Details.class).all().stream()
+                .map(Details::getSummaryText).toList();
+        assertTrue(files.contains("SignaturePad.java · 58 lines"),
+                files.toString());
+        assertTrue(
+                files.stream()
+                        .anyMatch(f -> f.startsWith("signature-pad.ts · ")),
+                files.toString());
+        // The TypeScript as written, not the minified production copy.
+        assertTrue(findInView(Pre.class).all().stream().anyMatch(pre -> pre
+                .getText().contains("@customElement('signature-pad')")));
     }
 
     private static void fireDomEvent(SignaturePad pad, String event) {

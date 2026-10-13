@@ -2,6 +2,7 @@ package com.example.uc3;
 
 import com.example.common.UseCaseDescription;
 import com.example.components.RatingStars;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import com.example.views.Sample;
 
@@ -57,6 +58,14 @@ public class RatingView extends VerticalLayout {
         });
 
         add(new Sample("How did we do?", rating, status, feedback));
+        add(new BuiltWith("RatingStars",
+                "Field on AbstractCompositeField · Java and CSS")
+                .point("A HasValue<Integer>, so Binder and signals work with it; 0 means not rated.")
+                .point("Its own LowRatingEvent fires for one or two stars, which is what the application reacts to.")
+                .point("Buttons in a radio group with aria-checked and \"3 of 5 stars\" labels: Tab and Enter work, and screen readers announce it.")
+                .java("components/RatingStars")
+                .java("components/RatingStarsVariant")
+                .resource("META-INF/resources/rating-stars.css"));
     }
 
     // Package-private test seams.

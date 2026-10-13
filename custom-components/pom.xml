@@ -59,6 +59,40 @@
 
     <build>
         <defaultGoal>spring-boot:run</defaultGoal>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <!-- The views show how each component is built, so the
+                 components' Java sources are packaged with the
+                 application. -->
+            <resource>
+                <directory>src/main/java</directory>
+                <targetPath>component-sources</targetPath>
+                <includes>
+                    <include>com/example/components/*.java</include>
+                    <include>com/example/desk/*.java</include>
+                </includes>
+            </resource>
+            <!-- The stylesheets and TypeScript as written; the production
+                 build minifies the copies it serves. -->
+            <resource>
+                <directory>src/main/resources/META-INF/resources</directory>
+                <targetPath>component-sources/web</targetPath>
+                <includes>
+                    <include>*.css</include>
+                    <include>frontend/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/test/java</directory>
+                <targetPath>component-sources</targetPath>
+                <includes>
+                    <include>com/example/components/*Tester.java</include>
+                    <include>com/example/components/*Element.java</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

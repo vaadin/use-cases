@@ -7,8 +7,10 @@ import com.example.components.Sparkline;
 import com.example.desk.Ticket;
 import com.example.desk.TicketDetail;
 import com.example.desk.TicketStore;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -19,6 +21,7 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * UC10 — The composite app.
@@ -39,7 +42,10 @@ import com.vaadin.flow.router.Route;
 @Menu(order = 10, title = "UC10 — The composite app")
 public class ServiceDeskView extends VerticalLayout {
 
+    static final int NARROW = 900;
+
     private final Grid<Ticket> grid = new Grid<>();
+    private final SplitLayout split = new SplitLayout();
     private final TicketDetail detail = new TicketDetail();
 
     public ServiceDeskView(TicketStore store) {
@@ -80,10 +86,25 @@ public class ServiceDeskView extends VerticalLayout {
 
         Div detailBox = new Div(detail);
         detailBox.getStyle().set("padding", "0 1rem");
-        SplitLayout split = new SplitLayout(grid, detailBox);
+        split.addToPrimary(grid);
+        split.addToSecondary(detailBox);
         split.setSplitterPosition(55);
         split.setSizeFull();
+        // Side by side on wide screens, list above detail on phones.
+        Signal.effect(this, () -> {
+            boolean narrow = UI.getCurrent().getPage().windowSizeSignal().get()
+                    .width() < NARROW;
+            split.setOrientation(narrow ? SplitLayout.Orientation.VERTICAL
+                    : SplitLayout.Orientation.HORIZONTAL);
+            split.setSplitterPosition(narrow ? 45 : 55);
+        });
         add(split);
+        add(new BuiltWith("TicketDetail", "A component made of components")
+                .point("TicketDetail is a Composite of the address form, money field, rating, color picker, QR code and signature pad.")
+                .point("It knows nothing about the list or the store: it shows the ticket it is given and fires TicketSavedEvent.")
+                .point("The view only wires the two: row selection calls setTicket, and the event saves and refreshes the list.")
+                .java("desk/TicketDetail").java("desk/Ticket")
+                .java("desk/TicketStore"));
     }
 
     // Package-private test seams.
@@ -93,5 +114,9 @@ public class ServiceDeskView extends VerticalLayout {
 
     TicketDetail detail() {
         return detail;
+    }
+
+    SplitLayout split() {
+        return split;
     }
 }

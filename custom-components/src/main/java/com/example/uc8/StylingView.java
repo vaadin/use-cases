@@ -9,6 +9,7 @@ import com.example.components.RatingStarsVariant;
 import com.example.components.SignaturePad;
 import com.example.components.Sparkline;
 import com.example.components.SparklineVariant;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import com.example.views.Sample;
 
@@ -91,6 +92,14 @@ public class StylingView extends VerticalLayout {
                 new Sample("CSS variables", row("--rating-stars-color", hearts),
                         row("--signature-pad-ink (draw)", blueInk)),
                 new Sample("Shadow parts", row("qr-code::part(svg)", brand)));
+        add(new BuiltWith("the styling API",
+                "Theme variants, CSS variables and parts")
+                .point("Theme variants are Java enums implementing ThemeVariant, set with addThemeVariants.")
+                .point("CSS variables such as --rating-stars-color are the supported way to change colors and sizes.")
+                .point("A part such as qr-code::part(svg) reaches into a shadow root only where the element allows it.")
+                .resource("META-INF/resources/rating-stars.css")
+                .resource("META-INF/resources/sparkline.css")
+                .resource("META-INF/resources/uc8.css"));
     }
 
     private static RatingStars rating(int value) {

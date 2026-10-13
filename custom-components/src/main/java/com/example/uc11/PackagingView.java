@@ -79,22 +79,23 @@ public class PackagingView extends VerticalLayout {
     }
 
     /**
-     * One line per component: its stylesheets, modules and npm packages, each
+     * One line per component: its own stylesheets, modules and npm packages
+     * (not the ones it inherits from the Vaadin component it extends), each
      * marked missing if the resource is not on the classpath.
      */
     static String describe(Class<? extends Component> type) {
         Stream<String> sheets = Arrays
-                .stream(type.getAnnotationsByType(StyleSheet.class))
+                .stream(type.getDeclaredAnnotationsByType(StyleSheet.class))
                 .map(sheet -> sheet.value()
                         + present("META-INF/resources/" + sheet.value()));
         Stream<String> modules = Arrays
-                .stream(type.getAnnotationsByType(JsModule.class))
+                .stream(type.getDeclaredAnnotationsByType(JsModule.class))
                 .map(module -> module.value() + (module.value().startsWith("./")
                         ? present("META-INF/resources/frontend/"
                                 + module.value().substring(2))
                         : " (npm)"));
         Stream<String> packages = Arrays
-                .stream(type.getAnnotationsByType(NpmPackage.class))
+                .stream(type.getDeclaredAnnotationsByType(NpmPackage.class))
                 .map(npm -> "npm " + npm.value() + "@" + npm.version());
         List<String> parts = Stream.of(sheets, modules, packages)
                 .flatMap(s -> s).toList();

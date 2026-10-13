@@ -2,6 +2,7 @@ package com.example.uc7;
 
 import com.example.common.UseCaseDescription;
 import com.example.components.ColorPicker;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import com.example.views.Sample;
 
@@ -59,6 +60,13 @@ public class ColorPickerView extends VerticalLayout {
         HorizontalLayout row = new HorizontalLayout(picker, hex, label);
         row.setAlignItems(Alignment.CENTER);
         add(new Sample("Label color", row));
+        add(new BuiltWith("ColorPicker",
+                "Wrapped React component · ReactAdapterComponent")
+                .point("color-picker.tsx renders react-colorful's picker inside a custom element through ReactAdapterElement.")
+                .point("The color is named state shared both ways: setState in Java, useState in React.")
+                .point("addStateChangeListener tells the server when the user drags in the picker.")
+                .java("components/ColorPicker")
+                .resource("META-INF/resources/frontend/color-picker.tsx"));
     }
 
     private void apply(String color) {

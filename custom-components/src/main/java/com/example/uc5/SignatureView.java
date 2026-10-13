@@ -2,6 +2,7 @@ package com.example.uc5;
 
 import com.example.common.UseCaseDescription;
 import com.example.components.SignaturePad;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import com.example.views.Sample;
 
@@ -66,6 +67,13 @@ public class SignatureView extends VerticalLayout {
 
         add(new Sample("Delivery #4521", pad,
                 new HorizontalLayout(clear, confirm), status, preview));
+        add(new BuiltWith("SignaturePad",
+                "Own web component · Lit element with a Java API")
+                .point("signature-pad.ts draws on a canvas in the browser and fires value-changed with the signature as a PNG data URL.")
+                .point("The Java class extends AbstractSinglePropertyField, so that value becomes the field's value on the server.")
+                .point("@DomEvent turns the element's signature-started into a server event, and clear() calls the element's method.")
+                .java("components/SignaturePad")
+                .resource("META-INF/resources/frontend/signature-pad.ts"));
     }
 
     // Package-private test seams.

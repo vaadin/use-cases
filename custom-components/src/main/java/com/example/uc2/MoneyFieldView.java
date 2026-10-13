@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import com.example.common.UseCaseDescription;
 import com.example.components.Money;
 import com.example.components.MoneyField;
+import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import com.example.views.Sample;
 import org.jspecify.annotations.Nullable;
@@ -98,6 +99,11 @@ public class MoneyFieldView extends VerticalLayout {
 
         add(new Sample("Refund", refund, fee, summary, readOnly, issue,
                 result));
+        add(new BuiltWith("MoneyField", "Custom field · CustomField<Money>")
+                .point("CustomField brings a label, helper text, error message and required indicator, like any built-in field.")
+                .point("generateModelValue builds a Money from the two inner fields; setPresentationValue splits it back.")
+                .point("Being a HasValue, it is bound by Binder in one line and tied to a signal with bindValue.")
+                .java("components/MoneyField").java("components/Money"));
     }
 
     // Package-private test seams.

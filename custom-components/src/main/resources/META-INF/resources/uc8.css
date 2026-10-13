@@ -14,3 +14,9 @@
     background: white;
     box-shadow: 0 0 0 3px var(--aura-accent-color, #0c6ce9);
 }
+
+@media (max-width: 640px) {
+    .uc8-view .sample vaadin-horizontal-layout > span {
+        width: 100% !important;
+    }
+}

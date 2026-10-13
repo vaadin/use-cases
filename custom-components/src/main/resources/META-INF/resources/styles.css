@@ -43,3 +43,51 @@
     font-size: 0.875rem;
     color: var(--vaadin-text-color-secondary);
 }
+
+/* How the use case's component is built, shown in the page. */
+.built-with {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 960px;
+}
+
+.built-with h2 {
+    margin: 0.5rem 0 0;
+    font-size: 1.125rem;
+}
+
+.built-with .technique {
+    color: var(--vaadin-text-color-secondary);
+    font-size: 0.875rem;
+}
+
+.built-with .points {
+    margin: 0.5rem 0;
+    padding-inline-start: 1.25rem;
+}
+
+.built-with .source {
+    margin: 0 0 0.5rem;
+    padding: 0.75rem;
+    max-height: 28rem;
+    overflow: auto;
+    font-size: 0.8125rem;
+    border-radius: var(--vaadin-radius-m, 6px);
+    background: var(--vaadin-background-container, #f4f4f4);
+}
+
+/* Narrow screens: the examples stack and nothing scrolls sideways. */
+@media (max-width: 640px) {
+    .sample {
+        padding: 0.75rem;
+    }
+
+    .sample vaadin-horizontal-layout {
+        flex-wrap: wrap;
+    }
+}
+
+.sample pre {
+    max-width: 100%;
+    overflow-x: auto;
+}

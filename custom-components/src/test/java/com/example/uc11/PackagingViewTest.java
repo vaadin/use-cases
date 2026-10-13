@@ -25,6 +25,8 @@ class PackagingViewTest extends SpringBrowserlessTest {
         // would carry it.
         inventory.forEach(line -> assertFalse(line.contains("MISSING"), line));
         assertEquals("AddressForm: Java only", inventory.get(0));
+        // What it inherits from CustomField is Vaadin's, not the add-on's.
+        assertEquals("MoneyField: Java only", inventory.get(1));
         assertEquals("SignaturePad: ./signature-pad.ts", inventory.get(4));
         assertEquals("ColorPicker: ./color-picker.tsx, "
                 + "npm react-colorful@5.8.1", inventory.get(6));

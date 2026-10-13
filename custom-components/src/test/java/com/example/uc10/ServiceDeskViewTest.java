@@ -10,11 +10,18 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import tools.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.node.ObjectNode;
 
+import com.vaadin.browserless.ComponentTester;
 import com.vaadin.browserless.ComponentTesterPackages;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.dom.DebouncePhase;
+import com.vaadin.flow.shared.JsonConstants;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -82,6 +89,39 @@ class ServiceDeskViewTest extends SpringBrowserlessTest {
         assertFalse(detail.saveButton().isEnabled());
         // A closed ticket's pad ignores the browser, not just looks grey.
         assertFalse(detail.signature().isEnabled());
+    }
+
+    @Test
+    void listAndDetailStackOnPhones() {
+        ServiceDeskView view = navigate(ServiceDeskView.class);
+        resizeWindow(1400, 900);
+        runPendingSignalsTasks();
+        assertEquals(SplitLayout.Orientation.HORIZONTAL,
+                view.split().getOrientation());
+
+        resizeWindow(390, 844);
+        runPendingSignalsTasks();
+        assertEquals(SplitLayout.Orientation.VERTICAL,
+                view.split().getOrientation());
+
+        resizeWindow(1024, 768);
+        runPendingSignalsTasks();
+        assertEquals(SplitLayout.Orientation.HORIZONTAL,
+                view.split().getOrientation());
+    }
+
+    /** Plays the browser's debounced resize event on the UI. */
+    private static void resizeWindow(int width, int height) {
+        ObjectNode data = JsonNodeFactory.instance.objectNode();
+        data.put("event.w", width);
+        data.put("event.h", height);
+        data.put(JsonConstants.EVENT_DATA_PHASE,
+                DebouncePhase.TRAILING.getIdentifier());
+        new ComponentTester<UI>(UI.getCurrent()) {
+            void fire() {
+                fireDomEvent("window-resize", data);
+            }
+        }.fire();
     }
 
     @Test
