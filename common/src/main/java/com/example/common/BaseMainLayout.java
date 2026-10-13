@@ -56,7 +56,13 @@ public abstract class BaseMainLayout extends AppLayout
         this(moduleId, title, SLACK_FEEDBACK);
     }
 
-    BaseMainLayout(String moduleId, String title, SlackFeedback slackFeedback) {
+    /**
+     * Creates the layout with feedback sent to the given {@link SlackFeedback}
+     * instead of the one configured by the environment, for apps that provide
+     * it themselves, such as a Spring bean that a test can replace.
+     */
+    protected BaseMainLayout(String moduleId, String title,
+            SlackFeedback slackFeedback) {
         this.moduleId = moduleId;
         this.title = title;
         this.slackFeedback = slackFeedback;
