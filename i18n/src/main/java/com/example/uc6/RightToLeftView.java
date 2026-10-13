@@ -127,8 +127,7 @@ public class RightToLeftView extends VerticalLayout {
                 "A UI init listener runs an effect that calls UI.setDirection whenever the locale changes.")
                 .point("The Vaadin components mirror themselves; the application's own CSS uses logical properties such as margin-inline-start.")
                 .point("Icons that point in the reading direction get a class that flips them with :dir(rtl).")
-                .java("I18nConfig").java("uc6/RightToLeftView")
-                .resource("META-INF/resources/uc6.css"));
+                .java("I18nConfig").java("uc6/RightToLeftView").css("uc6.css"));
     }
 
     private void localize(Locale locale) {

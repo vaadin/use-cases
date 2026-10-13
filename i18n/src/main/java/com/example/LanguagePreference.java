@@ -94,7 +94,8 @@ public final class LanguagePreference {
         VaadinSession.getCurrent().setLocale(locale);
         remembered.set(locale);
         // Gap: there is no server-side API for this, and with WebSocket push
-        // there is no HTTP response to put a Set-Cookie header in.
+        // there is no HTTP response to put a Set-Cookie header in
+        // (API-GAPS.md #6, vaadin/flow#26382).
         UI.getCurrent().getPage().executeJs(
                 "document.cookie = $0 + '=' + $1 + ';path=/;max-age=' + $2"
                         + " + ';SameSite=Lax'",

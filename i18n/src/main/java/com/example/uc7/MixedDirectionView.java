@@ -99,7 +99,7 @@ public class MixedDirectionView extends VerticalLayout {
                         MissingAPI.isolate(ticket.get()))));
 
         // Gap: Flow has no component for <bdi>, nor a setter for an element's
-        // own dir attribute.
+        // own dir attribute (API-GAPS.md #10, vaadin/flow#26386).
         Signal.effect(this, () -> bdi.setText(customer.get()));
         Span standalone = new Span();
         standalone.getElement().appendChild(bdi);

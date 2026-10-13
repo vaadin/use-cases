@@ -53,6 +53,12 @@ public class BuiltWith extends Div {
         return file("resources/" + path, path);
     }
 
+    /** A stylesheet, such as {@code uc6.css}, as written. */
+    public BuiltWith css(String name) {
+        return file("resources/META-INF/resources/" + name,
+                "shown-sources/web/" + name);
+    }
+
     private BuiltWith file(String repositoryPath, String classpathPath) {
         String source = read(classpathPath);
         String name = classpathPath

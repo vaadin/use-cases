@@ -10,6 +10,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.textfield.TextField;
 
@@ -69,6 +70,15 @@ class RightToLeftViewTest extends SpringBrowserlessTest {
 
         assertEquals("Maria", name.getValue());
         assertEquals("שם", name.getLabel());
+    }
+
+    @Test
+    void showsTheStylesheetAsWritten() {
+        navigate(RightToLeftView.class);
+
+        // The stylesheet as written, not the minified copy that is served.
+        assertTrue(findInView(Pre.class).all().stream().anyMatch(
+                pre -> pre.getText().contains("margin-inline-start: 1.5rem;")));
     }
 
     @Test

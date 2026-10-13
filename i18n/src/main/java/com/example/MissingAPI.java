@@ -44,8 +44,9 @@ public final class MissingAPI {
      * <p>
      * Gap: neither the JDK (outside AWT's {@code ComponentOrientation}) nor
      * Flow can tell the direction of a locale, and {@link UI#setDirection} does
-     * not follow {@link UI#setLocale} on its own. Migrate to a locale-driven
-     * direction in Flow once there is one.
+     * not follow {@link UI#setLocale} on its own (API-GAPS.md #1,
+     * vaadin/flow#26380). Migrate to a locale-driven direction in Flow once
+     * there is one.
      */
     public static Direction directionOf(Locale locale) {
         return RTL_LANGUAGES.contains(locale.getLanguage())
@@ -60,8 +61,8 @@ public final class MissingAPI {
      * count.
      * <p>
      * Gap: Flow has {@link UI#localeSignal()}, but no signal-returning
-     * counterpart of {@link Component#getTranslation}. Migrate to it once there
-     * is one.
+     * counterpart of {@link Component#getTranslation} (API-GAPS.md #2,
+     * vaadin/flow#26381). Migrate to it once there is one.
      */
     public static Signal<String> translate(String key, Object... params) {
         UI ui = UI.getCurrent();
@@ -81,8 +82,9 @@ public final class MissingAPI {
      * <p>
      * Gap: the pickers format dates in the picker's locale but leave every
      * other text in English unless the application fills in a
-     * {@link DatePickerI18n} by hand, and neither follows a later locale
-     * change. Migrate to a locale-derived default once the component has one.
+     * {@link DatePickerI18n} by hand, and neither follows a later locale change
+     * (API-GAPS.md #3 and #4, vaadin/flow-components#1382). Migrate to a
+     * locale-derived default once the component has one.
      */
     public static DatePickerI18n datePickerI18n(Component owner,
             Locale locale) {
@@ -116,8 +118,8 @@ public final class MissingAPI {
      * <p>
      * Gap: {@link java.text.MessageFormat} and {@link I18NProvider} insert
      * parameters as they are, and Flow has no component for the HTML
-     * {@code <bdi>} element. Migrate once translations isolate parameters
-     * themselves.
+     * {@code <bdi>} element (API-GAPS.md #10, vaadin/flow#26386). Migrate once
+     * translations isolate parameters themselves.
      */
     public static String isolate(String text) {
         return FSI + text + PDI;

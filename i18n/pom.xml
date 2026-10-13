@@ -60,6 +60,15 @@
                     <include>**/*.java</include>
                 </includes>
             </resource>
+            <!-- Stylesheets as written: the production build minifies the
+                 copies it serves. -->
+            <resource>
+                <directory>src/main/resources/META-INF/resources</directory>
+                <targetPath>shown-sources/web</targetPath>
+                <includes>
+                    <include>*.css</include>
+                </includes>
+            </resource>
         </resources>
         <plugins>
             <plugin>
