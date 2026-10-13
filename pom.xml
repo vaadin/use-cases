@@ -22,6 +22,7 @@
         <module>multimedia</module>
         <module>clipboard</module>
         <module>page-visibility</module>
+        <module>pdf-viewer</module>
         <module>reporting</module>
         <module>printing</module>
         <module>route-hierarchy</module>

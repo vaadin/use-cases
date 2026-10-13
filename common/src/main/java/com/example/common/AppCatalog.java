@@ -26,6 +26,8 @@ public final class AppCatalog {
                     "https://observability-cases.fly.dev/"),
             new App("page-visibility", "Page Visibility API",
                     "https://page-visibility-cases.fly.dev/"),
+            new App("pdf-viewer", "PDF Viewer",
+                    "https://pdf-viewer-cases.fly.dev/"),
             new App("printing", "Printing", "https://printing-cases.fly.dev/"),
             new App("reporting", "Reporting",
                     "https://reporting-cases.fly.dev/"),

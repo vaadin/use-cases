@@ -1,0 +1,18 @@
+.uc6-viewer {
+    height: 60vh;
+}
+
+.uc6-log {
+    color: var(--vaadin-text-color-secondary);
+}
+
+/* The order list needs more room than the small label. */
+.uc6-layout {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+}
+
+@media (max-width: 800px) {
+    .uc6-layout {
+        grid-template-columns: 1fr;
+    }
+}

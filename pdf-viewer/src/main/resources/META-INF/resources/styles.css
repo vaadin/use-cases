@@ -1,0 +1,47 @@
+/* PDF viewer use cases — shared styles */
+
+.app-title {
+    font-size: var(--aura-font-size-l);
+    margin: 0;
+}
+
+.home-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    max-width: 960px;
+    width: 100%;
+}
+
+.home-card .home-card-tag {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary);
+    letter-spacing: 0.05em;
+}
+
+.api-gap {
+    max-width: 60rem;
+    color: var(--vaadin-text-color-secondary);
+    font-size: var(--aura-font-size-s);
+}
+
+/* A list or form next to the viewer, stacked on narrow screens. */
+.side-by-side {
+    display: grid;
+    grid-template-columns: minmax(16rem, 1fr) 2fr;
+    gap: var(--vaadin-gap-l, 1.5rem);
+    width: 100%;
+    align-items: start;
+}
+
+@media (max-width: 800px) {
+    .side-by-side {
+        grid-template-columns: 1fr;
+    }
+}
+
+.side-by-side > vaadin-pdf-viewer {
+    width: 100%;
+    min-width: 0;
+}
