@@ -36,25 +36,44 @@ public final class TestSource {
      *            as {@code uc2/NewOrderViewTest}
      */
     public static List<TestMethod> methods(String path) {
-        List<String> lines = read(path).lines().toList();
+        return methods(read(path).lines().toList());
+    }
+
+    /** The test methods in the lines of a source file. */
+    static List<TestMethod> methods(List<String> lines) {
         List<TestMethod> methods = new ArrayList<>();
         for (int i = 0; i < lines.size(); i++) {
             if (!TEST_ANNOTATION.matcher(lines.get(i)).find()) {
                 continue;
             }
-            int start = i;
             int signature = i;
             Matcher name = METHOD.matcher(lines.get(signature));
-            while (!name.find() && signature + 1 < lines.size()) {
-                signature++;
+            while (!name.find()) {
+                if (++signature == lines.size()) {
+                    // No method after the annotation: nothing to show.
+                    return methods;
+                }
                 name = METHOD.matcher(lines.get(signature));
             }
+            int start = firstAnnotation(lines, i);
             int end = endOfBlock(lines, signature);
             methods.add(new TestMethod(name.group(1), sentence(name.group(1)),
                     unindent(lines.subList(start, end + 1))));
             i = end;
         }
         return methods;
+    }
+
+    /**
+     * The first of the annotation lines directly above a test annotation, so
+     * that {@code @WithMockUser} above {@code @Test} is shown too.
+     */
+    private static int firstAnnotation(List<String> lines, int annotation) {
+        int start = annotation;
+        while (start > 0 && lines.get(start - 1).strip().startsWith("@")) {
+            start--;
+        }
+        return start;
     }
 
     /** The whole source of a test class. */
@@ -81,24 +100,67 @@ public final class TestSource {
         return Character.toUpperCase(words.charAt(0)) + words.substring(1);
     }
 
-    /** The line of the brace that closes the block opened at or after line. */
+    /**
+     * The line of the brace that closes the block opened at or after
+     * {@code from}. Braces in strings, characters, text blocks and comments do
+     * not count. When the block never closes, the last line.
+     */
     private static int endOfBlock(List<String> lines, int from) {
         int depth = 0;
         boolean opened = false;
+        boolean blockComment = false;
+        boolean textBlock = false;
         for (int i = from; i < lines.size(); i++) {
-            for (char c : lines.get(i).toCharArray()) {
-                if (c == '{') {
+            String line = lines.get(i);
+            for (int c = 0; c < line.length(); c++) {
+                char ch = line.charAt(c);
+                if (blockComment) {
+                    if (line.startsWith("*/", c)) {
+                        blockComment = false;
+                        c++;
+                    }
+                } else if (textBlock) {
+                    if (line.startsWith("\"\"\"", c)) {
+                        textBlock = false;
+                        c += 2;
+                    } else if (ch == '\\') {
+                        c++;
+                    }
+                } else if (line.startsWith("//", c)) {
+                    break;
+                } else if (line.startsWith("/*", c)) {
+                    blockComment = true;
+                    c++;
+                } else if (line.startsWith("\"\"\"", c)) {
+                    textBlock = true;
+                    c += 2;
+                } else if (ch == '"' || ch == '\'') {
+                    c = endOfLiteral(line, c);
+                } else if (ch == '{') {
                     depth++;
                     opened = true;
-                } else if (c == '}') {
+                } else if (ch == '}') {
                     depth--;
+                    if (opened && depth == 0) {
+                        return i;
+                    }
                 }
-            }
-            if (opened && depth == 0) {
-                return i;
             }
         }
         return lines.size() - 1;
+    }
+
+    /** The index of the quote that closes the literal opened at start. */
+    private static int endOfLiteral(String line, int start) {
+        char quote = line.charAt(start);
+        for (int c = start + 1; c < line.length(); c++) {
+            if (line.charAt(c) == '\\') {
+                c++;
+            } else if (line.charAt(c) == quote) {
+                return c;
+            }
+        }
+        return line.length();
     }
 
     private static String unindent(List<String> lines) {

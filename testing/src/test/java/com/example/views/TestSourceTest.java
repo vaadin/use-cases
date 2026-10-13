@@ -47,6 +47,41 @@ class TestSourceTest {
     }
 
     @Test
+    void bracesInStringsCommentsAndTextBlocksDoNotEndTheMethod() {
+        List<String> source = List.of("class T {", "    @Test",
+                "    void braces() {", "        assertEquals(\"}\", close());",
+                "        char c = '}'; // }", "        /* } */",
+                "        String block = \"\"\"", "            }",
+                "            \"\"\";", "    }", "", "    @Test",
+                "    void next() {", "    }", "}");
+
+        List<TestSource.TestMethod> methods = TestSource.methods(source);
+
+        assertEquals(List.of("braces", "next"),
+                methods.stream().map(TestSource.TestMethod::name).toList());
+        assertTrue(methods.getFirst().code().endsWith("\"\"\";\n}"),
+                methods.getFirst().code());
+    }
+
+    @Test
+    void annotationsAboveTheTestAnnotationAreShown() {
+        List<String> source = List.of("class T {",
+                "    @WithMockUser(roles = \"ADMIN\")", "    @Test",
+                "    void admin() {", "    }", "}");
+
+        assertEquals(
+                "@WithMockUser(roles = \"ADMIN\")\n@Test\n"
+                        + "void admin() {\n}",
+                TestSource.methods(source).getFirst().code());
+    }
+
+    @Test
+    void annotationWithoutAMethodIsSkipped() {
+        assertEquals(List.of(),
+                TestSource.methods(List.of("class T {", "    @Test", "}")));
+    }
+
+    @Test
     void unknownSourceIsAnError() {
         assertThrows(IllegalArgumentException.class,
                 () -> TestSource.methods("uc99/NoSuchTest"));

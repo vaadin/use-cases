@@ -19,15 +19,6 @@ public class TestShowcase extends Div {
     static final String SOURCE_ROOT = "https://github.com/vaadin/use-cases/"
             + "blob/main/testing/src/test/java/com/example/";
 
-    /**
-     * @param path
-     *            the test class, such as {@code uc2/NewOrderViewTest}
-     * @param kind
-     *            what kind of test it is, such as "Browserless view test ·
-     *            milliseconds, no browser"
-     * @param run
-     *            the command that runs it
-     */
     static final String FAST = "./mvnw -pl testing -am test";
     static final String BROWSER = "./mvnw -pl testing -am verify -Pit";
     static final String LOAD = "./mvnw -pl testing -am verify -Pload";
@@ -71,6 +62,15 @@ public class TestShowcase extends Div {
                 LOAD);
     }
 
+    /**
+     * @param path
+     *            the test class, such as {@code uc2/NewOrderViewTest}
+     * @param kind
+     *            what kind of test it is, such as "Browserless view test ·
+     *            milliseconds, no browser"
+     * @param run
+     *            the command that runs it
+     */
     public TestShowcase(String path, String kind, String run) {
         addClassName("tests");
         String className = path.substring(path.lastIndexOf('/') + 1);
