@@ -32,11 +32,14 @@ Upstream: https://github.com/vaadin/<repo>/issues/<n>
 
 A gap that has been fixed upstream is wrong information. When a fix lands:
 
-- mark the entry closed (`## 14. Session id on the trail — closed`) with a
-  link to the fix, keeping any limits that remain, or remove it;
+- remove the entry. If part of the gap remains, rewrite the entry so it
+  describes only what is still missing;
 - remove the workaround and use the new API;
 - update every place that repeats the gap: view text, class Javadoc, README
   rows.
+
+Removing an entry renumbers nothing: keep the numbers of the remaining
+entries, so references to them stay valid.
 
 When a rename or refactoring changes a name an entry refers to (a meter, a
 class, a route), update the entry in the same pull request.

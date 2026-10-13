@@ -23,11 +23,9 @@ needs.
 
 ## Guidelines & Conventions
 
-Always read `CONVENTIONS.md` in full when **authoring** or **reviewing** code, and before **committing** or **opening a pull request** — it is the canonical list of checkable conventions.
+Design and implementation guidelines live in `guidelines/`. Read `guidelines/overview.md` and the chapters it maps for the topics your work touches when **authoring** or **reviewing** code.
 
-Design and implementation guidelines live in `guidelines/`. Read the chapters mapped in `guidelines/overview.md` selectively for the topics your work touches.
-
-The commit message format, the PR description format and the expectations for opening a pull request are in the `commit-and-pr` skill (`.claude/skills/commit-and-pr/SKILL.md`), linked from the Commit & PR Hygiene section of `CONVENTIONS.md`.
+The commit message format, the PR description format and the expectations for opening a pull request are in the `commit-and-pr` skill (`.claude/skills/commit-and-pr/SKILL.md`).
 
 ## Development Commands
 

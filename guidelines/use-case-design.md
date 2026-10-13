@@ -57,6 +57,9 @@ it against the feature's source, not against your expectation of it.
 - If a value shown is application-wide rather than about this view, say so.
 - When the feature changes, update every place that repeats the claim.
 
+Remove code the reader can never reach: a styling branch that can not
+apply, a method only a test calls, an option nobody asked for.
+
 Do not show a broken example. If a media file can not be seeked in Safari,
 serve it so it can. If a panel always shows the first record, bind it to the
 selection.

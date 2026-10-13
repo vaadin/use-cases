@@ -5,8 +5,7 @@ description: How to write a commit message and a pull request description in thi
 
 # Commits and pull requests
 
-These are the canonical rules for this repository; the Commit & PR Hygiene
-section of [`CONVENTIONS.md`](../../../CONVENTIONS.md) points here.
+These are the canonical rules for this repository.
 
 Run `./mvnw spotless:apply` before committing.
 
@@ -94,7 +93,7 @@ app, through `BaseMainLayout`", "deploys: every app is redeployed because
 - Call out anything that changes for every app (`common`, the parent pom, the
   workflows) and anything a maintainer has to do after merging (a secret, a
   Fly app).
-- Mention the `API-GAPS.md` entries added, closed or changed.
+- Mention the `API-GAPS.md` entries added, removed or changed.
 - Cap at ~10 bullets. Past that, the pull request probably does more than one
   thing — split it.
 
@@ -116,5 +115,6 @@ words; keep API names and identifiers exact.
   browser; the preview app URL is posted on the pull request.
 - One purpose per pull request. Move unrelated refactorings and cross-module
   sweeps to their own pull request, and say in each which one to merge first.
+- Merge `main` into a branch under review instead of rebasing it.
 - Keep the description current. When a pull request it depends on is merged,
   or review changes the scope, update the description.

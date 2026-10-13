@@ -34,33 +34,27 @@ Anything that keeps running after the user navigates away — a scheduled task,
 a poll, a listener on a shared bean — leaks for the rest of the session and
 changes what other views show.
 
-```java
-@Override
-protected void onAttach(AttachEvent attachEvent) {
-    super.onAttach(attachEvent);
-    UI ui = attachEvent.getUI();
-    Signal.effect(this, () -> {
-        if (visibility.get() == PageVisibility.VISIBLE) {
-            startTicking(ui);
-        } else {
-            stopTicking();
-        }
-    });
-}
+Use `whenAttached` for this. It keeps the setup and the matching cleanup in one
+place, runs again on every re-attach, and needs no fields to carry state from
+`onAttach` to `onDetach`:
 
-@Override
-protected void onDetach(DetachEvent detachEvent) {
-    stopTicking();
-    super.onDetach(detachEvent);
+```java
+public UpdateWhenActiveView(TaskScheduler taskScheduler) {
+    timeLabel.bindText(time.map(TIME::format));
+
+    whenAttached(ui -> {
+        ScheduledFuture<?> tick = taskScheduler.scheduleAtFixedRate(
+                () -> time.set(LocalTime.now()), Duration.ofSeconds(1));
+        return () -> tick.cancel(false);
+    });
 }
 ```
 
-- Keep the `Registration` or `ScheduledFuture` of everything you start and
-  release it on detach.
-- `Signal.effect(this, ...)` is tied to the component's attach state and needs
-  no manual cleanup.
-- Set a "scheduled" flag only after the work is actually scheduled. If the
-  view is not attached, nothing will ever clear the flag again.
+- Return a cleanup that releases everything the handler started: the
+  `Registration` of a listener, the `ScheduledFuture` of a task.
+- `Signal.effect(this, ...)` and the `bind*` methods are tied to the
+  component's attach state already and need no cleanup.
+- Override `onAttach`/`onDetach` only when `whenAttached` does not fit.
 - Write state-changing logic so it can be unit tested without a UI: a small
   package-private static method (e.g. deriving a status from two timestamps)
   is easier to test than the view that calls it.
@@ -82,24 +76,36 @@ bean is a bug that only shows up in the second tab.
 
 ## Asynchronous updates
 
-Updates from a background thread go through the UI:
+Let background work write to signals, and let the view bind its components to
+those signals, instead of changing components through `UI#access`. A signal can
+be set from any thread; the bindings and effects that read it update the UI
+under the session lock and the change is pushed to the browser:
 
 ```java
-tickTask = taskScheduler.scheduleAtFixedRate(ui.accessLater(() -> {
-    timeLabel.setText(LocalTime.now().format(TIME));
-}, null), Duration.ofSeconds(1));
+private final ValueSignal<LocalTime> time = new ValueSignal<>(LocalTime.now());
+
+// in the background task
+time.set(LocalTime.now());
+
+// in the view
+timeLabel.bindText(time.map(TIME::format));
 ```
 
-Add `@Push` to the app shell when a view updates without a user action, and
-`@EnableScheduling` when it uses Spring's `TaskScheduler`. Simulated latency
-belongs in a helper the tests can switch off, so tests do not wait.
+- Set immutable values (`set`, `update`, `replace`). `modify` on a local
+  signal is not safe from a background thread.
+- Use `UI#access` only when there is no state to put in a signal, e.g. a
+  one-off notification.
+- Add `@Push` to the app shell when a view updates without a user action, and
+  `@EnableScheduling` when it uses Spring's `TaskScheduler`.
+- Simulated latency belongs in a helper the tests can switch off, so tests do
+  not wait.
 
 ## Client-side code
 
 Prefer a Flow API to JavaScript. When a use case needs JavaScript, keep more
 than a few lines out of `executeJs` strings: put it in a TypeScript module under
-`src/main/frontend/` and call it from the view. Run it from the attach handler
-so it runs again when Flow recreates the element.
+`src/main/frontend/` and call it from the view. Run it from `whenAttached`, so
+it runs again when Flow recreates the element.
 
 ## Security and guest access
 
@@ -115,7 +121,6 @@ Security:
 
 ## Data
 
-Never build JSON with string concatenation; use Jackson. Read payloads from a
-feature through a small helper that renders a missing value as "—" rather than
-`null`, so a change in the payload shape does not show "null ms" to the
-reader.
+Read payloads from a feature through a small helper that renders a missing
+value as "—" rather than `null`, so a change in the payload shape does not show
+"null ms" to the reader.
