@@ -3,6 +3,7 @@ package com.example.uc1;
 import java.util.List;
 
 import com.example.AppearanceSetup;
+import com.example.views.BuiltWith;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -28,7 +29,12 @@ class BrandTokensViewTest extends SpringBrowserlessTest {
 
         assertEquals("UC1 — Brand with design tokens",
                 findInView(H1.class).single().getText());
-        assertEquals("Order #1042", findInView(H2.class).first().getText());
+        // The sample's heading; "How it is built" brings one of its own.
+        assertEquals(List.of("Order #1042"),
+                findInView(H2.class).all().stream()
+                        .filter(h -> h.getParent()
+                                .filter(BuiltWith.class::isInstance).isEmpty())
+                        .map(H2::getText).toList());
         assertEquals(List.of("aura/aura.css"),
                 AppearanceSetup.styleSheets(UI.getCurrent()));
     }
@@ -41,9 +47,11 @@ class BrandTokensViewTest extends SpringBrowserlessTest {
                 .map(Details::getSummaryText).toList();
         assertTrue(files.stream().anyMatch(f -> f.startsWith("brand.css · ")),
                 files.toString());
-        // The stylesheet as written, not the minified copy that is served.
-        assertTrue(findInView(Pre.class).all().stream().anyMatch(pre -> pre
-                .getText().contains("--aura-accent-color-light: #0f766e;")));
+        // The packaged source is shown, comments and all.
+        assertTrue(findInView(Pre.class).all().stream()
+                .anyMatch(pre -> pre.getText()
+                        .contains("--aura-accent-color-light: #0f766e;")
+                        && pre.getText().contains("/*")));
     }
 
     @Test
