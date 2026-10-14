@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Covers rendering and the per-ticket reply drafts. Keeping the ticket per
  * browser tab across reloads cannot be simulated in browserless tests yet; see
- * API-GAPS.md.
+ * API-GAPS.md #2.
  */
 @SpringBootTest
 @ViewPackages(classes = TicketPerTabView.class)

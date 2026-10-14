@@ -1,5 +1,6 @@
 package com.example.uc1;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -28,6 +29,7 @@ import com.vaadin.flow.router.Route;
  * window) to see the banner update in both.
  */
 @Route(value = "uc1", layout = MainLayout.class)
+@UseCaseDescription("Showing a maintenance notice to every user at once")
 @PageTitle("UC1 — Maintenance banner")
 @Menu(order = 1, title = "UC1 — Maintenance banner")
 public class MaintenanceBannerView extends VerticalLayout {

@@ -1,5 +1,6 @@
 package com.example.uc8;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -25,6 +26,7 @@ import com.vaadin.flow.router.Route;
  * lifetime of each scope at a glance.
  */
 @Route(value = "uc8", layout = MainLayout.class)
+@UseCaseDescription("Seeing which scope survives a reload, a new tab or another browser")
 @PageTitle("UC8 — Scope playground")
 @Menu(order = 8, title = "UC8 — Scope playground")
 public class ScopePlaygroundView extends VerticalLayout {

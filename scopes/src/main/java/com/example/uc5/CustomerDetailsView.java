@@ -1,5 +1,7 @@
 package com.example.uc5;
 
+import com.example.common.UseCaseDescription;
+
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -23,6 +25,7 @@ import com.vaadin.flow.router.Route;
  * the editor exactly.
  */
 @Route(value = "uc5", layout = CustomerEditorLayout.class)
+@UseCaseDescription("Keeping a draft across the pages of an editor and dropping it on leaving")
 @PageTitle("UC5 — Customer draft")
 @Menu(order = 5, title = "UC5 — Customer draft")
 public class CustomerDetailsView extends VerticalLayout {

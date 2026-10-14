@@ -2,9 +2,9 @@
 
 Places where the APIs used by this module were missing or awkward.
 
-## No Spring scope for `BrowserTab`
+## 1. No Spring scope for `BrowserTab`
 
-**Where it bit us:** uc6 / `BookingDraft.java`, uc7 / `TicketWorkspace.java`, uc8 / `ScopeCounters.java`
+**Where it bites:** UC6 / BookingDraft.java, UC7 / TicketWorkspace.java, UC8 / ScopeCounters.java
 **Symptom:** vaadin/flow#25901 adds `BrowserTab` with a programmatic attribute
 map (`getAttribute` / `setAttribute` / `addDestroyListener`), but there is no
 matching bean scope. Every other Vaadin lifetime (`@VaadinSessionScope`,
@@ -18,10 +18,11 @@ from a tab destroy listener. It has to take the session lock itself, because
 **Suggested API:** `@BrowserTabScope` in `com.vaadin.flow.spring.annotation`,
 backed by a `VaadinBrowserTabScope` registered in `VaadinScopesConfig` next to
 the existing scopes, and the CDI equivalent in vaadin-cdi.
+Upstream: https://github.com/vaadin/flow/issues/13468
 
-## Browser tabs cannot be simulated in browserless tests
+## 2. Browser tabs cannot be simulated in browserless tests
 
-**Where it bit us:** uc6, uc7, uc8 tests
+**Where it bites:** UC6, UC7, UC8 tests
 **Symptom:** The mock UI has no `window.name`, so every UI becomes its own
 browser tab. There is no way to simulate the things the scope exists for: a
 reload (a new UI in the same tab), a second tab in the same session, a
@@ -33,9 +34,9 @@ rendering, the non-tab state, and tab destruction at session end.
 name), `openTab()` / `duplicateTab()`, and a way to expire inactive tabs or
 advance the heartbeat clock.
 
-## A closed tab keeps its state until the heartbeat timeout
+## 3. A closed tab keeps its state until the heartbeat timeout
 
-**Where it bit us:** uc6 / `BookingDraft.java`
+**Where it bites:** UC6 / BookingDraft.java
 **Symptom:** A browser tab is destroyed only when none of its UIs has sent a
 heartbeat for the heartbeat timeout (three heartbeat intervals, 15 minutes by
 default). A seat held by an abandoned booking stays blocked for that long. The module
@@ -46,9 +47,9 @@ affects every other UI in the application.
 UI was closed, short enough to cover a reload but independent of the heartbeat
 interval.
 
-## Duplicated tabs cannot be detected
+## 4. Duplicated tabs cannot be detected
 
-**Where it bit us:** uc6 / `BookingDraft.java`, uc7 / `TicketWorkspace.java`
+**Where it bites:** UC6 / BookingDraft.java, UC7 / TicketWorkspace.java
 **Symptom:** The tab id is `window.name`, which the browser copies when a tab
 is duplicated. The duplicate shares the booking or the open ticket with the
 original, which is exactly the mix-up the scope is meant to prevent, and the
@@ -58,9 +59,9 @@ application has no way to notice.
 example with a per-page `sessionStorage` marker) and either give it a new id or
 expose `BrowserTab#isDuplicate()` so that the application can decide.
 
-## `BrowserTab` state is not reactive
+## 5. `BrowserTab` state is not reactive
 
-**Where it bit us:** uc7 / `TicketPerTabView.java`
+**Where it bites:** UC7 / TicketPerTabView.java
 **Symptom:** `BrowserTab` attributes are a plain map. If one component changes
 tab state, other components in the same tab (for example a header showing the
 open ticket) are not notified, unlike state held in a signal.
@@ -69,9 +70,9 @@ components it owns by hand.
 **Suggested API:** Recommend (and document) keeping signals inside tab-scoped
 beans, or offer a signal-valued attribute accessor on `BrowserTab`.
 
-## Spring `@SessionScope` is not tied to the browserless Vaadin session
+## 6. Spring `@SessionScope` is not tied to the browserless Vaadin session
 
-**Where it bit us:** uc3 / `OrderExportViewTest.java`, uc8 / `ScopePlaygroundViewTest.java`
+**Where it bites:** UC3 / OrderExportViewTest.java, UC8 / ScopePlaygroundViewTest.java
 **Symptom:** In `SpringBrowserlessTest`, Spring's `RequestContextHolder` stays
 bound to Spring Test's own `MockHttpServletRequest` for the whole test method.
 `cleanVaadinEnvironment()` + `initVaadinEnvironment()` create a new Vaadin

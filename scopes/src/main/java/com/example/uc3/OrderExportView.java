@@ -1,5 +1,6 @@
 package com.example.uc3;
 
+import com.example.common.UseCaseDescription;
 import com.example.uc3.ExportPreferences.Column;
 import com.example.views.MainLayout;
 
@@ -25,6 +26,7 @@ import com.vaadin.flow.router.Route;
  * therefore Spring's {@code @SessionScope}, not {@code @VaadinSessionScope}.
  */
 @Route(value = "uc3", layout = MainLayout.class)
+@UseCaseDescription("Sharing export settings between a view and a plain Spring MVC endpoint")
 @PageTitle("UC3 — Export settings")
 @Menu(order = 3, title = "UC3 — Export settings")
 public class OrderExportView extends VerticalLayout {

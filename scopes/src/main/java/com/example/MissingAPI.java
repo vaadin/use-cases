@@ -35,7 +35,8 @@ import com.vaadin.flow.server.VaadinSession;
  * that belongs to one browser tab and survives reloads and full page
  * navigation. It does not add a Spring scope, so this class provides one:
  * annotate a bean with {@link BrowserTabScope @BrowserTabScope} and inject it
- * like any {@code @UIScope} or {@code @VaadinSessionScope} bean.
+ * like any {@code @UIScope} or {@code @VaadinSessionScope} bean. See
+ * API-GAPS.md #1 and vaadin/flow#13468.
  * <p>
  * When Vaadin ships an official {@code @BrowserTabScope} (expected next to the
  * existing ones in {@code com.vaadin.flow.spring.annotation}), replace the

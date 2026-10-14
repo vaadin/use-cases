@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
@@ -35,6 +36,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * UI and the history is gone.
  */
 @Route(value = "uc4", layout = MainLayout.class)
+@UseCaseDescription("Keeping one undo history per editor window, shared by its components")
 @PageTitle("UC4 — Undo history")
 @Menu(order = 4, title = "UC4 — Undo history")
 public class PriceListEditorView extends VerticalLayout {

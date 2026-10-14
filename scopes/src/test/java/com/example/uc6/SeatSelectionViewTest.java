@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Covers rendering and the application-scoped seat inventory. Browser-tab
  * behaviour (reload, second tab, tab expiry) cannot be simulated in browserless
- * tests yet; see API-GAPS.md.
+ * tests yet; see API-GAPS.md #2.
  */
 @SpringBootTest
 @ViewPackages(classes = SeatSelectionView.class)

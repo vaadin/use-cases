@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * Checks the counters for everything browserless tests can simulate: navigation
  * within a UI and a new session. Reloads and tab duplication cannot be
- * simulated yet; see API-GAPS.md.
+ * simulated yet; see API-GAPS.md #2.
  */
 @SpringBootTest
 @ViewPackages(packages = "com.example")
@@ -46,7 +46,7 @@ class ScopePlaygroundViewTest extends SpringBrowserlessTest {
         // A new Vaadin session: everything except the application scope
         // starts over. The Spring HTTP session keeps counting only because
         // browserless tests do not give Spring a new HTTP session here; see
-        // API-GAPS.md. In a real browser it is 1 as well.
+        // API-GAPS.md #6. In a real browser it is 1 as well.
         cleanVaadinEnvironment();
         initVaadinEnvironment();
         navigate(ScopePlaygroundView.class);

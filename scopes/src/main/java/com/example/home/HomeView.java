@@ -1,6 +1,9 @@
 package com.example.home;
 
+import java.util.List;
+
 import com.example.common.BaseHomeView;
+import com.example.common.UseCaseDescription;
 import com.example.uc1.MaintenanceBannerView;
 import com.example.uc2.SharedCartView;
 import com.example.uc3.OrderExportView;
@@ -11,11 +14,12 @@ import com.example.uc7.TicketPerTabView;
 import com.example.uc8.ScopePlaygroundView;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
+@UseCaseDescription("Picking the bean scope that shares state with the right users, tabs and pages")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 
@@ -27,32 +31,15 @@ public class HomeView extends BaseHomeView {
                         + "route. The scope decides who shares a bean and "
                         + "which user actions — a reload, a second tab, "
                         + "navigating away — keep or discard it.");
-
-        Div cards = new Div();
-        cards.addClassName("home-cards");
-        cards.add(homeCard("UC1 · Application", "Maintenance banner",
-                "A notice every user sees at once.",
-                MaintenanceBannerView.class));
-        cards.add(homeCard("UC2 · Vaadin session", "Shared shopping cart",
-                "One cart for all of a user's tabs.", SharedCartView.class));
-        cards.add(homeCard("UC3 · HTTP session", "Export settings",
-                "Settings a plain Spring MVC download endpoint also reads.",
-                OrderExportView.class));
-        cards.add(homeCard("UC4 · UI", "Undo history",
-                "Toolbar and editor share one undo history per window.",
-                PriceListEditorView.class));
-        cards.add(homeCard("UC5 · Route", "Customer draft",
-                "A draft kept across the pages of an editor, dropped on leaving.",
-                CustomerDetailsView.class));
-        cards.add(homeCard("UC6 · Browser tab", "Booking wizard",
-                "A booking that survives reloads, separate per tab.",
-                SeatSelectionView.class));
-        cards.add(homeCard("UC7 · Browser tab", "Ticket per tab",
-                "Each tab keeps its own ticket and reply after a reload.",
-                TicketPerTabView.class));
-        cards.add(homeCard("UC8 · All scopes", "Scope playground",
-                "Counters showing which scope survives which action.",
-                ScopePlaygroundView.class));
-        add(cards);
+        addGroup("Shared by users and sessions", VaadinIcon.USERS, Accent.BLUE,
+                List.of(MaintenanceBannerView.class, SharedCartView.class,
+                        OrderExportView.class));
+        addGroup("Kept for one window or editor", VaadinIcon.EDIT,
+                Accent.PURPLE,
+                List.of(PriceListEditorView.class, CustomerDetailsView.class));
+        addGroup("Kept per browser tab", VaadinIcon.BROWSER, Accent.GREEN,
+                List.of(SeatSelectionView.class, TicketPerTabView.class));
+        addGroup("All scopes side by side", VaadinIcon.SLIDERS, Accent.ORANGE,
+                List.of(ScopePlaygroundView.class));
     }
 }

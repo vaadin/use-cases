@@ -2,6 +2,7 @@ package com.example.uc7;
 
 import java.util.Objects;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
@@ -32,6 +33,7 @@ import com.vaadin.flow.server.BrowserTab;
  * alternative next to it.
  */
 @Route(value = "uc7", layout = MainLayout.class)
+@UseCaseDescription("Keeping a different ticket and reply draft in each browser tab")
 @PageTitle("UC7 — Ticket per tab")
 @Menu(order = 7, title = "UC7 — Ticket per tab")
 public class TicketPerTabView extends VerticalLayout {

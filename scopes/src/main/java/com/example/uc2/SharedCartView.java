@@ -2,6 +2,7 @@ package com.example.uc2;
 
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -31,6 +32,7 @@ import com.vaadin.flow.signals.Signal;
  * Open this page in two tabs of the same browser and add items in one.
  */
 @Route(value = "uc2", layout = MainLayout.class)
+@UseCaseDescription("Keeping one shopping cart across all of a user's tabs")
 @PageTitle("UC2 — Shared shopping cart")
 @Menu(order = 2, title = "UC2 — Shared shopping cart")
 public class SharedCartView extends VerticalLayout {

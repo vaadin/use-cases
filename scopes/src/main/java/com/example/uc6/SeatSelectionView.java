@@ -2,6 +2,7 @@ package com.example.uc6;
 
 import java.util.Map;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -30,6 +31,7 @@ import com.vaadin.flow.signals.Signal;
  * tabs. {@link BookingDraft} is therefore browser-tab scoped.
  */
 @Route(value = "uc6", layout = MainLayout.class)
+@UseCaseDescription("Keeping a multi-step booking through reloads, separate in each tab")
 @PageTitle("UC6 — Booking wizard")
 @Menu(order = 6, title = "UC6 — Booking wizard")
 public class SeatSelectionView extends VerticalLayout {
