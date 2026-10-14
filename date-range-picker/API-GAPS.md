@@ -123,14 +123,21 @@ bad-input check.
 
 ## 9. One end can not be made read-only
 
-**Where it bites:** UC4 / `ChangeReturnDateView.java`
+**Where it bites:** UC4 / `ChangeReturnDateView.java`, `lock-range-start.ts`
 **Symptom:** once a rental has started, its pick-up date is fixed, but the
 return date can still move. `readonly` applies to the whole field, and
 `separateDatePicking` only changes what a click picks; the start input stays
-editable.
-**Workaround used:** the view puts the start date back when it is changed and
-explains why.
-**Suggested API:** `startReadonly` / `endReadonly`.
+editable, and the calendar button always picks the whole range from the
+start. Correcting a changed start afterwards is easy to miss, so the change
+has to be prevented in the browser.
+**Workaround used:** `lock-range-start.ts` blocks typing, pasting and dropping
+into the start input, marks it `aria-readonly`, takes it out of the tab order,
+moves focus from it to the end input, and makes the calendar button open the
+calendar for the end only. It depends on the picker's current light DOM
+inputs and toggle button. The server still puts the start back if a changed
+one arrives.
+**Suggested API:** `startReadonly` / `endReadonly`, with the calendar button
+and clicks on the field then picking only the editable end.
 
 ## 10. Month names, day names and the first day of the week are not taken from the locale
 

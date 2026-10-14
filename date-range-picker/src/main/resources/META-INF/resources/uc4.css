@@ -1,0 +1,5 @@
+/* The locked pick-up date reads as fixed text, not as an input. */
+.uc4-rental > input[slot='input'] {
+    color: var(--vaadin-text-color-secondary);
+    cursor: default;
+}

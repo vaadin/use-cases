@@ -31,6 +31,11 @@ class ChangeReturnDateViewTest extends SpringBrowserlessTest {
                 picker.getElement().getProperty("separateDatePicking", false));
         assertEquals(pickUp.toString(), picker.getElement().getProperty("min"));
         assertEquals("Return on", summary().substring(0, 9));
+        assertTrue(
+                DateRangePickerTester.pendingJavaScript().stream()
+                        .anyMatch(call -> call.getExpression()
+                                .contains("dateRangePickerLockStart")),
+                "The start input is locked in the browser");
     }
 
     @Test
@@ -43,7 +48,7 @@ class ChangeReturnDateViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void thePickUpDateIsPutBack() {
+    void aChangedPickUpDateThatReachesTheServerIsPutBack() {
         navigate(ChangeReturnDateView.class);
         pick(today, today.plusDays(6));
 
