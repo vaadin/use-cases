@@ -1,5 +1,7 @@
 package com.example.acme;
 
+import com.example.common.AppWindow;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Div;

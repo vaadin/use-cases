@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import com.example.acme.AppWindow;
 import com.example.acme.DemoRig;
 import com.example.acme.InsightCard;
 import com.example.acme.Insights;
 import com.example.acme.Investigation;
 import com.example.acme.MeterTable;
 import com.example.acme.Telemetry;
+import com.example.common.AppWindow;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import io.micrometer.core.instrument.Counter;
@@ -331,9 +331,9 @@ public class ConnectionInsightsView extends VerticalLayout {
                 SYNC_STOCK, "GET /api/warehouse/stock failed"));
         sync.setId("sync-stock");
 
-        return new AppWindow("Acme Supply — Warehouse Picking", ROUTE, order,
-                pickList, new HorizontalLayout(Alignment.END, confirm, stock,
-                        sync));
+        return new AppWindow("Acme Supply — Warehouse Picking",
+                "acme.example/" + ROUTE, order, pickList,
+                new HorizontalLayout(Alignment.END, confirm, stock, sync));
     }
 
     /** The knobs that fake the dead zone by the loading dock. */

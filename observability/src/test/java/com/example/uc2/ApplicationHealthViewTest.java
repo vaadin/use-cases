@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
-import com.example.acme.AppWindow;
+import com.example.common.AppWindow;
 import com.example.home.HomeView;
 import com.example.uc2.ApplicationHealthView.Channel;
 import com.example.uc2.ProductCatalogService.CatalogLoad;
