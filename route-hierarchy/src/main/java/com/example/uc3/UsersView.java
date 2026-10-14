@@ -24,7 +24,7 @@ import com.vaadin.flow.router.RouterLink;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("Users")
-@UseCaseDescription("Showing the record's name in the last crumb")
+@UseCaseDescription("Showing a dynamic page title as the last breadcrumb")
 @Menu(order = 3, title = "UC3 — Dynamic leaf label")
 public class UsersView extends VerticalLayout {
 

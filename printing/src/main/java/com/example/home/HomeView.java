@@ -3,6 +3,7 @@ package com.example.home;
 import java.util.List;
 
 import com.example.common.BaseHomeView;
+import com.example.common.UseCaseDescription;
 import com.example.uc1.PrintCurrentViewView;
 import com.example.uc2.PrintRouteView;
 import com.example.uc3.PrintableListView;
@@ -17,6 +18,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
+@UseCaseDescription("Printing views, lists, dashboards and documents from a Vaadin app")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 

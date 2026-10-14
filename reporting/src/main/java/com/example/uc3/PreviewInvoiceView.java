@@ -47,7 +47,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Check it before sending")
-@UseCaseDescription("Previewing the real document before it is sent")
+@UseCaseDescription("Previewing the exact generated PDF before sending it")
 @Menu(order = 3, title = "UC3 — Check it before sending")
 @StyleSheet("invoicing.css")
 public class PreviewInvoiceView extends VerticalLayout {

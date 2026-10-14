@@ -27,7 +27,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc8", layout = MainLayout.class)
 @PageTitle("UC8 — Long-press to delete")
-@UseCaseDescription("Guarding a delete behind a long press")
+@UseCaseDescription("Requiring a press-and-hold to confirm a destructive action")
 @Menu(order = 8, title = "UC8 — Long-press to delete")
 @StyleSheet("uc8.css")
 public class LongPressDeleteView extends VerticalLayout {

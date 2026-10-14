@@ -45,9 +45,9 @@ import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @PageTitle("Use Case 23: Real-time Dashboard")
+@UseCaseDescription("Updating a live service-health dashboard from background data")
 @Route(value = "use-case-23", layout = MainLayout.class)
 @Menu(order = 23, title = "UC23 — Real-time Dashboard")
-@UseCaseDescription("Refreshing a dashboard with data pushed from the server")
 @StyleSheet("usecase23.css")
 @AnonymousAllowed
 public class UseCase23View extends Main {

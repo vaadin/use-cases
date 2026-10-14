@@ -36,7 +36,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc19", layout = MainLayout.class)
 @PageTitle("UC19 — Dynamic responsive styling")
-@UseCaseDescription("Applying user-chosen colors per breakpoint")
+@UseCaseDescription("Applying user-chosen colors at different width breakpoints")
 @Menu(order = 19, title = "UC19 — Dynamic responsive styling")
 @StyleSheet("uc19.css")
 public class DynamicResponsiveStylingView extends VerticalLayout {

@@ -33,82 +33,83 @@ class HomeViewTest extends SpringBrowserlessTest {
 
     private static final UseCase UC1 = new UseCase("UC1",
             "Dynamic Button State",
-            "Enabling a submit button only when the form is valid");
+            "Enabling and disabling a button from the state of a form");
     private static final UseCase UC2 = new UseCase("UC2", "Nested Conditions",
-            "Showing form fields only when earlier answers need them");
+            "Revealing form sections step by step from nested conditions");
     private static final UseCase UC3 = new UseCase("UC3",
             "Interactive SVG Shape Editor",
-            "Binding SVG attributes to editable shape state");
+            "Editing SVG shapes interactively with state kept in signals");
     private static final UseCase UC4 = new UseCase("UC4", "Filtered Data Grid",
-            "Filtering a grid from several search controls");
+            "Filtering and sorting a grid reactively from signal values");
     private static final UseCase UC5 = new UseCase("UC5", "Cascading Selector",
-            "Narrowing each dropdown by the previous selection");
+            "Keeping dependent location selectors in sync as the parent changes");
     private static final UseCase UC6 = new UseCase("UC6", "Shopping Cart",
-            "Keeping cart totals in sync with every change");
+            "Keeping cart line items and totals up to date as quantities change");
     private static final UseCase UC8 = new UseCase("UC8", "Multi-Step Wizard",
-            "Unlocking wizard steps only after the current one validates");
+            "Guiding users through a multi-step wizard with per-step validation");
     private static final UseCase UC9 = new UseCase("UC9", "Binder Integration",
-            "Validating fields with rules that depend on other fields");
+            "Combining Binder validation with signal-driven form state");
     private static final UseCase UC10 = new UseCase("UC10", "Events to Signals",
-            "Turning uploads, shortcuts and dark mode into signals");
+            "Turning DOM and browser events into signals");
     private static final UseCase UC11 = new UseCase("UC11", "Responsive Layout",
-            "Adapting content to the width of its container");
+            "Adapting a layout to its container size instead of the window");
     private static final UseCase UC13 = new UseCase("UC13",
             "Real-Time Active Users",
-            "Showing who is online and which view they are on");
+            "Showing who is online across sessions without polling");
     private static final UseCase UC14 = new UseCase("UC14",
             "Async Data Loading",
-            "Showing loading, success and error states of a background task");
+            "Loading data asynchronously with loading, error and retry states");
     private static final UseCase UC15 = new UseCase("UC15", "Debounced Search",
-            "Searching as the user types without a call per keystroke");
+            "Searching only after the user stops typing and cancelling stale requests");
     private static final UseCase UC16 = new UseCase("UC16",
             "URL State Integration",
-            "Keeping search filters in the URL to share and go back");
+            "Keeping search state and the URL in sync for shareable links");
     private static final UseCase UC17 = new UseCase("UC17",
             "PC Builder (70 signals)",
-            "Keeping dozens of interdependent values consistent");
+            "Managing a large form with dozens of dependent, validated signals");
     private static final UseCase UC18 = new UseCase("UC18", "LLM Task List",
-            "Letting an AI assistant edit a task list");
+            "Letting an LLM chat edit a task list through signals");
     private static final UseCase UC19 = new UseCase("UC19", "Parallel Loading",
-            "Loading several items in parallel, each with its own spinner");
+            "Loading several items in parallel with per-item progress and retry");
     private static final UseCase UC20 = new UseCase("UC20", "User Preferences",
-            "Applying a user's preference across all views of the session");
+            "Keeping user preferences in a session-scoped signal across views");
     private static final UseCase UC21 = new UseCase("UC21",
             "Signals-Based i18n",
-            "Switching the UI language without reloading the page");
+            "Switching the UI language reactively without rebuilding views");
     private static final UseCase UC22 = new UseCase("UC22",
             "Two-Way Mapped Signals",
-            "Editing the fields of a record through two-way bindings");
+            "Editing one value through a two-way mapped view of another signal");
     private static final UseCase UC23 = new UseCase("UC23",
             "Real-time Dashboard",
-            "Refreshing a dashboard with data pushed from the server");
+            "Updating a live service-health dashboard from background data");
     private static final UseCase UC24 = new UseCase("UC24",
             "VirtualList Notifications",
-            "Showing a filtered notification inbox in a virtual list");
+            "Feeding a virtual list from a signal of incoming notifications");
     private static final UseCase UC25 = new UseCase("UC25", "Stock Ticker",
-            "Flashing prices as they rise or fall in real time");
+            "Streaming price changes into a live ticker");
     private static final UseCase UC26 = new UseCase("UC26", "Lazy Creation",
-            "Creating heavy components only when they are first shown");
+            "Creating expensive components only when they are first needed");
     private static final UseCase UC27 = new UseCase("UC27",
             "Router State Signal",
-            "Updating a breadcrumb whenever navigation completes");
+            "Reacting to navigation and route parameters through a router state signal");
     private static final UseCase MUC1 = new UseCase("MUC1", "Shared Chat",
-            "Sharing chat messages with every user in real time");
+            "Chatting between users with a shared, append-only message list");
     private static final UseCase MUC2 = new UseCase("MUC2",
             "Collaborative Cursors",
-            "Showing where other users point in a shared area");
+            "Showing every user's cursor position to all others in real time");
     private static final UseCase MUC3 = new UseCase("MUC3", "Click Race Game",
-            "Deciding fairly which user clicked first");
+            "Resolving who wins when several users click at the same time");
     private static final UseCase MUC4 = new UseCase("MUC4",
-            "Collaborative Editing", "Showing who is editing which form field");
+            "Collaborative Editing",
+            "Showing who is editing which field and locking it for others");
     private static final UseCase MUC6 = new UseCase("MUC6", "Shared Task List",
-            "Editing one task list together with other users");
+            "Editing a shared task list together with live statistics");
     private static final UseCase MUC7 = new UseCase("MUC7",
             "Shared LLM Task List",
-            "Letting an AI assistant edit a task list shared by all users");
+            "Letting several users manage one task list through a shared LLM chat");
     private static final UseCase MUC8 = new UseCase("MUC8",
             "Broadcast Announcement",
-            "Broadcasting an announcement to all active users");
+            "Broadcasting an announcement to all users without a custom broadcaster");
 
     private static final List<Group> GROUPS = List.of(
             new Group("Reactive UI basics",

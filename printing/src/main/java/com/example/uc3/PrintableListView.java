@@ -50,7 +50,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Printing a long list")
-@UseCaseDescription("Printing every row of a long Grid")
+@UseCaseDescription("Printing a long list that a Grid cannot paginate")
 @Menu(order = 3, title = "UC3 — Printing a long list")
 @StyleSheet("uc3.css")
 public class PrintableListView extends VerticalLayout {

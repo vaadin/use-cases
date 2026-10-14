@@ -26,9 +26,9 @@ import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @PageTitle("Use Case 25: Stock Ticker")
+@UseCaseDescription("Streaming price changes into a live ticker")
 @Route(value = "use-case-25", layout = MainLayout.class)
 @Menu(order = 25, title = "UC25 — Stock Ticker")
-@UseCaseDescription("Flashing prices as they rise or fall in real time")
 @StyleSheet("usecase25.css")
 @AnonymousAllowed
 public class UseCase25View extends Main {

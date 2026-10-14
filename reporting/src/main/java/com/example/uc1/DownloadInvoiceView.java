@@ -41,7 +41,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Download the invoice")
-@UseCaseDescription("Generating a PDF and letting the user download it")
+@UseCaseDescription("Letting users download a generated PDF invoice")
 @Menu(order = 1, title = "UC1 — Download the invoice")
 @StyleSheet("invoicing.css")
 public class DownloadInvoiceView extends VerticalLayout {

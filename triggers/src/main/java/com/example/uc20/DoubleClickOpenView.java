@@ -32,7 +32,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc20", layout = MainLayout.class)
 @PageTitle("UC20 — Double-click → new tab")
-@UseCaseDescription("Opening a row in a new tab on double-click")
+@UseCaseDescription("Opening a row in a new tab on double-click without the popup blocker")
 @Menu(order = 20, title = "UC20 — Double-click → new tab")
 @StyleSheet("uc20.css")
 public class DoubleClickOpenView extends VerticalLayout {

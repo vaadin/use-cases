@@ -28,8 +28,8 @@ import static com.example.usecase21.TranslationService.translate;
 
 @Route(value = "use-case-21", layout = MainLayout.class)
 @PageTitle("Use Case 21: Signals-Based i18n")
+@UseCaseDescription("Switching the UI language reactively without rebuilding views")
 @Menu(order = 21, title = "UC21 — Signals-Based i18n")
-@UseCaseDescription("Switching the UI language without reloading the page")
 @StyleSheet("usecase21.css")
 @AnonymousAllowed
 public class UseCase21View extends VerticalLayout {

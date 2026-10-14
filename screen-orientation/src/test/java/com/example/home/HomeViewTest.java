@@ -30,20 +30,22 @@ class HomeViewTest extends SpringBrowserlessTest {
             String href) {
     }
 
-    private static final List<UseCase> USE_CASES = List.of(
-            new UseCase("UC1", "Adaptive layout",
-                    "Switching the layout between landscape and portrait",
-                    "uc1"),
+    private static final List<UseCase> USE_CASES = List.of(new UseCase("UC1",
+            "Adaptive layout",
+            "Switching between side-by-side and stacked panes on rotation",
+            "uc1"),
             new UseCase("UC2", "Orientation viewer",
-                    "Showing the current orientation type and angle", "uc2"),
+                    "Reading the device orientation, angle and support state live",
+                    "uc2"),
             new UseCase("UC3", "Rotate prompt",
-                    "Asking the user to rotate to the required orientation",
+                    "Asking users to rotate the device for content that needs it",
                     "uc3"),
             new UseCase("UC4", "Lock for video",
-                    "Locking landscape in fullscreen while a video plays",
+                    "Locking the screen to landscape during fullscreen video",
                     "uc4"),
             new UseCase("UC5", "Lock error UX",
-                    "Telling the user why an orientation lock failed", "uc5"));
+                    "Handling the ways locking the screen orientation can fail",
+                    "uc5"));
 
     @Test
     void cardsListTheUseCasesInMenuOrder() {
@@ -63,8 +65,7 @@ class HomeViewTest extends SpringBrowserlessTest {
                                 + ": " + useCase.problem())
                         .toList(),
                 find(SideNavItem.class).all().stream()
-                        .filter(item -> item.getTooltip() != null
-                                && item.getTooltip().getText() != null)
+                        .filter(item -> !"Home".equals(item.getLabel()))
                         .map(item -> item.getLabel() + ": "
                                 + item.getTooltip().getText())
                         .toList(),

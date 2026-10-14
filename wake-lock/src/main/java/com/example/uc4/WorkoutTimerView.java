@@ -35,7 +35,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * the timer starts and released whenever the timer pauses or resets.
  */
 @Route(value = "uc4", layout = MainLayout.class)
-@UseCaseDescription("Keeping the screen awake while a timer runs")
+@UseCaseDescription("Keeping the screen awake only while a timer is running")
 @Menu(order = 4, title = "UC4 — Workout timer")
 @StyleSheet("uc4.css")
 public class WorkoutTimerView extends VerticalLayout {

@@ -25,7 +25,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc10", layout = MainLayout.class)
 @PageTitle("UC10 — Highlight")
-@UseCaseDescription("Reusing one highlight effect with different settings")
+@UseCaseDescription("Reusing one configurable highlight action with different colors and durations")
 @Menu(order = 10, title = "UC10 — Highlight")
 @StyleSheet("uc10.css")
 public class HighlightView extends VerticalLayout {

@@ -27,8 +27,8 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @Route(value = "use-case-09", layout = MainLayout.class)
 @PageTitle("Use Case 9: Form with Binder Integration and Signal Validation")
+@UseCaseDescription("Combining Binder validation with signal-driven form state")
 @Menu(order = 9, title = "UC9 — Binder Integration")
-@UseCaseDescription("Validating fields with rules that depend on other fields")
 @StyleSheet("usecase09.css")
 @AnonymousAllowed
 public class UseCase09View extends VerticalLayout {

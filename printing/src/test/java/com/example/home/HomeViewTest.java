@@ -40,22 +40,24 @@ class HomeViewTest extends SpringBrowserlessTest {
 
     private static final UseCase UC1 = new UseCase("UC1",
             "Print the current view",
-            "Printing the current view without the app shell");
+            "Printing the current page without the application shell around it");
     private static final UseCase UC2 = new UseCase("UC2", "A print-only route",
-            "Printing a document from a window of its own");
+            "Printing a document from a route that opens in its own window");
     private static final UseCase UC3 = new UseCase("UC3",
-            "Printing a long list", "Printing every row of a long Grid");
+            "Printing a long list",
+            "Printing a long list that a Grid cannot paginate");
     private static final UseCase UC4 = new UseCase("UC4",
             "Paper setup and preview",
-            "Letting users pick paper size and margins");
+            "Choosing paper size and margins and previewing the printed page");
     private static final UseCase UC5 = new UseCase("UC5",
             "Letterhead and page numbers",
-            "Putting a letterhead and page numbers on every sheet");
+            "Putting a letterhead and page numbers on every printed sheet");
     private static final UseCase UC6 = new UseCase("UC6",
-            "Printing a dashboard", "Printing charts so they fit the paper");
+            "Printing a dashboard",
+            "Printing a dashboard of charts without clipping");
     private static final UseCase UC7 = new UseCase("UC7",
             "Expand everything for print",
-            "Printing sections the user has folded away");
+            "Making collapsed sections show up on paper");
 
     private static final List<UseCase> USE_CASES = List.of(UC1, UC2, UC3, UC4,
             UC5, UC6, UC7);

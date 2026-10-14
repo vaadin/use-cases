@@ -36,7 +36,7 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
  * avatar; the change is broadcast to all other UIs through the registry signal.
  */
 @Route(value = "uc2", layout = MainLayout.class)
-@UseCaseDescription("Showing other users who has switched away")
+@UseCaseDescription("Showing which users are present or away across browser tabs")
 @Menu(order = 2, title = "UC2 — Presence")
 @StyleSheet("uc2.css")
 public class PresenceAvatarsView extends VerticalLayout {

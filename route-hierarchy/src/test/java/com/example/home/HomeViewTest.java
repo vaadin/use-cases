@@ -38,22 +38,22 @@ class HomeViewTest extends SpringBrowserlessTest {
     }
 
     private static final UseCase UC1 = new UseCase("UC1", "URL-prefix trail",
-            "Getting breadcrumbs for nested URLs with no setup");
+            "Building breadcrumbs from URL prefixes with no configuration");
     private static final UseCase UC2 = new UseCase("UC2",
             "@RouteParent override",
-            "Linking a detail page to a parent outside its URL");
+            "Overriding the route parent when the URL does not nest");
     private static final UseCase UC3 = new UseCase("UC3", "Dynamic leaf label",
-            "Showing the record's name in the last crumb");
+            "Showing a dynamic page title as the last breadcrumb");
     private static final UseCase UC4 = new UseCase("UC4",
             "Parameter-preserving links",
-            "Keeping the project ID in every ancestor link");
+            "Keeping route parameters in links to ancestor pages");
     private static final UseCase UC5 = new UseCase("UC5", "Up-one-level button",
-            "Adding a button that goes one level up");
+            "Adding an up-one-level button from the route parent");
     private static final UseCase UC6 = new UseCase("UC6",
             "Layout-wide breadcrumbs",
-            "Showing one breadcrumb bar for a whole layout");
+            "Sharing one breadcrumb trail across a whole layout");
     private static final UseCase UC7 = new UseCase("UC7", "Route-tree sitemap",
-            "Rendering a sitemap of all routes");
+            "Generating a sitemap from the route hierarchy");
 
     private static final List<UseCase> USE_CASES = List.of(UC1, UC2, UC3, UC4,
             UC5, UC6, UC7);

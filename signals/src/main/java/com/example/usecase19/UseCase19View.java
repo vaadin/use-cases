@@ -41,8 +41,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "use-case-19", layout = MainLayout.class)
 @PageTitle("Use Case 19: Parallel Loading")
+@UseCaseDescription("Loading several items in parallel with per-item progress and retry")
 @Menu(order = 19, title = "UC19 — Parallel Loading")
-@UseCaseDescription("Loading several items in parallel, each with its own spinner")
 @StyleSheet("usecase19.css")
 @AnonymousAllowed
 public class UseCase19View extends VerticalLayout {

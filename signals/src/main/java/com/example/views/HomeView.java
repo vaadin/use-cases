@@ -3,6 +3,7 @@ package com.example.views;
 import java.util.List;
 
 import com.example.common.BaseHomeView;
+import com.example.common.UseCaseDescription;
 import com.example.muc01.MUC01View;
 import com.example.muc02.MUC02View;
 import com.example.muc03.MUC03View;
@@ -47,6 +48,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @Route(value = "", layout = MainLayout.class)
 @PageTitle("Signal API Use Cases - Home")
+@UseCaseDescription("Building reactive and collaborative UIs with the Signal API")
 @Menu(order = 0, title = "Home")
 @AnonymousAllowed
 public class HomeView extends BaseHomeView {

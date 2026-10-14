@@ -3,6 +3,7 @@ package com.example.home;
 import java.util.List;
 
 import com.example.common.BaseHomeView;
+import com.example.common.UseCaseDescription;
 import com.example.uc1.UpdateWhenActiveView;
 import com.example.uc2.PresenceAvatarsView;
 import com.example.uc3.NotificationGatingView;
@@ -13,6 +14,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
+@UseCaseDescription("Reacting on the server when the user's tab is hidden, visible or focused")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 

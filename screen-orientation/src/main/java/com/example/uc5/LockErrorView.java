@@ -37,7 +37,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Lock error UX")
-@UseCaseDescription("Telling the user why an orientation lock failed")
+@UseCaseDescription("Handling the ways locking the screen orientation can fail")
 @Menu(order = 5, title = "UC5 — Lock error UX")
 @StyleSheet("uc5.css")
 public class LockErrorView extends VerticalLayout {

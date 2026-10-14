@@ -3,6 +3,7 @@ package com.example.home;
 import java.util.List;
 
 import com.example.common.BaseHomeView;
+import com.example.common.UseCaseDescription;
 import com.example.uc1.PrivateRecordingView;
 import com.example.uc2.SeekableStreamView;
 import com.example.uc3.AdaptiveStreamingView;
@@ -19,6 +20,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
+@UseCaseDescription("Playing, streaming and controlling video and audio from the server")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 

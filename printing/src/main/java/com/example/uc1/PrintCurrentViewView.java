@@ -46,7 +46,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Print the current view")
-@UseCaseDescription("Printing the current view without the app shell")
+@UseCaseDescription("Printing the current page without the application shell around it")
 @Menu(order = 1, title = "UC1 — Print the current view")
 @StyleSheet("uc1.css")
 public class PrintCurrentViewView extends VerticalLayout {

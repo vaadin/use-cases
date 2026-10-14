@@ -30,8 +30,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-08", layout = MainLayout.class)
 @PageTitle("Use Case 8: Multi-Step Wizard with Validation")
+@UseCaseDescription("Guiding users through a multi-step wizard with per-step validation")
 @Menu(order = 8, title = "UC8 — Multi-Step Wizard")
-@UseCaseDescription("Unlocking wizard steps only after the current one validates")
 @StyleSheet("usecase08.css")
 @AnonymousAllowed
 public class UseCase08View extends VerticalLayout {

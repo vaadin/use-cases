@@ -44,34 +44,21 @@ everywhere.
 `ScreenOrientation.isPortraitSignal()` — both mapping to `false` when the type
 is `UNKNOWN` or `UNSUPPORTED`, matching the existing enum behaviour.
 
-## Pre-bootstrap `UNKNOWN` is briefly observable in `onAttach`
+## Resolved: `UNKNOWN` in `onAttach` and feature detection
 
 **Where it bit us:** uc1 / `AdaptiveLayoutView`, uc2 / `OrientationViewerView`,
-uc3 / `RotatePromptView`.
-**Symptom:** Views attached during the very first request still see
-`ScreenOrientationType.UNKNOWN` on the very first signal read because the
-client-side bootstrap parameter has not been processed yet when `onAttach`
-runs in some test/dev scenarios. Each view ends up needing an explicit
-`UNKNOWN` branch in its mapping logic just to render something sensible
-for that one tick.
-**Workaround used:** Every view enumerates the `UNKNOWN` branch in its
-switch — usually as "treat like UNSUPPORTED" or "treat like portrait".
-**Suggested API:** Either (a) document a recommended default mapping, or
-(b) consider a `orientationSignalOrDefault(ScreenOrientationType
-fallback)` accessor that swaps `UNKNOWN` for an application-provided
-fallback before the value reaches consumers.
-
-## No way to feature-detect screen-orientation support from the server before bootstrap
-
-**Where it bit us:** uc3 / `RotatePromptView`, uc4 / `LockForVideoView`.
-**Symptom:** To decide whether to show a "rotate your device" hint or a
-"lock orientation" button, you want a synchronous answer to "does this
-browser implement the Screen Orientation API?". You must wait for the
-signal to settle on `UNSUPPORTED` — distinct from `UNKNOWN` but still
-asynchronous.
-**Workaround used:** Treat `UNSUPPORTED` as feature-detect, but accept a
-brief window where the UI offers a control that will fail on click.
-**Suggested API:** Add `ExtendedClientDetails#supportsScreenOrientation()` (the
-bootstrap already carries enough information to fill it in synchronously).
-That mirrors how `ExtendedClientDetails` already exposes other
-"feature-detect" booleans.
+uc3 / `RotatePromptView`, uc4 / `LockForVideoView`.
+**Original concern:** views attached during the first request might read
+`ScreenOrientationType.UNKNOWN` before the client reported its orientation,
+and there was no synchronous way to ask whether the browser implements the
+Screen Orientation API at all.
+**Resolution:** neither is a gap. The browser sends its orientation with the
+bootstrap (`v-r=init`) request, and Flow seeds `orientationSignal()` from it
+before the router creates the first view, so in a real browser `onAttach`
+already sees the real type, or `UNSUPPORTED` when the API is missing. The
+synchronous feature-detect boolean also exists:
+`ExtendedClientDetails#isScreenOrientationSupported()` (@since 25.2), which
+mirrors the seeded signal. `UNKNOWN` is only seen when no bootstrap request
+ran — in practice, browserless tests that don't seed the signal through
+`ScreenOrientationTestSupport` — which is why the views keep an `UNKNOWN`
+branch.

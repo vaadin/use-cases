@@ -38,8 +38,8 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
  */
 @Route(value = "muc-02", layout = MainLayout.class)
 @PageTitle("Multi-User Case 2: Collaborative Cursors")
+@UseCaseDescription("Showing every user's cursor position to all others in real time")
 @Menu(order = 51, title = "MUC2 — Collaborative Cursors")
-@UseCaseDescription("Showing where other users point in a shared area")
 @StyleSheet("muc02.css")
 @AnonymousAllowed
 public class MUC02View extends VerticalLayout {

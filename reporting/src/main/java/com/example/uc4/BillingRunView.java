@@ -47,7 +47,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — The monthly billing run")
-@UseCaseDescription("Generating a month of invoices with progress")
+@UseCaseDescription("Building one combined document from the selected invoices on click")
 @Menu(order = 4, title = "UC4 — The monthly billing run")
 @StyleSheet("invoicing.css")
 public class BillingRunView extends VerticalLayout {

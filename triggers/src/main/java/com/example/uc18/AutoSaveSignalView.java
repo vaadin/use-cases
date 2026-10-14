@@ -36,7 +36,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc18", layout = MainLayout.class)
 @PageTitle("UC18 — Auto-save signal")
-@UseCaseDescription("Saving text into a signal on every keystroke")
+@UseCaseDescription("Pushing every keystroke into a server signal without a Java handler")
 @Menu(order = 18, title = "UC18 — Auto-save signal")
 @StyleSheet("uc18.css")
 public class AutoSaveSignalView extends VerticalLayout {

@@ -44,8 +44,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "use-case-10", layout = MainLayout.class)
 @PageTitle("Use Case 10: Bridging Events to Signals")
+@UseCaseDescription("Turning DOM and browser events into signals")
 @Menu(order = 10, title = "UC10 — Events to Signals")
-@UseCaseDescription("Turning uploads, shortcuts and dark mode into signals")
 @StyleSheet("usecase10.css")
 @AnonymousAllowed
 public class UseCase10View extends VerticalLayout {

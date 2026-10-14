@@ -36,7 +36,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * a held lock.
  */
 @Route(value = "uc3", layout = MainLayout.class)
-@UseCaseDescription("Keeping the screen awake only while presenting")
+@UseCaseDescription("Keeping the screen awake only while a presentation is running")
 @Menu(order = 3, title = "UC3 — Slideshow")
 @StyleSheet("uc3.css")
 public class SlideshowView extends VerticalLayout {

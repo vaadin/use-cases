@@ -25,7 +25,7 @@ import com.vaadin.flow.router.RouterLink;
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("Projects")
-@UseCaseDescription("Keeping the project ID in every ancestor link")
+@UseCaseDescription("Keeping route parameters in links to ancestor pages")
 @Menu(order = 4, title = "UC4 — Parameter-preserving links")
 public class ProjectsView extends VerticalLayout {
 

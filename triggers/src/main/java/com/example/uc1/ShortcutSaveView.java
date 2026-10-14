@@ -37,7 +37,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Ctrl+S snapshot to clipboard")
-@UseCaseDescription("Copying the notes to the clipboard with Ctrl+S")
+@UseCaseDescription("Saving a snapshot to the clipboard with Ctrl+S, fully client-side")
 @Menu(order = 1, title = "UC1 — Ctrl+S snapshot")
 @StyleSheet("uc1.css")
 public class ShortcutSaveView extends VerticalLayout {

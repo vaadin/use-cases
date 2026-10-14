@@ -47,7 +47,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Paper setup and preview")
-@UseCaseDescription("Letting users pick paper size and margins")
+@UseCaseDescription("Choosing paper size and margins and previewing the printed page")
 @Menu(order = 4, title = "UC4 — Paper setup and preview")
 @StyleSheet("uc4.css")
 public class PrintPreviewView extends VerticalLayout {

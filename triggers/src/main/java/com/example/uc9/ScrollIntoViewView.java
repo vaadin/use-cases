@@ -36,7 +36,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc9", layout = MainLayout.class)
 @PageTitle("UC9 — Scroll into view")
-@UseCaseDescription("Scrolling to a section without a server round-trip")
+@UseCaseDescription("Scrolling a target into view on click, client-side or server-side")
 @Menu(order = 9, title = "UC9 — Scroll into view")
 @StyleSheet("uc9.css")
 public class ScrollIntoViewView extends VerticalLayout {

@@ -277,7 +277,9 @@ public final class MissingAPI {
 
     /**
      * Shows the text track in the given language and hides the others, like
-     * picking a language from the player's subtitle menu.
+     * picking a language from the player's subtitle menu. Until the metadata
+     * has loaded, the browser may still pick a track of its own, so the choice
+     * is applied once it has.
      *
      * @param media
      *            the player
@@ -285,10 +287,16 @@ public final class MissingAPI {
      *            the language to show, or {@code null} to hide all tracks
      */
     public static void showTextTrack(Media media, @Nullable String language) {
-        media.getElement().executeJs("""
-                for (const track of this.textTracks) {
-                  track.mode = track.language === $0 ? 'showing' : 'disabled';
-                }
-                """, language);
+        media.getElement().executeJs(
+                """
+                        const show = () => {
+                          for (const track of this.textTracks) {
+                            track.mode = track.language === $0 ? 'showing' : 'disabled';
+                          }
+                        };
+                        if (this.readyState >= 1) { show(); }
+                        else { this.addEventListener('loadedmetadata', show, { once: true }); }
+                        """,
+                language);
     }
 }

@@ -23,8 +23,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-04", layout = MainLayout.class)
 @PageTitle("Use Case 4: Filtered and Sorted Data Grid")
+@UseCaseDescription("Filtering and sorting a grid reactively from signal values")
 @Menu(order = 4, title = "UC4 — Filtered Data Grid")
-@UseCaseDescription("Filtering a grid from several search controls")
 @AnonymousAllowed
 public class UseCase04View extends VerticalLayout {
 

@@ -40,7 +40,7 @@ import com.vaadin.flow.server.webpush.WebPushSubscription;
  * notification is needed when they aren't.
  */
 @Route(value = "uc3", layout = MainLayout.class)
-@UseCaseDescription("Choosing between an in-tab toast and Web Push")
+@UseCaseDescription("Choosing between an in-page toast and a push notification by tab visibility")
 @Menu(order = 3, title = "UC3 — Notification gating")
 @StyleSheet("uc3.css")
 public class NotificationGatingView extends VerticalLayout {

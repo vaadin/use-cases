@@ -12,6 +12,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.trigger.internal.DomEventTrigger;
+import com.vaadin.flow.component.trigger.internal.PropertyInput;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -30,7 +31,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc13", layout = MainLayout.class)
 @PageTitle("UC13 — Client-side filter")
-@UseCaseDescription("Filtering a list without a request per keystroke")
+@UseCaseDescription("Filtering a server-loaded list in the browser on every keystroke")
 @Menu(order = 13, title = "UC13 — Client-side filter")
 @StyleSheet("uc13.css")
 public class ClientFilterView extends VerticalLayout {
@@ -66,8 +67,8 @@ public class ClientFilterView extends VerticalLayout {
             list.add(row);
         }
 
-        new DomEventTrigger(search, "input")
-                .triggers(new FilterListAction(list));
+        new DomEventTrigger(search, "input").triggers(new FilterListAction(list,
+                new PropertyInput<>(search, "value", String.class)));
 
         add(search, list);
     }

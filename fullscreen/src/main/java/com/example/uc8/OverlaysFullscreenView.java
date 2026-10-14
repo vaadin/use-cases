@@ -45,7 +45,7 @@ import com.vaadin.flow.signals.Signal;
  * observable (and testable) without a real browser.
  */
 @Route(value = "uc8", layout = MainLayout.class)
-@UseCaseDescription("Keeping menus and popups working in fullscreen")
+@UseCaseDescription("Keeping menus, popovers and dropdowns visible in fullscreen")
 @Menu(order = 8, title = "UC8 — Overlays in fullscreen")
 @StyleSheet("uc8.css")
 public class OverlaysFullscreenView extends VerticalLayout {

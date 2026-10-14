@@ -31,13 +31,17 @@ class HomeViewTest extends SpringBrowserlessTest {
 
     private static final List<UseCase> USE_CASES = List.of(
             new UseCase("UC1", "Update when active",
-                    "Pausing server work while the tab is hidden", "uc1"),
+                    "Pausing periodic updates while the browser tab is hidden",
+                    "uc1"),
             new UseCase("UC2", "Presence",
-                    "Showing other users who has switched away", "uc2"),
+                    "Showing which users are present or away across browser tabs",
+                    "uc2"),
             new UseCase("UC3", "Notification gating",
-                    "Choosing between an in-tab toast and Web Push", "uc3"),
+                    "Choosing between an in-page toast and a push notification by tab visibility",
+                    "uc3"),
             new UseCase("UC4", "Refresh stale data",
-                    "Refreshing stale data when the user comes back", "uc4"));
+                    "Refreshing stale data when the user returns to the tab",
+                    "uc4"));
 
     @Test
     void cardsListTheUseCasesInMenuOrder() {
@@ -57,8 +61,7 @@ class HomeViewTest extends SpringBrowserlessTest {
                                 + ": " + useCase.problem())
                         .toList(),
                 find(SideNavItem.class).all().stream()
-                        .filter(item -> item.getTooltip() != null
-                                && item.getTooltip().getText() != null)
+                        .filter(item -> !"Home".equals(item.getLabel()))
                         .map(item -> item.getLabel() + ": "
                                 + item.getTooltip().getText())
                         .toList(),

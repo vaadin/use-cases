@@ -37,7 +37,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Lock landscape for video")
-@UseCaseDescription("Locking landscape in fullscreen while a video plays")
+@UseCaseDescription("Locking the screen to landscape during fullscreen video")
 @Menu(order = 4, title = "UC4 — Lock for video")
 @StyleSheet("uc4.css")
 public class LockForVideoView extends VerticalLayout {

@@ -31,7 +31,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Orientation viewer")
-@UseCaseDescription("Showing the current orientation type and angle")
+@UseCaseDescription("Reading the device orientation, angle and support state live")
 @Menu(order = 2, title = "UC2 — Orientation viewer")
 @StyleSheet("uc2.css")
 public class OrientationViewerView extends VerticalLayout {

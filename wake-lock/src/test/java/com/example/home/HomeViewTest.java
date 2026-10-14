@@ -30,13 +30,16 @@ class HomeViewTest extends SpringBrowserlessTest {
 
     private static final List<UseCase> USE_CASES = List.of(
             new UseCase("UC1", "Manual toggle",
-                    "Letting the user keep the screen awake on demand", "uc1"),
+                    "Letting users switch keep-screen-awake on and off", "uc1"),
             new UseCase("UC2", "Recipe",
-                    "Keeping the screen awake while a view is open", "uc2"),
+                    "Keeping the screen on while someone follows step-by-step instructions",
+                    "uc2"),
             new UseCase("UC3", "Slideshow",
-                    "Keeping the screen awake only while presenting", "uc3"),
+                    "Keeping the screen awake only while a presentation is running",
+                    "uc3"),
             new UseCase("UC4", "Workout timer",
-                    "Keeping the screen awake while a timer runs", "uc4"));
+                    "Keeping the screen awake only while a timer is running",
+                    "uc4"));
 
     @Test
     void cardsListTheUseCasesInMenuOrder() {
@@ -56,8 +59,7 @@ class HomeViewTest extends SpringBrowserlessTest {
                                 + ": " + useCase.problem())
                         .toList(),
                 find(SideNavItem.class).all().stream()
-                        .filter(item -> item.getTooltip() != null
-                                && item.getTooltip().getText() != null)
+                        .filter(item -> !"Home".equals(item.getLabel()))
                         .map(item -> item.getLabel() + ": "
                                 + item.getTooltip().getText())
                         .toList(),

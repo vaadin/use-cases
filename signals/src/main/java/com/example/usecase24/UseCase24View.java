@@ -31,8 +31,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-24", layout = MainLayout.class)
 @PageTitle("Use Case 24: VirtualList with Signal Data Source")
+@UseCaseDescription("Feeding a virtual list from a signal of incoming notifications")
 @Menu(order = 24, title = "UC24 — VirtualList Notifications")
-@UseCaseDescription("Showing a filtered notification inbox in a virtual list")
 @StyleSheet("usecase24.css")
 @AnonymousAllowed
 public class UseCase24View extends VerticalLayout {

@@ -3,6 +3,7 @@ package com.example.home;
 import java.util.List;
 
 import com.example.common.BaseHomeView;
+import com.example.common.UseCaseDescription;
 import com.example.uc1.DownloadInvoiceView;
 import com.example.uc2.OpenInNewTabView;
 import com.example.uc3.PreviewInvoiceView;
@@ -14,6 +15,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
+@UseCaseDescription("Generating business documents as PDFs and getting them to the customer")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 

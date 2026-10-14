@@ -25,7 +25,7 @@ import com.vaadin.flow.signals.Signal;
  * or never happen at all on an insecure origin or an unsupported browser.
  */
 @Route(value = "uc1", layout = MainLayout.class)
-@UseCaseDescription("Letting the user keep the screen awake on demand")
+@UseCaseDescription("Letting users switch keep-screen-awake on and off")
 @Menu(order = 1, title = "UC1 — Manual toggle")
 public class ManualToggleView extends VerticalLayout {
 

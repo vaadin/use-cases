@@ -41,7 +41,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  */
 @Route(value = "uc21", layout = MainLayout.class)
 @PageTitle("UC21 — Shortcut download")
-@UseCaseDescription("Starting a file download from a keyboard shortcut")
+@UseCaseDescription("Starting a server-generated download from a keyboard shortcut")
 @Menu(order = 21, title = "UC21 — Shortcut download")
 @StyleSheet("uc21.css")
 public class ShortcutDownloadView extends VerticalLayout {

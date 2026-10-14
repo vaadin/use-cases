@@ -47,7 +47,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Letterhead and page numbers")
-@UseCaseDescription("Putting a letterhead and page numbers on every sheet")
+@UseCaseDescription("Putting a letterhead and page numbers on every printed sheet")
 @Menu(order = 5, title = "UC5 — Letterhead and page numbers")
 @StyleSheet("uc5.css")
 public class HeaderFooterView extends VerticalLayout {

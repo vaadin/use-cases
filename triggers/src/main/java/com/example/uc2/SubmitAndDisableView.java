@@ -39,7 +39,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Click an image to dim its siblings")
-@UseCaseDescription("Selecting an image and dimming the others at once")
+@UseCaseDescription("Highlighting a clicked image and dimming the others in one client-side step")
 @Menu(order = 2, title = "UC2 — Image gallery select")
 @StyleSheet("uc2.css")
 public class SubmitAndDisableView extends VerticalLayout {

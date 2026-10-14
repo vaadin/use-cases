@@ -47,7 +47,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Expand everything for print")
-@UseCaseDescription("Printing sections the user has folded away")
+@UseCaseDescription("Making collapsed sections show up on paper")
 @Menu(order = 7, title = "UC7 — Expand everything for print")
 public class ExpandForPrintView extends VerticalLayout {
 

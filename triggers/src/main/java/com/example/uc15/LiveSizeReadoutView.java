@@ -29,7 +29,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc15", layout = MainLayout.class)
 @PageTitle("UC15 — Live size readout")
-@UseCaseDescription("Showing an element's size as it resizes")
+@UseCaseDescription("Showing an element's live size without server round-trips")
 @Menu(order = 15, title = "UC15 — Live size readout")
 @StyleSheet("uc15.css")
 public class LiveSizeReadoutView extends VerticalLayout {

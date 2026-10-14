@@ -31,7 +31,7 @@ import com.vaadin.flow.signals.Signal;
  * reverts on exit.
  */
 @Route(value = "uc4", layout = MainLayout.class)
-@UseCaseDescription("Adapting the layout when the user goes fullscreen")
+@UseCaseDescription("Reformatting a layout automatically when fullscreen starts and ends")
 @Menu(order = 4, title = "UC4 — Reactive layout")
 @StyleSheet("uc4.css")
 public class ReactiveLayoutView extends VerticalLayout {

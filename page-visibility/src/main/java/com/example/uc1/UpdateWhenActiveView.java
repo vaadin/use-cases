@@ -34,7 +34,7 @@ import com.vaadin.flow.signals.Signal;
  * so the websocket stays quiet. On return, ticking resumes.
  */
 @Route(value = "uc1", layout = MainLayout.class)
-@UseCaseDescription("Pausing server work while the tab is hidden")
+@UseCaseDescription("Pausing periodic updates while the browser tab is hidden")
 @Menu(order = 1, title = "UC1 — Update when active")
 @StyleSheet("uc1.css")
 public class UpdateWhenActiveView extends VerticalLayout {

@@ -3,6 +3,7 @@ package com.example.home;
 import java.util.List;
 
 import com.example.common.BaseHomeView;
+import com.example.common.UseCaseDescription;
 import com.example.uc1.ShareThisPageView;
 import com.example.uc2.CopyLinkFallbackView;
 import com.example.uc3.CustomMessageView;
@@ -16,6 +17,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
+@UseCaseDescription("Sharing pages, links and content through the device's native share sheet")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 

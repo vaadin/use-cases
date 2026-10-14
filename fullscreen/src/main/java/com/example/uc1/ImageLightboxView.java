@@ -28,7 +28,7 @@ import com.vaadin.flow.signals.Signal;
  * stage; pressing Escape returns to the gallery.
  */
 @Route(value = "uc1", layout = MainLayout.class)
-@UseCaseDescription("Showing a clicked image fullscreen")
+@UseCaseDescription("Opening a clicked thumbnail as a fullscreen image preview")
 @Menu(order = 1, title = "UC1 — Image lightbox")
 @StyleSheet("uc1.css")
 public class ImageLightboxView extends VerticalLayout {

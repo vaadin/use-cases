@@ -24,7 +24,7 @@ import com.vaadin.flow.router.RouterLink;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("Orders")
-@UseCaseDescription("Linking a detail page to a parent outside its URL")
+@UseCaseDescription("Overriding the route parent when the URL does not nest")
 @Menu(order = 2, title = "UC2 — @RouteParent override")
 public class OrdersView extends VerticalLayout {
 

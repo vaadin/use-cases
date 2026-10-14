@@ -65,7 +65,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Printing a dashboard")
-@UseCaseDescription("Printing charts so they fit the paper")
+@UseCaseDescription("Printing a dashboard of charts without clipping")
 @Menu(order = 6, title = "UC6 — Printing a dashboard")
 @StyleSheet("uc6.css")
 public class PrintDashboardView extends VerticalLayout {

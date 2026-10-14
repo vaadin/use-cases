@@ -38,7 +38,7 @@ import com.vaadin.flow.router.RouteParameters;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — A print-only route")
-@UseCaseDescription("Printing a document from a window of its own")
+@UseCaseDescription("Printing a document from a route that opens in its own window")
 @Menu(order = 2, title = "UC2 — A print-only route")
 public class PrintRouteView extends VerticalLayout {
 

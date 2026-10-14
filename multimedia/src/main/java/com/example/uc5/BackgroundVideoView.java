@@ -1,5 +1,7 @@
 package com.example.uc5;
 
+import java.util.List;
+
 import com.example.MissingAPI;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
@@ -14,6 +16,7 @@ import com.vaadin.flow.component.html.Media;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Video;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -27,26 +30,50 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * additionally needs {@code playsinline}. The clip is decorative, so it is
  * hidden from assistive technology and has no controls — but moving content
  * that lasts more than five seconds needs a way to pause it (WCAG 2.2.2), so
- * the view adds its own pause button.
+ * the view adds its own pause button. A select switches between three clips;
+ * the new clip only plays after {@code load()}, and keeps the paused state.
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Background video")
-@UseCaseDescription("Playing a silent looping video behind a headline")
+@UseCaseDescription("Autoplaying a muted looping background video with a pause button")
 @Menu(order = 5, title = "UC5 — Background video")
 @StyleSheet("uc5.css")
 public class BackgroundVideoView extends VerticalLayout {
 
-    static final String CLIP = "media/background.mp4";
+    /**
+     * A background clip.
+     *
+     * @param label
+     *            the name shown in the select
+     * @param file
+     *            the URL of the clip
+     */
+    record Background(String label, String file) {
+    }
 
+    static final List<Background> BACKGROUNDS = List.of(
+            new Background("Aurora", "media/background-aurora.mp4"),
+            new Background("Sunset", "media/background-sunset.mp4"),
+            new Background("Forest", "media/background-forest.mp4"));
+
+    private final Video video = new Video();
     private final ValueSignal<Boolean> paused = new ValueSignal<>(false);
 
     public BackgroundVideoView() {
         addClassName("uc5-view");
         add(new H1("UC5 — Background video"));
         add(new Paragraph("The hero below autoplays a muted clip in a loop. "
-                + "It starts without a click because it is muted."));
+                + "It starts without a click because it is muted. Pick "
+                + "another background to switch the clip."));
 
-        Video video = new Video();
+        Select<Background> background = new Select<>();
+        background.setLabel("Background");
+        background.setItems(BACKGROUNDS);
+        background.setItemLabelGenerator(Background::label);
+        background.setValue(BACKGROUNDS.get(0));
+        background.addValueChangeListener(e -> showBackground(e.getValue()));
+        add(background);
+
         video.addClassName("hero-video");
         video.setAutoplay(true);
         // setMuted only writes the attribute, which does not mute an element
@@ -56,7 +83,7 @@ public class BackgroundVideoView extends VerticalLayout {
         video.setPreload(Media.Preload.AUTO);
         MissingAPI.setPlaysInline(video, true);
         video.getElement().setAttribute("aria-hidden", "true");
-        video.addSource(CLIP, "video/mp4");
+        video.addSource(BACKGROUNDS.get(0).file(), "video/mp4");
 
         Button pause = new Button();
         pause.addClassName("hero-pause");
@@ -70,6 +97,9 @@ public class BackgroundVideoView extends VerticalLayout {
             } else {
                 MissingAPI.play(video);
             }
+            // load() starts an autoplay video, so a paused one must lose
+            // autoplay to stay paused when the background changes.
+            video.setAutoplay(!pausing);
             paused.set(pausing);
         });
 
@@ -80,5 +110,11 @@ public class BackgroundVideoView extends VerticalLayout {
         Div hero = new Div(video, overlay);
         hero.addClassName("hero");
         add(hero);
+    }
+
+    private void showBackground(Background background) {
+        video.removeAll();
+        video.addSource(background.file(), "video/mp4");
+        MissingAPI.load(video);
     }
 }

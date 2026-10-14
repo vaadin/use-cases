@@ -3,6 +3,7 @@ package com.example.home;
 import java.util.List;
 
 import com.example.common.BaseHomeView;
+import com.example.common.UseCaseDescription;
 import com.example.uc1.ManualToggleView;
 import com.example.uc2.RecipeView;
 import com.example.uc3.SlideshowView;
@@ -13,6 +14,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
+@UseCaseDescription("Keeping the screen on while the user is following along")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 

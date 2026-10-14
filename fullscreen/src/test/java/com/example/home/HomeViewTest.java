@@ -41,23 +41,23 @@ class HomeViewTest extends SpringBrowserlessTest {
     }
 
     private static final UseCase UC1 = new UseCase("UC1", "Image lightbox",
-            "Showing a clicked image fullscreen");
+            "Opening a clicked thumbnail as a fullscreen image preview");
     private static final UseCase UC2 = new UseCase("UC2", "Slideshow",
-            "Presenting slides fullscreen without the app around them");
+            "Presenting slides fullscreen with keyboard navigation");
     private static final UseCase UC3 = new UseCase("UC3",
             "Distraction-free editor",
-            "Giving a writer the whole screen to write in");
+            "Giving writers a fullscreen editor with no distractions");
     private static final UseCase UC4 = new UseCase("UC4", "Reactive layout",
-            "Adapting the layout when the user goes fullscreen");
+            "Reformatting a layout automatically when fullscreen starts and ends");
     private static final UseCase UC5 = new UseCase("UC5", "Kiosk",
-            "Locking a kiosk screen and catching unexpected exits");
+            "Running a fullscreen kiosk that only staff can exit with a PIN");
     private static final UseCase UC6 = new UseCase("UC6", "Chart expand",
-            "Expanding one chart of a dashboard to fullscreen");
+            "Expanding a single dashboard chart card to fullscreen");
     private static final UseCase UC7 = new UseCase("UC7", "View app fullscreen",
-            "Showing the whole app without the browser chrome");
+            "Showing the whole app fullscreen without browser chrome");
     private static final UseCase UC8 = new UseCase("UC8",
             "Overlays in fullscreen",
-            "Keeping menus and popups working in fullscreen");
+            "Keeping menus, popovers and dropdowns visible in fullscreen");
 
     private static final List<UseCase> USE_CASES = List.of(UC1, UC2, UC3, UC4,
             UC5, UC6, UC7, UC8);

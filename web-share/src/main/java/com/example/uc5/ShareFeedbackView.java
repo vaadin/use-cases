@@ -34,7 +34,7 @@ import com.vaadin.flow.signals.Signal;
  * This view wires those callbacks into a small outcome log.
  */
 @Route(value = "uc5", layout = MainLayout.class)
-@UseCaseDescription("Reacting to a completed, cancelled or failed share")
+@UseCaseDescription("Telling users whether a share completed, was cancelled or failed")
 @Menu(order = 5, title = "UC5 — Completion feedback")
 @StyleSheet("uc5.css")
 public class ShareFeedbackView extends VerticalLayout {

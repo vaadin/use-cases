@@ -40,14 +40,14 @@ class HomeViewTest extends SpringBrowserlessTest {
     private static final UseCase UC1 = new UseCase("UC1", "Share this page",
             "Sharing the current page through the native share sheet");
     private static final UseCase UC2 = new UseCase("UC2", "Copy-link fallback",
-            "Falling back to copy-link where sharing is unsupported");
+            "Offering a copy-link button where native sharing is unsupported");
     private static final UseCase UC3 = new UseCase("UC3",
             "Share a custom message",
-            "Sharing a title, text and link the user fills in");
+            "Sharing a custom title, text and URL with a live preview");
     private static final UseCase UC4 = new UseCase("UC4", "Per-item share",
-            "Sharing one item from a list");
+            "Sharing a specific list item from its own button");
     private static final UseCase UC5 = new UseCase("UC5", "Completion feedback",
-            "Reacting to a completed, cancelled or failed share");
+            "Telling users whether a share completed, was cancelled or failed");
     private static final UseCase UC6 = new UseCase("UC6", "Share invite link",
             "Sharing a freshly generated invite link");
 

@@ -63,57 +63,58 @@ class HomeViewTest extends SpringBrowserlessTest {
     }
 
     private static final UseCase UC1 = new UseCase("UC1", "Ctrl+S snapshot",
-            "Copying the notes to the clipboard with Ctrl+S");
+            "Saving a snapshot to the clipboard with Ctrl+S, fully client-side");
     private static final UseCase UC2 = new UseCase("UC2",
             "Image gallery select",
-            "Selecting an image and dimming the others at once");
+            "Highlighting a clicked image and dimming the others in one client-side step");
     private static final UseCase UC3 = new UseCase("UC3", "Hidden share link",
-            "Copying a link the page never shows");
+            "Copying a server-side value that is never rendered in the UI");
     private static final UseCase UC4 = new UseCase("UC4", "Double-click copy",
-            "Copying text on a double-click");
+            "Copying text to the clipboard on double-click");
     private static final UseCase UC5 = new UseCase("UC5", "Idle warning",
-            "Warning users who have gone idle");
+            "Warning users after a few seconds of inactivity");
     private static final UseCase UC6 = new UseCase("UC6", "Network status",
-            "Showing when the browser goes offline");
+            "Showing online and offline status even when the server is unreachable");
     private static final UseCase UC7 = new UseCase("UC7", "Cross-tab broadcast",
-            "Passing messages between open browser tabs");
+            "Sending messages between browser tabs of the same app");
     private static final UseCase UC8 = new UseCase("UC8",
-            "Long-press to delete", "Guarding a delete behind a long press");
+            "Long-press to delete",
+            "Requiring a press-and-hold to confirm a destructive action");
     private static final UseCase UC9 = new UseCase("UC9", "Scroll into view",
-            "Scrolling to a section without a server round-trip");
+            "Scrolling a target into view on click, client-side or server-side");
     private static final UseCase UC10 = new UseCase("UC10", "Highlight",
-            "Reusing one highlight effect with different settings");
+            "Reusing one configurable highlight action with different colors and durations");
     private static final UseCase UC11 = new UseCase("UC11",
             "Right-click coords",
-            "Getting right-click coordinates on the server");
+            "Reporting right-click coordinates to the server and replacing the browser menu");
     private static final UseCase UC12 = new UseCase("UC12",
             "Accessibility announce",
-            "Announcing a save to screen-reader users");
+            "Announcing a save to screen readers without moving focus");
     private static final UseCase UC13 = new UseCase("UC13",
             "Client-side filter",
-            "Filtering a list without a request per keystroke");
+            "Filtering a server-loaded list in the browser on every keystroke");
     private static final UseCase UC14 = new UseCase("UC14", "Responsive cards",
-            "Fitting card columns to the container width");
+            "Adapting a card grid to its width with breakpoint classes");
     private static final UseCase UC15 = new UseCase("UC15", "Live size readout",
-            "Showing an element's size as it resizes");
+            "Showing an element's live size without server round-trips");
     private static final UseCase UC16 = new UseCase("UC16", "Pointer tracker",
-            "Following the pointer without flooding the server");
+            "Showing live pointer coordinates without server round-trips");
     private static final UseCase UC17 = new UseCase("UC17", "Atomic reset",
             "Resetting several fields at once in the browser");
     private static final UseCase UC18 = new UseCase("UC18", "Auto-save signal",
-            "Saving text into a signal on every keystroke");
+            "Pushing every keystroke into a server signal without a Java handler");
     private static final UseCase UC19 = new UseCase("UC19",
             "Dynamic responsive styling",
-            "Applying user-chosen colors per breakpoint");
+            "Applying user-chosen colors at different width breakpoints");
     private static final UseCase UC20 = new UseCase("UC20",
             "Double-click → new tab",
-            "Opening a row in a new tab on double-click");
+            "Opening a row in a new tab on double-click without the popup blocker");
     private static final UseCase UC21 = new UseCase("UC21", "Shortcut download",
-            "Starting a file download from a keyboard shortcut");
+            "Starting a server-generated download from a keyboard shortcut");
     private static final UseCase UC22 = new UseCase("UC22", "Key event log",
-            "Showing which keys and modifiers were pressed");
+            "Logging every key press with its modifiers as it happens");
     private static final UseCase UC23 = new UseCase("UC23", "Konami code",
-            "Reacting only to a complete key sequence");
+            "Reacting to a key sequence tracked entirely in the browser");
 
     private static final List<UseCase> USE_CASES = List.of(UC1, UC2, UC3, UC4,
             UC5, UC6, UC7, UC8, UC9, UC10, UC11, UC12, UC13, UC14, UC15, UC16,

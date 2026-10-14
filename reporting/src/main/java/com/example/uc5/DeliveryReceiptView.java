@@ -43,7 +43,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Know that it arrived")
-@UseCaseDescription("Marking an invoice sent only once it has arrived")
+@UseCaseDescription("Recording a document as sent only when the transfer completes")
 @Menu(order = 5, title = "UC5 — Know that it arrived")
 @StyleSheet("invoicing.css")
 public class DeliveryReceiptView extends VerticalLayout {

@@ -29,7 +29,7 @@ import com.vaadin.flow.signals.Signal;
  * browser UI in the way — there's nothing more elaborate to stage.
  */
 @Route(value = "uc7", layout = MainLayout.class)
-@UseCaseDescription("Showing the whole app without the browser chrome")
+@UseCaseDescription("Showing the whole app fullscreen without browser chrome")
 @Menu(order = 7, title = "UC7 — View app fullscreen")
 public class AppFullscreenView extends VerticalLayout {
 

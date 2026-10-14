@@ -32,15 +32,19 @@ class HomeViewTest extends SpringBrowserlessTest {
 
     private static final List<UseCase> USE_CASES = List.of(
             new UseCase("UC1", "Download the invoice",
-                    "Generating a PDF and letting the user download it", "uc1"),
+                    "Letting users download a generated PDF invoice", "uc1"),
             new UseCase("UC2", "Open it in a new tab",
-                    "Opening a generated PDF in a new browser tab", "uc2"),
+                    "Opening a generated document in a new tab instead of downloading it",
+                    "uc2"),
             new UseCase("UC3", "Check it before sending",
-                    "Previewing the real document before it is sent", "uc3"),
+                    "Previewing the exact generated PDF before sending it",
+                    "uc3"),
             new UseCase("UC4", "The monthly billing run",
-                    "Generating a month of invoices with progress", "uc4"),
+                    "Building one combined document from the selected invoices on click",
+                    "uc4"),
             new UseCase("UC5", "Know that it arrived",
-                    "Marking an invoice sent only once it has arrived", "uc5"));
+                    "Recording a document as sent only when the transfer completes",
+                    "uc5"));
 
     @Test
     void cardsListTheUseCasesInMenuOrder() {
@@ -60,8 +64,7 @@ class HomeViewTest extends SpringBrowserlessTest {
                                 + ": " + useCase.problem())
                         .toList(),
                 find(SideNavItem.class).all().stream()
-                        .filter(item -> item.getTooltip() != null
-                                && item.getTooltip().getText() != null)
+                        .filter(item -> !"Home".equals(item.getLabel()))
                         .map(item -> item.getLabel() + ": "
                                 + item.getTooltip().getText())
                         .toList(),

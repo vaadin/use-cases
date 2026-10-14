@@ -19,7 +19,7 @@ import com.vaadin.flow.router.RouterLink;
  */
 @Route(value = "uc6", layout = TeamLayout.class)
 @PageTitle("Dashboard")
-@UseCaseDescription("Showing one breadcrumb bar for a whole layout")
+@UseCaseDescription("Sharing one breadcrumb trail across a whole layout")
 @Menu(order = 6, title = "UC6 — Layout-wide breadcrumbs")
 public class DashboardView extends VerticalLayout {
 

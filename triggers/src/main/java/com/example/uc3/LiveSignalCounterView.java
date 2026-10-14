@@ -40,7 +40,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Copy a hidden share link")
-@UseCaseDescription("Copying a link the page never shows")
+@UseCaseDescription("Copying a server-side value that is never rendered in the UI")
 @Menu(order = 3, title = "UC3 — Hidden share link")
 @StyleSheet("uc3.css")
 public class LiveSignalCounterView extends VerticalLayout {

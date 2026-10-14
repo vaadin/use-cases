@@ -51,8 +51,10 @@ class SubtitlesViewTest extends SpringBrowserlessTest {
         RadioButtonGroup<String> picker = find(RadioButtonGroup.class).single();
         picker.setValue("Suomi");
 
+        // Applied after loadedmetadata, or the browser's own pick also shows.
         assertTrue(media.takeJavaScript().stream()
-                .anyMatch(js -> js.contains("textTracks")));
+                .anyMatch(js -> js.contains("textTracks")
+                        && js.contains("loadedmetadata")));
     }
 
     @Test

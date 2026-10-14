@@ -26,7 +26,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc12", layout = MainLayout.class)
 @PageTitle("UC12 — Accessibility announce")
-@UseCaseDescription("Announcing a save to screen-reader users")
+@UseCaseDescription("Announcing a save to screen readers without moving focus")
 @Menu(order = 12, title = "UC12 — Accessibility announce")
 @StyleSheet("uc12.css")
 public class AccessibleSaveView extends VerticalLayout {

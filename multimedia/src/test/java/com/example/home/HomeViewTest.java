@@ -42,23 +42,23 @@ class HomeViewTest extends SpringBrowserlessTest {
     }
 
     private static final UseCase UC1 = new UseCase("UC1", "Private recording",
-            "Serving a video only its owner can watch");
+            "Serving private recordings and posters without public URLs");
     private static final UseCase UC2 = new UseCase("UC2", "Seekable streaming",
-            "Letting users scrub through a long recording");
+            "Making a long recording seekable by serving byte ranges");
     private static final UseCase UC3 = new UseCase("UC3", "Adaptive streaming",
-            "Switching video quality to match the connection");
+            "Switching video quality as the connection changes with HLS");
     private static final UseCase UC4 = new UseCase("UC4", "Format fallback",
-            "Offering a modern codec with a safe fallback");
+            "Offering a video in a modern codec with a fallback that plays everywhere");
     private static final UseCase UC5 = new UseCase("UC5", "Background video",
-            "Playing a silent looping video behind a headline");
+            "Autoplaying a muted looping background video with a pause button");
     private static final UseCase UC6 = new UseCase("UC6", "Podcast playlist",
-            "Playing a list of episodes one after another");
+            "Playing podcast episodes in one player and continuing with the next");
     private static final UseCase UC7 = new UseCase("UC7", "Chapters & controls",
-            "Controlling playback and chapters from the server");
+            "Driving playback and chapter jumps from the server with custom controls");
     private static final UseCase UC8 = new UseCase("UC8", "Resume playback",
-            "Resuming playback where the user left off");
+            "Resuming a recording where the user left off");
     private static final UseCase UC9 = new UseCase("UC9", "Subtitles",
-            "Showing subtitles in the viewer's language");
+            "Offering subtitles in several languages and keeping the choice in the URL");
 
     private static final List<UseCase> USE_CASES = List.of(UC1, UC2, UC3, UC4,
             UC5, UC6, UC7, UC8, UC9);
@@ -77,8 +77,7 @@ class HomeViewTest extends SpringBrowserlessTest {
 
         assertEquals(List.of(
                 new Group("Delivering the media", List.of(UC1, UC2, UC3, UC4)),
-                new Group("Playing it back",
-                        List.of(UC5, UC6, UC7, UC8, UC9))),
+                new Group("Playing it back", List.of(UC5, UC6, UC7, UC8, UC9))),
                 groups);
     }
 

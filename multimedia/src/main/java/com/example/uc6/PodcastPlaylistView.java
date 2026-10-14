@@ -42,7 +42,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc6/:episode?", layout = MainLayout.class)
 @PageTitle("UC6 — Podcast playlist")
-@UseCaseDescription("Playing a list of episodes one after another")
+@UseCaseDescription("Playing podcast episodes in one player and continuing with the next")
 @Menu(order = 6, title = "UC6 — Podcast playlist")
 @StyleSheet("uc6.css")
 public class PodcastPlaylistView extends VerticalLayout
@@ -79,7 +79,7 @@ public class PodcastPlaylistView extends VerticalLayout
         nowPlaying.bindText(current.map(i -> "Now playing: " + (i + 1) + ". "
                 + EPISODES.get(i).title()));
 
-        audio.setControls(true);
+        audio.setControlsVisible(true);
         audio.setAriaLabel("Podcast player");
         audio.setWidthFull();
         audio.addSource(EPISODES.get(0).file(), "audio/mpeg");

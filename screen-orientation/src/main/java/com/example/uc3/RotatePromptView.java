@@ -36,7 +36,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Rotate-your-device overlay")
-@UseCaseDescription("Asking the user to rotate to the required orientation")
+@UseCaseDescription("Asking users to rotate the device for content that needs it")
 @Menu(order = 3, title = "UC3 — Rotate prompt")
 @StyleSheet("uc3.css")
 public class RotatePromptView extends VerticalLayout {
@@ -124,8 +124,9 @@ public class RotatePromptView extends VerticalLayout {
     }
 
     /**
-     * UNKNOWN and UNSUPPORTED never block: UNKNOWN is a brief pre-bootstrap gap
-     * and UNSUPPORTED platforms cannot be expected to rotate at all.
+     * UNKNOWN and UNSUPPORTED never block: UNKNOWN means the client has not
+     * reported yet (in practice only in tests, as the bootstrap seeds it) and
+     * UNSUPPORTED platforms cannot be expected to rotate at all.
      */
     private static boolean isMismatch(Required required,
             ScreenOrientationType type) {

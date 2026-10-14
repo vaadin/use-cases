@@ -20,8 +20,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-05", layout = MainLayout.class)
 @PageTitle("Use Case 5: Cascading Location Selector")
+@UseCaseDescription("Keeping dependent location selectors in sync as the parent changes")
 @Menu(order = 5, title = "UC5 — Cascading Selector")
-@UseCaseDescription("Narrowing each dropdown by the previous selection")
 @AnonymousAllowed
 public class UseCase05View extends VerticalLayout {
 

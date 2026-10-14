@@ -33,7 +33,7 @@ import com.vaadin.flow.signals.Signal;
  * gesture, so it is a plain click listener.
  */
 @Route(value = "uc3", layout = MainLayout.class)
-@UseCaseDescription("Giving a writer the whole screen to write in")
+@UseCaseDescription("Giving writers a fullscreen editor with no distractions")
 @Menu(order = 3, title = "UC3 — Distraction-free editor")
 @StyleSheet("uc3.css")
 public class DistractionFreeEditorView extends VerticalLayout {

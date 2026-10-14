@@ -48,7 +48,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Open it in a new tab")
-@UseCaseDescription("Opening a generated PDF in a new browser tab")
+@UseCaseDescription("Opening a generated document in a new tab instead of downloading it")
 @Menu(order = 2, title = "UC2 — Open it in a new tab")
 @StyleSheet("invoicing.css")
 public class OpenInNewTabView extends VerticalLayout {

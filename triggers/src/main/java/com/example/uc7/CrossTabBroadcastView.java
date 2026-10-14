@@ -33,7 +33,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Cross-tab broadcast")
-@UseCaseDescription("Passing messages between open browser tabs")
+@UseCaseDescription("Sending messages between browser tabs of the same app")
 @Menu(order = 7, title = "UC7 — Cross-tab broadcast")
 @StyleSheet("uc7.css")
 public class CrossTabBroadcastView extends VerticalLayout {

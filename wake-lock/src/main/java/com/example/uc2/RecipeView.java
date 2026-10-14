@@ -32,7 +32,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * toggle for the user to forget.
  */
 @Route(value = "uc2", layout = MainLayout.class)
-@UseCaseDescription("Keeping the screen awake while a view is open")
+@UseCaseDescription("Keeping the screen on while someone follows step-by-step instructions")
 @Menu(order = 2, title = "UC2 — Recipe")
 @StyleSheet("uc2.css")
 public class RecipeView extends VerticalLayout {

@@ -51,7 +51,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * the card shrink, not a separate bar re-tween.
  */
 @Route(value = "uc6", layout = MainLayout.class)
-@UseCaseDescription("Expanding one chart of a dashboard to fullscreen")
+@UseCaseDescription("Expanding a single dashboard chart card to fullscreen")
 @Menu(order = 6, title = "UC6 — Chart expand")
 @StyleSheet("uc6.css")
 public class ChartExpandView extends VerticalLayout {
