@@ -5,8 +5,9 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Shims for upload features that have no Java API yet. Each method names the
- * upstream issue; replace the call with the real API once it exists.
+ * Shims for upload features that have no Java API yet. Each method names its
+ * {@code API-GAPS.md} entry and the upstream issue; replace the call with the
+ * real API once it exists.
  */
 public final class MissingAPI {
 
@@ -25,7 +26,7 @@ public final class MissingAPI {
      * {@code autoUpload = false}, as if the user had pressed each file's start
      * button.
      * <p>
-     * Missing: {@code Upload#startUpload()} — <a href=
+     * Missing ({@code API-GAPS.md} #2): {@code Upload#startUpload()} — <a href=
      * "https://github.com/vaadin/flow-components/issues/1384">vaadin/flow-components#1384</a>.
      * Migrate by calling the real method.
      */
@@ -37,7 +38,8 @@ public final class MissingAPI {
      * Tells the server how many files are in the upload's list without having
      * been sent yet, every time a file is added or removed in the browser.
      * <p>
-     * Missing: a way to read the upload's queue from the server — <a href=
+     * Missing ({@code API-GAPS.md} #2): a way to read the upload's queue from
+     * the server — <a href=
      * "https://github.com/vaadin/flow-components/issues/6858">vaadin/flow-components#6858</a>.
      * Migrate by reading the queue when it is needed instead of tracking it.
      */

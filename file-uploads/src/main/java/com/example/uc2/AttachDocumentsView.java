@@ -59,7 +59,7 @@ import com.vaadin.flow.server.streams.UploadRejectedException;
  * be bound with the {@link Binder} that validates the other fields, and has no
  * required indicator, error message or helper text, so those are plain text
  * elements next to it. Files rejected by one selection are reported in a single
- * notification instead of one per file. See {@code API-GAPS.md}.
+ * notification instead of one per file. See {@code API-GAPS.md} #1, #2 and #4.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Attach documents")

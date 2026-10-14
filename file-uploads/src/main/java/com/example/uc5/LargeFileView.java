@@ -39,7 +39,7 @@ import com.vaadin.flow.server.streams.UploadMetadata;
  * Progress is also announced to screen readers at every quarter through a
  * polite live region, because the upload's own progress bar is silent. If the
  * connection drops, the transfer cannot be resumed — the user has to start the
- * whole file again. See {@code API-GAPS.md}.
+ * whole file again. See {@code API-GAPS.md} #6 and #7.
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Large file")

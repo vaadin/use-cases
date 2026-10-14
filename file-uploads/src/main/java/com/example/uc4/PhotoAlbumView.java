@@ -42,7 +42,7 @@ import com.vaadin.flow.server.streams.UploadMetadata;
  * <p>
  * The album, not the upload, owns the photos: it gives each one an id and
  * renames duplicate file names, because the upload identifies files only by
- * name. See {@code API-GAPS.md}.
+ * name. See {@code API-GAPS.md} #5.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Photo album")
