@@ -45,12 +45,14 @@
 }
 
 .app-window-title {
+    /* Takes the free space, so the address and any title-bar buttons sit at
+       the right end, also when the address is hidden. */
+    flex: 1 1 auto;
     font-size: 0.875rem;
     font-weight: 600;
 }
 
 .app-window-url {
-    margin-inline-start: auto;
     /* The address gives way before the title does. */
     flex-shrink: 10;
     font-family: monospace;
