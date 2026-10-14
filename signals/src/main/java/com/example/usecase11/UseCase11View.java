@@ -35,7 +35,7 @@ import com.vaadin.flow.signals.Signal;
 @Route(value = "use-case-11", layout = MainLayout.class)
 @PageTitle("Use Case 11: Responsive Layout")
 @UseCaseDescription("Adapting a layout to its container size instead of the window")
-@Menu(order = 11, title = "UC 11: Responsive Layout")
+@Menu(order = 11, title = "UC11 — Responsive Layout")
 @StyleSheet("usecase11.css")
 @AnonymousAllowed
 public class UseCase11View extends VerticalLayout {

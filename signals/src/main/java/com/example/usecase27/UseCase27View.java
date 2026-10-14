@@ -25,7 +25,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 @Route(value = "use-case-27", layout = UseCase27Layout.class)
 @PageTitle("Use Case 27: Router State Signal")
 @UseCaseDescription("Reacting to navigation and route parameters through a router state signal")
-@Menu(order = 27, title = "UC 27: Router State Signal")
+@Menu(order = 27, title = "UC27 — Router State Signal")
 @AnonymousAllowed
 public class UseCase27View extends VerticalLayout {
 

@@ -19,6 +19,7 @@ import com.example.uc8.OptimisticSaveView;
 import com.example.uc9.SlowRequestFeedbackView;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -38,12 +39,20 @@ public class HomeView extends BaseHomeView {
                         + "the browser no more than it needs. API-GAPS.md "
                         + "records where Flow made that harder than it "
                         + "should be.");
-        addMenuCards(List.of(MillionRowGridView.class,
-                ParallelDashboardView.class, LongRunningJobView.class,
-                OrderDetailView.class, LatestResponseWinsView.class,
-                DeferredSectionsView.class, ThrottledFeedView.class,
-                OptimisticSaveView.class, SlowRequestFeedbackView.class,
-                VirtualScrollingView.class, GridSearchLoadingView.class,
-                StructuredSkeletonView.class, BlurHashPreviewView.class));
+        addGroup("Large data sets", VaadinIcon.TABLE, Accent.BLUE,
+                List.of(MillionRowGridView.class, VirtualScrollingView.class,
+                        GridSearchLoadingView.class));
+        addGroup("Answering in the background", VaadinIcon.HOURGLASS,
+                Accent.GREEN, List.of(ParallelDashboardView.class,
+                        LongRunningJobView.class, OrderDetailView.class));
+        addGroup("Building only what the user sees", VaadinIcon.EYE,
+                Accent.ORANGE,
+                List.of(DeferredSectionsView.class,
+                        StructuredSkeletonView.class,
+                        BlurHashPreviewView.class));
+        addGroup("Fewer, smarter round-trips", VaadinIcon.BOLT, Accent.PURPLE,
+                List.of(LatestResponseWinsView.class, ThrottledFeedView.class,
+                        OptimisticSaveView.class,
+                        SlowRequestFeedbackView.class));
     }
 }
