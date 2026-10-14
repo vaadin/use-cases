@@ -1,214 +1,263 @@
-# API gaps — collaboration on shared signals
+# API gaps: collaboration on shared signals
 
-What this module could not do with the signal API as it stands in Vaadin 25.3,
-or could only do by writing something the framework should arguably own. The
-reference point is Collaboration Kit, because UC1–UC9 are the
-[Collaboration Engine Sampler](https://ce-sampler.demo.vaadin.com/) rebuilt on
-signals and the comparison is therefore exact.
+What this module could not do with the signal API in Vaadin 25.4, or could do
+only by writing code the framework should own. The reference point is
+Collaboration Kit (CE): UC1–UC9 rebuild the
+[Collaboration Engine Sampler](https://ce-sampler.demo.vaadin.com/) on
+signals, so the comparison is exact.
 
-Every numbered item below is referenced from the code that hit it, and the
-behavioural claims are pinned down by
-[`SharedSignalSemanticsTest`](src/test/java/com/example/collab/SharedSignalSemanticsTest.java)
-so that a framework change makes a test fail rather than making this document
-quietly wrong.
+The code that hits a gap refers to it as `API-GAPS.md #N`. The behaviour
+claims are pinned down by
+[`SharedSignalSemanticsTest`](src/test/java/com/example/collab/SharedSignalSemanticsTest.java),
+so a framework change makes a test fail instead of making this file wrong.
 
-## Parity blockers
+## 1. Nothing removes a peer that disappears
 
-**1. Nothing removes a peer that disappears.**
-Collaboration Kit has `EntryScope.CONNECTION`: entries written by a connection
-are dropped when that connection ends, and `BeaconHandler` ends it when the
-browser closes the tab. A shared signal has no such notion, so every presence
-use case here removes its own entry from an attach/detach listener
-([`Presence#bind`](src/main/java/com/example/collab/Presence.java)) — and that
-only covers the cases where a detach happens. A crashed server, a killed
-session or an exception on the way out leaves the peer in the map for the
-lifetime of the application.
+**Where it bites:** UC1 / `PresenceView.java`, UC2 / `OptInPresenceView.java`, helper `Presence#bind`
+**Symptom:** CE has `EntryScope.CONNECTION`: entries a connection wrote are
+dropped when the connection ends, and `BeaconHandler` ends it when the tab
+closes. Shared signals have no such scope. A killed tab, a killed session or a
+crashed server leaves the peer in the map. The protocol already supports it:
+`SignalCommand.InsertCommand` and `PutIfAbsentCommand` carry a `scopeOwner()`,
+and `SignalCommand.ClearOwnerCommand` clears everything one owner wrote. But
+every public insert/put passes `null` as the owner, and nothing public sends
+`ClearOwnerCommand`.
+**Workaround used:** `Presence#bind` removes the entry in the cleanup of a
+`whenAttached` handler. For a vanished browser this relies on the UI being closed after
+three missed heartbeats (`application.properties`), so a ghost avatar stays
+for minutes.
+**Suggested API:** an insert/put that takes an owner, and a way to end an
+owner's scope, by default tied to the session or UI.
+Upstream: https://github.com/vaadin/flow/issues/25867
 
-The interesting part is that the protocol already supports it:
-`SignalCommand.InsertCommand` carries a `scopeOwner()`, and
-`SignalCommand.ClearOwnerCommand` exists to clear everything owned by one
-owner. No public API sets an owner or clears one, so the capability is present
-in the wire format and unreachable from an application.
+## 2. Shared signals are single-node
 
-*Wanted*: an insert/put that takes an owner, and a way to end an owner's
-scope — ideally tied to the session by default, as Collaboration Kit does.
+**Where it bites:** every use case
+**Symptom:** CE has a `Backend` abstraction with Hazelcast and Redis
+implementations. A shared signal keeps its tree in the JVM that created it:
+the public constructors (e.g. `SharedNodeSignal()`) use
+`LocalAsynchronousSignalTree`, documented as "does not support clustering".
+Nothing in this module works across two servers. This is the one gap that
+stops an application from replacing CE today.
+**Workaround used:** none. The module runs on a single node.
+**Suggested API:** a pluggable cluster backend for the signal tree. The API
+already expects one: the transaction error in #15 talks about cluster nodes.
 
-**2. Shared signals are single-node.**
-Collaboration Kit ships a `Backend` abstraction with Hazelcast and Redis
-implementations, so a collaborative view survives being deployed behind two
-instances. Shared signals keep their tree in the JVM that created it. Nothing
-in this module works across two servers, which is the one gap that would stop
-an application from replacing Collaboration Kit today.
+## 3. Nothing expires
 
-The API is clearly built with this in mind — the transaction restriction in #15
-is phrased in terms of cluster nodes — but there is no way to plug a backend
-in.
+**Where it bites:** UC12 / `RoomsView.java`, `RoomsTopic#closeEmptyRooms`
+**Symptom:** CE's `HasExpirationTimeout` drops a topic's data after a period
+with nobody connected. A `SharedNodeSignal` keeps every child until something
+removes it, so UC12's room tree grows forever.
+**Workaround used:** a *Close empty rooms* button that calls
+`RoomsTopic#closeEmptyRooms`. A demo can have a button; a chat with
+per-conversation rooms cannot.
+**Suggested API:** resolve a group of shared signals by key, and evict it
+after a configurable idle time.
+Upstream: https://github.com/vaadin/flow/issues/25865
 
-**3. Nothing expires.**
-`HasExpirationTimeout` lets a CE topic drop its data after a period with nobody
-in it. A `SharedNodeSignal` keeps every child until something removes it, so
-UC12's room tree grows forever; the view has a *Close empty rooms* button
-because the alternative was a leak
-([`RoomsTopic#closeEmptyRooms`](src/main/java/com/example/uc12/RoomsTopic.java)).
-A demo can press a button. A chat with per-conversation rooms cannot.
+## 4. No persistence hook
 
-**4. No persistence hook.**
-`CollaborationMessagePersister` gives CE a load callback and a write-through
-callback, so a chat's history survives a restart without the view knowing.
-There is no signal-side equivalent: UC4 writes to its store and to the signal
-separately and reloads the signal from the store by hand
-([`ChatTopic`](src/main/java/com/example/uc4/ChatTopic.java)). Two writes that
-have to be kept in step is exactly the class of bug the rest of the signal API
-is good at preventing.
+**Where it bites:** UC4 / `ChatView.java`, `ChatTopic.java`
+**Symptom:** CE's `CollaborationMessagePersister` has a load callback and a
+write-through callback, so chat history survives a restart. Signals have no
+equivalent. The application must write to its store and to the signal
+separately, and keep the two in step.
+**Workaround used:** `ChatTopic` writes to both, and rebuilds the signal from
+the store by hand.
+**Suggested API:** a load and write-through hook on a shared signal, so the
+store and the signal cannot drift apart.
+Upstream: https://github.com/vaadin/flow/issues/25864
 
-## Component bindings
+## 5. `Grid` has no signal-aware items API
 
-**5. `Grid` has no signal-aware items API.**
-`AvatarGroup.bindItems` and `MessageList.bindItems` take a
-`Signal<List<Signal<T>>>` and are a pleasure to use — UC1 and UC4 are three
-lines each because of them. `Grid` takes a data provider, so UC8 and UC9 push
-the shared list into a `ListDataProvider` from an effect
-([`SignalBindings`](src/main/java/com/example/collab/SignalBindings.java)).
-Two details make it more than boilerplate:
+**Where it bites:** UC8 / `CollaborativeGridView.java`, UC9 / `CollaborativeGridProView.java`, helper `SignalBindings`
+**Symptom:** `AvatarGroup.bindItems` and `MessageList.bindItems` take a
+`Signal<List<Signal<T>>>`, so UC1 and UC4 need three lines each. `Grid` takes
+only a data provider. Two details make the glue more than boilerplate:
 
-- the grid's items have to be the row *signals* rather than the row values, or
-  every keystroke replaces every item and selection is lost;
-- the effect has to read each row as well as the list, or an edit inside a row
-  never reaches the grid.
+- the grid items must be the row *signals*, not the row values; otherwise
+  every keystroke replaces every item and the selection is lost;
+- the effect must read each row as well as the list; otherwise an edit inside
+  a row never reaches the grid.
 
-`Grid.setPartNameGenerator` compounds it: a part name generator is not
-reactive, so a view that colours rows by who is looking at them has to call
-`refreshAll()` from an effect of its own.
+`Grid.setPartNameGenerator` is not reactive either, so a view that colours
+rows by who is looking at them must call `refreshAll()` from its own effect.
+(A `Grid.bindItems` existed briefly and was removed again in
+vaadin/flow-components#8954.)
+**Workaround used:** `SignalBindings` pushes the shared list into a
+`ListDataProvider` from an effect; the views call
+`getDataProvider().refreshAll()` from an effect for part names.
+**Suggested API:** `Grid.bindItems(Signal<List<Signal<T>>>)` that refreshes
+one row when one row signal changes, and a reactive part name generator.
 
-**6. The field highlighter has no public Java API.**
-`vaadin-field-highlighter` ships with the platform and is what makes UC5 look
-like Collaboration Kit, but the only Java surface is
-`FieldHighlighterInitializer.init(Element)` — `protected static`. Using it
-means extending that class for its `@JsModule` and `@NpmPackage` annotations
-and calling `setUsers` over `executeJs`
-([`SignalFieldHighlighter`](src/main/java/com/example/collab/SignalFieldHighlighter.java)).
-CE's `FieldHighlighter` is not public either, but CE at least exposes it
-through `CollaborationBinder`; on signals there is nothing.
+## 6. The field highlighter has no public Java API
 
-**7. No `Binder` integration.**
-`CollaborationBinder` is a `Binder`, so a CE form keeps its validators,
-converters, bean binding and `writeBean`. A signal binding and a `Binder` both
-want to own a field's value, so a collaborative form on signals gives up the
-`Binder` half — UC5's e-mail check is an effect that calls `setInvalid`
-([`CollaborativeFormView`](src/main/java/com/example/uc5/CollaborativeFormView.java)).
-For a form of any size this is the most expensive gap in the list.
+**Where it bites:** UC5 / `CollaborativeFormView.java`, helper `SignalFieldHighlighter`
+**Symptom:** `vaadin-field-highlighter` ships with the platform, but the only
+Java surface is `FieldHighlighterInitializer.init(Element)`, which is
+`protected static`. CE's `FieldHighlighter` is not public either, but CE
+exposes it through `CollaborationBinder`. On signals there is nothing.
+**Workaround used:** `SignalFieldHighlighter` extends
+`FieldHighlighterInitializer` to inherit its `@JsModule` and `@NpmPackage`,
+and calls `setUsers` through `executeJs`.
+**Suggested API:** a public `FieldHighlighter` with e.g.
+`bindUsers(HasValue<?, ?> field, Signal<List<FieldHighlighterUser>>)`.
 
-**8. Validity is not bindable.**
-`HasValue` binds value, read-only state and the required indicator to signals,
-but not validity: there is no `bindInvalid` or `bindErrorMessage`, so a
-validation result derived from shared state has to be applied imperatively from
-inside an effect.
+## 7. No `Binder` integration
 
-**9. Shared state carries no actor, and effects are not change events.**
-`SignalBinding.onChange` does report the old and the new value, which is more
-than an effect can see and enough for UC6's "name: Ada → Ada B". What no API
-reports is *who* wrote — so `FieldValue` carries its author as payload
-([`FieldValue`](src/main/java/com/example/collab/FieldValue.java)) and every
-application that wants "Ada changed the address" pays for it in its data model.
+**Where it bites:** UC5 / `CollaborativeFormView.java`, helper `FormState`
+**Symptom:** `CollaborationBinder` is a `Binder`, so a CE form keeps its
+validators, converters, bean binding and `writeBean`. `Binder` can now expose
+signals (`Binding.valueSignal()`, `validationStatusSignal()`), but it cannot
+be backed by a shared signal: `bindValue` and `Binder` both want to own the
+field value. A collaborative form on signals gives up `Binder`. For a form of
+any size this is the most expensive gap here.
+**Workaround used:** `FormState` binds each field with `bindValue`; UC5's
+e-mail check is an effect that calls `setInvalid`.
+**Suggested API:** a `Binder` whose bindings read and write a shared signal
+(per property or per bean), keeping validators and converters.
+Upstream: https://github.com/vaadin/flow/issues/23868
 
-The same shape appears for collections. CE's `PresenceHandler` is called per
-user with a callback for that user leaving, so join and leave fall out of the
-API; an effect over a presence map is called with the current set, so UC3 and
-UC6 keep the previously rendered set and diff against it. It works, it is
-about fifteen lines per view, and every view writes it again.
+## 8. Validity is not bindable
 
-**10. A `SignalBinding` cannot be undone.**
-`bindValue`, `bindText` and friends return a `SignalBinding`, which is not a
-`Registration` and has no `remove()`. A binding therefore lives as long as its
-component, which is usually what you want and occasionally not — a field that
-is re-bound to a different signal (UC12 switching rooms) has to be replaced
-with a new component instead.
+**Where it bites:** UC5 / `CollaborativeFormView.java`
+**Symptom:** `HasValue` binds value, read-only state and the required
+indicator (`bindValue`, `bindReadOnly`, `bindRequiredIndicatorVisible`), but
+`HasValidation` has no `bindInvalid` or `bindErrorMessage`. They were added in
+vaadin/flow#23258 and reverted in vaadin/flow#23681.
+**Workaround used:** an effect calls `setInvalid` and `setErrorMessage`.
+**Suggested API:** `HasValidation.bindInvalid(Signal<Boolean>)` and
+`bindErrorMessage(Signal<String>)`.
 
-## Semantics worth documenting
+## 9. Shared state carries no actor, and effects are not change events
 
-**11. `CommandValidator` does not know who is writing, and refuses by
-throwing.**
-`SignalCommand` exposes the command id, the target node and — for the value
-commands — the value, which is enough to enforce rules about the *data*
-(UC13 refuses labels over twelve characters in the shared state itself, which
-Collaboration Kit cannot do at all). It carries no principal, so an access rule
-about *users* can only be written by closing over the user, as
-[`AccessTopic#formFor`](src/main/java/com/example/uc7/AccessTopic.java) does.
-That makes a validator a capability handed to one peer rather than a rule on
-the data: a second handle to the same node, without the validator, writes
-freely.
+**Where it bites:** UC3 / `CustomUserListView.java`, UC6 / `FormEventsView.java`, helper `FieldValue`
+**Symptom:** `SignalBinding.onChange` reports the old and new value, which is
+enough for UC6's "name: Ada → Ada B". No API reports *who* wrote. For
+collections, CE's `PresenceHandler` is called per user with a callback for
+that user leaving. An effect over a presence map only sees the current set.
+**Workaround used:** `FieldValue` carries its author as payload. UC3 and UC6
+keep the last rendered set and diff against it, about fifteen lines per view.
+**Suggested API:** the writer's identity on a change (e.g. in
+`EffectContext` or the binding context), and per-entry added/removed
+callbacks for `SharedMapSignal` and `SharedListSignal`.
 
-The refusal is also shaped differently from every other refusal in the API. A
-failed condition comes back as `SignalOperation.Error` on the operation; a
-validator that returns `false` makes `submit` throw
-`UnsupportedOperationException` with no message. A view that wants to report
-"you may not do that" has to catch an exception in one case and inspect an
-operation result in the other.
+## 10. A `SignalBinding` cannot be undone
 
-**12. `GridPro` does not say which cell is being edited.**
-`CellEditStartedEvent` exposes `getItem()` and nothing else, and there is no
-cell-edit-finished event, so UC9 can highlight the row a peer is editing but
-not the cell — which is what Collaboration Kit's grid integration shows. The
-event is constructed with a path internally; it is simply not exposed.
+**Where it bites:** UC12 / `RoomsView.java`, helper `FormState`
+**Symptom:** `bindValue`, `bindText` and similar return a `SignalBinding`.
+It is not a `Registration` and has no `remove()`, and bindings require a
+non-null signal. A binding lives as long as its component. A field that must
+switch to another signal (UC12 changing rooms) cannot be re-bound.
+**Workaround used:** replace the component with a new one.
+**Suggested API:** `SignalBinding.remove()`, or allow re-binding the same
+property to a different signal.
 
-**13. A pending write cannot be kept pending.**
-`peekConfirmed()` and `get()` do genuinely differ, and UC13 shows it: inside
-the callback that called `set()`, this client's reading has moved on and the
-confirmed reading has not, because the command is applied when the session
-flushes. But the window closes before the response is rendered, so a UI cannot
-*show* a write as in flight, grey out an unconfirmed row, or offer to retry
-one. Nor can a test simulate a slow or failed confirmation, since the only
-publicly constructible tree is the synchronous one. Optimistic UI is the use
-case `peekConfirmed()` exists for and the one thing it cannot be used for.
+## 11. `CommandValidator` does not know who writes, and refuses by throwing
 
-**14. An operation's result is not available to the code that submitted it.**
-`operation.result().getNow(null)` returns `null` in every UI callback, for the
-same reason as #13 — the command has not been applied yet. It is a quiet trap:
-the first version of UC7 read it there and reported "not confirmed yet" for
-every claim, winning or losing. The correct form is a future callback plus
-`ui.access`, which every call site has to remember
-([`Outcomes`](src/main/java/com/example/collab/Outcomes.java)).
+**Where it bites:** UC7 / `FormAccessView.java`, `AccessTopic#formFor`; UC13 / `PendingStateView.java`, `PendingTopic.java`
+**Symptom:** `CommandValidator.isValid(SignalCommand)` sees the command,
+target node and value. That is enough for rules about *data* (UC13 refuses
+labels over 12 characters in the shared state, which CE cannot do). It has no
+principal, so a rule about *users* must close over the user. That makes the
+validator a capability of one handle, not a rule on the data: another handle
+to the same node without the validator writes freely. A refusal is also
+shaped differently from other refusals: a failed condition gives a
+`SignalOperation.Error`, but a validator returning `false` makes `submit`
+throw `UnsupportedOperationException` with no message
+(`AbstractSharedSignal#submit`).
+**Workaround used:** `AccessTopic#formFor` wraps the signals with
+`withValidator` per peer; UC7 and UC13 catch the exception.
+**Suggested API:** a validator that receives the writing session or user, and
+a refusal reported as a failed operation result with a reason.
 
-*Wanted*: something like `operation.onOutcome(Component, consumer)` that
-handles the session hop, in the spirit of `Signal.effect(Component, …)`.
+## 12. `GridPro` does not say which cell is being edited
 
-**15. A transaction cannot span independent shared signals.**
-`Signal.runInTransaction` across two top-level shared signals throws, because
-each one commits separately and may be owned by a different cluster node. The
-message says so plainly and recommends keeping the values in one shared signal.
-That is sound, and it is a constraint on the *data model* rather than on the
-call: UC10 moves an item between two lists atomically, and its two lists are
-children of one `SharedNodeSignal` for that reason alone
-([`RaceTopic`](src/main/java/com/example/uc10/RaceTopic.java)). An application
-that discovers this after modelling its state as several top-level signals has
-to restructure.
+**Where it bites:** UC9 / `CollaborativeGridProView.java`, `CatalogTopic.java`
+**Symptom:** `GridPro.CellEditStartedEvent` exposes only `getItem()`, and
+there is no cell-edit-finished event. UC9 can highlight the row a peer edits,
+not the cell, which CE's grid integration shows. The event is constructed
+with the column path internally; it is just not exposed.
+**Workaround used:** row-level highlighting only.
+**Suggested API:** `CellEditStartedEvent.getColumn()` (or the path), and a
+`CellEditFinishedEvent`.
 
-**16. Smaller edges.**
+## 13. A pending write cannot be kept pending
 
-- `SharedListSignal` has no remove-by-value: removing an entry means
-  `peek().stream().filter(…).findFirst().ifPresent(list::remove)`, because
-  `remove` takes the entry's signal
-  ([`FormState#leave`](src/main/java/com/example/collab/FormState.java)).
-- `SharedListSignal` has `getValues()` / `peekValues()`; `SharedMapSignal` has
-  no equivalent, so its values are unwrapped by hand.
-- `SharedNumberSignal.getAsInt()` goes through `get()` and therefore needs a
-  reactive context; there is no `peekAsInt()`, so reading a counter outside an
-  effect means `peek().intValue()`.
-- `SharedMapSignal.get()` returns the entries in an unspecified order, so any
-  view that renders them sorts by something of its own first — otherwise two
-  clients can list the same users differently.
+**Where it bites:** UC13 / `PendingStateView.java`
+**Symptom:** `peekConfirmed()` and `get()` do differ: inside the callback
+that called `set()`, this client sees the new value and the confirmed reading
+does not, because the command is applied when the session flushes. But the
+window closes before the response is rendered, so a UI cannot show a write as
+in flight, grey out an unconfirmed row, or offer a retry. A test cannot
+simulate a slow or failed confirmation either: the public constructors use
+`LocalAsynchronousSignalTree`, and the constructors that take another tree
+are `protected`. Optimistic UI is what `peekConfirmed()` exists for, and the
+one thing it cannot be used for.
+**Workaround used:** none. UC13 only shows the difference inside the callback.
+**Suggested API:** a way to observe pending commands from the UI, and a
+test tree whose confirmation can be delayed or rejected.
+
+## 14. An operation's result is not available to the code that submitted it
+
+**Where it bites:** UC7 / `FormAccessView.java`, UC13 / `PendingStateView.java`, helper `Outcomes`
+**Symptom:** `operation.result().getNow(null)` returns `null` in every UI
+callback, for the same reason as #13. It is a quiet trap: the first version
+of UC7 read it there and reported "not confirmed yet" for every claim.
+**Workaround used:** `Outcomes.report` uses a future callback plus
+`ui.access`, which every call site would otherwise repeat.
+**Suggested API:** e.g. `operation.onOutcome(Component, consumer)` that
+handles the hop back to the UI, like `Signal.effect(Component, …)`.
+
+## 15. A transaction cannot span independent shared signals
+
+**Where it bites:** UC10 / `ConflictsView.java`, `RaceTopic.java`
+**Symptom:** `Signal.runInTransaction` across two top-level shared signals
+throws, because each one commits separately and "may be owned by a different
+cluster node" (`StagedTransaction`). The message says to keep the values in
+one shared signal. That is a constraint on the *data model*: UC10 moves an
+item between two lists atomically, and the lists are children of one
+`SharedNodeSignal` only for that reason. An application that has already
+modelled its state as several top-level signals must restructure.
+**Workaround used:** both lists live under one `SharedNodeSignal` in
+`RaceTopic`.
+**Suggested API:** document the rule on `SharedNodeSignal` and
+`runInTransaction`, or support transactions across trees.
+
+## 16. Smaller edges
+
+**Where it bites:** UC5 / helper `FormState#leave`; any view rendering a `SharedMapSignal` or counter
+**Symptom:**
+
+- `SharedListSignal.remove` takes the entry's signal; there is no
+  remove-by-value.
+- `SharedListSignal` has `getValues()` / `peekValues()`; `SharedMapSignal`
+  has no equivalent.
+- `SharedNumberSignal.getAsInt()` calls `get()` and so needs a reactive
+  context; there is no `peekAsInt()`.
+- `SharedMapSignal` does not document the order of its entries. The
+  implementation keeps insertion order, but nothing promises it.
+
+**Workaround used:**
+`peek().stream().filter(…).findFirst().ifPresent(list::remove)`; unwrapping
+map values by hand; `peek().intValue()`; views sort map entries by a key of
+their own before rendering.
+**Suggested API:** `SharedListSignal.removeIf(Predicate<T>)`,
+`SharedMapSignal.getValues()` / `peekValues()`,
+`SharedNumberSignal.peekAsInt()`, and a documented entry order.
 
 ## Not a gap
 
-Worth recording, since they were expected to be problems and were not:
+Expected to be problems, but were not:
 
-- **Atomicity.** `replace`, `incrementBy`, `update` and `verifyChild` cover the
-  conflict cases Collaboration Kit's last-write-wins map cannot express, and
-  they report rejection rather than losing a write silently (UC10).
-- **Derived state.** `Signal.computed` removes the hand-maintained counters a
-  CE application needs beside its data (UC11).
+- **Atomicity.** `replace`, `incrementBy`, `update` and `verifyChild` cover
+  conflicts that CE's last-write-wins map cannot express, and they report a
+  rejection instead of losing a write (UC10).
+- **Derived state.** `Signal.computed` removes the hand-kept counters a CE
+  application needs beside its data (UC11).
 - **Topics.** A `SharedNodeSignal` with `putChildIfAbsent` is a better topic
-  namespace than a topic id, because the list of rooms is itself shared state a
-  client can render (UC12).
+  namespace than a topic id, because the room list is itself shared state
+  (UC12).
 - **Subscription lifecycle.** `Signal.effect(Component, …)` replaces
-  `ConnectionContext` / `TopicConnection` entirely, and is less to get wrong.
+  `ConnectionContext` / `TopicConnection`, with less to get wrong.

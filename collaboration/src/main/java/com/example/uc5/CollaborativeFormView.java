@@ -42,7 +42,7 @@ import com.vaadin.flow.signals.Signal;
 @RouteAlias(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Edit a form together")
 @UseCaseDescription("Several users editing the same form, with field highlights")
-@Menu(order = 5, title = "UC5 — Collaborative form")
+@Menu(order = 5, title = "UC5 — Edit a form together")
 public class CollaborativeFormView extends UseCaseView {
 
     static final String TOPIC = "uc5-form";

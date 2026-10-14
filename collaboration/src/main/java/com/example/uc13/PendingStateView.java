@@ -19,7 +19,7 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.signals.operations.SignalOperation;
 
 /**
- * UC13 — Show pending versus confirmed state. Beyond the sampler.
+ * UC13 — Know if a write went through. Beyond the sampler.
  * <p>
  * A shared signal can be read two ways: {@code get()} / {@code peek()} is what
  * this client believes, including writes it has submitted, and
@@ -46,13 +46,13 @@ import com.vaadin.flow.signals.operations.SignalOperation;
  */
 @Route(value = "pending", layout = MainLayout.class)
 @RouteAlias(value = "uc13", layout = MainLayout.class)
-@PageTitle("UC13 — Pending versus confirmed state")
+@PageTitle("UC13 — Know if a write went through")
 @UseCaseDescription("Telling a local, unconfirmed change from a confirmed one")
-@Menu(order = 13, title = "UC13 — Pending vs confirmed")
+@Menu(order = 13, title = "UC13 — Know if a write went through")
 public class PendingStateView extends UseCaseView {
 
     public PendingStateView(PendingTopic topic) {
-        super("UC13 — Show pending versus confirmed state",
+        super("UC13 — Know if a write went through",
                 "Write a new label in any panel. The readout records what this client believed and what the shared "
                         + "state had confirmed at three points: before the write, in the instant after submitting "
                         + "it, and once it landed. Labels longer than "

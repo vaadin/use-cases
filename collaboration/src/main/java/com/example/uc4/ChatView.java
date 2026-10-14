@@ -44,7 +44,7 @@ import com.vaadin.flow.signals.Signal;
 @RouteAlias(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Chat in real time")
 @UseCaseDescription("Sending messages that every participant sees at once")
-@Menu(order = 4, title = "UC4 — Real-time chat")
+@Menu(order = 4, title = "UC4 — Chat in real time")
 public class ChatView extends UseCaseView {
 
     static final String TOPIC = "uc4-chat";

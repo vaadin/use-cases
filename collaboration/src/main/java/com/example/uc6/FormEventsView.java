@@ -22,9 +22,9 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.signals.Signal;
 
 /**
- * UC6 — See the raw collaboration events. The sampler's {@code custom-form}
- * sample, where {@code FormManager.setPropertyChangeHandler} and
- * {@code setHighlightHandler} print to a log.
+ * UC6 — Log who changed what. The sampler's {@code custom-form} sample, where
+ * {@code FormManager.setPropertyChangeHandler} and {@code setHighlightHandler}
+ * print to a log.
  * <p>
  * This is where signals and Collaboration Kit differ most, and it is worth
  * being precise about how:
@@ -43,13 +43,13 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "form-events", layout = MainLayout.class)
 @RouteAlias(value = "uc6", layout = MainLayout.class)
-@PageTitle("UC6 — See the raw collaboration events")
+@PageTitle("UC6 — Log who changed what")
 @UseCaseDescription("Reacting to what other users do in a shared form")
-@Menu(order = 6, title = "UC6 — Collaboration events")
+@Menu(order = 6, title = "UC6 — Log who changed what")
 public class FormEventsView extends UseCaseView {
 
     public FormEventsView(FormEventsTopic topic) {
-        super("UC6 — See the raw collaboration events",
+        super("UC6 — Log who changed what",
                 "The same collaborative form as UC5, with every change printed as it happens: what changed, "
                         + "from what to what, and who is in which field. Each panel logs what it observed, so the "
                         + "logs are not copies of one another.");

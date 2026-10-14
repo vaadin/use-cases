@@ -35,7 +35,7 @@ import com.vaadin.flow.router.RouteAlias;
 @RouteAlias(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Join and leave on purpose")
 @UseCaseDescription("Letting users decide when they count as present")
-@Menu(order = 2, title = "UC2 — Join and leave")
+@Menu(order = 2, title = "UC2 — Join and leave on purpose")
 public class OptInPresenceView extends UseCaseView {
 
     static final String TOPIC = "uc2-opt-in";
@@ -48,7 +48,7 @@ public class OptInPresenceView extends UseCaseView {
         add(new PeerRig(peer -> peerView(presence, peer)));
 
         addNote("markAsPresent(true/false) becomes put/remove on the presence map. Because membership is no "
-                + "longer tied to attach, the detach listener has to be kept anyway — otherwise a peer that "
+                + "longer tied to attach, the cleanup on detach has to be kept anyway — otherwise a peer that "
                 + "joined and then vanished is still in the map (API-GAPS.md #1).");
     }
 
@@ -75,7 +75,7 @@ public class OptInPresenceView extends UseCaseView {
         Div content = new Div(join, group, count);
         // Opting in is the user's decision, leaving is not: a peer that is
         // gone cannot be present, whatever the checkbox said.
-        content.addDetachListener(event -> topic.remove(peer.key()));
+        content.whenAttached(ui -> () -> topic.remove(peer.key()));
         return content;
     }
 }

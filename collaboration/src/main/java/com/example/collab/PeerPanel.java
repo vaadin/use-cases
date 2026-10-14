@@ -18,10 +18,10 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * <p>
  * The <em>Disconnect</em> button is the interesting part. It removes the body
  * from the DOM, which detaches it, which disposes the effects inside it and
- * fires the detach listeners that presence and field highlighting hang off —
- * the same sequence as closing a browser tab, only observable from a test. It
- * is how every use case here demonstrates a user leaving without needing a
- * second session.
+ * runs the detach cleanups that presence and field highlighting hang off — the
+ * same sequence as closing a browser tab, only observable from a test. It is
+ * how every use case here demonstrates a user leaving without needing a second
+ * session.
  */
 public class PeerPanel extends Div {
 
@@ -48,8 +48,7 @@ public class PeerPanel extends Div {
         name.addClassName("peer-name");
 
         Button toggle = new Button();
-        toggle.addThemeVariants(ButtonVariant.LUMO_SMALL,
-                ButtonVariant.LUMO_TERTIARY);
+        toggle.addThemeVariants(ButtonVariant.SMALL, ButtonVariant.TERTIARY);
         toggle.addClickListener(event -> setConnected(!isConnected()));
         Signal.effect(this, () -> toggle
                 .setText(connected.get() ? "Disconnect" : "Connect"));

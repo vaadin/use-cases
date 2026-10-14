@@ -27,7 +27,7 @@ import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
- * UC11 — Derive shared state instead of storing it. Beyond the sampler.
+ * UC11 — Keep totals always in step. Beyond the sampler.
  * <p>
  * Collaboration Kit gives an application shared maps and lists, and every
  * number computed from them has to be maintained by hand: a counter written
@@ -46,13 +46,13 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
  */
 @Route(value = "computed", layout = MainLayout.class)
 @RouteAlias(value = "uc11", layout = MainLayout.class)
-@PageTitle("UC11 — Derive shared state instead of storing it")
+@PageTitle("UC11 — Keep totals always in step")
 @UseCaseDescription("Deriving shared totals instead of storing them")
-@Menu(order = 11, title = "UC11 — Computed shared state")
+@Menu(order = 11, title = "UC11 — Keep totals always in step")
 public class ComputedStateView extends UseCaseView {
 
     public ComputedStateView(BoardTopic topic) {
-        super("UC11 — Derive shared state instead of storing it",
+        super("UC11 — Keep totals always in step",
                 "One shared task list. Claim a task or move it along in any panel: every readout in every panel "
                         + "follows, although no code writes any of them — they are all computed from the list.");
 
@@ -128,13 +128,11 @@ public class ComputedStateView extends UseCaseView {
 
         Button claim = new Button("Claim",
                 event -> entry.update(task -> task.withAssignee(peer.name())));
-        claim.addThemeVariants(ButtonVariant.LUMO_SMALL,
-                ButtonVariant.LUMO_TERTIARY);
+        claim.addThemeVariants(ButtonVariant.SMALL, ButtonVariant.TERTIARY);
 
         Button advance = new Button("Advance", event -> entry
                 .update(task -> task.withStatus(next(task.status()))));
-        advance.addThemeVariants(ButtonVariant.LUMO_SMALL,
-                ButtonVariant.LUMO_TERTIARY);
+        advance.addThemeVariants(ButtonVariant.SMALL, ButtonVariant.TERTIARY);
 
         HorizontalLayout row = new HorizontalLayout(title, claim, advance);
         row.setAlignItems(Alignment.CENTER);

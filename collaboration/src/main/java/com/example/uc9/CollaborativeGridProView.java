@@ -39,7 +39,7 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @RouteAlias(value = "uc9", layout = MainLayout.class)
 @PageTitle("UC9 — Collaborate in a Grid Pro")
 @UseCaseDescription("Editing a Grid Pro together without overwriting each other")
-@Menu(order = 9, title = "UC9 — Collaborative Grid Pro")
+@Menu(order = 9, title = "UC9 — Collaborate in a Grid Pro")
 public class CollaborativeGridProView extends UseCaseView {
 
     public CollaborativeGridProView(CatalogTopic topic) {
@@ -104,7 +104,7 @@ public class CollaborativeGridProView extends UseCaseView {
         }));
 
         Div content = new Div(grid, editors);
-        content.addDetachListener(event -> topic.editing().remove(peer.key()));
+        content.whenAttached(ui -> () -> topic.editing().remove(peer.key()));
         return content;
     }
 

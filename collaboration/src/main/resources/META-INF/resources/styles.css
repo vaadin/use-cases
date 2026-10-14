@@ -26,10 +26,10 @@ html {
    fictional users. */
 .use-case-note {
     max-width: 70ch;
-    border-left: 3px solid var(--vaadin-border-color-strong, #666);
+    border-left: 3px solid var(--vaadin-border-color);
     padding-left: var(--vaadin-padding-m, 1rem);
     color: var(--vaadin-text-color-secondary);
-    font-size: var(--vaadin-font-size-s, 0.875rem);
+    font-size: var(--aura-font-size-s);
 }
 
 /* The sampler's harness: N simulated users side by side. */
@@ -86,8 +86,8 @@ html {
    is always the one at the top. */
 .event-log {
     min-height: 2rem;
-    font-family: var(--vaadin-font-family-monospace, monospace);
-    font-size: var(--vaadin-font-size-xs, 0.75rem);
+    font-family: monospace;
+    font-size: var(--aura-font-size-xs);
     white-space: pre-wrap;
     max-height: 12rem;
     overflow: auto;
@@ -96,10 +96,13 @@ html {
     padding: var(--vaadin-padding-s, 0.5rem);
 }
 
+/* Full width and a column no wider than the screen, so the cards stack on a
+   phone instead of running off its right edge. */
 .home-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
     gap: 1rem;
+    width: 100%;
     max-width: 960px;
 }
 

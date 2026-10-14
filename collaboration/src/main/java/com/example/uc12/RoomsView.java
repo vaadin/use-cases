@@ -28,7 +28,7 @@ import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * UC12 — Room per topic, created on demand. Beyond the sampler.
+ * UC12 — Rooms created on demand. Beyond the sampler.
  * <p>
  * Every sample in the Collaboration Engine Sampler takes a topic id as a
  * string, and the engine keeps a topic per id somewhere out of sight. Signals
@@ -48,13 +48,13 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "rooms", layout = MainLayout.class)
 @RouteAlias(value = "uc12", layout = MainLayout.class)
-@PageTitle("UC12 — Room per topic, created on demand")
+@PageTitle("UC12 — Rooms created on demand")
 @UseCaseDescription("Creating a shared topic per room only when someone opens it")
-@Menu(order = 12, title = "UC12 — Rooms on demand")
+@Menu(order = 12, title = "UC12 — Rooms created on demand")
 public class RoomsView extends UseCaseView {
 
     public RoomsView(RoomsTopic topic) {
-        super("UC12 — Room per topic, created on demand",
+        super("UC12 — Rooms created on demand",
                 "Create a room in one panel and it appears in the others, because the room list is shared state "
                         + "and not a parameter. Each room has its own presence and its own messages; switching "
                         + "rooms leaves the first one.");
@@ -85,8 +85,8 @@ public class RoomsView extends UseCaseView {
 
         // Switching rooms rebuilds the room panel rather than re-pointing the
         // bindings inside it: a binding belongs to a component, so a new room
-        // gets new components. Leaving the old room happens here, because the
-        // presence entry is keyed by peer and not by component.
+        // gets new components, and the old room panel's detach leaves the old
+        // room.
         Runnable openSelected = () -> {
             roomPanel.removeAll();
             roomPanel.add(roomView(topic, peer, selected.peek()));
@@ -99,15 +99,13 @@ public class RoomsView extends UseCaseView {
                         name + " (" + topic.messages(name).get().size() + ")",
                         event -> {
                             if (!name.equals(selected.peek())) {
-                                topic.presence(selected.peek())
-                                        .remove(peer.key());
                                 selected.set(name);
                                 openSelected.run();
                             }
                         });
-                open.addThemeVariants(ButtonVariant.LUMO_SMALL);
+                open.addThemeVariants(ButtonVariant.SMALL);
                 if (name.equals(selected.peek())) {
-                    open.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+                    open.addThemeVariants(ButtonVariant.PRIMARY);
                 }
                 roomBar.add(open);
             });
@@ -122,23 +120,18 @@ public class RoomsView extends UseCaseView {
                 newRoom.clear();
             }
         });
-        create.addThemeVariants(ButtonVariant.LUMO_SMALL);
+        create.addThemeVariants(ButtonVariant.SMALL);
 
         openSelected.run();
 
-        Div content = new Div(roomBar, new HorizontalLayout(newRoom, create),
+        return new Div(roomBar, new HorizontalLayout(newRoom, create),
                 roomPanel);
-        content.addDetachListener(
-                event -> topic.presence(selected.peek()).remove(peer.key()));
-        return content;
     }
 
     private static Component roomView(RoomsTopic topic, Peer peer,
             String room) {
         var presence = topic.presence(room);
         var messages = topic.messages(room);
-
-        presence.put(peer.key(), peer);
 
         AvatarGroup group = new AvatarGroup();
         group.setMaxItemsVisible(4);
@@ -159,7 +152,10 @@ public class RoomsView extends UseCaseView {
         Span header = new Span("Room: " + room);
 
         Div panel = new Div(header, group, list, input);
-        panel.addDetachListener(event -> presence.remove(peer.key()));
+        panel.whenAttached(ui -> {
+            presence.put(peer.key(), peer);
+            return () -> presence.remove(peer.key());
+        });
         return panel;
     }
 }

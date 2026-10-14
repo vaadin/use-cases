@@ -139,7 +139,7 @@ public class FormState {
         field.getElement().addEventListener("blur", event -> leave(name, peer));
         // A peer that is gone is not editing anything, whatever the last DOM
         // event said.
-        field.addDetachListener(event -> leave(name, peer));
+        field.whenAttached(ui -> () -> leave(name, peer));
 
         return field.bindValue(value(name),
                 written -> write(name, written, peer));

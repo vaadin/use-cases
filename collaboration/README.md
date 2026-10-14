@@ -42,14 +42,14 @@ field-highlight cleanup hangs off.
 | 3 | `presence-custom` | **Render presence my own way.** The same map as a hand-built list, with a rename, and a join/leave log that has to be diffed because an effect reports state rather than events. |
 | 4 | `chat` | **Chat in real time.** `MessageList.bindItems` over an append-only `SharedListSignal`, plus the persistence that `CollaborationMessagePersister` would have handled — here written twice by hand. |
 | 5 | `form` | **Edit a form together.** `CollaborationBinder`'s two halves: per-field value sync through a shared map, and the platform's field highlighter driven by a shared list of editors per field. |
-| 6 | `form-events` | **See the raw collaboration events.** `FormManager`'s handlers as a log: old and new values come from the binding, the author from the stored value, and editor arrivals from a diff. |
+| 6 | `form-events` | **Log who changed what.** `FormManager`'s handlers as a log: old and new values come from the binding, the author from the stored value, and editor arrivals from a diff. |
 | 7 | `form-access` | **Control who may edit.** A write lock claimed with a compare-and-set, so a lost race is reported rather than silently won, and writes refused in the shared state by a validator rather than by a disabled field. |
 | 8 | `grid` | **Collaborate in a Grid.** A shared row list behind a `Grid`, with each peer's selection visible to the others. The row *signals* are the grid's items, which is what makes identity survive an edit. |
 | 9 | `grid-pro` | **Collaborate in a Grid Pro.** Cell editing as `SharedValueSignal.update`, so two peers editing different columns of one row both keep their change. |
-| 10 | `conflicts` | **Make concurrent edits provably safe.** `set` against `replace` against `incrementBy`, and a two-list move inside one transaction. Beyond Collaboration Kit. |
-| 11 | `computed` | **Derive shared state instead of storing it.** Every readout computed from one shared list, with no counter to keep in step. Beyond Collaboration Kit. |
-| 12 | `rooms` | **Room per topic, created on demand.** A `SharedNodeSignal` as a topic namespace, so the room list is shared state a client can render. Beyond Collaboration Kit. |
-| 13 | `pending` | **Pending versus confirmed state.** `get()` and `peekConfirmed()` disagreeing inside the callback that wrote, and what that means for reporting an operation's outcome. Beyond Collaboration Kit. |
+| 10 | `conflicts` | **Make concurrent edits safe.** `set` against `replace` against `incrementBy`, and a two-list move inside one transaction. Beyond Collaboration Kit. |
+| 11 | `computed` | **Keep totals always in step.** Every readout computed from one shared list, with no counter to keep in step. Beyond Collaboration Kit. |
+| 12 | `rooms` | **Rooms created on demand.** A `SharedNodeSignal` as a topic namespace, so the room list is shared state a client can render. Beyond Collaboration Kit. |
+| 13 | `pending` | **Know if a write went through.** `get()` and `peekConfirmed()` disagreeing inside the callback that wrote, and what that means for reporting an operation's outcome. Beyond Collaboration Kit. |
 
 Each view is also reachable as `/ucN`, and says in the app itself what it had
 to write by hand and which gap that is.
@@ -57,7 +57,8 @@ to write by hand and which gap that is.
 ## Run
 
 ```
-mvn spring-boot:run -pl :collaboration-use-cases
+./mvnw -pl common install -DskipTests
+./mvnw -pl collaboration spring-boot:run
 ```
 
 Open <http://localhost:8080/>.

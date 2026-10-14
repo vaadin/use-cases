@@ -48,7 +48,7 @@ import com.vaadin.flow.signals.Signal;
 @RouteAlias(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Control who may edit")
 @UseCaseDescription("Letting only some users edit a shared form")
-@Menu(order = 7, title = "UC7 — Write access")
+@Menu(order = 7, title = "UC7 — Control who may edit")
 public class FormAccessView extends UseCaseView {
 
     static final String TOPIC = "uc7-access";

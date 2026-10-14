@@ -43,7 +43,7 @@ public class PeerRig extends VerticalLayout {
         addClassName("peer-rig");
 
         Button addUser = new Button("Add user", event -> addPeer());
-        addUser.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        addUser.addThemeVariants(ButtonVariant.PRIMARY);
 
         Div toolbar = new Div(addUser);
         toolbar.addClassName("peer-toolbar");

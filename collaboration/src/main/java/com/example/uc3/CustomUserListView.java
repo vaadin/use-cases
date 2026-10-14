@@ -45,7 +45,7 @@ import com.vaadin.flow.signals.Signal;
 @RouteAlias(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Render presence my own way")
 @UseCaseDescription("Rendering the list of present users with my own components")
-@Menu(order = 3, title = "UC3 — Custom user list")
+@Menu(order = 3, title = "UC3 — Render presence my own way")
 public class CustomUserListView extends UseCaseView {
 
     static final String TOPIC = "uc3-custom-list";

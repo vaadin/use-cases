@@ -41,7 +41,7 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @RouteAlias(value = "uc8", layout = MainLayout.class)
 @PageTitle("UC8 — Collaborate in a Grid")
 @UseCaseDescription("Showing which row each user is looking at in a Grid")
-@Menu(order = 8, title = "UC8 — Collaborative Grid")
+@Menu(order = 8, title = "UC8 — Collaborate in a Grid")
 public class CollaborativeGridView extends UseCaseView {
 
     private static final AtomicInteger NEXT_ROW = new AtomicInteger();
@@ -115,7 +115,7 @@ public class CollaborativeGridView extends UseCaseView {
 
         Div content = new Div(grid, watchers,
                 new HorizontalLayout(add, remove));
-        content.addDetachListener(event -> topic.watching().remove(peer.key()));
+        content.whenAttached(ui -> () -> topic.watching().remove(peer.key()));
         return content;
     }
 

@@ -65,7 +65,7 @@ class CollaborativeFormViewTest extends SpringBrowserlessTest {
         var peer = rig.getPanel(0).getPeer();
         // Focus is a DOM event a browserless test cannot fire, so the field's
         // own entry point is used. What is under test is the exit: without the
-        // detach listener this peer would highlight the field forever.
+        // cleanup on detach this peer would highlight the field forever.
         topic.form().enter(FormTopic.NAME, peer);
         assertEquals(1, topic.form().editors(FormTopic.NAME).peek().size());
 

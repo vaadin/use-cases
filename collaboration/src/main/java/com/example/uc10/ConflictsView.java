@@ -22,8 +22,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.signals.operations.SignalOperation;
 
 /**
- * UC10 — Make concurrent edits provably safe. Beyond the sampler: this is what
- * shared signals have and Collaboration Kit does not.
+ * UC10 — Make concurrent edits safe. Beyond the sampler: this is what shared
+ * signals have and Collaboration Kit does not.
  * <p>
  * Collaboration Kit's map is last-write-wins. Two users editing the same field
  * from the same starting value produce one value and no complaint, and the user
@@ -50,13 +50,13 @@ import com.vaadin.flow.signals.operations.SignalOperation;
  */
 @Route(value = "conflicts", layout = MainLayout.class)
 @RouteAlias(value = "uc10", layout = MainLayout.class)
-@PageTitle("UC10 — Make concurrent edits provably safe")
+@PageTitle("UC10 — Make concurrent edits safe")
 @UseCaseDescription("Keeping concurrent edits from losing updates")
-@Menu(order = 10, title = "UC10 — Conflicts & atomicity")
+@Menu(order = 10, title = "UC10 — Make concurrent edits safe")
 public class ConflictsView extends UseCaseView {
 
     public ConflictsView(RaceTopic topic) {
-        super("UC10 — Make concurrent edits provably safe",
+        super("UC10 — Make concurrent edits safe",
                 "Two users editing the same note. Press Read in both panels, change the text in both, then save "
                         + "in both: with set() the second save wins silently, with replace() it is rejected because "
                         + "the value it was based on is no longer there.");

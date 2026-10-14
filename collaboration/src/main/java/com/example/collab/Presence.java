@@ -50,25 +50,20 @@ public class Presence {
      * Marks a peer as present in a topic for as long as {@code owner} is
      * attached.
      * <p>
-     * Both listeners are needed: a component can be detached and re-attached (a
-     * {@code PeerPanel} reconnecting, a view revisited), and presence has to
-     * follow. Callers that want to control membership independently of attach
-     * state — UC2 — should write to {@link #topic(String)} themselves instead.
+     * {@code whenAttached} runs again on every re-attach (a {@code PeerPanel}
+     * reconnecting, a view revisited), so presence follows. Callers that want
+     * to control membership independently of attach state — UC2 — should write
+     * to {@link #topic(String)} themselves instead.
      *
      * @return a registration that leaves the topic
      */
     public Registration bind(com.vaadin.flow.component.Component owner,
             String topic, Peer peer) {
         SharedMapSignal<Peer> presence = topic(topic);
-        if (owner.isAttached()) {
+        return owner.whenAttached(ui -> {
             presence.put(peer.key(), peer);
-        }
-        Registration attach = owner
-                .addAttachListener(event -> presence.put(peer.key(), peer));
-        Registration detach = owner
-                .addDetachListener(event -> presence.remove(peer.key()));
-        return Registration.combine(attach, detach,
-                () -> presence.remove(peer.key()));
+            return () -> presence.remove(peer.key());
+        });
     }
 
     /**
