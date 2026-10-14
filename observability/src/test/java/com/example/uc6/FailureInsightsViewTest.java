@@ -3,7 +3,7 @@ package com.example.uc6;
 import java.util.List;
 import java.util.Optional;
 
-import com.example.acme.AppWindow;
+import com.example.common.AppWindow;
 import com.example.home.HomeView;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;

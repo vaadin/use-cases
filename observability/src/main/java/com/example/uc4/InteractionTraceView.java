@@ -10,10 +10,10 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.example.acme.AppWindow;
 import com.example.acme.DemoRig;
 import com.example.acme.Investigation;
 import com.example.acme.Telemetry;
+import com.example.common.AppWindow;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import io.micrometer.core.instrument.Counter;
@@ -253,8 +253,8 @@ public class InteractionTraceView extends VerticalLayout {
         status.addClassName("catalog-summary");
         status.setText("Not dispatched");
 
-        return new AppWindow("Acme Supply — Shipping Desk", ROUTE, consignee,
-                lines,
+        return new AppWindow("Acme Supply — Shipping Desk",
+                "acme.example/" + ROUTE, consignee, lines,
                 new HorizontalLayout(Alignment.END, carrier, dispatch, status));
     }
 
