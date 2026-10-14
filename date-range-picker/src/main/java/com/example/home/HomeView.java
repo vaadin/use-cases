@@ -12,11 +12,10 @@ import com.example.uc5.DatesInYourFormatView;
 import com.example.uc6.OneFieldView;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 
@@ -33,18 +32,16 @@ public class HomeView extends BaseHomeView {
                         + "start and an end date. Each card below is one such "
                         + "task, built on the prototype "
                         + "<vaadin-date-range-picker> web component.");
+        addGroup("Book and request", VaadinIcon.CALENDAR_USER, Accent.BLUE,
+                List.of(BookAStayView.class, RequestTimeOffView.class,
+                        ChangeReturnDateView.class));
+        addGroup("Filter", VaadinIcon.FILTER, Accent.GREEN,
+                List.of(FilterOrdersView.class, OneFieldView.class));
+        addGroup("Fit the user", VaadinIcon.GLOBE, Accent.ORANGE,
+                List.of(DatesInYourFormatView.class));
         add(new Paragraph(new Text("There is no Flow component for the picker "
                 + "yet, so this app wraps the web component itself. Where the "
                 + "API falls short, the use case says so and links to "),
                 new Anchor(API_GAPS_URL, "API-GAPS.md"), new Text(".")));
-
-        group("Book and request", List.of(BookAStayView.class,
-                RequestTimeOffView.class, ChangeReturnDateView.class));
-        group("Filter", List.of(FilterOrdersView.class, OneFieldView.class));
-        group("Fit the user", List.of(DatesInYourFormatView.class));
-    }
-
-    private void group(String heading, List<Class<? extends Component>> views) {
-        add(new H2(heading), menuCards(views));
     }
 }

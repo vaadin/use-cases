@@ -14,11 +14,10 @@ import com.example.uc7.JumpToClauseView;
 import com.example.uc8.LocalizedViewerView;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 
@@ -35,20 +34,17 @@ public class HomeView extends BaseHomeView {
                         + "receipts, manuals. Each card below is one thing an "
                         + "app does with them, built on the prototype "
                         + "<vaadin-pdf-viewer> web component.");
+        addGroup("Show the right document", VaadinIcon.FILE_TEXT_O, Accent.BLUE,
+                List.of(ReviewBeforeSendingView.class,
+                        DocumentLibraryView.class, CheckReceiptView.class));
+        addGroup("Guide the reader", VaadinIcon.BOOKMARK_O, Accent.GREEN,
+                List.of(ReadBeforeAcceptingView.class, ManualDeepLinkView.class,
+                        JumpToClauseView.class));
+        addGroup("Fit the app", VaadinIcon.COG_O, Accent.ORANGE,
+                List.of(PrintLabelView.class, LocalizedViewerView.class));
         add(new Paragraph(new Text("There is no Flow component for the viewer "
                 + "yet, so this app wraps the web component itself. Where the "
                 + "API falls short, the use case says so and links to "),
                 new Anchor(API_GAPS_URL, "API-GAPS.md"), new Text(".")));
-
-        group("Show the right document", List.of(ReviewBeforeSendingView.class,
-                DocumentLibraryView.class, CheckReceiptView.class));
-        group("Guide the reader", List.of(ReadBeforeAcceptingView.class,
-                ManualDeepLinkView.class, JumpToClauseView.class));
-        group("Fit the app",
-                List.of(PrintLabelView.class, LocalizedViewerView.class));
-    }
-
-    private void group(String heading, List<Class<? extends Component>> views) {
-        add(new H2(heading), menuCards(views));
     }
 }
