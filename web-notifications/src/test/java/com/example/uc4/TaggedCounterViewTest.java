@@ -27,7 +27,7 @@ class TaggedCounterViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h -> h.getText().startsWith("UC4 — Collapse repeated")));
+                h -> h.getText().equals("UC4 — Collapse repeated alerts")));
         assertSpan("0 unread");
         assertFalse(button("Mark all as read").isEnabled());
     }
@@ -89,15 +89,17 @@ class TaggedCounterViewTest extends SpringBrowserlessTest {
     }
 
     private void assertSpan(String text) {
-        assertTrue(findInView(Span.class).all().stream()
-                .anyMatch(s -> text.equals(s.getText())),
+        assertTrue(
+                findInView(Span.class).all().stream()
+                        .anyMatch(s -> text.equals(s.getText())),
                 "expected span \"" + text + "\"");
     }
 
     private void assertLogContains(String fragment) {
-        assertTrue(findInView(Div.class).all().stream()
-                .anyMatch(d -> d.getText() != null
-                        && d.getText().contains(fragment)),
+        assertTrue(
+                findInView(Div.class).all().stream()
+                        .anyMatch(d -> d.getText() != null
+                                && d.getText().contains(fragment)),
                 "expected log to contain \"" + fragment + "\"");
     }
 }

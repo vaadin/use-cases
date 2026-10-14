@@ -7,12 +7,14 @@ import java.util.List;
 import com.example.MissingAPI;
 import com.example.MissingAPI.NotificationOptions;
 import com.example.MissingAPI.NotificationPermission;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -26,27 +28,29 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * UC4 — Collapse repeated notifications with a tag.
+ * UC4 — Collapse repeated alerts.
  * <p>
  * A chat app that raises one OS notification per incoming message quickly
  * buries the user under a stack of near-identical popups. Giving every
  * notification the same {@code tag} makes the browser <em>replace</em> the
- * previous one instead, so the user sees a single, up-to-date "5 new
- * messages" notification. {@code renotify} makes the replacement alert again
- * (on browsers that support it). Untick "Collapse with tag" to compare with
- * the stacking behaviour; "Mark all as read" resets the counter and closes
- * the tagged notification.
+ * previous one instead, so the user sees a single, up-to-date "5 new messages"
+ * notification. {@code renotify} makes the replacement alert again (on browsers
+ * that support it). Untick "Collapse with tag" to compare with the stacking
+ * behaviour; "Mark all as read" resets the counter and closes the tagged
+ * notification.
  */
 @Route(value = "uc4", layout = MainLayout.class)
-@PageTitle("UC4 — Collapse with tag")
-@Menu(order = 4, title = "UC4 — Collapse with tag")
+@PageTitle("UC4 — Collapse repeated alerts")
+@UseCaseDescription("Replacing one notification instead of stacking a new one for every message")
+@Menu(order = 4, title = "UC4 — Collapse repeated alerts")
+@StyleSheet("uc4.css")
 public class TaggedCounterView extends VerticalLayout {
 
     static final String TAG = "inbox";
     private static final DateTimeFormatter TIME = DateTimeFormatter
             .ofPattern("HH:mm:ss");
-    private static final List<String> SENDERS = List.of("Alice", "Bob",
-            "Carol", "Dave");
+    private static final List<String> SENDERS = List.of("Alice", "Bob", "Carol",
+            "Dave");
     private static final List<String> MESSAGES = List.of(
             "Are we still on for 3pm?", "I pushed the fix.",
             "Can you review my PR?", "Lunch?");
@@ -57,7 +61,7 @@ public class TaggedCounterView extends VerticalLayout {
     private int received;
 
     public TaggedCounterView() {
-        add(new H1("UC4 — Collapse repeated notifications with a tag"));
+        add(new H1("UC4 — Collapse repeated alerts"));
         add(new Paragraph("Enable notifications, then receive a few "
                 + "messages. With \"Collapse with tag\" ticked the OS "
                 + "shows one notification whose counter goes up; "
@@ -77,13 +81,17 @@ public class TaggedCounterView extends VerticalLayout {
                 e -> markAllRead(UI.getCurrent()));
 
         Span counter = new Span();
-        counter.addClassName("big-counter");
+        counter.addClassName("uc4-counter");
         counter.bindText(unread.map(n -> n + " unread"));
 
         log.addClassName("notification-log");
-        add(new HorizontalLayout(allow, collapse),
-                new HorizontalLayout(receiveOne, receiveBurst, markRead),
-                counter, new H2("Notifications sent"), log);
+        HorizontalLayout settings = new HorizontalLayout(allow, collapse);
+        settings.setAlignItems(Alignment.CENTER);
+        settings.setWrap(true);
+        HorizontalLayout actions = new HorizontalLayout(receiveOne,
+                receiveBurst, markRead);
+        actions.setWrap(true);
+        add(settings, actions, counter, new H2("Notifications sent"), log);
         markRead.bindEnabled(unread.map(n -> n > 0));
     }
 
@@ -112,8 +120,7 @@ public class TaggedCounterView extends VerticalLayout {
                 .peek();
         if (permission == NotificationPermission.GRANTED) {
             MissingAPI.showNotification(ui, title, options);
-            appendLog("\"" + title + "\"  tag="
-                    + (useTag ? TAG : "(none)"));
+            appendLog("\"" + title + "\"  tag=" + (useTag ? TAG : "(none)"));
         } else {
             appendLog("\"" + title + "\"  not shown — permission is "
                     + permission.name().toLowerCase());

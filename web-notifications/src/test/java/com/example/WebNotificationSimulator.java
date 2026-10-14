@@ -2,11 +2,10 @@ package com.example;
 
 import java.util.List;
 
-import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.node.ObjectNode;
-
 import com.example.MissingAPI.NotificationPermission;
 import com.example.MissingAPI.ShownNotification;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.DomEvent;
@@ -48,8 +47,8 @@ public final class WebNotificationSimulator {
     }
 
     /**
-     * Pretends the user clicked the notification: the shim fires a click
-     * event and then, because it closes the notification, a close event.
+     * Pretends the user clicked the notification: the shim fires a click event
+     * and then, because it closes the notification, a close event.
      */
     public static void click(ShownNotification notification) {
         fire(MissingAPI.CLICK_EVENT, idDetail(notification));

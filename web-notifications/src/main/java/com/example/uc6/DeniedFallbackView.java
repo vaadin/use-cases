@@ -6,12 +6,13 @@ import java.time.format.DateTimeFormatter;
 import com.example.MissingAPI;
 import com.example.MissingAPI.NotificationOptions;
 import com.example.MissingAPI.NotificationPermission;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -29,20 +30,22 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
 /**
- * UC6 — Handle a denied permission gracefully.
+ * UC6 — Denied permission.
  * <p>
- * Once the user blocks notifications, the browser never shows the prompt
- * again — calling {@code requestPermission()} just resolves to
- * {@code "denied"}. An app shouldn't keep offering a button that does nothing.
- * This view detects the denied state, explains how to re-enable notifications
- * in the common browsers, and keeps working by falling back to in-app Vaadin
- * notifications. When the user re-enables notifications in the site settings,
- * the view notices (the browser reports the change, or "Check again"
- * re-reads it) and switches back to OS notifications without a reload.
+ * Once the user blocks notifications, the browser never shows the prompt again
+ * — calling {@code requestPermission()} just resolves to {@code "denied"}. An
+ * app shouldn't keep offering a button that does nothing. This view detects the
+ * denied state, explains how to re-enable notifications in the common browsers,
+ * and keeps working by falling back to in-app Vaadin notifications. When the
+ * user re-enables notifications in the site settings, the view notices (the
+ * browser reports the change, or "Check again" re-reads it) and switches back
+ * to OS notifications without a reload.
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Denied permission")
+@UseCaseDescription("Explaining how to re-enable blocked notifications and falling back to in-app messages")
 @Menu(order = 6, title = "UC6 — Denied permission")
+@StyleSheet("uc6.css")
 public class DeniedFallbackView extends VerticalLayout {
 
     private static final DateTimeFormatter TIME = DateTimeFormatter
@@ -54,7 +57,7 @@ public class DeniedFallbackView extends VerticalLayout {
     private final Div log = new Div();
 
     public DeniedFallbackView() {
-        add(new H1("UC6 — Handle a denied permission gracefully"));
+        add(new H1("UC6 — Denied permission"));
         add(new Paragraph("To try this, click \"Allow notifications\" and "
                 + "choose Block (or block notifications for this site in "
                 + "the browser settings). The view explains how to undo "
@@ -68,14 +71,37 @@ public class DeniedFallbackView extends VerticalLayout {
 
         HorizontalLayout row = new HorizontalLayout(allow, send, statusBadge);
         row.setAlignItems(Alignment.CENTER);
+        row.setWrap(true);
 
         buildHelpPanel();
         log.addClassName("notification-log");
         add(row, helpPanel, new H2("Delivery log"), log);
+
+        Signal<NotificationPermission> permission = MissingAPI
+                .permissionSignal(UI.getCurrent());
+        helpPanel.bindVisible(
+                permission.map(p -> p == NotificationPermission.DENIED));
+        allow.bindVisible(
+                permission.map(p -> p == NotificationPermission.DEFAULT
+                        || p == NotificationPermission.UNKNOWN));
+        allow.bindEnabled(
+                permission.map(p -> p == NotificationPermission.DEFAULT));
+        statusBadge.bindText(permission.map(p -> switch (p) {
+        case GRANTED -> "OS notifications on";
+        case DENIED -> "Blocked — using in-app notifications";
+        case UNSUPPORTED -> "Unsupported — using in-app notifications";
+        case DEFAULT -> "Not decided — using in-app notifications";
+        case UNKNOWN -> "Checking…";
+        }));
+        statusBadge.bindClassName("hidden",
+                permission.map(p -> p == NotificationPermission.DENIED));
+        statusBadge.bindClassName("paused",
+                permission.map(p -> p != NotificationPermission.GRANTED
+                        && p != NotificationPermission.DENIED));
     }
 
     private void buildHelpPanel() {
-        helpPanel.addClassName("help-panel");
+        helpPanel.addClassName("uc6-help-panel");
         UnorderedList steps = new UnorderedList(
                 new ListItem("Chrome / Edge: click the icon left of the "
                         + "address bar → Site settings → Notifications → "
@@ -96,33 +122,6 @@ public class DeniedFallbackView extends VerticalLayout {
                         + "keep getting messages inside the app. To get "
                         + "OS notifications again:"),
                 steps, checkAgain);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        Signal<NotificationPermission> permission = MissingAPI
-                .permissionSignal(attachEvent.getUI());
-
-        helpPanel.bindVisible(
-                permission.map(p -> p == NotificationPermission.DENIED));
-        allow.bindVisible(
-                permission.map(p -> p == NotificationPermission.DEFAULT
-                        || p == NotificationPermission.UNKNOWN));
-        allow.bindEnabled(
-                permission.map(p -> p == NotificationPermission.DEFAULT));
-        statusBadge.bindText(permission.map(p -> switch (p) {
-        case GRANTED -> "OS notifications on";
-        case DENIED -> "Blocked — using in-app notifications";
-        case UNSUPPORTED -> "Unsupported — using in-app notifications";
-        case DEFAULT -> "Not decided — using in-app notifications";
-        case UNKNOWN -> "Checking…";
-        }));
-        statusBadge.bindClassName("hidden",
-                permission.map(p -> p == NotificationPermission.DENIED));
-        statusBadge.bindClassName("paused",
-                permission.map(p -> p != NotificationPermission.GRANTED
-                        && p != NotificationPermission.DENIED));
     }
 
     // Package-private so tests can call it without a click.

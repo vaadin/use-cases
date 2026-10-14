@@ -3,9 +3,9 @@ package com.example.uc1;
 import com.example.MissingAPI;
 import com.example.MissingAPI.NotificationOptions;
 import com.example.MissingAPI.NotificationPermission;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -22,20 +22,21 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
 /**
- * UC1 — Ask for permission on a user gesture.
+ * UC1 — Ask for permission.
  * <p>
  * Browsers only show the notification permission prompt when
- * {@code Notification.requestPermission()} is called from inside a user
- * gesture such as a click, and they penalise sites that prompt on page load.
- * This view asks only when the user clicks "Allow notifications". The request
- * is bound to the button on the client, because a round-trip to the server
- * would lose the gesture. The current permission is shown reactively:
- * {@code default} (not decided yet), {@code granted}, {@code denied}, or
- * "unsupported" for browsers without the API or pages that aren't served over
- * HTTPS. Once permission is granted, a test notification can be sent.
+ * {@code Notification.requestPermission()} is called from inside a user gesture
+ * such as a click, and they penalise sites that prompt on page load. This view
+ * asks only when the user clicks "Allow notifications". The request is bound to
+ * the button on the client, because a round-trip to the server would lose the
+ * gesture. The current permission is shown reactively: {@code default} (not
+ * decided yet), {@code granted}, {@code denied}, or "unsupported" for browsers
+ * without the API or pages that aren't served over HTTPS. Once permission is
+ * granted, a test notification can be sent.
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Ask for permission")
+@UseCaseDescription("Asking for notification permission on a click and showing its state live")
 @Menu(order = 1, title = "UC1 — Ask for permission")
 public class PermissionStateView extends VerticalLayout {
 
@@ -46,7 +47,7 @@ public class PermissionStateView extends VerticalLayout {
     private final Paragraph explanation = new Paragraph();
 
     public PermissionStateView() {
-        add(new H1("UC1 — Ask for permission on a user gesture"));
+        add(new H1("UC1 — Ask for permission"));
         add(new Paragraph("Nothing is asked when the page loads. Click the "
                 + "button to trigger the browser's permission prompt — the "
                 + "request runs inside your click, which browsers require. "
@@ -58,6 +59,7 @@ public class PermissionStateView extends VerticalLayout {
 
         HorizontalLayout row = new HorizontalLayout(allowButton, statusBadge);
         row.setAlignItems(Alignment.CENTER);
+        row.setWrap(true);
         add(row, explanation, new H2("Try it"), testButton);
 
         // Bound on the client: requestPermission() runs in the click gesture.
@@ -65,14 +67,9 @@ public class PermissionStateView extends VerticalLayout {
         testButton.addClickListener(e -> MissingAPI.showNotification(
                 UI.getCurrent(), "Hello from Vaadin",
                 NotificationOptions.body("Notifications are working.")));
-    }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        UI ui = attachEvent.getUI();
         Signal<NotificationPermission> permission = MissingAPI
-                .permissionSignal(ui);
+                .permissionSignal(UI.getCurrent());
 
         statusBadge.bindText(permission.map(PermissionStateView::badgeText));
         statusBadge.bindClassName("paused",

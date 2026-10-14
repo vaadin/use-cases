@@ -27,10 +27,10 @@ class HiddenTabOnlyViewTest extends SpringBrowserlessTest {
         navigate(HiddenTabOnlyView.class);
         runPendingSignalsTasks();
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h -> h.getText().startsWith("UC5 — Only notify when")));
-        assertTrue(findInView(Button.class).all().stream().anyMatch(b -> b
-                .getText().equals("Send me a message in 5 seconds")));
+        assertTrue(findInView(H1.class).all().stream()
+                .anyMatch(h -> h.getText().equals("UC5 — Only when hidden")));
+        assertTrue(findInView(Button.class).all().stream().anyMatch(
+                b -> b.getText().equals("Send me a message in 5 seconds")));
 
         setVisibility(PageVisibility.HIDDEN);
         assertTrue(findInView(Span.class).all().stream()
@@ -76,9 +76,10 @@ class HiddenTabOnlyViewTest extends SpringBrowserlessTest {
     }
 
     private void assertLogContains(String fragment) {
-        assertTrue(findInView(Div.class).all().stream()
-                .anyMatch(d -> d.getText() != null
-                        && d.getText().contains(fragment)),
+        assertTrue(
+                findInView(Div.class).all().stream()
+                        .anyMatch(d -> d.getText() != null
+                                && d.getText().contains(fragment)),
                 "expected log to contain \"" + fragment + "\"");
     }
 }

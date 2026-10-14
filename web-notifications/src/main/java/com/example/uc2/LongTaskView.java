@@ -9,12 +9,11 @@ import java.util.concurrent.ScheduledFuture;
 import com.example.MissingAPI;
 import com.example.MissingAPI.NotificationOptions;
 import com.example.MissingAPI.NotificationPermission;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -35,20 +34,21 @@ import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * UC2 — Notify when a long-running task finishes.
+ * UC2 — Task finished.
  * <p>
- * The user starts a slow server-side job (here: generating a report that
- * takes ten seconds) and, as users do, switches to another tab while waiting.
- * When the job finishes the server pushes the result to the UI via
- * {@link UI#accessLater} and shows a native OS notification, so the user
- * learns about it without having to keep checking the tab. The same click that
- * starts the job also asks for notification permission if it hasn't been
- * decided yet — the moment the user wants the result is the moment the prompt
- * makes sense. Without permission the result is announced with an in-app
- * notification instead.
+ * The user starts a slow server-side job (here: generating a report that takes
+ * ten seconds) and, as users do, switches to another tab while waiting. When
+ * the job finishes the server pushes the result to the UI via
+ * {@link UI#accessLater} and shows a native OS notification, so the user learns
+ * about it without having to keep checking the tab. The same click that starts
+ * the job also asks for notification permission if it hasn't been decided yet —
+ * the moment the user wants the result is the moment the prompt makes sense.
+ * Without permission the result is announced with an in-app notification
+ * instead.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Task finished")
+@UseCaseDescription("Telling the user that a slow server job has finished while they work in another tab")
 @Menu(order = 2, title = "UC2 — Task finished")
 public class LongTaskView extends VerticalLayout {
 
@@ -75,7 +75,7 @@ public class LongTaskView extends VerticalLayout {
     public LongTaskView(TaskScheduler taskScheduler) {
         this.taskScheduler = taskScheduler;
 
-        add(new H1("UC2 — Notify when a long-running task finishes"));
+        add(new H1("UC2 — Task finished"));
         add(new Paragraph("Click \"Generate report\" and switch to another "
                 + "tab. The report takes ten seconds to build on the "
                 + "server; when it's done you get an OS notification. If "
@@ -84,7 +84,7 @@ public class LongTaskView extends VerticalLayout {
 
         startButton.addThemeVariants(ButtonVariant.PRIMARY);
         progress.setIndeterminate(true);
-        progress.setWidth("320px");
+        progress.setMaxWidth("320px");
         permissionBadge.addClassName("status-badge");
 
         // Ask inside the click gesture; the server listener starts the task.
@@ -94,6 +94,7 @@ public class LongTaskView extends VerticalLayout {
         HorizontalLayout row = new HorizontalLayout(startButton,
                 new Span("Notifications:"), permissionBadge);
         row.setAlignItems(Alignment.CENTER);
+        row.setWrap(true);
 
         log.addClassName("notification-log");
         add(row, progress, statusLabel, new H2("Delivery log"), log);
@@ -105,13 +106,9 @@ public class LongTaskView extends VerticalLayout {
         case RUNNING -> "Generating report… feel free to switch tabs.";
         case DONE -> "Report ready.";
         }));
-    }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
         Signal<NotificationPermission> permission = MissingAPI
-                .permissionSignal(attachEvent.getUI());
+                .permissionSignal(UI.getCurrent());
         permissionBadge.bindText(permission.map(p -> switch (p) {
         case GRANTED -> "on";
         case DENIED -> "blocked — in-app fallback";
@@ -121,22 +118,22 @@ public class LongTaskView extends VerticalLayout {
         }));
         permissionBadge.bindClassName("paused",
                 permission.map(p -> p != NotificationPermission.GRANTED));
-    }
 
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        if (pending != null) {
-            pending.cancel(false);
-            pending = null;
-        }
-        super.onDetach(detachEvent);
+        // A report still running when the user leaves is cancelled, so it
+        // doesn't notify from another view.
+        whenAttached(ui -> () -> {
+            if (pending != null) {
+                pending.cancel(false);
+                pending = null;
+                taskState.set(TaskState.IDLE);
+            }
+        });
     }
 
     private void start(UI ui) {
         taskState.set(TaskState.RUNNING);
         appendLog("report started");
-        pending = taskScheduler.schedule(
-                ui.accessLater(() -> finish(ui), null),
+        pending = taskScheduler.schedule(ui.accessLater(() -> finish(ui), null),
                 Instant.now().plus(TASK_DURATION));
     }
 
@@ -148,8 +145,10 @@ public class LongTaskView extends VerticalLayout {
                 + LocalTime.now().format(TIME) + ".";
         if (MissingAPI.permissionSignal(ui)
                 .peek() == NotificationPermission.GRANTED) {
-            MissingAPI.showNotification(ui, "Your report is ready",
-                    NotificationOptions.body(body).withTag("report-ready"))
+            MissingAPI
+                    .showNotification(ui, "Your report is ready",
+                            NotificationOptions.body(body)
+                                    .withTag("report-ready"))
                     .onError(reason -> {
                         inApp(body);
                         appendLog("OS notification refused (" + reason

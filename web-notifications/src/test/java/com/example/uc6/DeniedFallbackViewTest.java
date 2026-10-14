@@ -26,8 +26,8 @@ class DeniedFallbackViewTest extends SpringBrowserlessTest {
         navigate(DeniedFallbackView.class);
         runPendingSignalsTasks();
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h -> h.getText().startsWith("UC6 — Handle a denied")));
+        assertTrue(findInView(H1.class).all().stream()
+                .anyMatch(h -> h.getText().equals("UC6 — Denied permission")));
         assertFalse(helpPanelShown());
     }
 
@@ -82,9 +82,10 @@ class DeniedFallbackViewTest extends SpringBrowserlessTest {
     }
 
     private void assertLogContains(String fragment) {
-        assertTrue(findInView(Div.class).all().stream()
-                .anyMatch(d -> d.getText() != null
-                        && d.getText().contains(fragment)),
+        assertTrue(
+                findInView(Div.class).all().stream()
+                        .anyMatch(d -> d.getText() != null
+                                && d.getText().contains(fragment)),
                 "expected log to contain \"" + fragment + "\"");
     }
 }

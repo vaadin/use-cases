@@ -38,9 +38,9 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * browser API with public Flow primitives only:
  * <ul>
  * <li>{@link #permissionSignal(UI)} — a per-UI signal of the current
- * permission, kept up to date from the browser (Permissions API
- * {@code change} event, plus a re-check whenever the tab becomes visible or
- * focused again).</li>
+ * permission, kept up to date from the browser (Permissions API {@code change}
+ * event, plus a re-check whenever the tab becomes visible or focused
+ * again).</li>
  * <li>{@link #requestPermissionOnClick(Component)} — binds
  * {@code Notification.requestPermission()} to the component's native
  * {@code click} listener on the client, so the call happens inside the user
@@ -48,17 +48,18 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * gesture.</li>
  * <li>{@link #showNotification(UI, String, NotificationOptions)} — shows a
  * native OS notification and returns a handle whose click / close / error
- * events are delivered back to the server as DOM events on the UI
- * element.</li>
+ * events are delivered back to the server as DOM events on the UI element.</li>
  * </ul>
- * All values are passed to the client as {@code executeJs} parameters
- * (options are serialised with Jackson), never concatenated into JavaScript.
+ * The browser half lives in {@code src/main/frontend/web-notifications.ts},
+ * loaded by {@code MainLayout}. All values are passed to it as
+ * {@code executeJs} parameters (options are serialised with Jackson), never
+ * concatenated into JavaScript.
  * <p>
  * <b>Migration:</b> once a Flow API lands, replace
  * {@code MissingAPI.permissionSignal(ui)} with the framework's permission
  * signal, {@code requestPermissionOnClick} with the framework's click-bound
- * request (e.g. a trigger action in the style of {@code WebShare.onClick}),
- * and {@code showNotification} with the framework's show method. See
+ * request (e.g. a trigger action in the style of {@code WebShare.onClick}), and
+ * {@code showNotification} with the framework's show method. See
  * {@code API-GAPS.md} for the suggested shape.
  */
 public final class MissingAPI {
@@ -77,123 +78,6 @@ public final class MissingAPI {
 
     private static final JsonMapper MAPPER = JsonMapper.builder().build();
 
-    /**
-     * Installed once per UI on the UI (body) element: reports the current
-     * permission and re-reports it whenever it may have changed.
-     */
-    private static final String INSTALL_JS = """
-            const body = this;
-            const report = (force) => {
-              const p = (!('Notification' in window) || !window.isSecureContext)
-                  ? 'unsupported' : Notification.permission;
-              if (!force && body.__vaadinWebNotificationPermission === p) {
-                return;
-              }
-              body.__vaadinWebNotificationPermission = p;
-              body.dispatchEvent(new CustomEvent($0, { detail: { permission: p } }));
-            };
-            body.__vaadinWebNotificationReport = report;
-            report(true);
-            if (navigator.permissions && navigator.permissions.query) {
-              navigator.permissions.query({ name: 'notifications' })
-                  .then((status) => { status.onchange = () => report(false); })
-                  .catch(() => {});
-            }
-            document.addEventListener('visibilitychange', () => report(false));
-            window.addEventListener('focus', () => report(false));
-            """;
-
-    /**
-     * Installed on the trigger element: calls requestPermission() from the
-     * native click listener, i.e. inside the user gesture. Handles both the
-     * Promise form and the legacy callback form (older Safari).
-     */
-    private static final String REQUEST_ON_CLICK_JS = """
-            const el = this;
-            const body = $0;
-            if (el.__vaadinWebNotificationRequest) {
-              return;
-            }
-            const report = () => body.__vaadinWebNotificationReport
-                && body.__vaadinWebNotificationReport(true);
-            el.__vaadinWebNotificationRequest = () => {
-              if (!('Notification' in window) || !window.isSecureContext
-                  || Notification.permission !== 'default') {
-                report();
-                return;
-              }
-              new Promise((resolve) => {
-                const result = Notification.requestPermission(resolve);
-                if (result && result.then) {
-                  result.then(resolve, resolve);
-                }
-              }).then(report);
-            };
-            el.addEventListener('click', el.__vaadinWebNotificationRequest);
-            """;
-
-    private static final String REMOVE_REQUEST_ON_CLICK_JS = """
-            if (this.__vaadinWebNotificationRequest) {
-              this.removeEventListener('click', this.__vaadinWebNotificationRequest);
-              delete this.__vaadinWebNotificationRequest;
-            }
-            """;
-
-    private static final String SHOW_JS = """
-            const body = this;
-            const title = $0;
-            const options = $1;
-            const id = $2;
-            const fire = (type, extra) => body.dispatchEvent(new CustomEvent(type,
-                { detail: Object.assign({ id: id }, extra || {}) }));
-            if (!('Notification' in window) || !window.isSecureContext) {
-              fire($5, { reason: 'unsupported' });
-              return;
-            }
-            if (Notification.permission !== 'granted') {
-              fire($5, { reason: 'permission-' + Notification.permission });
-              return;
-            }
-            let n;
-            try {
-              n = new Notification(title, options);
-            } catch (e) {
-              // e.g. Chrome on Android: "Illegal constructor", only
-              // ServiceWorkerRegistration.showNotification() is allowed there.
-              fire($5, { reason: String((e && e.name) || e) });
-              return;
-            }
-            const registry = body.__vaadinWebNotifications
-                || (body.__vaadinWebNotifications = new Map());
-            registry.set(id, n);
-            n.onclick = (e) => {
-              e.preventDefault();
-              window.focus();
-              n.close();
-              fire($3);
-            };
-            n.onclose = () => {
-              registry.delete(id);
-              fire($4);
-            };
-            n.onerror = () => {
-              registry.delete(id);
-              fire($5, { reason: 'error' });
-            };
-            """;
-
-    private static final String CLOSE_JS = """
-            const registry = this.__vaadinWebNotifications;
-            if (!registry) {
-              return;
-            }
-            registry.forEach((n, id) => {
-              if ((id === $0) || ($1 !== null && n.tag === $1)) {
-                n.close();
-              }
-            });
-            """;
-
     private MissingAPI() {
     }
 
@@ -204,7 +88,9 @@ public final class MissingAPI {
     public enum NotificationPermission {
         /** The browser hasn't reported yet (initial state of every UI). */
         UNKNOWN,
-        /** {@code "default"} — the user hasn't decided; a prompt is possible. */
+        /**
+         * {@code "default"} — the user hasn't decided; a prompt is possible.
+         */
         DEFAULT,
         /** {@code "granted"} — notifications may be shown. */
         GRANTED,
@@ -248,8 +134,8 @@ public final class MissingAPI {
      *            keep the notification on screen until the user acts on it
      *            (ignored by some platforms)
      * @param renotify
-     *            alert the user again when a notification replaces one with
-     *            the same tag (Chromium only; requires {@code tag})
+     *            alert the user again when a notification replaces one with the
+     *            same tag (Chromium only; requires {@code tag})
      * @param silent
      *            suppress sound and vibration
      */
@@ -344,10 +230,10 @@ public final class MissingAPI {
         }
 
         /**
-         * Runs on the server when the browser refused to show the
-         * notification. The argument is a short reason such as
-         * {@code "unsupported"}, {@code "permission-denied"} or the name of
-         * the error thrown by the constructor.
+         * Runs on the server when the browser refused to show the notification.
+         * The argument is a short reason such as {@code "unsupported"},
+         * {@code "permission-denied"} or the name of the error thrown by the
+         * constructor.
          */
         public ShownNotification onError(SerializableConsumer<String> handler) {
             this.errorHandler = handler;
@@ -356,7 +242,8 @@ public final class MissingAPI {
 
         /** Closes the notification in the browser, if it is still shown. */
         public void close() {
-            ui.getElement().executeJs(CLOSE_JS, id, null);
+            ui.getElement().executeJs(
+                    "window.webNotifications.close(this, $0, $1)", id, null);
         }
     }
 
@@ -371,13 +258,12 @@ public final class MissingAPI {
     }
 
     /**
-     * Asks the browser to report the current permission again. Useful after
-     * the user was told to change it in the site settings.
+     * Asks the browser to report the current permission again. Useful after the
+     * user was told to change it in the site settings.
      */
     public static void refreshPermission(UI ui) {
         state(ui);
-        ui.getElement().executeJs(
-                "this.__vaadinWebNotificationReport && this.__vaadinWebNotificationReport(true)");
+        ui.getElement().executeJs("window.webNotifications.report(this)");
     }
 
     /**
@@ -394,28 +280,26 @@ public final class MissingAPI {
      */
     public static Registration requestPermissionOnClick(Component trigger) {
         Element element = trigger.getElement();
-        SerializableConsumer<UI> install = ui -> {
+        // Runs again on every attach, in case Flow recreated the element.
+        return trigger.whenAttached(ui -> {
             state(ui);
-            element.executeJs(REQUEST_ON_CLICK_JS, ui.getElement());
-        };
-        trigger.getUI().ifPresent(install);
-        Registration attach = trigger
-                .addAttachListener(e -> install.accept(e.getUI()));
-        return () -> {
-            attach.remove();
-            element.executeJs(REMOVE_REQUEST_ON_CLICK_JS);
-        };
+            element.executeJs(
+                    "window.webNotifications.requestOnClick(this, $0)",
+                    ui.getElement());
+            return () -> element.executeJs(
+                    "window.webNotifications.removeRequestOnClick(this)");
+        });
     }
 
     /**
-     * Shows a native OS notification in the browser tab behind {@code ui}.
-     * The browser silently refuses unless the permission is
+     * Shows a native OS notification in the browser tab behind {@code ui}. The
+     * browser silently refuses unless the permission is
      * {@link NotificationPermission#GRANTED}; the refusal is reported via
      * {@link ShownNotification#onError}.
      * <p>
-     * A notification with the same {@code tag} as an older one replaces it;
-     * the older handle is dropped on the server, since browsers don't fire a
-     * close event for replaced notifications.
+     * A notification with the same {@code tag} as an older one replaces it; the
+     * older handle is dropped on the server, since browsers don't fire a close
+     * event for replaced notifications.
      */
     public static ShownNotification showNotification(UI ui, String title,
             NotificationOptions options) {
@@ -426,13 +310,13 @@ public final class MissingAPI {
         ShownNotification handle = new ShownNotification(ui, id, title,
                 options.tag());
         if (options.tag() != null) {
-            state.live.values()
-                    .removeIf(n -> options.tag().equals(n.tag));
+            state.live.values().removeIf(n -> options.tag().equals(n.tag));
         }
         state.live.put(id, handle);
         JsonNode json = MAPPER.valueToTree(options);
-        ui.getElement().executeJs(SHOW_JS, title, json, id, CLICK_EVENT,
-                CLOSE_EVENT, ERROR_EVENT);
+        ui.getElement().executeJs(
+                "window.webNotifications.show(this, $0, $1, $2)", id, title,
+                json);
         return handle;
     }
 
@@ -440,12 +324,13 @@ public final class MissingAPI {
     public static void closeNotifications(UI ui, String tag) {
         Objects.requireNonNull(tag, "tag");
         state(ui).live.values().removeIf(n -> tag.equals(n.tag));
-        ui.getElement().executeJs(CLOSE_JS, null, tag);
+        ui.getElement().executeJs("window.webNotifications.close(this, $0, $1)",
+                null, tag);
     }
 
     /**
-     * Notifications shown in this UI that the browser hasn't reported as
-     * closed yet. Package-private: used by the test simulator.
+     * Notifications shown in this UI that the browser hasn't reported as closed
+     * yet. Package-private: used by the test simulator.
      */
     static List<ShownNotification> liveNotifications(UI ui) {
         return new ArrayList<>(state(ui).live.values());
@@ -458,7 +343,8 @@ public final class MissingAPI {
     }
 
     /** Event detail sent by the client for notification events. */
-    public record NotificationDetail(@Nullable String id, @Nullable String reason) {
+    public record NotificationDetail(@Nullable String id,
+            @Nullable String reason) {
     }
 
     private static final class State implements Serializable {
@@ -513,7 +399,8 @@ public final class MissingAPI {
                 }
             }
         }).addEventDetail().allowInert();
-        body.executeJs(INSTALL_JS, PERMISSION_EVENT);
+        body.executeJs("window.webNotifications.install(this, $0, $1, $2, $3)",
+                PERMISSION_EVENT, CLICK_EVENT, CLOSE_EVENT, ERROR_EVENT);
     }
 
     private static @Nullable ShownNotification find(State state, DomEvent e) {

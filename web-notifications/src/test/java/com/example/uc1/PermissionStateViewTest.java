@@ -23,10 +23,12 @@ class PermissionStateViewTest extends SpringBrowserlessTest {
     void viewRendersHeadingAndButtons() {
         navigate(PermissionStateView.class);
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(h -> h
-                .getText().equals("UC1 — Ask for permission on a user gesture")));
-        assertEquals(1, findInView(Button.class).all().stream()
-                .filter(b -> "Allow notifications".equals(b.getText())).count());
+        assertTrue(findInView(H1.class).all().stream()
+                .anyMatch(h -> h.getText().equals("UC1 — Ask for permission")));
+        assertEquals(1,
+                findInView(Button.class).all().stream()
+                        .filter(b -> "Allow notifications".equals(b.getText()))
+                        .count());
     }
 
     @Test
@@ -74,8 +76,9 @@ class PermissionStateViewTest extends SpringBrowserlessTest {
     }
 
     private void assertBadge(String text) {
-        assertTrue(findInView(Span.class).all().stream()
-                .anyMatch(s -> text.equals(s.getText())),
+        assertTrue(
+                findInView(Span.class).all().stream()
+                        .anyMatch(s -> text.equals(s.getText())),
                 "expected badge \"" + text + "\"");
     }
 

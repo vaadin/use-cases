@@ -4,12 +4,15 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.example.MissingAPI;
 import com.example.MissingAPI.NotificationOptions;
 import com.example.MissingAPI.NotificationPermission;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 import org.springframework.scheduling.TaskScheduler;
@@ -17,6 +20,7 @@ import org.springframework.scheduling.TaskScheduler;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -34,19 +38,21 @@ import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * UC3 — Click a notification to open the related item.
+ * UC3 — Click to open.
  * <p>
  * A support agent works in another tab while new tickets are assigned to them.
- * Each assignment raises a native notification. Clicking it brings the
- * browser tab to the front and opens the ticket it refers to — the click is
- * delivered to the server, which selects the ticket and shows its details.
- * The notification uses {@code requireInteraction} so it stays on screen until
- * the agent acts on it. Without permission, an in-app notification with an
- * "Open" button does the same job.
+ * Each assignment raises a native notification. Clicking it brings the browser
+ * tab to the front and opens the ticket it refers to — the click is delivered
+ * to the server, which selects the ticket and shows its details. The
+ * notification uses {@code requireInteraction} so it stays on screen until the
+ * agent acts on it. Without permission, an in-app notification with an "Open"
+ * button does the same job.
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Click to open")
+@UseCaseDescription("Opening the related item when the user clicks a notification")
 @Menu(order = 3, title = "UC3 — Click to open")
+@StyleSheet("uc3.css")
 public class ClickToOpenView extends VerticalLayout {
 
     static final Duration DELAY = Duration.ofSeconds(5);
@@ -67,6 +73,7 @@ public class ClickToOpenView extends VerticalLayout {
 
     private final TaskScheduler taskScheduler;
     private final AtomicInteger nextNumber = new AtomicInteger(1041);
+    private final List<ScheduledFuture<?>> pending = new ArrayList<>();
 
     private final ListSignal<Ticket> tickets = new ListSignal<>();
     private final ValueSignal<@Nullable Ticket> selected = new ValueSignal<>(
@@ -79,7 +86,7 @@ public class ClickToOpenView extends VerticalLayout {
     public ClickToOpenView(TaskScheduler taskScheduler) {
         this.taskScheduler = taskScheduler;
 
-        add(new H1("UC3 — Click a notification to open the related item"));
+        add(new H1("UC3 — Click to open"));
         add(new Paragraph("Enable notifications, click \"Assign me a "
                 + "ticket\" and switch to another tab. After five seconds "
                 + "a notification appears; clicking it brings this tab "
@@ -90,11 +97,12 @@ public class ClickToOpenView extends VerticalLayout {
         Button assign = new Button("Assign me a ticket in 5 seconds",
                 e -> scheduleAssignment(UI.getCurrent()));
         assign.addThemeVariants(ButtonVariant.PRIMARY);
-        add(new HorizontalLayout(allow, assign));
+        HorizontalLayout buttons = new HorizontalLayout(allow, assign);
+        buttons.setWrap(true);
+        add(buttons);
 
-        ticketList.addClassName("ticket-list");
-        add(new H2("My tickets"), ticketList, new H2("Opened ticket"),
-                details);
+        ticketList.addClassName("uc3-ticket-list");
+        add(new H2("My tickets"), ticketList, new H2("Opened ticket"), details);
 
         Signal.effect(this, () -> {
             ticketList.removeAll();
@@ -130,13 +138,22 @@ public class ClickToOpenView extends VerticalLayout {
                 .permissionSignal(UI.getCurrent());
         allow.bindEnabled(
                 permission.map(p -> p == NotificationPermission.DEFAULT));
+
+        // Assignments still pending when the user leaves are dropped, so they
+        // don't notify from another view.
+        whenAttached(ui -> () -> {
+            pending.forEach(task -> task.cancel(false));
+            pending.clear();
+        });
     }
 
     private void scheduleAssignment(UI ui) {
-        Notification.show("A ticket will be assigned in 5 seconds — switch "
-                + "tabs now", 2500, Notification.Position.BOTTOM_START);
-        taskScheduler.schedule(ui.accessLater(() -> assignTicket(ui), null),
-                Instant.now().plus(DELAY));
+        Notification.show(
+                "A ticket will be assigned in 5 seconds — switch " + "tabs now",
+                2500, Notification.Position.BOTTOM_START);
+        pending.add(taskScheduler.schedule(
+                ui.accessLater(() -> assignTicket(ui), null),
+                Instant.now().plus(DELAY)));
     }
 
     // Package-private so tests can assign a ticket without waiting.
@@ -177,8 +194,8 @@ public class ClickToOpenView extends VerticalLayout {
     }
 
     private void open(Ticket ticket, String how) {
-        openedHow.set("Opened from " + how + " at "
-                + LocalTime.now().format(TIME));
+        openedHow.set(
+                "Opened from " + how + " at " + LocalTime.now().format(TIME));
         selected.set(ticket);
     }
 }

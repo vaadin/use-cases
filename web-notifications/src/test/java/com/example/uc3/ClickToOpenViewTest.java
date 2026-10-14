@@ -25,10 +25,10 @@ class ClickToOpenViewTest extends SpringBrowserlessTest {
     void viewRendersHeadingAndButtons() {
         navigate(ClickToOpenView.class);
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h -> h.getText().startsWith("UC3 — Click a notification")));
-        assertTrue(findInView(Button.class).all().stream().anyMatch(b -> b
-                .getText().equals("Assign me a ticket in 5 seconds")));
+        assertTrue(findInView(H1.class).all().stream()
+                .anyMatch(h -> h.getText().equals("UC3 — Click to open")));
+        assertTrue(findInView(Button.class).all().stream().anyMatch(
+                b -> b.getText().equals("Assign me a ticket in 5 seconds")));
         assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> "Nothing opened yet.".equals(s.getText())));
     }
