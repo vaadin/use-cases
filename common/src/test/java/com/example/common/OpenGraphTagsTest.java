@@ -36,6 +36,10 @@ class OpenGraphTagsTest {
     static class NestedLayout extends Div implements RouterLayout {
     }
 
+    @PageTitle("Audio & Video Use Cases")
+    static class AmpersandLayout extends Div implements RouterLayout {
+    }
+
     @Route(value = "", layout = AppLayout.class)
     @UseCaseDescription("What the whole app is about")
     @Menu(title = "Home")
@@ -52,6 +56,11 @@ class OpenGraphTagsTest {
     @Route(value = "uc2", layout = NestedLayout.class)
     @Menu(title = "UC2 — Menu title")
     static class NestedView extends Div {
+    }
+
+    @Route(value = "uc3", layout = AmpersandLayout.class)
+    @PageTitle("UC3 — Find & highlight")
+    static class AmpersandView extends Div {
     }
 
     @Test
@@ -77,6 +86,15 @@ class OpenGraphTagsTest {
         assertEquals("Demo Use Cases", property(document, "og:site_name"));
         assertEquals("UC2 — Menu title", property(document, "og:title"));
         assertNull(property(document, "og:description"));
+    }
+
+    @Test
+    void siteNameSpellsOutAmpersandButTheTitleKeepsIt() {
+        Document document = tags("uc3", AmpersandView.class, BASE_URL, true);
+
+        assertEquals("Audio and Video Use Cases",
+                property(document, "og:site_name"));
+        assertEquals("UC3 — Find & highlight", property(document, "og:title"));
     }
 
     @Test

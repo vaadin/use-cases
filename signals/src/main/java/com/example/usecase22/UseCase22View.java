@@ -24,7 +24,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-22", layout = MainLayout.class)
 @PageTitle("Use Case 22: Two-Way Mapped Signals")
 @UseCaseDescription("Editing one value through a two-way mapped view of another signal")
-@Menu(order = 22, title = "UC 22: Two-Way Mapped Signals")
+@Menu(order = 22, title = "UC22 — Two-Way Mapped Signals")
 @StyleSheet("usecase22.css")
 @AnonymousAllowed
 public class UseCase22View extends VerticalLayout {

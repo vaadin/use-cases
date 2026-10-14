@@ -18,7 +18,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 @Route(value = "muc-07", layout = MainLayout.class)
 @PageTitle("MUC 7: Shared LLM Task List")
 @UseCaseDescription("Letting several users manage one task list through a shared LLM chat")
-@Menu(order = 56, title = "MUC 7: Shared LLM Task List")
+@Menu(order = 56, title = "MUC7 — Shared LLM Task List")
 @AnonymousAllowed
 public class MUC07View extends AbstractTaskChatView {
 

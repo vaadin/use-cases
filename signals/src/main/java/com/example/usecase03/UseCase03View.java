@@ -29,7 +29,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-03", layout = MainLayout.class)
 @PageTitle("Use Case 3: Interactive SVG Shape Editor")
 @UseCaseDescription("Editing SVG shapes interactively with state kept in signals")
-@Menu(order = 3, title = "UC 3: Interactive SVG Shape Editor")
+@Menu(order = 3, title = "UC3 — Interactive SVG Shape Editor")
 @StyleSheet("usecase03.css")
 @AnonymousAllowed
 public class UseCase03View extends VerticalLayout {

@@ -18,7 +18,7 @@ import com.vaadin.flow.signals.shared.SharedListSignal;
 @Route(value = "use-case-18", layout = MainLayout.class)
 @PageTitle("Use Case 18: LLM-Powered Task List")
 @UseCaseDescription("Letting an LLM chat edit a task list through signals")
-@Menu(order = 18, title = "UC 18: LLM Task List")
+@Menu(order = 18, title = "UC18 — LLM Task List")
 @StyleSheet("usecase18.css")
 @AnonymousAllowed
 public class UseCase18View extends AbstractTaskChatView {

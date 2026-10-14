@@ -43,7 +43,7 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @Route(value = "muc-08", layout = MainLayout.class)
 @PageTitle("MUC 8: Broadcast Announcement")
 @UseCaseDescription("Broadcasting an announcement to all users without a custom broadcaster")
-@Menu(order = 57, title = "MUC 8: Broadcast Announcement")
+@Menu(order = 57, title = "MUC8 — Broadcast Announcement")
 @StyleSheet("muc08.css")
 @AnonymousAllowed
 public class MUC08View extends VerticalLayout {
