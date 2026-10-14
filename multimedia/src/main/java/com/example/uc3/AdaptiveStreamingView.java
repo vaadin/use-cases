@@ -1,14 +1,17 @@
 package com.example.uc3;
 
 import com.example.HlsDownloadHandler;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Media;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.html.Video;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -33,6 +36,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Adaptive streaming")
+@UseCaseDescription("Switching video quality as the connection changes with HLS")
 @Menu(order = 3, title = "UC3 — Adaptive streaming")
 @NpmPackage(value = "hls.js", version = "1.7.3")
 @JsModule("./hls-fallback.ts")
@@ -48,6 +52,17 @@ public class AdaptiveStreamingView extends VerticalLayout {
                 + "playlist and switches as bandwidth changes. Throttle the "
                 + "network in the browser's developer tools and watch the "
                 + "label in the top-left corner of the picture."));
+        add(new Paragraph("The stream comes in three renditions. The number "
+                + "is the height of the picture in pixels, and the p stands "
+                + "for progressive: every frame is drawn in full. A taller "
+                + "picture is sharper but needs a faster connection."));
+        add(new UnorderedList(
+                new ListItem("240p — 426 × 240 pixels at about 0.4 Mbit/s, "
+                        + "for slow mobile connections"),
+                new ListItem("360p — 640 × 360 pixels at about 0.8 Mbit/s, "
+                        + "for average connections"),
+                new ListItem("720p — 1280 × 720 pixels (HD) at about 1.7 "
+                        + "Mbit/s, for fast connections")));
 
         Span badge = new Span();
         badge.addClassName("status-badge");
@@ -55,7 +70,7 @@ public class AdaptiveStreamingView extends VerticalLayout {
         add(new HorizontalLayout(badge));
 
         Video video = new Video();
-        video.setControls(true);
+        video.setControlsVisible(true);
         video.setPreload(Media.Preload.METADATA);
         video.setWidth("640px");
         video.setMaxWidth("100%");

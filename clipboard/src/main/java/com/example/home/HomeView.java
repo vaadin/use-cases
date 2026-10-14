@@ -3,6 +3,7 @@ package com.example.home;
 import java.util.List;
 
 import com.example.common.BaseHomeView;
+import com.example.common.UseCaseDescription;
 import com.example.uc1.CopyStaticTextView;
 import com.example.uc2.CopyComponentValueView;
 import com.example.uc3.CopyRichContentView;
@@ -16,23 +17,29 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
 @PageTitle("Clipboard API Use Cases")
+@UseCaseDescription("Copying and pasting text, rich content, images and files with the Clipboard API")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 
     public HomeView() {
         super("Clipboard API — use cases",
-                "Each card below exercises one use case of the Vaadin Flow Clipboard API.");
-        addMenuCards(List.of(CopyStaticTextView.class,
-                CopyComponentValueView.class, CopyRichContentView.class,
-                CopyImageView.class, PasteSpreadsheetView.class,
-                CopyFromContextMenuView.class, PasteFilesView.class,
-                CopyFromGridView.class));
+                "Each card below shows one way to copy to or paste from the "
+                        + "clipboard with the Vaadin Flow Clipboard API.");
+        addGroup("Copying content", VaadinIcon.COPY_O, Accent.BLUE,
+                List.of(CopyStaticTextView.class, CopyComponentValueView.class,
+                        CopyRichContentView.class, CopyImageView.class));
+        addGroup("Copy actions in menus and grids", VaadinIcon.TABLE,
+                Accent.PURPLE,
+                List.of(CopyFromContextMenuView.class, CopyFromGridView.class));
+        addGroup("Pasting into the app", VaadinIcon.PASTE, Accent.GREEN,
+                List.of(PasteSpreadsheetView.class, PasteFilesView.class));
         Anchor inspector = new Anchor(
                 "https://evercoder.github.io/clipboard-inspector/",
                 "Clipboard Inspector");

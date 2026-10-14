@@ -18,7 +18,7 @@ import com.vaadin.flow.router.Route;
  * — and it does so <em>without</em> a view instance. The label comes from
  * {@link UserProfileTitleGenerator}, declared via {@code @DynamicPageTitle};
  * the breadcrumb resolves it through
- * {@code MenuRegistry.getTitle(class, params)} purely from the class and the
+ * {@code Router#resolvePageTitle(class, params)} purely from the class and the
  * {@code :userId} parameter. The parent {@code uc3} is found by stripping the
  * {@code :userId} segment.
  */

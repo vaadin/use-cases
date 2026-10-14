@@ -1,5 +1,6 @@
 package com.example.uc1;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -33,6 +34,7 @@ import com.vaadin.flow.signals.Signal;
  * transient user activation.
  */
 @Route(value = "uc1", layout = MainLayout.class)
+@UseCaseDescription("Sharing the current page through the native share sheet")
 @Menu(order = 1, title = "UC1 — Share this page")
 public class ShareThisPageView extends VerticalLayout {
 

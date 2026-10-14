@@ -26,7 +26,7 @@ class ChapterControlsViewTest extends SpringBrowserlessTest {
         navigate(ChapterControlsView.class);
         runPendingSignalsTasks();
 
-        assertFalse(findInView(Video.class).single().isControls());
+        assertFalse(findInView(Video.class).single().isControlsVisible());
         assertEquals(4, chapterButtons().size());
         assertTrue(chapterButtons().get(0).hasClassName("current"));
         assertEquals("0:00 / 0:00", time().getText());

@@ -1,35 +1,49 @@
 package com.example.uc2;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.html.Code;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Video;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ViewPackages(classes = SeekableStreamView.class)
 class SeekableStreamViewTest extends SpringBrowserlessTest {
 
     @Test
-    void showsBuiltInAndRangeAwarePlayersSideBySide() {
+    void recordingIsServedThroughAHandler() {
         navigate(SeekableStreamView.class);
 
         assertEquals("UC2 — Seekable streaming",
                 findInView(H1.class).single().getText());
-        assertEquals(2, findInView(H2.class).all().size());
+        Video video = findInView(Video.class).single();
+        assertTrue(video.getSources().get(0).getSrc()
+                .startsWith("VAADIN/dynamic/resource/"));
+        assertEquals("video/mp4", video.getSources().get(0).getType());
+    }
 
-        var videos = findInView(Video.class).all();
-        assertEquals(2, videos.size());
-        String builtIn = videos.get(0).getSources().get(0).getSrc();
-        String ranged = videos.get(1).getSources().get(0).getSrc();
-        assertNotEquals(builtIn, ranged);
-        videos.forEach(video -> assertEquals("video/mp4",
-                video.getSources().get(0).getType()));
+    @Test
+    void explainsWhichHandlersAnswerRanges() {
+        navigate(SeekableStreamView.class);
+
+        assertEquals("Which handlers can seek",
+                findInView(H2.class).single().getText());
+        assertEquals(List.of("DownloadHandler.forFile(file)",
+                "DownloadHandler.fromInputStream(...).enableRangeRequests()",
+                "forClassResource(...).enableRangeRequests()",
+                "META-INF/resources"),
+                findInView(Code.class).all().stream().map(Code::getText)
+                        .toList());
+        assertEquals(5, findInView(ListItem.class).all().size());
     }
 }

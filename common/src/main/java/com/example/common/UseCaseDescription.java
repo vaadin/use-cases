@@ -12,7 +12,8 @@ import java.lang.annotation.Target;
  * while still saying what the view shows: {@link BaseMainLayout} uses it as the
  * nav item's tooltip and
  * {@link BaseHomeView#addMenuCards(java.util.Collection)} as the home card's
- * description, so both read the same text.
+ * description, so both read the same text. {@link OpenGraphTags} also shows it
+ * when a link to the view is shared; on a home view it describes the whole app.
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
