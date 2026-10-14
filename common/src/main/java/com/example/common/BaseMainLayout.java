@@ -45,6 +45,16 @@ public abstract class BaseMainLayout extends AppLayout
     private static final SlackFeedback SLACK_FEEDBACK = SlackFeedback
             .fromEnvironment();
 
+    /**
+     * The environment variable naming the Git commit or branch "View source"
+     * links to, set by a pull request preview to the commit it is deployed
+     * from. Without it the links point to {@code main}.
+     */
+    private static final String SOURCE_REF_ENV = "SOURCE_REF";
+
+    private static final @Nullable String SOURCE_REF = System
+            .getenv(SOURCE_REF_ENV);
+
     private final String moduleId;
     private final String title;
     private final SlackFeedback slackFeedback;
@@ -171,10 +181,7 @@ public abstract class BaseMainLayout extends AppLayout
             return;
         }
         String className = viewClass.getSimpleName();
-        String packagePath = viewClass.getPackageName().replace(".", "/");
-        sourceCodeLink.setHref("https://github.com/vaadin/use-cases/tree/main/"
-                + moduleId + "/src/main/java/" + packagePath + "/" + className
-                + ".java");
+        sourceCodeLink.setHref(sourceUrl(SOURCE_REF, moduleId, viewClass));
         boolean isUseCase = className.endsWith("View");
         sourceCodeLink.setVisible(isUseCase);
 
@@ -185,6 +192,20 @@ public abstract class BaseMainLayout extends AppLayout
                                 .getPathWithQueryParameters())
                 : null;
         feedbackButton.setVisible(useCase != null && slackFeedback.isEnabled());
+    }
+
+    /**
+     * The GitHub URL of the given view's source at the given Git commit or
+     * branch, or at {@code main} when there is none, so that a pull request
+     * preview links to the code it runs rather than to {@code main}, where a
+     * view the pull request adds or changes is missing or different.
+     */
+    static String sourceUrl(@Nullable String ref, String moduleId,
+            Class<?> viewClass) {
+        String sourceRef = ref == null || ref.isBlank() ? "main" : ref;
+        return "https://github.com/vaadin/use-cases/tree/" + sourceRef + "/"
+                + moduleId + "/src/main/java/"
+                + viewClass.getName().replace('.', '/') + ".java";
     }
 
     private static String useCaseTitle(Class<?> viewClass) {
