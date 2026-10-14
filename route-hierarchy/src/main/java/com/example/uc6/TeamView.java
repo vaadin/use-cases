@@ -1,5 +1,7 @@
 package com.example.uc6;
 
+import com.example.common.UseCaseDescription;
+
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -14,6 +16,7 @@ import com.vaadin.flow.router.RouterLink;
  */
 @Route(value = "uc6/team", layout = TeamLayout.class)
 @PageTitle("Team")
+@UseCaseDescription("A child view that reuses the breadcrumb of its parent layout")
 @Menu(order = 14, title = "Team")
 public class TeamView extends VerticalLayout {
 

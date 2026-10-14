@@ -1,5 +1,6 @@
 package com.example.uc8;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
@@ -32,6 +33,7 @@ import com.vaadin.flow.server.menu.MenuEntry;
  */
 @Route(value = "uc8", layout = MainLayout.class)
 @PageTitle("Hierarchical menu")
+@UseCaseDescription("Showing the menu as a tree that follows the route hierarchy")
 @Menu(order = 8, title = "UC8 — Hierarchical menu")
 public class HierarchicalMenuView extends VerticalLayout {
 

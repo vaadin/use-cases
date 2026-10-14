@@ -1,5 +1,6 @@
 package com.example.uc1;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
@@ -18,6 +19,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc1/electronics/laptops", layout = MainLayout.class)
 @PageTitle("Laptops")
+@UseCaseDescription("A page two levels deep whose whole trail comes from its URL")
 @Menu(order = 11, title = "Laptops")
 public class SubcategoryView extends VerticalLayout {
 

@@ -1,5 +1,6 @@
 package com.example.uc9;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
@@ -26,6 +27,7 @@ import com.vaadin.flow.router.RouterLink;
  */
 @Route(value = "forecast", layout = MainLayout.class)
 @PageTitle("Revenue forecast")
+@UseCaseDescription("A top-level page that the menu groups under Reports")
 @Menu(order = 16, title = "Revenue forecast", parent = ReportsView.class)
 public class RevenueForecastView extends VerticalLayout {
 

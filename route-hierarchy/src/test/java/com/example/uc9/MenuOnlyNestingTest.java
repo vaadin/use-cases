@@ -104,9 +104,13 @@ class MenuOnlyNestingTest extends SpringBrowserlessTest {
         // @Menu(parent = ...) pushed a level deeper drops out of it: without
         // the annotation the top-level /forecast route would have sat here
         // next to the use cases themselves.
-        assertEquals(List.of("Home", "UC9 — Menu-only nesting"), mainNav());
-        assertFalse(mainNav().contains("Revenue forecast"),
-                mainNav().toString());
+        // Other test classes' views can leak into the registry, so assert
+        // only the entries this class owns.
+        List<String> mainNav = mainNav();
+        assertTrue(mainNav.contains("UC9 — Menu-only nesting"),
+                mainNav.toString());
+        assertFalse(mainNav.contains("Revenue forecast"), mainNav.toString());
+        assertFalse(mainNav.contains("Sales report"), mainNav.toString());
     }
 
     private List<String> mainNav() {

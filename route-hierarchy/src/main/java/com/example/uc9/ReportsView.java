@@ -3,6 +3,7 @@ package com.example.uc9;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.common.UseCaseDescription;
 import com.example.uc8.HierarchicalMenuView;
 import com.example.views.MainLayout;
 
@@ -42,6 +43,7 @@ import com.vaadin.flow.server.menu.MenuEntry;
  */
 @Route(value = "uc9", layout = MainLayout.class)
 @PageTitle("Reports")
+@UseCaseDescription("Grouping a page in the menu without moving its route")
 @Menu(order = 9, title = "UC9 — Menu-only nesting")
 public class ReportsView extends VerticalLayout {
 

@@ -1,5 +1,6 @@
 package com.example.uc9;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
@@ -20,6 +21,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc9/sales", layout = MainLayout.class)
 @PageTitle("Sales report")
+@UseCaseDescription("A page whose menu and breadcrumb parents agree")
 @Menu(order = 15, title = "Sales report")
 public class SalesReportView extends VerticalLayout {
 
