@@ -11,12 +11,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <!-- Video, Audio and Source come from vaadin/flow#25900; switch back to
-             the mainline snapshot once it is merged. -->
-        <flow.version>25.4.video-and-audio-components-SNAPSHOT</flow.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.example</groupId>

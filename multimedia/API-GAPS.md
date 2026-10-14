@@ -14,38 +14,41 @@ The components cover the declarative part well: UC1 (private recording with a
 poster), UC4 (format fallback) and most of UC5 (background video) need nothing
 else. Everything that involves *playing* media from the server, *observing*
 playback, or serving media that is not a single small file needs a workaround.
-Those workarounds live in [`MissingAPI.java`](src/main/java/com/example/MissingAPI.java),
-[`RangeDownloadHandler.java`](src/main/java/com/example/RangeDownloadHandler.java)
+Those workarounds live in [`MissingAPI.java`](src/main/java/com/example/MissingAPI.java)
 and [`HlsDownloadHandler.java`](src/main/java/com/example/HlsDownloadHandler.java).
 
 The measurements quoted below come from headless Chromium 153 against the
 running app. Statements about iOS and Safari come from Apple's documentation
 and were not tested.
 
-## Built-in download handlers ignore `Range`, so served media cannot be seeked
+## Download handlers answer `Range` only for files, unless opted in
 
-**Where it bit us:** UC2 / `SeekableStreamView.java` (side by side), and UC7,
-UC8, UC9, which all serve the 60-second recording.
-**Symptom:** `DownloadHandler.fromInputStream`, `forFile`, `forClassResource`
-and `forServletResource` always answer `200` with the whole body and no
-`Accept-Ranges` header. The browser then reports `video.seekable` as empty:
-dragging the scrubber to 0:45 in the left-hand UC2 player snaps back to
-~0:01.5, while the same file served with range support seeks to 0:46.5.
-`preload="metadata"` also cannot save bandwidth, because there is no way to
-fetch only the header. Apple's Safari documentation requires byte-range
-support for video, so there such a response is not expected to play at all
-(not tested here). Static files are fine: `media/trailer.mp4` answers a
-`Range` request with `206`, and Flow's own `ResponseWriter` implements `Range`
-for the static resources it serves. Only the handler path lacks it.
-**Workaround used:** `RangeDownloadHandler`, a ~100-line handler that parses a
-single `bytes=` range and answers `206` with `Content-Range`, or `416`.
-**Suggested API:** honour `Range` in the built-in handlers whenever the length
-is known (`forFile`, `forClassResource`, and `fromInputStream` when the
-`DownloadResponse` has a content length), reusing `ResponseWriter`'s range
-logic. For custom sources, a seekable variant of `DownloadResponse` (for
-example one taking a `SeekableByteChannel` or a `(offset, length) ->
-InputStream` function) would let applications stream from object storage
-without implementing HTTP ranges themselves.
+**Where it bit us:** every view that plays bundled media through a handler:
+UC1, UC2, UC7, UC8 and UC9.
+**Status:** fixed by vaadin/flow#26198 and vaadin/flow#26255.
+`DownloadHandler.forFile` sends `Accept-Ranges: bytes` and answers `Range`
+requests with `206` (single and multipart) by seeking in the file.
+`forClassResource`, `forServletResource` and `fromInputStream` do the same
+after `enableRangeRequests()`. All views now serve their media with `forFile`
+through `MediaLibrary.serve(path)`, so every player can seek and the
+~100-line `RangeDownloadHandler` is gone. The HLS segments of UC3 are streamed
+from the same files.
+**Remaining symptom:** ranges are off by default for everything but
+`forFile`, and nothing tells you. Without them a handler answers `200` with
+the whole body and no `Accept-Ranges`; the browser then reports
+`video.seekable` as empty, so dragging the scrubber snaps back to where
+playback was, and Safari, which requires byte-range support for video, is not
+expected to play it at all (not tested here). For a compressed jar entry the
+opt-in inflates the entry from its start on every seek, so it does not suit
+long recordings.
+**Workaround used:** the media is bundled in the jar, so `MediaLibrary`
+copies each file to a temporary directory once when the app runs from the
+packaged jar, and serves it from there with `forFile`. `forFile` takes the
+MIME type from the servlet container only, so `application.properties` maps
+`.vtt` to `text/vtt` for the subtitles of UC9.
+**Suggested API:** `Media#addSource(DownloadHandler, type)` could log a
+development-mode warning when `isRangeRequestsEnabled()` is `false`, and
+`forFile` could accept a content type.
 
 ## `setMuted(true)` does not mute a player created from the server, so autoplay is blocked
 
@@ -125,7 +128,10 @@ from the server.
 **Workaround used:** `MissingAPI.addTextTrack(media, kind, language, label,
 DownloadHandler)` appends a raw `<track>` element (with the VTT file served
 through a handler), and `MissingAPI.showTextTrack(media, language)` sets
-`textTrack.mode` with JavaScript.
+`textTrack.mode` with JavaScript. It has to wait for `loadedmetadata`:
+Chromium picks a track of its own when the metadata loads, ignoring a mode set
+before that, so setting `mode` right away left two subtitle languages showing
+at once on the first visit.
 **Suggested API:** a `Track` component (`kind`, `srclang`, `label`, `default`,
 `src` as URL or `DownloadHandler`), accepted by `Media` next to `Source`,
 plus `Media#setShowingTrack(String language)` or a signal for it.

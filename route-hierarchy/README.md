@@ -39,7 +39,7 @@ Flow version yet, so this module pins `flow.version` to
 | - | ---- | ------------- |
 | UC1 | URL-prefix trail | `uc1` → `uc1/electronics` → `uc1/electronics/laptops` with no annotations; the trail comes purely from `getRouteHierarchy`'s URL-prefix fallback. |
 | UC2 | `@RouteParent` override | A detail page at `order-detail/:orderId` whose URL shares no prefix with its conceptual parent `uc2`; `@RouteParent(OrdersView.class)` is what links them. |
-| UC3 | Dynamic leaf label | A profile at `uc3/:userId` implementing `HasDynamicTitle`; the current crumb shows the resolved person name, not the static `@PageTitle`. |
+| UC3 | Dynamic leaf label | A profile at `uc3/:userId` with `@DynamicPageTitle`; the current crumb shows the person name, resolved from `:userId` by a `PageTitleGenerator` without a view instance. |
 | UC4 | Parameter-preserving links | A four-level parameterised hierarchy where each ancestor link keeps the live `:projectId` (and only the parameters its own template needs). |
 | UC5 | Up-one-level button | A single "↑ Up to <parent>" control built from `getRouteParent(...)`, hidden at the hierarchy root. |
 | UC6 | Layout-wide auto breadcrumbs | One `Breadcrumbs` component in a parent layout, shared by every child view; in `ROUTER` mode it rebuilds on every navigation with no `AfterNavigationObserver` and no manual seeding. |

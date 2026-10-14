@@ -2,6 +2,7 @@ package com.example.usecase08;
 
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -29,7 +30,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-08", layout = MainLayout.class)
 @PageTitle("Use Case 8: Multi-Step Wizard with Validation")
-@Menu(order = 8, title = "UC 8: Multi-Step Wizard")
+@UseCaseDescription("Guiding users through a multi-step wizard with per-step validation")
+@Menu(order = 8, title = "UC8 — Multi-Step Wizard")
 @StyleSheet("usecase08.css")
 @AnonymousAllowed
 public class UseCase08View extends VerticalLayout {

@@ -3,6 +3,7 @@ package com.example.uc1;
 import java.util.List;
 
 import com.example.MediaLibrary;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
@@ -23,7 +24,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.server.streams.DownloadHandler;
-import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -41,6 +41,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc1/:recording?", layout = MainLayout.class)
 @PageTitle("UC1 — Private recording")
+@UseCaseDescription("Serving private recordings and posters without public URLs")
 @Menu(order = 1, title = "UC1 — Private recording")
 public class PrivateRecordingView extends VerticalLayout
         implements BeforeEnterObserver {
@@ -99,23 +100,14 @@ public class PrivateRecordingView extends VerticalLayout
         // A fresh player per recording: swapping the <source> of a player
         // that has already loaded does nothing without HTMLMediaElement.load().
         Video video = new Video();
-        video.setControls(true);
+        video.setControlsVisible(true);
         video.setPreload(Media.Preload.METADATA);
         video.setWidth("640px");
         video.setMaxWidth("100%");
         video.setAriaLabel(recording.title());
-        video.addSource(
-                DownloadHandler.fromInputStream(event -> new DownloadResponse(
-                        MediaLibrary.open(recording.id() + ".mp4"),
-                        recording.id() + ".mp4", "video/mp4",
-                        MediaLibrary.bytes(recording.id() + ".mp4").length)),
+        video.addSource(MediaLibrary.serve(recording.id() + ".mp4"),
                 "video/mp4");
-        video.setPoster(
-                DownloadHandler.fromInputStream(event -> new DownloadResponse(
-                        MediaLibrary.open(recording.id() + "-poster.jpg"),
-                        recording.id() + "-poster.jpg", "image/jpeg",
-                        MediaLibrary.bytes(
-                                recording.id() + "-poster.jpg").length)));
+        video.setPoster(MediaLibrary.serve(recording.id() + "-poster.jpg"));
 
         return new Div(video, new Paragraph(recording.description()));
     }

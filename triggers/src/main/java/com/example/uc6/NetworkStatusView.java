@@ -1,5 +1,6 @@
 package com.example.uc6;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -25,6 +26,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Network status")
+@UseCaseDescription("Showing online and offline status even when the server is unreachable")
 @Menu(order = 6, title = "UC6 — Network status")
 @StyleSheet("uc6.css")
 public class NetworkStatusView extends VerticalLayout {
