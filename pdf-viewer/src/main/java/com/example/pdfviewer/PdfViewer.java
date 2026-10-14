@@ -45,7 +45,7 @@ public class PdfViewer extends Component implements HasSize, HasStyle {
      * depends on the others through URLs with the same commit, so the two must
      * match or npm installs a second copy of the shared packages.
      */
-    static final String PREVIEW_URL = "https://pkg.pr.new/vaadin/web-components/@vaadin/pdf-viewer@3141b6e97ee28811344a2e851112c4ba1ae340ce";
+    static final String PREVIEW_URL = "https://pkg.pr.new/vaadin/web-components/@vaadin/pdf-viewer@dcd878f1286c04a77ca05219d530dcaa802a41dd";
 
     /** How the viewer fits the pages, see {@link #setZoom(Zoom)}. */
     public enum Zoom {

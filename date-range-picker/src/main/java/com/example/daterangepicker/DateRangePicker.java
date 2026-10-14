@@ -65,7 +65,7 @@ public class DateRangePicker extends AbstractField<DateRangePicker, DateRange>
      * uses. Flow's {@code DatePicker} declares the same URL; declaring it here
      * too keeps the range picker working in a view without a date picker.
      */
-    static final String PREVIEW_URL = "https://pkg.pr.new/vaadin/web-components/@vaadin/date-picker@3141b6e97ee28811344a2e851112c4ba1ae340ce";
+    static final String PREVIEW_URL = "https://pkg.pr.new/vaadin/web-components/@vaadin/date-picker@dcd878f1286c04a77ca05219d530dcaa802a41dd";
 
     private final Set<LocalDate> disabledDates = new LinkedHashSet<>();
     private final Set<DayOfWeek> disabledWeekdays = EnumSet
