@@ -68,3 +68,11 @@
     gap: var(--vaadin-gap-m);
     padding: var(--vaadin-padding-l, 1.5rem);
 }
+
+/* On a phone the address is the first thing to go: it is decoration, the
+   title says whose window it is. */
+@media (max-width: 480px) {
+    .app-window-url {
+        display: none;
+    }
+}
