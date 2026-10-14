@@ -23,9 +23,10 @@ and `SignalCommand.ClearOwnerCommand` clears everything one owner wrote. But
 every public insert/put passes `null` as the owner, and nothing public sends
 `ClearOwnerCommand`.
 **Workaround used:** `Presence#bind` removes the entry in the cleanup of a
-`whenAttached` handler. For a vanished browser this relies on the UI being closed after
-three missed heartbeats (`application.properties`), so a ghost avatar stays
-for minutes.
+`whenAttached` handler. For a vanished browser this relies on the UI being
+closed after three missed heartbeats. With the 15-second interval set in
+`application.properties`, a ghost avatar stays for up to about a minute; at
+Vaadin's default interval it would stay for about 15 minutes.
 **Suggested API:** an insert/put that takes an owner, and a way to end an
 owner's scope, by default tied to the session or UI.
 Upstream: https://github.com/vaadin/flow/issues/25867
