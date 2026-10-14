@@ -2,6 +2,7 @@ package com.example.uc4;
 
 import java.util.Locale;
 
+import com.example.common.UseCaseDescription;
 import com.example.data.Employee;
 import com.example.data.Employees;
 import com.example.export.CsvWriter;
@@ -12,6 +13,7 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
@@ -59,8 +61,10 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * See {@code API-GAPS.md}.
  */
 @Route(value = "uc4", layout = MainLayout.class)
+@UseCaseDescription("Turning badges, checkboxes and formatted cells into plain text for export")
 @PageTitle("UC4 — Rendered columns as text")
 @Menu(order = 4, title = "UC4 — Rendered columns as text")
+@StyleSheet("uc4.css")
 public class RenderedValuesView extends VerticalLayout {
 
     static final int ROW_COUNT = 25;
@@ -133,7 +137,8 @@ public class RenderedValuesView extends VerticalLayout {
 
     private static Span statusBadge(Employee employee) {
         Span badge = new Span(employee.active() ? "Active" : "On leave");
-        badge.getElement().getThemeList().add("badge");
+        badge.addClassName("uc4-status");
+        badge.setClassName("on-leave", !employee.active());
         return badge;
     }
 

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
+import com.example.common.UseCaseDescription;
 import com.example.data.Employee;
 import com.example.data.Employees;
 import com.example.export.CsvWriter;
@@ -48,6 +49,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * what a large export must not do. See {@code API-GAPS.md}.
  */
 @Route(value = "uc7", layout = MainLayout.class)
+@UseCaseDescription("Streaming a large, lazily loaded grid to a file a page at a time")
 @PageTitle("UC7 — Large lazy data set")
 @Menu(order = 7, title = "UC7 — Large lazy data set")
 public class LargeDatasetExportView extends VerticalLayout {
@@ -89,7 +91,7 @@ public class LargeDatasetExportView extends VerticalLayout {
 
     public LargeDatasetExportView() {
         setSizeFull();
-        add(new H1("UC7 — Exporting a large, lazily-loaded data set"));
+        add(new H1("UC7 — Large lazy data set"));
         add(new Paragraph("The grid below is backed by " + ROW_COUNT
                 + " rows that live in a simulated backend. Sort a column, then "
                 + "run the export: it walks the backend in pages of "

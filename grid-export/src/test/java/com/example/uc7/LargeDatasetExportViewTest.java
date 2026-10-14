@@ -28,7 +28,7 @@ class LargeDatasetExportViewTest extends SpringBrowserlessTest {
         LargeDatasetExportView view = navigate(LargeDatasetExportView.class);
 
         assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h1 -> h1.getText().startsWith("UC7 — Exporting a large")));
+                h1 -> "UC7 — Large lazy data set".equals(h1.getText())));
         assertEquals(LargeDatasetExportView.ROW_COUNT, test(view.grid).size());
         assertTrue(view.fetchCount() < EXPECTED_FETCHES,
                 "rendering the grid should not walk the whole backend");

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.ToDoubleFunction;
 
+import com.example.common.UseCaseDescription;
 import com.example.data.Employee;
 import com.example.data.Employees;
 import com.example.export.ExportedGrid;
@@ -44,6 +45,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * See {@code API-GAPS.md}.
  */
 @Route(value = "uc5", layout = MainLayout.class)
+@UseCaseDescription("Exporting a spreadsheet with merged group headers and a totals row")
 @PageTitle("UC5 — Spreadsheet report")
 @Menu(order = 5, title = "UC5 — Spreadsheet report")
 public class ExcelReportView extends VerticalLayout {
@@ -59,7 +61,7 @@ public class ExcelReportView extends VerticalLayout {
 
     public ExcelReportView() {
         setSizeFull();
-        add(new H1("UC5 — A spreadsheet report, headers and footers included"));
+        add(new H1("UC5 — Spreadsheet report"));
         add(new Paragraph("The grid below has a grouped header and a footer "
                 + "row of totals. Both make it into the workbook: the group "
                 + "becomes a merged cell above the two columns it covers, and "

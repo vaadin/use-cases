@@ -1,5 +1,6 @@
 package com.example.uc6;
 
+import com.example.common.UseCaseDescription;
 import com.example.data.Employee;
 import com.example.data.Employees;
 import com.example.export.CsvWriter;
@@ -41,6 +42,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * do to it" switch. See {@code API-GAPS.md}.
  */
 @Route(value = "uc6", layout = MainLayout.class)
+@UseCaseDescription("Dropping and masking sensitive columns when exporting")
 @PageTitle("UC6 — Redact on export")
 @Menu(order = 6, title = "UC6 — Redact on export")
 public class RedactedExportView extends VerticalLayout {
@@ -63,7 +65,7 @@ public class RedactedExportView extends VerticalLayout {
 
     public RedactedExportView() {
         setSizeFull();
-        add(new H1("UC6 — Redact and convert on export"));
+        add(new H1("UC6 — Redact on export"));
         add(new Paragraph("The grid shows the internal id and the full card "
                 + "number because the people using the application need them. "
                 + "The report does not: the id column is dropped, the card "

@@ -28,7 +28,7 @@ class ExcelReportViewTest extends SpringBrowserlessTest {
         ExcelReportView view = navigate(ExcelReportView.class);
 
         assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h1 -> h1.getText().startsWith("UC5 — A spreadsheet report")));
+                h1 -> "UC5 — Spreadsheet report".equals(h1.getText())));
         assertEquals(ExcelReportView.ROW_COUNT, test(view.grid).size());
         assertEquals("Salary", test(view.grid).getHeaderCell(2));
         assertEquals(2, view.grid.getHeaderRows().size());

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.ToDoubleFunction;
 
+import com.example.common.UseCaseDescription;
 import com.example.data.Employee;
 import com.example.data.Employees;
 import com.example.export.ExportedGrid;
@@ -47,6 +48,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * widths it needs are not on the server at all. See {@code API-GAPS.md}.
  */
 @Route(value = "uc8", layout = MainLayout.class)
+@UseCaseDescription("Printing a multi-page PDF that repeats the headers on every page")
 @PageTitle("UC8 — Multi-page PDF")
 @Menu(order = 8, title = "UC8 — Multi-page PDF")
 public class MultiPagePdfView extends VerticalLayout {
@@ -65,7 +67,7 @@ public class MultiPagePdfView extends VerticalLayout {
 
     public MultiPagePdfView() {
         setSizeFull();
-        add(new H1("UC8 — A multi-page PDF with repeated headers"));
+        add(new H1("UC8 — Multi-page PDF"));
         add(new Paragraph("The report below runs to several pages. Both "
                 + "header rows — the grouped one and the column labels — are "
                 + "repeated at the top of every page, the money columns stay "

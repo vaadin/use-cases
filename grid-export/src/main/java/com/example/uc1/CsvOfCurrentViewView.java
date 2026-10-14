@@ -2,6 +2,7 @@ package com.example.uc1;
 
 import java.util.Locale;
 
+import com.example.common.UseCaseDescription;
 import com.example.data.Employee;
 import com.example.data.Employees;
 import com.example.export.CsvWriter;
@@ -45,6 +46,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * says. See {@code API-GAPS.md}.
  */
 @Route(value = "uc1", layout = MainLayout.class)
+@UseCaseDescription("Exporting the filtered and sorted rows a grid shows as CSV")
 @PageTitle("UC1 — CSV of the current view")
 @Menu(order = 1, title = "UC1 — CSV of the current view")
 public class CsvOfCurrentViewView extends VerticalLayout {

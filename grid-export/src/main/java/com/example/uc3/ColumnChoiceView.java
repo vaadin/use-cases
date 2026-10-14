@@ -5,6 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.example.MissingAPI;
+import com.example.common.UseCaseDescription;
 import com.example.data.Employee;
 import com.example.data.Employees;
 import com.example.export.CsvWriter;
@@ -42,6 +43,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * {@code API-GAPS.md}.
  */
 @Route(value = "uc3", layout = MainLayout.class)
+@UseCaseDescription("Exporting only the columns the user kept, in the order they dragged them")
 @PageTitle("UC3 — The user's column choices")
 @Menu(order = 3, title = "UC3 — The user's column choices")
 public class ColumnChoiceView extends VerticalLayout {
@@ -65,7 +67,7 @@ public class ColumnChoiceView extends VerticalLayout {
 
     public ColumnChoiceView() {
         setSizeFull();
-        add(new H1("UC3 — The export follows the user's column choices"));
+        add(new H1("UC3 — The user's column choices"));
         add(new Paragraph("Untick a column to hide it, or drag a column "
                 + "header to move it. The preview — and the downloaded file — "
                 + "shows exactly the columns you left visible, in the order "

@@ -1,5 +1,6 @@
 package com.example.uc2;
 
+import com.example.common.UseCaseDescription;
 import com.example.data.Employee;
 import com.example.data.Employees;
 import com.example.export.CsvWriter;
@@ -35,6 +36,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * See {@code API-GAPS.md}.
  */
 @Route(value = "uc2", layout = MainLayout.class)
+@UseCaseDescription("Exporting only the rows the user selected, in the grid's order")
 @PageTitle("UC2 — Export the selection")
 @Menu(order = 2, title = "UC2 — Export the selection")
 public class ExportSelectionView extends VerticalLayout {
@@ -49,7 +51,7 @@ public class ExportSelectionView extends VerticalLayout {
 
     public ExportSelectionView() {
         setSizeFull();
-        add(new H1("UC2 — Export only the selected rows"));
+        add(new H1("UC2 — Export the selection"));
         add(new Paragraph("Tick some rows: the preview below holds just "
                 + "those, in the grid's row order. Re-sort the grid without "
                 + "changing the selection and the exported rows are reordered "

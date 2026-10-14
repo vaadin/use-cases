@@ -30,8 +30,7 @@ class ColumnChoiceViewTest extends SpringBrowserlessTest {
         ColumnChoiceView view = navigate(ColumnChoiceView.class);
 
         assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h1 -> "UC3 — The export follows the user's column choices"
-                        .equals(h1.getText())));
+                h1 -> "UC3 — The user's column choices".equals(h1.getText())));
         assertEquals(ColumnChoiceView.ROW_COUNT, test(view.grid).size());
         assertEquals(ALL_HEADERS, view.report().columnHeaders());
         assertEquals(ALL_HEADERS.size(), view.columnPicker.getValue().size());

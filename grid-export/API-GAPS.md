@@ -23,9 +23,9 @@ That plumbing lives in two places in this module, and both are workarounds:
 
 ---
 
-## A plain `addColumn(ValueProvider)` column will not tell you its value
+## 1. A plain `addColumn(ValueProvider)` column will not tell you its value
 
-**Where it bit us:** uc1 / CsvOfCurrentViewView.java — and every other use case
+**Where it bites:** UC1 / CsvOfCurrentViewView.java — and every other use case
 **Symptom:** `grid.addColumn(Employee::name)` is the most common column in every
 Vaadin application. It wraps the value provider in a `ColumnPathRenderer`, which
 keeps it in a **private field** and exposes nothing:
@@ -62,9 +62,9 @@ A narrower fix that would already unblock exporters:
 `ColumnPathRenderer#getValueProvider()` and `#getProperty()` as public getters,
 mirroring `LitRenderer#getValueProviders()`, which *is* public.
 
-## No `Grid#getItems()`, and the grid's sort order is not in the data provider
+## 2. No `Grid#getItems()`, and the grid's sort order is not in the data provider
 
-**Where it bit us:** uc1 / CsvOfCurrentViewView.java, uc7 /
+**Where it bites:** UC1 / CsvOfCurrentViewView.java, UC7 /
 LargeDatasetExportView.java
 **Symptom:** "export what the user sees" means the current filter and the
 current sorting. Neither is where you would look for it. Clicking a column
@@ -85,9 +85,9 @@ in-memory data.
 works for every data provider type, documented as "filtered and sorted as
 displayed".
 
-## A formatted cell costs a component, and you can never have both the value and its formatting
+## 3. A formatted cell costs a component, and you can never have both the value and its formatting
 
-**Where it bit us:** uc4 / RenderedValuesView.java, uc5 / ExcelReportView.java
+**Where it bites:** UC4 / RenderedValuesView.java, UC5 / ExcelReportView.java
 **Symptom:** `NumberRenderer` and `LocalDateRenderer` hold exactly what a report
 wants — the formatted string — in `getFormattedValue()`, which is `protected`,
 fed by `getValueProvider()`, also `protected`. The only public way in is
@@ -109,9 +109,9 @@ computed from the items directly, not from the exported cells.
 `Column#getCellContent(item)` — e.g. a `CellContent(Object value, String text)`
 — so a writer can choose which one it needs.
 
-## A multi-property `LitRenderer` column is unreadable
+## 4. A multi-property `LitRenderer` column is unreadable
 
-**Where it bit us:** uc4 / RenderedValuesView.java (the "Contact" column)
+**Where it bites:** UC4 / RenderedValuesView.java (the "Contact" column)
 **Symptom:** `LitRenderer#getValueProviders()` is public, which is enough when a
 column renders exactly one property. With two or more, nothing says which of
 them the cell displays, or in what order, because the template string is only
@@ -127,9 +127,9 @@ that message on a button press, so the gap is visible in the app.
 renderer's own contract with the client), or have `LitRenderer` expose an
 ordered `Map` plus the template so a plain-text rendering can be derived.
 
-## No text alternative for a rendered component
+## 5. No text alternative for a rendered component
 
-**Where it bit us:** uc4 / RenderedValuesView.java, uc6 / RedactedExportView.java
+**Where it bites:** UC4 / RenderedValuesView.java, UC6 / RedactedExportView.java
 **Symptom:** a `ComponentRenderer` cell can be built, but what its *text* is,
 is anybody's guess. A `Checkbox` has no text at all; issue #7196 suggests
 "Yes"/"No", an `Icon` its `icon` attribute, a `Button` its caption — all
@@ -152,9 +152,9 @@ e.g. `ComponentRenderer#withTextAlternative(SerializableFunction<SOURCE,
 String>)`, defaulting to the conventions listed in #7196's acceptance criterion
 1, and reused for the cell's accessible name.
 
-## `getSelectedItems()` is an unordered `Set`
+## 6. `getSelectedItems()` is an unordered `Set`
 
-**Where it bit us:** uc2 / ExportSelectionView.java
+**Where it bites:** UC2 / ExportSelectionView.java
 **Symptom:** "export the rows I ticked" is one of the most common export
 requests, and `Grid#getSelectedItems()` answers it with a `Set<T>`. A report is
 a document: its rows have to appear in the order the user saw them. Exporting
@@ -167,9 +167,9 @@ data provider to order a handful of rows.
 **Suggested API:** `Grid#getSelectedItemsInViewOrder()`, or make the exporter's
 "selected rows only" option carry the ordering guarantee.
 
-## `Grid#getColumns()` does not reflect a user's drag reorder
+## 7. `Grid#getColumns()` does not reflect a user's drag reorder
 
-**Where it bit us:** uc3 / ColumnChoiceView.java
+**Where it bites:** UC3 / ColumnChoiceView.java
 **Symptom:** with `setColumnReorderingAllowed(true)`, the user drags columns
 into the order they want. `getColumns()` keeps returning the declaration order
 afterwards — the new order exists only in the `ColumnReorderEvent` that was
@@ -186,9 +186,9 @@ by side so the divergence is visible.
 so `getColumns()` is the single source of truth — or add
 `Grid#getColumnsInDisplayOrder()`.
 
-## Header and footer cells have no accessible common supertype, and spans are only recoverable by cell identity
+## 8. Header and footer cells have no accessible common supertype, and spans are only recoverable by cell identity
 
-**Where it bit us:** uc5 / ExcelReportView.java
+**Where it bites:** UC5 / ExcelReportView.java
 **Symptom:** two problems in the same place.
 
 `HeaderRow.HeaderCell` and `FooterRow.FooterCell` have identical APIs
@@ -214,9 +214,9 @@ cells.
 introduce a public `GridCell` interface), and add
 `AbstractCell#getColumns()` returning the columns the cell spans.
 
-## No per-column extractor or converter hook
+## 9. No per-column extractor or converter hook
 
-**Where it bit us:** uc6 / RedactedExportView.java
+**Where it bites:** UC6 / RedactedExportView.java
 **Symptom:** the export is rarely a literal copy of the screen. Dropping the
 internal id column, masking a card number, turning a boolean into "Yes"/"No" —
 all ordinary application code, with nowhere to put it. Without a per-column
@@ -231,9 +231,9 @@ in whatever the real API does here).
 `withColumnExtractor(column, extractor)` and
 `withColumnConverter(column, converter)` — plus `withExcludedColumns(...)`.
 
-## No paged or streaming export path; `buildQuery` returns a raw `Query`
+## 10. No paged or streaming export path; `buildQuery` returns a raw `Query`
 
-**Where it bit us:** uc7 / LargeDatasetExportView.java
+**Where it bites:** UC7 / LargeDatasetExportView.java
 **Symptom:** the grid is careful never to pull a large backend into memory; the
 export has to be equally careful, and gets no help. The single-shot option,
 `getLazyDataView().getItems()`, issues one query with
@@ -253,9 +253,9 @@ time.
 returning a lazy `Stream<Row>` — and, independently, a generically typed
 `DataCommunicator#buildQuery`.
 
-## A paginating writer needs the static parts over and over, and the rows twice
+## 11. A paginating writer needs the static parts over and over, and the rows twice
 
-**Where it bit us:** uc8 / MultiPagePdfView.java
+**Where it bites:** UC8 / MultiPagePdfView.java
 **Symptom:** CSV and `.xlsx` are forgiving formats: write the headers once,
 stream the rows past them, done. A printed report is not. The header rows —
 grouped cells included — have to be drawn again at the top of **every** page, so
@@ -280,9 +280,9 @@ measures it, then paginates it.
 rows, and offer the rows both ways: `getRows()` for a snapshot and
 `streamRows(pageSize)` for a lazy walk.
 
-## Column widths are CSS strings, so a report cannot size its columns
+## 12. Column widths are CSS strings, so a report cannot size its columns
 
-**Where it bit us:** uc8 / MultiPagePdfView.java
+**Where it bites:** UC8 / MultiPagePdfView.java
 **Symptom:** a PDF table has to decide how wide each column is, in points. The
 grid cannot say. `Column#getWidth()` returns a CSS string — `"120px"`, `"8em"`,
 or `null` — and for the common `setAutoWidth(true)` case the real width is
@@ -306,9 +306,9 @@ approximate character count would beat a CSS string — or an explicit statement
 in the export API that widths are the report writer's problem, so nobody looks
 for them.
 
-## No styling information to export
+## 13. No styling information to export
 
-**Where it bit us:** uc5 / ExcelReportView.java
+**Where it bites:** UC5 / ExcelReportView.java
 **Symptom:** acceptance criterion 2 of #7196 asks for "border, background and
 text colors, width, spaces and other styles that are important in the report
 document", and the issue's own API sketch admits it is "not clear what exactly
@@ -326,9 +326,9 @@ alignment, widths) and let the report writer own the appearance — or, if visua
 fidelity is genuinely the goal, treat it as a client-side snapshot problem
 rather than a server-side data problem.
 
-## Not built: hierarchical export and Grid cloning
+## 14. Not built: hierarchical export and Grid cloning
 
-**Where it bit us:** nowhere — these two use cases from #7196 were left out of
+**Where it bites:** nowhere — these two use cases from #7196 were left out of
 the module deliberately, because there is no API to demonstrate.
 **Symptom:**
 

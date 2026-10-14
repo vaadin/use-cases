@@ -24,8 +24,8 @@ class MultiPagePdfViewTest extends SpringBrowserlessTest {
     void viewRendersTheGroupedGridAndTheGeneratedPdf() {
         MultiPagePdfView view = navigate(MultiPagePdfView.class);
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h1 -> h1.getText().startsWith("UC8 — A multi-page PDF")));
+        assertTrue(findInView(H1.class).all().stream()
+                .anyMatch(h1 -> "UC8 — Multi-page PDF".equals(h1.getText())));
         assertEquals(MultiPagePdfView.ROW_COUNT, test(view.grid).size());
         assertEquals(2, view.grid.getHeaderRows().size());
         assertEquals(

@@ -23,8 +23,7 @@ class RedactedExportViewTest extends SpringBrowserlessTest {
         RedactedExportView view = navigate(RedactedExportView.class);
 
         assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h1 -> "UC6 — Redact and convert on export"
-                        .equals(h1.getText())));
+                .anyMatch(h1 -> "UC6 — Redact on export".equals(h1.getText())));
         assertEquals("Id", test(view.grid).getHeaderCell(0));
         assertEquals(List.of("Name", "Department", "Card number", "Active"),
                 view.report().columnHeaders(),

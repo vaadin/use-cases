@@ -23,9 +23,8 @@ class ExportSelectionViewTest extends SpringBrowserlessTest {
     void nothingSelectedExportsNoRows() {
         ExportSelectionView view = navigate(ExportSelectionView.class);
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h1 -> "UC2 — Export only the selected rows"
-                        .equals(h1.getText())));
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h1 -> "UC2 — Export the selection".equals(h1.getText())));
         assertEquals(ExportSelectionView.ROW_COUNT, test(view.grid).size());
         assertEquals(List.of(), view.report().rows());
         assertTrue(view.csv().contains("No rows selected."),
