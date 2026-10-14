@@ -43,7 +43,7 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @Route(value = "use-case-13", layout = MainLayout.class)
 @PageTitle("Use Case 13: Real-Time Active Users")
 @UseCaseDescription("Showing who is online across sessions without polling")
-@Menu(order = 13, title = "UC 13: Real-Time Active Users")
+@Menu(order = 13, title = "UC13 — Real-Time Active Users")
 @StyleSheet("usecase13.css")
 @AnonymousAllowed
 public class UseCase13View extends VerticalLayout {

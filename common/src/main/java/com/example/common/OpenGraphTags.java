@@ -26,6 +26,9 @@ import com.vaadin.flow.server.communication.IndexHtmlResponse;
  * the image is the module's {@value #IMAGE}, served from
  * {@code src/main/resources/META-INF/resources}. Registered for every app
  * through {@code META-INF/services}.
+ * <p>
+ * The site name spells out {@code &} as "and": Slack shows the escaped
+ * {@code &amp;} of {@code og:site_name} as is instead of decoding it.
  */
 public class OpenGraphTags implements VaadinServiceInitListener {
 
@@ -54,7 +57,8 @@ public class OpenGraphTags implements VaadinServiceInitListener {
 
         property(document, "og:type", "website");
         baseUrl.ifPresent(url -> property(document, "og:url", url + path));
-        siteName.ifPresent(name -> property(document, "og:site_name", name));
+        siteName.ifPresent(name -> property(document, "og:site_name",
+                name.replace("&", "and")));
         title(target).or(() -> siteName).ifPresent(title -> {
             property(document, "og:title", title);
             name(document, "twitter:title", title);
