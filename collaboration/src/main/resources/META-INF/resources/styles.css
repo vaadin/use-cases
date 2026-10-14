@@ -39,37 +39,27 @@ html {
     padding-bottom: var(--vaadin-padding-s, 0.5rem);
 }
 
+/* The rig takes the view's full width, so the windows wrap within the screen
+   instead of sizing it to their title bars. */
+.peer-rig {
+    align-self: stretch;
+}
+
 .peer-strip {
+    width: 100%;
     display: flex;
     flex-wrap: wrap;
     gap: var(--vaadin-padding-m, 1rem);
     align-items: stretch;
 }
 
-.peer-panel {
+/* Each peer is an AppWindow; its top edge carries the peer's colour, the
+   same colour as the peer's avatar in every group. */
+.app-window.peer-panel {
     flex: 1 1 320px;
     min-width: 300px;
-    box-sizing: border-box;
-    border: 1px solid var(--vaadin-border-color);
+    max-width: none;
     border-top: 3px solid var(--peer-color, var(--vaadin-border-color));
-    border-radius: var(--vaadin-radius-l, 12px);
-    overflow: hidden;
-    background: var(--vaadin-background-color);
-}
-
-.peer-header {
-    padding: var(--vaadin-padding-s, 0.5rem) var(--vaadin-padding-m, 1rem);
-    border-bottom: 1px solid var(--vaadin-border-color);
-    background: var(--vaadin-background-container, rgba(0, 0, 0, 0.03));
-}
-
-.peer-name {
-    flex: 1;
-    font-weight: 500;
-}
-
-.peer-body {
-    padding: var(--vaadin-padding-m, 1rem);
 }
 
 /* Each use case returns one container of controls per peer; stacking them is
@@ -94,23 +84,6 @@ html {
     border: 1px solid var(--vaadin-border-color);
     border-radius: var(--vaadin-radius-m, 8px);
     padding: var(--vaadin-padding-s, 0.5rem);
-}
-
-/* Full width and a column no wider than the screen, so the cards stack on a
-   phone instead of running off its right edge. */
-.home-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
-    gap: 1rem;
-    width: 100%;
-    max-width: 960px;
-}
-
-.home-card .home-card-tag {
-    font-size: 0.8125rem;
-    text-transform: uppercase;
-    color: var(--vaadin-text-color-secondary);
-    letter-spacing: 0.05em;
 }
 
 /* UC8/UC9 row highlight: the peer looking at or editing a row. */

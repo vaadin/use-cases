@@ -15,6 +15,7 @@ import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.button.Button;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Presence is application-scoped state with lifecycle hooks on both ends, so
@@ -40,6 +41,20 @@ class PresenceViewTest extends SpringBrowserlessTest {
             assertEquals(2,
                     find(AvatarGroup.class, panel).single().getItems().size(),
                     "each peer's avatar group should show both peers");
+        }
+    }
+
+    @Test
+    void everyPeerWindowShowsThePageItHasOpen() {
+        navigate(PresenceView.class);
+
+        PeerRig rig = findInView(PeerRig.class).single();
+        rig.addPeer();
+        // The added peer is attached after navigation, the first two during
+        // it: both must show the view's address.
+        for (var panel : rig.getPanels()) {
+            assertTrue(panel.getElement().getTextRecursively()
+                    .contains("collab.example/presence"));
         }
     }
 

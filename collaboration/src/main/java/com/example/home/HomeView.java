@@ -19,8 +19,7 @@ import com.example.uc8.CollaborativeGridView;
 import com.example.uc9.CollaborativeGridProView;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -31,29 +30,6 @@ import com.vaadin.flow.router.Route;
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 
-    /**
-     * The use cases grouped by the kind of problem they are about. The side
-     * navigation keeps the UC1 to UC13 order; within a group the cards follow
-     * it too.
-     */
-    private record Group(String heading,
-            List<Class<? extends Component>> views) {
-    }
-
-    private static final List<Group> GROUPS = List.of(
-            new Group("See who else is here",
-                    List.of(PresenceView.class, OptInPresenceView.class,
-                            CustomUserListView.class)),
-            new Group("Chat and edit a form together",
-                    List.of(ChatView.class, CollaborativeFormView.class,
-                            FormEventsView.class, FormAccessView.class)),
-            new Group("Edit a grid together",
-                    List.of(CollaborativeGridView.class,
-                            CollaborativeGridProView.class)),
-            new Group("Keep shared data correct",
-                    List.of(ConflictsView.class, ComputedStateView.class,
-                            RoomsView.class, PendingStateView.class)));
-
     public HomeView() {
         super("Collaboration — use cases",
                 "The Collaboration Engine Sampler rebuilt with shared signals "
@@ -63,7 +39,19 @@ public class HomeView extends BaseHomeView {
                         + "several simulated users side by side, so you do not "
                         + "need a second browser tab. Open one anyway to see "
                         + "that the state is really shared.");
-        GROUPS.forEach(group -> add(new H2(group.heading()),
-                menuCards(group.views())));
+        addGroup("See who else is here", VaadinIcon.USERS, Accent.BLUE,
+                List.of(PresenceView.class, OptInPresenceView.class,
+                        CustomUserListView.class));
+        addGroup("Chat and edit a form together", VaadinIcon.COMMENTS_O,
+                Accent.GREEN,
+                List.of(ChatView.class, CollaborativeFormView.class,
+                        FormEventsView.class, FormAccessView.class));
+        addGroup("Edit a grid together", VaadinIcon.TABLE, Accent.PURPLE,
+                List.of(CollaborativeGridView.class,
+                        CollaborativeGridProView.class));
+        addGroup("Keep shared data correct", VaadinIcon.CHECK_CIRCLE_O,
+                Accent.ORANGE,
+                List.of(ConflictsView.class, ComputedStateView.class,
+                        RoomsView.class, PendingStateView.class));
     }
 }
