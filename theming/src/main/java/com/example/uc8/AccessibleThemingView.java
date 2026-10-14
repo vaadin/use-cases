@@ -18,6 +18,7 @@ import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.badge.BadgeVariant;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -50,6 +51,7 @@ import com.vaadin.flow.signals.Signal;
 @PageTitle("UC8 — Accessible theming")
 @UseCaseDescription("Respecting contrast, motion and focus needs, and checking brand colors")
 @Menu(order = 8, title = "UC8 — Accessible theming")
+@StyleSheet("uc8.css")
 public class AccessibleThemingView extends VerticalLayout {
 
     static final String MORE_CONTRAST = "(prefers-contrast: more)";
@@ -65,6 +67,7 @@ public class AccessibleThemingView extends VerticalLayout {
     public AccessibleThemingView(Tenants tenants) {
         Appearance appearance = Appearance.current();
 
+        addClassName("uc8-view");
         add(new H1("UC8 — Accessible theming"));
         add(new Paragraph("Turn on high contrast or reduced motion, or take "
                 + "them over from your system settings. Tab through the form "
@@ -138,9 +141,7 @@ public class AccessibleThemingView extends VerticalLayout {
         double ratio = Colors.contrastRatio(color, "#ffffff");
         Span swatch = new Span("Aa");
         swatch.addClassName("swatch");
-        swatch.getStyle().set("background", color).set("color", "white")
-                .set("padding", "0 0.5rem").set("border-radius", "4px")
-                .set("margin-inline-end", "0.5rem");
+        swatch.getStyle().set("background", color);
         Badge verdict = new Badge(ratio >= AA ? "AA" : "Fails AA");
         verdict.addThemeVariants(
                 ratio >= AA ? BadgeVariant.SUCCESS : BadgeVariant.ERROR);
