@@ -1,6 +1,7 @@
 package com.example.usecase03;
 
 import com.example.MissingAPI;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -27,6 +28,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-03", layout = MainLayout.class)
 @PageTitle("Use Case 3: Interactive SVG Shape Editor")
+@UseCaseDescription("Editing SVG shapes interactively with state kept in signals")
 @Menu(order = 3, title = "UC 3: Interactive SVG Shape Editor")
 @StyleSheet("usecase03.css")
 @AnonymousAllowed

@@ -2,6 +2,7 @@ package com.example.uc8;
 
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -44,6 +45,7 @@ import com.vaadin.flow.signals.Signal;
  * observable (and testable) without a real browser.
  */
 @Route(value = "uc8", layout = MainLayout.class)
+@UseCaseDescription("Keeping menus, popovers and dropdowns visible in fullscreen")
 @Menu(order = 8, title = "UC8 — Overlays in fullscreen")
 @StyleSheet("uc8.css")
 public class OverlaysFullscreenView extends VerticalLayout {

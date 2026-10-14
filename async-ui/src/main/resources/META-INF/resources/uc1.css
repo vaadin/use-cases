@@ -1,0 +1,7 @@
+.uc1-view {
+    .fetch-stats,
+    .last-query {
+        font-size: 0.85rem;
+        color: var(--vaadin-text-color-secondary);
+    }
+}

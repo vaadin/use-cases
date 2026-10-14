@@ -39,6 +39,15 @@ public abstract class BaseHomeView extends VerticalLayout {
      * the view's {@link UseCaseDescription} becomes the description.
      */
     protected void addMenuCards(Collection<Class<? extends Component>> views) {
+        add(menuCards(views));
+    }
+
+    /**
+     * Like {@link #addMenuCards(Collection)}, but returns the cards' container
+     * instead of appending it, for home views that place each group in a
+     * container of their own.
+     */
+    protected Div menuCards(Collection<Class<? extends Component>> views) {
         Div cards = new Div();
         cards.addClassName("home-cards");
         MenuConfiguration.getMenuEntries().stream()
@@ -54,7 +63,7 @@ public abstract class BaseHomeView extends VerticalLayout {
                             description == null ? "" : description.value(),
                             entry.menuClass()));
                 });
-        add(cards);
+        return cards;
     }
 
     protected static Card homeCard(String tag, String title, String description,
@@ -62,12 +71,16 @@ public abstract class BaseHomeView extends VerticalLayout {
         Card card = new Card();
         card.addThemeVariants(CardVariant.OUTLINED);
         card.addClassName("home-card");
+        // The tag goes in the header prefix: the header slot's own content is
+        // the title, so setHeader would hide it.
         Div tagLabel = new Div(tag);
         tagLabel.addClassName("home-card-tag");
-        card.setHeader(tagLabel);
-        card.setTitle(new Div(title));
+        card.setHeaderPrefix(tagLabel);
+        card.setTitle(title, 3);
         card.add(new Paragraph(description));
-        card.addToFooter(new RouterLink("Open →", target));
+        RouterLink open = new RouterLink("Open →", target);
+        open.addClassName("home-card-link");
+        card.addToFooter(open);
         return card;
     }
 }

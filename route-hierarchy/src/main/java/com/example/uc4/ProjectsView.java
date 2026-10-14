@@ -1,5 +1,6 @@
 package com.example.uc4;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
@@ -24,6 +25,7 @@ import com.vaadin.flow.router.RouterLink;
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("Projects")
+@UseCaseDescription("Keeping route parameters in links to ancestor pages")
 @Menu(order = 4, title = "UC4 — Parameter-preserving links")
 public class ProjectsView extends VerticalLayout {
 

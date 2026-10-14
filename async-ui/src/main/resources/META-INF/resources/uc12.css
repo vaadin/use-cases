@@ -1,0 +1,132 @@
+.uc12-view {
+    .summary-status {
+        color: var(--vaadin-text-color-secondary);
+    }
+
+    .summary-card {
+        width: 100%;
+        max-width: 560px;
+    }
+
+    .summary-card h2,
+    .summary-card h3 {
+        margin: 0;
+    }
+
+    .summary-card h3 {
+        font-size: 1rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .summary-headline,
+    .summary-score,
+    .summary-list {
+        margin-bottom: 1.2rem;
+    }
+
+    .verdict {
+        margin: 0.3rem 0 0;
+        color: var(--vaadin-text-color-secondary);
+    }
+
+    /* Each bar is about the size of the text it stands for, so the card does
+       not jump when the content replaces it. */
+    .skeleton.bar {
+        min-height: 0;
+        height: 1rem;
+        margin: 0.35rem 0;
+    }
+
+    .skeleton.bar-title {
+        height: 1.8rem;
+        width: 70%;
+    }
+
+    .skeleton.bar-line {
+        width: 95%;
+    }
+
+    .skeleton.bar-rating {
+        height: 2rem;
+        width: 6rem;
+    }
+
+    .skeleton.bar-sentiment {
+        height: 0.6rem;
+    }
+
+    .list-skeleton {
+        padding-left: 1.5rem;
+    }
+
+    .skeleton.bar-item:nth-child(1) {
+        width: 80%;
+    }
+
+    .skeleton.bar-item:nth-child(2) {
+        width: 65%;
+    }
+
+    .skeleton.bar-item:nth-child(3) {
+        width: 72%;
+    }
+
+    .summary-list ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .summary-list li {
+        line-height: 1.7rem;
+    }
+
+    .rating {
+        font-size: 1.6rem;
+        font-weight: 600;
+        margin-right: 0.6rem;
+    }
+
+    .reviews {
+        color: var(--vaadin-text-color-secondary);
+    }
+
+    .sentiment {
+        display: flex;
+        height: 0.6rem;
+        margin-top: 0.4rem;
+        border-radius: 0.3rem;
+        overflow: hidden;
+
+        .positive {
+            background: var(--aura-green);
+        }
+
+        .mixed {
+            background: var(--aura-yellow);
+        }
+
+        .negative {
+            background: var(--aura-red);
+        }
+    }
+
+    .none-mentioned {
+        color: var(--vaadin-text-color-secondary);
+        font-style: italic;
+    }
+
+    /* Content fades in where its placeholder was. */
+    .streamed {
+        animation: uc12-fade-in 0.4s ease-out;
+    }
+}
+
+@keyframes uc12-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

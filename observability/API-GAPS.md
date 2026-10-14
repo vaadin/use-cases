@@ -263,7 +263,7 @@ bytes are not derivable from a tree walk at all.
    last interaction. `vaadin.ui.state.sample.age.max` makes that staleness visible,
    which is the right answer, but consumers have to remember to read it.
 
-## 7. Server request timing is already computed and transported — but unusable
+## 7. Server request timing is already computed and transported — **partly resolved**
 
 **Where it bites:** UC1, UC2.
 **Symptom:** `UidlWriter` already attaches `"timings": [cumulative, last]` to the UIDL
@@ -278,6 +278,17 @@ the client never sees a server duration.
 **Suggested API:** a production-safe, public accessor for per-request server duration on
 both sides (e.g. include it in the client hook's response event), so collectors need not
 re-measure or parse debug logs.
+**Update:** both sides now have a public accessor; only the production gate remains.
+- *Server:* Flow 25.4 fires `RequestStartedEvent` / `RequestEndedEvent` on the service
+  event bus ([flow#25961](https://github.com/vaadin/flow/pull/25961)).
+  `RequestEndedEvent#getDuration()` gives each request's server time, together with the
+  handler that served it and any failure, so a collector can listen instead of
+  re-measuring.
+- *Client:* the received `timings` are not private — `MessageHandler#getProfilingData()`
+  returns `[lastProcessing, totalProcessing, serverCumulative, serverLast, bootstrap]` and
+  is published as `window.Vaadin.Flow.clients[id].getProfilingData()`, the same call the
+  kit already reads render time from. The server values are `-1` unless
+  `vaadin.requestTiming=true`, which is still off by default in production.
 
 ## 8. Interaction attribution — now on insights, still absent from metrics
 

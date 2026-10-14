@@ -1,6 +1,7 @@
 package com.example.home;
 
 import com.example.common.BaseHomeView;
+import com.example.common.UseCaseDescription;
 import com.example.uc1.CatalogView;
 import com.example.uc2.OrdersView;
 import com.example.uc3.UsersView;
@@ -15,6 +16,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
+@UseCaseDescription("Building breadcrumbs, up-navigation and sitemaps from the route hierarchy")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 
