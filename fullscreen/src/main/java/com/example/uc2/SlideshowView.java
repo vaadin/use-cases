@@ -2,6 +2,7 @@ package com.example.uc2;
 
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -39,6 +40,7 @@ import com.vaadin.flow.signals.Signal;
  * {@link com.example.uc7.AppFullscreenView UC7}.
  */
 @Route(value = "uc2", layout = MainLayout.class)
+@UseCaseDescription("Presenting slides fullscreen with keyboard navigation")
 @Menu(order = 2, title = "UC2 — Slideshow")
 @StyleSheet("uc2.css")
 public class SlideshowView extends VerticalLayout {

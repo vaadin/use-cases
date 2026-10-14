@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
 import com.example.ShortcutTrigger;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Key;
@@ -40,6 +41,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  */
 @Route(value = "uc21", layout = MainLayout.class)
 @PageTitle("UC21 — Shortcut download")
+@UseCaseDescription("Starting a server-generated download from a keyboard shortcut")
 @Menu(order = 21, title = "UC21 — Shortcut download")
 @StyleSheet("uc21.css")
 public class ShortcutDownloadView extends VerticalLayout {

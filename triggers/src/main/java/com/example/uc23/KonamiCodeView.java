@@ -1,6 +1,7 @@
 package com.example.uc23;
 
 import com.example.SequenceTrigger;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Key;
@@ -29,6 +30,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc23", layout = MainLayout.class)
 @PageTitle("UC23 — Konami code")
+@UseCaseDescription("Reacting to a key sequence tracked entirely in the browser")
 @Menu(order = 23, title = "UC23 — Konami code")
 @StyleSheet("uc23.css")
 public class KonamiCodeView extends VerticalLayout {

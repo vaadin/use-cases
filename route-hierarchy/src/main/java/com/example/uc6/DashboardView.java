@@ -1,5 +1,7 @@
 package com.example.uc6;
 
+import com.example.common.UseCaseDescription;
+
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -17,6 +19,7 @@ import com.vaadin.flow.router.RouterLink;
  */
 @Route(value = "uc6", layout = TeamLayout.class)
 @PageTitle("Dashboard")
+@UseCaseDescription("Sharing one breadcrumb trail across a whole layout")
 @Menu(order = 6, title = "UC6 — Layout-wide breadcrumbs")
 public class DashboardView extends VerticalLayout {
 

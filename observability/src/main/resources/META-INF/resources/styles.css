@@ -5,25 +5,6 @@
     margin: 0;
 }
 
-.home-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-    max-width: 960px;
-}
-
-.home-group-heading {
-    font-size: var(--aura-font-size-m);
-    margin: 1rem 0 0;
-}
-
-.home-card .home-card-tag {
-    font-size: 0.8125rem;
-    text-transform: uppercase;
-    color: var(--vaadin-text-color-secondary);
-    letter-spacing: 0.05em;
-}
-
 /* The Acme app window: what a user of the fictional app sees, framed as a
    window so it reads apart from the observability readout below it. */
 .app-window {

@@ -5,20 +5,6 @@
     margin: 0;
 }
 
-.home-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-    max-width: 960px;
-}
-
-.home-card .home-card-tag {
-    font-size: 0.8125rem;
-    text-transform: uppercase;
-    color: var(--vaadin-text-color-secondary);
-    letter-spacing: 0.05em;
-}
-
 .status-badge {
     display: inline-block;
     padding: 0.15rem 0.6rem;
@@ -35,16 +21,7 @@
     border-color: color-mix(in srgb, var(--aura-green) 40%, transparent);
 }
 
-.side-by-side {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    width: 100%;
-    max-width: 1100px;
-}
-
-.player-slot video,
-.side-by-side video {
+.player-slot video {
     display: block;
     border-radius: var(--vaadin-radius-m);
     background: black;
