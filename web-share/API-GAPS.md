@@ -93,24 +93,17 @@ Without the last three pieces, UC5's success/cancel/error branches can only
 be exercised by reaching into package-private `handleSuccess` /
 `handleError` methods on the view itself.
 
-## No way to feature-detect from the server before bootstrap
+## Resolved: feature detection before the first view renders
 
 **Where it bit us:** uc1 / ShareThisPageView.java, uc2 / CopyLinkFallbackView.java
-**Symptom:** `WebShare.supportSignal()` is seeded from the client during the
-bootstrap handshake — before that point it reads `UNKNOWN`. For
-server-side rendering of an initial view (e.g. a Server-Side Rendered
-landing page) you can't know whether to render the native-share button or
-the copy-link button until the client has reported back, which causes a
-visible swap on first paint (a tiny flash of the "Detecting…" state). The
-signal's Javadoc says the value "is replaced with a real value before any
-user code observes the signal" — but the `UNKNOWN` value is visible in
-our `Signal.effect` and we have to render for it.
-**Workaround used:** We render a disabled "Detecting…" placeholder during
-the `UNKNOWN` window. This is fine for an SPA but would be a flicker for
-SSR-first rendering.
-**Suggested API:** Surface support state as part of the initial HTML
-response (analogous to how `vaadin-script-tag` already inlines other
-bootstrap params) so SSR renders can read it synchronously. Alternatively,
-expose `WebShare.isSupported()` as a `Boolean` (nullable) that returns the
-seeded value if it has already arrived, so server-side renderers can
-short-circuit the `UNKNOWN` branch.
+**Original concern:** `WebShare.supportSignal()` reads `UNKNOWN` until the
+client reports back, so the first view would render a "Detecting…" state and
+then swap to the native-share or copy-link button.
+**Resolution:** not a gap. The browser sends Web Share support with the
+bootstrap (`v-r=init`) request, and Flow seeds the signal from it before the
+router creates the first view, so a view in a real browser already reads
+`SUPPORTED` or `UNSUPPORTED` on its first render. Flow has no server-side
+rendering phase before that request. `supportSignal().peek()` is the
+synchronous "seeded value, if any" accessor the original suggestion asked for.
+`UNKNOWN` is only seen when no bootstrap request ran — in practice, browserless
+tests — which is why the views keep an `UNKNOWN` branch.

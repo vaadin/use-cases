@@ -1,5 +1,6 @@
 package com.example.uc2;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -31,6 +32,7 @@ import com.vaadin.flow.signals.Signal;
  * feature-detection callback.
  */
 @Route(value = "uc2", layout = MainLayout.class)
+@UseCaseDescription("Offering a copy-link button where native sharing is unsupported")
 @Menu(order = 2, title = "UC2 — Copy-link fallback")
 @StyleSheet("uc2.css")
 public class CopyLinkFallbackView extends VerticalLayout {

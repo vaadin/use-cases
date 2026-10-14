@@ -1,0 +1,21 @@
+.uc5-view {
+    .showing.mismatch {
+        color: var(--aura-red-text);
+        font-weight: 600;
+    }
+
+    .request-log {
+        display: flex;
+        flex-direction: column;
+        font-family: monospace;
+        font-size: 0.85rem;
+
+        .stale {
+            color: var(--aura-orange-text);
+        }
+
+        .shown {
+            color: var(--aura-green-text);
+        }
+    }
+}

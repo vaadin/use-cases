@@ -11,7 +11,7 @@ on:
 jobs:
   prime-cache:
     name: Prime Maven cache
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       modules: ${{ steps.find.outputs.modules }}
     steps:
@@ -37,7 +37,7 @@ jobs:
   build:
     name: Build ${{ matrix.module }}
     needs: prime-cache
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -57,7 +57,7 @@ jobs:
     name: Build result
     needs: build
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Check build matrix status
         if: needs.build.result != 'success'
