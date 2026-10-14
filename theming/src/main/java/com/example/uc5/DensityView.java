@@ -136,7 +136,8 @@ public class DensityView extends VerticalLayout {
                     lumo ? "Lumo: compact shrinks the whole page; there is no "
                             + "comfortable preset" : "");
         });
-        addDetachListener(e -> setLumoCompact(ui, false));
+        // The compact stylesheet is page-wide, so it goes when the view does.
+        whenAttached(attachedUi -> () -> setLumoCompact(attachedUi, false));
         add(new BuiltWith("Aura's density theme names on one container").point(
                 "theme=\"small\" or theme=\"large\" on the work area scales Aura's sizes for that part only, bound with bindAttribute.")
                 .point("Lumo's compact preset redefines its sizes on :root, so with Lumo it shrinks the whole page while the view is open.")

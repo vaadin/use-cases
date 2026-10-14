@@ -45,13 +45,15 @@ public final class MissingAPI {
                 .addEventListener(event, e -> matches
                         .set(e.getEventData().get("event.detail").asBoolean()))
                 .addEventData("event.detail");
-        owner.getElement()
-                .addAttachListener(e -> owner.getElement().executeJs("""
-                        const query = matchMedia($0);
-                        const send = () => this.dispatchEvent(
-                            new CustomEvent($1, { detail: query.matches }));
-                        query.addEventListener('change', send);
-                        send();""", query, event));
+        owner.whenAttached(ui -> {
+            owner.getElement().executeJs("""
+                    const query = matchMedia($0);
+                    const send = () => this.dispatchEvent(
+                        new CustomEvent($1, { detail: query.matches }));
+                    query.addEventListener('change', send);
+                    send();""", query, event);
+            return null;
+        });
         return matches.asReadonly();
     }
 

@@ -15,6 +15,9 @@ import com.example.uc8.AccessibleThemingView;
 import com.example.uc9.ThemeSwitchView;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -26,6 +29,8 @@ import com.vaadin.flow.router.Route;
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 
+    private static final String API_GAPS_URL = "https://github.com/vaadin/use-cases/blob/main/theming/API-GAPS.md";
+
     public HomeView() {
         super("Theming — use cases",
                 "Each card below changes how an application looks: a brand "
@@ -33,9 +38,10 @@ public class HomeView extends BaseHomeView {
                         + "customer and per user, compact screens, component "
                         + "variants and one-off styling, accessibility "
                         + "settings, and the choice between Aura and Lumo. "
-                        + "Appearance changes apply to every view and tab. "
-                        + "API-GAPS.md records where Flow made that harder "
-                        + "than it should be.");
+                        + "Appearance changes apply to every view and tab.");
+        add(new Paragraph(new Anchor(API_GAPS_URL, "API-GAPS.md"),
+                new Text(" records where Flow made that harder than it "
+                        + "should be.")));
         addGroup("The application's look", VaadinIcon.PALETTE, Accent.BLUE,
                 List.of(BrandTokensView.class, TenantThemeView.class,
                         UserPreferencesView.class, ThemeSwitchView.class));
