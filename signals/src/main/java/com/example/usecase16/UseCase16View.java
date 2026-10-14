@@ -44,7 +44,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-16", layout = MainLayout.class)
 @PageTitle("Use Case 16: URL State Integration")
 @UseCaseDescription("Keeping search state and the URL in sync for shareable links")
-@Menu(order = 16, title = "UC 16: URL State Integration")
+@Menu(order = 16, title = "UC16 — URL State Integration")
 @StyleSheet("usecase16.css")
 @AnonymousAllowed
 public class UseCase16View extends VerticalLayout

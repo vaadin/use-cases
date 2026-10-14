@@ -31,7 +31,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-06", layout = MainLayout.class)
 @PageTitle("Use Case 6: Shopping Cart with Real-time Totals")
 @UseCaseDescription("Keeping cart line items and totals up to date as quantities change")
-@Menu(order = 6, title = "UC 6: Shopping Cart")
+@Menu(order = 6, title = "UC6 — Shopping Cart")
 @StyleSheet("usecase06.css")
 @AnonymousAllowed
 public class UseCase06View extends VerticalLayout {

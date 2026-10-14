@@ -41,7 +41,7 @@ import com.vaadin.flow.signals.Signal;
 @Route(value = "muc-03", layout = MainLayout.class)
 @PageTitle("Multi-User Case 3: Click Game")
 @UseCaseDescription("Resolving who wins when several users click at the same time")
-@Menu(order = 52, title = "MUC 3: Click Race Game")
+@Menu(order = 52, title = "MUC3 — Click Race Game")
 @StyleSheet("muc03.css")
 @AnonymousAllowed
 public class MUC03View extends VerticalLayout {
