@@ -1,6 +1,7 @@
 package com.example.uc4;
 
 import com.example.Images;
+import com.example.MissingAPI;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -39,6 +40,11 @@ import com.vaadin.flow.server.streams.UploadMetadata;
  * their progress; once the batch has finished the list is cleared and the
  * photos appear in the album as server-made thumbnails. Clicking one opens the
  * full-size photo; each can be removed on its own.
+ * <p>
+ * Only the album takes drops, and only of files: a file dropped next to it is
+ * refused instead of being opened by the browser, and a link or an image
+ * dragged from another browser window is refused instead of lighting up the
+ * album and adding nothing. See {@code API-GAPS.md} #9.
  * <p>
  * The album, not the upload, owns the photos: it gives each one an id and
  * renames duplicate file names, because the upload identifies files only by
@@ -84,6 +90,7 @@ public class PhotoAlbumView extends VerticalLayout {
         UploadDropZone dropZone = new UploadDropZone(tiles, uploadManager);
         dropZone.addClassName("album-drop-zone");
         dropZone.setWidthFull();
+        MissingAPI.acceptFileDropsOnlyOn(dropZone);
 
         add(toolbar, inProgress, dropZone);
         render();

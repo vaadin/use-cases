@@ -9,6 +9,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
+import com.example.MissingAPI;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -35,6 +36,10 @@ import com.vaadin.flow.server.streams.UploadMetadata;
  * cancel at any time. When the file is complete the server reports its size and
  * SHA-256 checksum, so the sender can confirm that what arrived is what they
  * sent.
+ * <p>
+ * The view shows the progress the server measures, so the upload's own file
+ * list, which would show a second progress bar, is hidden, and the view's own
+ * cancel button stops the upload in the browser. See {@code API-GAPS.md} #10.
  * <p>
  * Progress is also announced to screen readers at every quarter through a
  * polite live region, because the upload's own progress bar is silent. If the
@@ -74,10 +79,11 @@ public class LargeFileView extends VerticalLayout {
         upload.setMaxFiles(1);
         upload.setMaxFileSize(MAX_FILE_BYTES);
         upload.setWidthFull();
+        upload.addClassName("large-file-upload");
 
         progressBar.setVisible(false);
         cancel.setVisible(false);
-        cancel.addClickListener(e -> upload.interruptUpload());
+        cancel.addClickListener(e -> MissingAPI.cancelUpload(upload));
         announcement.getElement().setAttribute("aria-live", "polite");
         announcement.addClassName("visually-hidden");
 
@@ -109,6 +115,9 @@ public class LargeFileView extends VerticalLayout {
     }
 
     private void completed(TransferContext context, boolean success) {
+        // The file list is hidden, so a failed file must not stay in it and
+        // keep the single file slot taken.
+        upload.clearFileList();
         progressBar.setVisible(false);
         cancel.setVisible(false);
         if (success) {
@@ -131,7 +140,6 @@ public class LargeFileView extends VerticalLayout {
             // the demo only needs the checksum.
             file.delete();
         }
-        upload.clearFileList();
     }
 
     private String timeLeft(long transferred, long total) {

@@ -71,3 +71,17 @@ Upstream: https://github.com/vaadin/flow-components/issues/783
 **Symptom:** Whether an upload is running, and how far it has got, is available only through `isUploading()` and the `whenStart` / `onProgress` / `whenComplete` callbacks. Showing the cancel button and the progress bar only while an upload runs means setting their visibility by hand in two callbacks.
 **Workaround used:** `setVisible` calls in `whenStart` and `whenComplete`.
 **Suggested API:** A read-only signal for the upload state (idle, uploading with bytes sent and total, finished, failed), so that `bindVisible` / `bindValue` can be used as elsewhere in Flow.
+
+## 9. The drop zone takes any drag, and the rest of the page takes files
+
+**Where it bites:** UC4 / PhotoAlbumView.java
+**Symptom:** `UploadDropZone` accepts every drag: a link or an image dragged from another browser window lights it up with a copy cursor, but the drop carries no file, so nothing is added and the user gets no feedback. Next to the drop zone the opposite happens: a photo dropped a few pixels outside it is not refused but opened by the browser in place of the application.
+**Workaround used:** `MissingAPI.acceptFileDropsOnlyOn(dropZone)` installs window-level drag listeners that refuse drags carrying files outside the drop zone and drags carrying no files on it.
+**Suggested API:** A drop zone that only reacts to drags that carry files, and an option (on `UploadManager` or the drop zone) to refuse file drops on the rest of the page.
+
+## 10. `Upload` cannot hide its own progress, and cannot be cancelled from the server
+
+**Where it bites:** UC5 / LargeFileView.java
+**Symptom:** A view that shows the progress the server measures (with `onProgress`) gets a second progress bar from the file list of `Upload`, which has no option to hide it. Hiding it also hides the list's cancel button, and the server cannot stand in for it: `Upload#interruptUpload()` only sets a flag that nothing reads when the upload is handled by an `UploadHandler`, so the upload keeps running. The modular `UploadManager` with an `UploadButton` and no `UploadFileList` has no second progress bar, but no `interruptUpload()` at all.
+**Workaround used:** The file list of `Upload` is hidden with CSS. `MissingAPI.cancelUpload(upload)` aborts the running upload in the browser, as the list's cancel button would. The list is cleared after every upload, failed ones included, so that a failed file does not keep the single file slot taken.
+**Suggested API:** `interruptUpload()` that stops uploads handled by an `UploadHandler`, on both `Upload` and `UploadManager`, and an option on `Upload` to hide its file list.

@@ -23,3 +23,8 @@
     clip-path: inset(50%);
     white-space: nowrap;
 }
+
+/* UC5 shows the progress the server measures; hide the upload's own list */
+.large-file-upload > vaadin-upload-file-list {
+    display: none;
+}
