@@ -199,7 +199,9 @@ jobs:
           # Reuses the layers fly-deploy.yml caches for the production app, and
           # writes none of its own, so previews do not evict them
           cache-from: type=gha,scope=${{ matrix.production }}
-      - run: flyctl deploy --image registry.fly.io/${{ matrix.app }}:${{ env._HEAD_SHA }} --config preview-fly.toml --ha=false
+      # SOURCE_REF makes "View source" link to the commit the preview runs,
+      # since a view the pull request adds or changes is not on main yet
+      - run: flyctl deploy --image registry.fly.io/${{ matrix.app }}:${{ env._HEAD_SHA }} --config preview-fly.toml --ha=false --env SOURCE_REF=${{ env._HEAD_SHA }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
