@@ -1,10 +1,17 @@
 package com.example.uc5;
 
+import java.time.Instant;
+import java.util.concurrent.ScheduledFuture;
+
 import com.example.MissingAPI.NotificationPermission;
 import com.example.PageVisibilityTestSupport;
 import com.example.WebNotificationSimulator;
+import com.example.home.HomeView;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
@@ -17,10 +24,26 @@ import com.vaadin.flow.component.page.PageVisibility;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
-@ViewPackages(classes = HiddenTabOnlyView.class)
+@ViewPackages(classes = { HiddenTabOnlyView.class, HomeView.class })
 class HiddenTabOnlyViewTest extends SpringBrowserlessTest {
+
+    // The tests deliver messages by hand instead of waiting five seconds.
+    @MockitoBean
+    private TaskScheduler taskScheduler;
+
+    private final ScheduledFuture<?> scheduled = mock(ScheduledFuture.class);
+
+    @BeforeEach
+    void returnScheduledFuture() {
+        doReturn(scheduled).when(taskScheduler).schedule(any(Runnable.class),
+                any(Instant.class));
+    }
 
     @Test
     void viewRendersHeadingAndBadges() {
@@ -81,5 +104,18 @@ class HiddenTabOnlyViewTest extends SpringBrowserlessTest {
                         .anyMatch(d -> d.getText() != null
                                 && d.getText().contains(fragment)),
                 "expected log to contain \"" + fragment + "\"");
+    }
+
+    @Test
+    void leavingTheViewCancelsThePendingMessage() {
+        navigate(HiddenTabOnlyView.class);
+
+        test(findInView(Button.class).all().stream()
+                .filter(b -> "Send me a message in 5 seconds"
+                        .equals(b.getText()))
+                .findFirst().orElseThrow()).click();
+        navigate(HomeView.class);
+
+        verify(scheduled).cancel(false);
     }
 }

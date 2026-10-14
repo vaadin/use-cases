@@ -1,10 +1,17 @@
 package com.example.uc3;
 
+import java.time.Instant;
+import java.util.concurrent.ScheduledFuture;
+
 import com.example.MissingAPI.NotificationPermission;
 import com.example.MissingAPI.ShownNotification;
 import com.example.WebNotificationSimulator;
+import com.example.home.HomeView;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
@@ -16,10 +23,26 @@ import com.vaadin.flow.component.html.Span;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
-@ViewPackages(classes = ClickToOpenView.class)
+@ViewPackages(classes = { ClickToOpenView.class, HomeView.class })
 class ClickToOpenViewTest extends SpringBrowserlessTest {
+
+    // The tests assign tickets by hand instead of waiting five seconds.
+    @MockitoBean
+    private TaskScheduler taskScheduler;
+
+    private final ScheduledFuture<?> scheduled = mock(ScheduledFuture.class);
+
+    @BeforeEach
+    void returnScheduledFuture() {
+        doReturn(scheduled).when(taskScheduler).schedule(any(Runnable.class),
+                any(Instant.class));
+    }
 
     @Test
     void viewRendersHeadingAndButtons() {
@@ -78,5 +101,18 @@ class ClickToOpenViewTest extends SpringBrowserlessTest {
 
         assertTrue(findInView(H3.class).all().stream().anyMatch(
                 h -> h.getText().equals("Ticket #" + ticket.number())));
+    }
+
+    @Test
+    void leavingTheViewCancelsThePendingAssignment() {
+        navigate(ClickToOpenView.class);
+
+        test(findInView(Button.class).all().stream()
+                .filter(b -> "Assign me a ticket in 5 seconds"
+                        .equals(b.getText()))
+                .findFirst().orElseThrow()).click();
+        navigate(HomeView.class);
+
+        verify(scheduled).cancel(false);
     }
 }

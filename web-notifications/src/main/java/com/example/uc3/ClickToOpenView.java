@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -149,8 +150,9 @@ public class ClickToOpenView extends VerticalLayout {
 
     private void scheduleAssignment(UI ui) {
         Notification.show(
-                "A ticket will be assigned in 5 seconds — switch " + "tabs now",
+                "A ticket will be assigned in 5 seconds — switch tabs now",
                 2500, Notification.Position.BOTTOM_START);
+        pending.removeIf(Future::isDone);
         pending.add(taskScheduler.schedule(
                 ui.accessLater(() -> assignTicket(ui), null),
                 Instant.now().plus(DELAY)));

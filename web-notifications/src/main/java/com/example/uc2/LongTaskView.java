@@ -125,7 +125,6 @@ public class LongTaskView extends VerticalLayout {
             if (pending != null) {
                 pending.cancel(false);
                 pending = null;
-                taskState.set(TaskState.IDLE);
             }
         });
     }

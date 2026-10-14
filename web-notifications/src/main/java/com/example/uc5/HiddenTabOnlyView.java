@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 
 import com.example.MissingAPI;
@@ -113,6 +114,7 @@ public class HiddenTabOnlyView extends VerticalLayout {
     private void schedule(UI ui) {
         Notification.show("A message will arrive in 5 seconds", 2000,
                 Notification.Position.BOTTOM_START);
+        pending.removeIf(Future::isDone);
         pending.add(
                 taskScheduler.schedule(ui.accessLater(() -> deliver(ui), null),
                         Instant.now().plus(DELAY)));
@@ -152,8 +154,8 @@ public class HiddenTabOnlyView extends VerticalLayout {
 
     private static void inApp() {
         Notification.show(
-                "New message from Alice: Did you see the new " + "designs?",
-                4000, Notification.Position.TOP_END);
+                "New message from Alice: Did you see the new designs?", 4000,
+                Notification.Position.TOP_END);
     }
 
     private void appendLog(String line) {
