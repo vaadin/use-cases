@@ -51,6 +51,8 @@
 
 .app-window-url {
     margin-inline-start: auto;
+    /* The address gives way before the title does. */
+    flex-shrink: 10;
     font-family: monospace;
     font-size: 0.75rem;
     color: var(--vaadin-text-color-secondary);
