@@ -15,8 +15,8 @@ PR has a feedback trail.
 | No public `ShortcutTrigger` | **Open** — local shim | UC1, UC2 |
 | No public `ClickAction` | **Open** — local shim | UC2 |
 | No generic `PreventDefaultAction` | **Open** — local shim | UC11 |
-| `Action.Input#toJs` not reachable outside `internal` | **Open** | UC13 |
-| `HandlerInput` not public | **Open** | UC5, UC7 |
+| `Action.Input#toJs` not reachable outside `internal` | **Resolved** in 25.2 ([flow#24590](https://github.com/vaadin/flow/pull/24590)) | UC13 |
+| `HandlerInput` not public | **Resolved** in 25.2 ([flow#24590](https://github.com/vaadin/flow/pull/24590)) | UC5, UC7 |
 | `PropertyInput` doesn't accept a raw `Element` | **Open** | — *(no current UC; see history note below)* |
 | Server-side feature detection | **Open** | — |
 | Public introspection of trigger wiring | **Open** | all tests |
@@ -71,42 +71,28 @@ trigger.
 the public surface or add a chainable builder method on `DomEventTrigger`
 mirroring `KeyboardEventTrigger.preventDefault()`.
 
-## `Action.Input#toJs` is package-private
+## Resolved: `Action.Input#toJs` is public
 
 **Where it bit us:** UC13 wanted a `FilterListAction` that took an
-`Action.Input<String>` as the query source — the natural shape mirroring
-`SetPropertyAction(target, name, source)`. But
-`Action.Input#toJs(Trigger)` has `protected` visibility, and the
-surrounding `Action` class lives in
-`com.vaadin.flow.component.trigger.internal`, so application code in any
-other package can't call it.
-**Symptom:** `source.toJs(trigger)` from a custom Action outside the
-`internal` package fails to compile with "toJs has protected access in
-Input".
-**Workaround used:** Drop the Input parameter entirely. UC13's
-`FilterListAction` is hard-wired to read its query from
-`event.target.value` and only works when bound to a `DomEventTrigger` on
-the relevant search field.
-**Suggested API:** Promote `Input#toJs` to `public` (it is already
-public by intent — every `Action` calls it). Or give Input a public
-render method that wraps `toJs` for external callers.
+`Action.Input<String>` as the query source, mirroring
+`SetPropertyAction(target, name, source)`, but `Input#toJs(Trigger)` used
+to be `protected`, so the action was hard-wired to `event.target.value`.
+**Resolution:** `Input#toJs` is `public` since 25.2
+([flow#24590](https://github.com/vaadin/flow/pull/24590)). UC13's
+`FilterListAction` now takes an `Action.Input<String>` and the view feeds
+it a `PropertyInput` reading the search field's `value`.
 
-## `HandlerInput` is not public
+## Resolved: `HandlerInput` is public
 
-**Where it bit us:** UC5 (`IdleTrigger`), UC7 (`BroadcastChannelTrigger`).
-Both expose event-scoped state through static `Action.Input` fields and
-would naturally use `HandlerInput<>("event.detail.idle",
-IdleTrigger.class)` — the exact pattern the built-in triggers use (see
-`SizeTrigger.EventData`, `MouseEventTrigger.EventData`).
-**Symptom:** `HandlerInput` is in the `internal` package and
-package-private. Custom Triggers in any other package fall back to
-declaring an anonymous `Action.Input<T>` per field with an inline
-trigger type check.
-**Workaround used:** Anonymous classes (see `IdleTrigger.EventData.idle`,
-`BroadcastChannelTrigger.EventData.data`). Each is ~10 lines instead of
-one.
-**Suggested API:** Make `HandlerInput` `public` so add-on triggers can
-reuse the canonical implementation.
+**Where it bit us:** UC5 (`IdleTrigger`), UC7 (`BroadcastChannelTrigger`)
+declared an anonymous `Action.Input<T>` per event field, with an inline
+trigger type check, because `HandlerInput` was package-private.
+**Resolution:** `HandlerInput` is `public` since 25.2
+([flow#24590](https://github.com/vaadin/flow/pull/24590)); both triggers
+now declare their inputs as one-line `HandlerInput`s. `HandlerInput`
+reads a top-level `event[name]` only, so `IdleTrigger` now puts `idle`
+directly on its synthetic event instead of under `event.detail`. A dotted
+path (`"detail.idle"`) would avoid reshaping custom events.
 
 ## `PropertyInput` doesn't accept a raw `Element`
 

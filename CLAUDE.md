@@ -1,27 +1,51 @@
-# Repository conventions
+# CLAUDE.md
 
-## Testing
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Every use case must have a browserless test. When adding a new `uc*View`
-(or any equivalent demo view) under any module in this repo, also add a
-sibling test in `src/test/java/...` that at minimum:
+## Repository Overview
 
-- navigates to the view via `navigate(MyView.class)`,
-- asserts that the expected top-level components render (heading, key
-  buttons, the primary signal-bound container),
-- exercises the view's signal wiring with at least one interaction or
-  state mutation when the view has any.
+This repository holds runnable use-case apps for Vaadin features. Each
+top-level directory (except `common`) is a standalone Spring Boot + Vaadin Flow
+application that demonstrates one feature area through a set of numbered use
+cases (`UC1`, `UC2`, …), and records where the current API falls short in an
+`API-GAPS.md`. Every app is deployed to Fly.io and linked from the application
+selector of every other app.
 
-Use `SpringBrowserlessTest` (from `browserless-test-spring`) with
-`@SpringBootTest` and `@ViewPackages(classes = MyView.class)`. Existing
-examples to mirror: `signals/src/test/java/com/example/usecase19/`
-(per-view interaction), `signals/src/test/java/com/example/muc01/`
-(cross-session state via a shared bean).
+### Technologies
 
-When a view depends on an application-scoped bean that holds shared
-state, also write a test that simulates a second session — either by
-mutating the bean directly from the test thread, or by calling
-`cleanVaadinEnvironment()` + `initVaadinEnvironment()` between two
-`navigate()` calls. This catches `ListSignal`-vs-`SharedListSignal`
-mistakes and other cross-session leaks at compile-and-test time rather
-than at runtime in the second browser tab.
+- Java 25, Maven (use the `./mvnw` wrapper)
+- Spring Boot 4, Vaadin Flow and Flow Components on the current snapshot
+- The Aura theme
+- Browserless tests (`browserless-test-spring`) with JUnit
+
+See `guidelines/repository.md` for the module layout and what a new module
+needs.
+
+## Guidelines & Conventions
+
+Design and implementation guidelines live in `guidelines/`. Read `guidelines/overview.md` and the chapters it maps for the topics your work touches when **authoring** or **reviewing** code.
+
+The commit message format, the PR description format and the expectations for opening a pull request are in the `commit-and-pr` skill (`.claude/skills/commit-and-pr/SKILL.md`).
+
+## Development Commands
+
+```bash
+# Build and test one module (and the shared common module it depends on)
+./mvnw -pl <module> -am install
+
+# Run the tests of one module
+./mvnw -pl <module> -am test
+
+# Run a single test class
+./mvnw -pl <module> -am test -Dtest='<TestClass>' -Dsurefire.failIfNoSpecifiedTests=false
+
+# Run an app at http://localhost:8080/ (install common first)
+./mvnw -pl common install -DskipTests
+./mvnw -pl <module> spring-boot:run
+
+# Format Java sources (Eclipse formatter + import order)
+./mvnw spotless:apply
+```
+
+CI builds every module separately with `./mvnw -pl <module> -am install`, so a
+change to `common` must keep every module building.

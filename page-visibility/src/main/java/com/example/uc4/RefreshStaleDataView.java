@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 import org.springframework.scheduling.TaskScheduler;
@@ -34,6 +35,7 @@ import com.vaadin.flow.signals.Signal;
  * away. A manual refresh button is always available.
  */
 @Route(value = "uc4", layout = MainLayout.class)
+@UseCaseDescription("Refreshing stale data when the user returns to the tab")
 @Menu(order = 4, title = "UC4 — Refresh stale data")
 @StyleSheet("uc4.css")
 public class RefreshStaleDataView extends VerticalLayout {

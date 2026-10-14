@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.example.MissingAPI;
+import com.example.common.UseCaseDescription;
 import com.example.data.Order;
 import com.example.data.Orders;
 import com.example.print.OrderDocument;
@@ -49,6 +50,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Printing a long list")
+@UseCaseDescription("Printing a long list that a Grid cannot paginate")
 @Menu(order = 3, title = "UC3 — Printing a long list")
 @StyleSheet("uc3.css")
 public class PrintableListView extends VerticalLayout {
