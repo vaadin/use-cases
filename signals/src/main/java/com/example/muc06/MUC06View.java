@@ -47,7 +47,7 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @Route(value = "muc-06", layout = MainLayout.class)
 @PageTitle("MUC 6: Shared Task List")
 @UseCaseDescription("Editing a shared task list together with live statistics")
-@Menu(order = 55, title = "MUC 6: Shared Task List")
+@Menu(order = 55, title = "MUC6 — Shared Task List")
 @StyleSheet("muc06.css")
 @AnonymousAllowed
 public class MUC06View extends VerticalLayout {

@@ -46,7 +46,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-14", layout = MainLayout.class)
 @PageTitle("Use Case 14: Async Data Loading")
 @UseCaseDescription("Loading data asynchronously with loading, error and retry states")
-@Menu(order = 14, title = "UC 14: Async Data Loading")
+@Menu(order = 14, title = "UC14 — Async Data Loading")
 @StyleSheet("usecase14.css")
 @AnonymousAllowed
 public class UseCase14View extends VerticalLayout {
