@@ -79,6 +79,21 @@ class BaseMainLayoutTest extends BrowserlessTest {
     }
 
     @Test
+    void sourceUrl_linksToTheGivenRefOrElseMain() {
+        String path = "/signals/src/main/java/com/example/common/layout/ParallelLoadingView.java";
+
+        assertEquals("https://github.com/vaadin/use-cases/tree/0a1b2c3" + path,
+                BaseMainLayout.sourceUrl("0a1b2c3", "signals",
+                        ParallelLoadingView.class));
+        for (String none : new String[] { null, "", " " }) {
+            assertEquals("https://github.com/vaadin/use-cases/tree/main" + path,
+                    BaseMainLayout.sourceUrl(none, "signals",
+                            ParallelLoadingView.class),
+                    String.valueOf(none));
+        }
+    }
+
+    @Test
     void feedback_slackFails_keepsTheDialogOpen() {
         webhook.respondWith(500);
         navigate(ParallelLoadingView.class);

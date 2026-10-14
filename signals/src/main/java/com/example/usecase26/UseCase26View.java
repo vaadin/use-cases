@@ -27,7 +27,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-26", layout = MainLayout.class)
 @PageTitle("Use Case 26: Lazy Component Creation")
 @UseCaseDescription("Creating expensive components only when they are first needed")
-@Menu(order = 26, title = "UC 26: Lazy Creation")
+@Menu(order = 26, title = "UC26 — Lazy Creation")
 @StyleSheet("usecase26.css")
 @AnonymousAllowed
 public class UseCase26View extends VerticalLayout {
