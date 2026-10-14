@@ -1,7 +1,9 @@
 package com.example;
 
+import com.example.common.SlackFeedback;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -20,4 +22,8 @@ public class Application implements AppShellConfigurator {
         SpringApplication.run(Application.class, args);
     }
 
+    @Bean
+    SlackFeedback slackFeedback() {
+        return SlackFeedback.fromEnvironment();
+    }
 }

@@ -2,6 +2,7 @@ package com.example.uc4;
 
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -30,6 +31,7 @@ import com.vaadin.flow.signals.Signal;
  * reverts on exit.
  */
 @Route(value = "uc4", layout = MainLayout.class)
+@UseCaseDescription("Reformatting a layout automatically when fullscreen starts and ends")
 @Menu(order = 4, title = "UC4 — Reactive layout")
 @StyleSheet("uc4.css")
 public class ReactiveLayoutView extends VerticalLayout {

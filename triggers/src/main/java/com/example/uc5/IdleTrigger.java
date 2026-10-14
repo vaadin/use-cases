@@ -2,6 +2,7 @@ package com.example.uc5;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.trigger.internal.Action;
+import com.vaadin.flow.component.trigger.internal.HandlerInput;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
 import com.vaadin.flow.shared.Registration;
@@ -12,9 +13,9 @@ import com.vaadin.flow.shared.Registration;
  * after an idle period. The trigger keeps a {@code setTimeout} timer that any
  * keyboard/pointer/scroll event on {@code window} resets.
  * <p>
- * The handler receives a synthetic {@code CustomEvent} with
- * {@code event.detail.idle === true|false}; the {@link EventData#idle} input
- * exposes that as a server-decodable {@code Boolean}.
+ * The handler receives a synthetic {@code CustomEvent} carrying
+ * {@code event.idle === true|false}; the {@link EventData#idle} input exposes
+ * that as a server-decodable {@code Boolean}.
  * <p>
  * Demonstrates a Trigger whose state lives entirely in JS — no DOM event maps
  * to "idle"; the trigger composes setTimeout with regular activity listeners.
@@ -42,7 +43,7 @@ public class IdleTrigger extends Trigger {
                         const events = ['mousemove','mousedown','keydown','wheel','touchstart'];
                         let idle = false;
                         let timer = null;
-                        const fire = (state) => $0(new CustomEvent('idle', {detail: {idle: state}}));
+                        const fire = (state) => $0(Object.assign(new CustomEvent('idle'), {idle: state}));
                         const goIdle = () => { idle = true; fire(true); };
                         const onActivity = () => {
                             if (idle) { idle = false; fire(false); }
@@ -64,22 +65,10 @@ public class IdleTrigger extends Trigger {
         }
 
         /**
-         * {@code event.detail.idle} — {@code true} when the trigger fired
-         * because the user just became idle, {@code false} when activity
-         * resumed.
+         * {@code event.idle} — {@code true} when the trigger fired because the
+         * user just became idle, {@code false} when activity resumed.
          */
-        public static final Action.Input<Boolean> idle = new Action.Input<>() {
-            @Override
-            public JsFunction toJs(Trigger trigger) {
-                if (!(trigger instanceof IdleTrigger)) {
-                    throw new IllegalArgumentException(
-                            "Input is scoped to IdleTrigger and cannot be used in a "
-                                    + trigger.getClass().getSimpleName()
-                                    + " handler");
-                }
-                return JsFunction.of("return event.detail.idle")
-                        .withArguments("event");
-            }
-        };
+        public static final Action.Input<Boolean> idle = new HandlerInput<>(
+                "idle", IdleTrigger.class);
     }
 }

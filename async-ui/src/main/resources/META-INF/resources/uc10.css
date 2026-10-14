@@ -1,0 +1,40 @@
+.uc10-view {
+    .contact-list {
+        flex: 1;
+        width: 100%;
+        min-height: 0;
+        overflow: auto;
+    }
+
+    .naive-stats {
+        font-size: 0.85rem;
+        color: var(--vaadin-text-color-secondary);
+    }
+}
+
+/* Outside .uc10-view nesting: the VirtualList renders its items itself. */
+.contact-card {
+    display: grid;
+    grid-template-columns: 2.2rem 1fr auto;
+    grid-template-areas: "avatar name number" "avatar email number";
+    column-gap: 0.75rem;
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--vaadin-text-color) 10%, transparent);
+
+    .avatar {
+        grid-area: avatar;
+        display: grid;
+        place-items: center;
+        width: 2.2rem;
+        height: 2.2rem;
+        border-radius: 50%;
+        background: color-mix(in srgb, var(--aura-blue) 18%, transparent);
+        color: var(--aura-blue-text);
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .name { grid-area: name; font-weight: 600; }
+    .email { grid-area: email; font-size: 0.85rem; color: var(--vaadin-text-color-secondary); }
+    .number { grid-area: number; align-self: center; font-size: 0.8rem; color: var(--vaadin-text-color-secondary); }
+}

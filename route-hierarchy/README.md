@@ -17,8 +17,9 @@ each crumb with the route's page title — including instance-free
 
 UC5 and UC7 are not breadcrumbs: they consume the same route-hierarchy API
 directly — `UpLink` calls `getRouteParent` for a single up-one-level control,
-and `SitemapView` uses `getRouteHierarchy` as a graph-builder. Those still reach
-for internal API; see [`API-GAPS.md`](API-GAPS.md).
+and `SitemapView` uses `getRouteHierarchy` as a graph-builder, both on
+`RouteConfiguration`, with titles from `Router#resolvePageTitle`. No view
+imports internal API; see [`API-GAPS.md`](API-GAPS.md).
 
 | # | View | What it shows |
 | - | ---- | ------------- |

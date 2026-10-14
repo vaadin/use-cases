@@ -64,8 +64,8 @@ class HomeViewTest extends SpringBrowserlessTest {
     }
 
     private static UseCase useCaseOf(Card card) {
-        return new UseCase(card.getHeader().getElement().getText(),
-                card.getTitle().getElement().getText(),
+        return new UseCase(card.getHeaderPrefix().getElement().getText(),
+                card.getTitleAsText(),
                 card.getChildren().filter(Paragraph.class::isInstance)
                         .map(p -> ((Paragraph) p).getText()).findFirst()
                         .orElse(null),

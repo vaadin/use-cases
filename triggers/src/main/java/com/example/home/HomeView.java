@@ -1,6 +1,7 @@
 package com.example.home;
 
 import com.example.common.BaseHomeView;
+import com.example.common.UseCaseDescription;
 import com.example.uc1.ShortcutSaveView;
 import com.example.uc10.HighlightView;
 import com.example.uc11.RightClickCoordsView;
@@ -31,6 +32,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
+@UseCaseDescription("Running actions in the browser on clicks, shortcuts and other events without a server round-trip")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 

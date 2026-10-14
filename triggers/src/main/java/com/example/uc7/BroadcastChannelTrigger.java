@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.trigger.internal.Action;
+import com.vaadin.flow.component.trigger.internal.HandlerInput;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
 import com.vaadin.flow.shared.Registration;
@@ -48,18 +49,7 @@ public class BroadcastChannelTrigger extends Trigger {
          * tab. Decoded server-side via Jackson when consumed by an action that
          * decodes its input.
          */
-        public static final Action.Input<String> data = new Action.Input<>() {
-            @Override
-            public JsFunction toJs(Trigger trigger) {
-                if (!(trigger instanceof BroadcastChannelTrigger)) {
-                    throw new IllegalArgumentException(
-                            "Input is scoped to BroadcastChannelTrigger and cannot be used in a "
-                                    + trigger.getClass().getSimpleName()
-                                    + " handler");
-                }
-                return JsFunction.of("return event.data")
-                        .withArguments("event");
-            }
-        };
+        public static final Action.Input<String> data = new HandlerInput<>(
+                "data", BroadcastChannelTrigger.class);
     }
 }

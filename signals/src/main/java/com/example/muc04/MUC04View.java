@@ -1,5 +1,6 @@
 package com.example.muc04;
 
+import com.example.common.UseCaseDescription;
 import com.example.muc04.SignalFieldHighlighter.User;
 import com.example.security.CurrentUserSignal;
 import com.example.security.CurrentUserSignal.UserInfo;
@@ -39,6 +40,7 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
  */
 @Route(value = "muc-04", layout = MainLayout.class)
 @PageTitle("Multi-User Case 4: Collaborative Editing")
+@UseCaseDescription("Showing who is editing which field and locking it for others")
 @Menu(order = 53, title = "MUC 4: Collaborative Editing")
 @StyleSheet("muc04.css")
 @AnonymousAllowed
