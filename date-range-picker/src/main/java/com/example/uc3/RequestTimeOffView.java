@@ -39,7 +39,9 @@ import com.vaadin.flow.router.Route;
  * <p>
  * The validation runs on the server ({@code manualValidation}). Text the picker
  * can not parse, such as "32.13.2026", reaches the server as an empty end, so
- * the form says the range is missing rather than that the date is wrong.
+ * the form says the range is missing rather than that the date is wrong. The
+ * picker can not limit the length of a range, so the calendar still offers end
+ * dates past the days left.
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Request time off")
@@ -123,6 +125,8 @@ public class RequestTimeOffView extends VerticalLayout {
         summary.addClassName("summary");
 
         add(period, summary, note, send, sent);
+        add(ApiGap.note(6, "there is no maximum length of a range; the "
+                + "server checks the " + DAYS_LEFT + " days left."));
         add(ApiGap.note(8, "text the picker can not parse reaches the server "
                 + "as an empty date, so the message says a date is missing, "
                 + "not that it is wrong."));

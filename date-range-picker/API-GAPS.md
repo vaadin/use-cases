@@ -137,8 +137,8 @@ calendar for the end only. In the calendar, pressing the start date and
 dragging moves the start, and dragging across other dates "paints" a new
 range, so the script keeps mouse moves from the calendar unless the press was
 on the end date. It depends on the picker's current light DOM inputs, toggle
-button and the `range-end` part of the calendar dates. The server still puts the start back if a changed
-one arrives.
+button and the `range-end` part of the calendar dates. The server still
+puts the start back if a changed one arrives.
 **Suggested API:** `startReadonly` / `endReadonly`, with the calendar button,
 clicks on the field and drags in the calendar then changing only the editable
 end.

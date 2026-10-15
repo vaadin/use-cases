@@ -10,7 +10,6 @@ import com.example.data.Order;
 import com.example.daterangepicker.DateRangePicker;
 import com.example.views.ApiGap;
 import com.example.views.MainLayout;
-import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.datepicker.DateRange;
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -94,7 +93,6 @@ public class OneFieldView extends VerticalLayout {
     }
 
     private void filter() {
-        @Nullable
         DateRange range = period.getValue();
         String customer = search.getValue().trim().toLowerCase(Locale.ROOT);
         List<Order> shown = orders.stream().filter(

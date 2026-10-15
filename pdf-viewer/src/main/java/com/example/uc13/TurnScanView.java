@@ -49,9 +49,10 @@ public class TurnScanView extends VerticalLayout {
         add(new H1("UC13 — Turn a sideways scan"));
         add(new Paragraph("The second page of this scanned delivery note is "
                 + "sideways. Scroll to it and turn it with the two buttons the "
-                + "app adds to the viewer's toolbar. The turned page is kept "
-                + "in the file, so it stays upright when the document is "
-                + "opened again."));
+                + "app adds to the viewer's toolbar. The page is turned "
+                + "in the file itself, so a real app could save it and the "
+                + "next reader would see it upright. This demo keeps the "
+                + "turned file only while the view is open."));
 
         Button left = turnButton(VaadinIcon.ROTATE_LEFT, "Turn left",
                 "Turn the current page counterclockwise", -90);

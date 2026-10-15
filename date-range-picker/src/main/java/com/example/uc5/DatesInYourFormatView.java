@@ -11,7 +11,6 @@ import com.example.views.ApiGap;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.datepicker.DateRange;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -30,7 +29,8 @@ import com.vaadin.flow.router.Route;
  * one and on Monday in the other. The picker formats and parses the dates for
  * {@code setLocale}, and shows the month and day names, the first day of the
  * week and its screen reader texts from {@code setI18n}. The locale starts as
- * the UI's, which Vaadin takes from the browser.
+ * the browser's ({@code WebBrowser#getLocale}). The UI's locale would not do:
+ * without an {@code I18NProvider}, Vaadin leaves it at the server's default.
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Dates in your format")
@@ -69,18 +69,26 @@ public class DatesInYourFormatView extends VerticalLayout {
                 + "language."));
         add(ApiGap.note(2, "formatting by locale reuses the connector of "
                 + "Flow's DatePicker, which is not public API."));
+
+        // Start from the browser's locale, unless the reader has picked one
+        // already.
+        whenAttached(ui -> {
+            if (locale.isEmpty()) {
+                locale.setValue(
+                        localeOf(ui.getSession().getBrowser().getLocale()));
+            }
+            return null;
+        });
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        if (locale.isEmpty()) {
-            locale.setValue(localeOf(attachEvent.getUI().getLocale()));
+    /**
+     * The locale of the select closest to the given one, US English when none
+     * is close or the locale is unknown.
+     */
+    static Locale localeOf(@Nullable Locale requested) {
+        if (requested == null) {
+            return Locale.US;
         }
-    }
-
-    /** The locale of the select closest to the given one. */
-    static Locale localeOf(Locale requested) {
         return LOCALES.stream().filter(requested::equals).findFirst()
                 .or(() -> LOCALES.stream()
                         .filter(item -> item.getLanguage()

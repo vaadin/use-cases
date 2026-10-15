@@ -27,7 +27,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC5 — Check the claim against the receipt.
+ * UC5 — Check against the receipt.
  * <p>
  * An approver compares what an expense claim says with the receipt that comes
  * with it. The receipt sits next to the claim, fitted into the viewer with

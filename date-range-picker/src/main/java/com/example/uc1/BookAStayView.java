@@ -39,7 +39,9 @@ import com.vaadin.flow.router.Route;
  * the view checks that no booked night lies inside the stay; and it has no
  * limit on the length of a range, so the view checks the 14-night maximum.
  * Disabling a booked night also stops the guest from checking out on the
- * morning of that day, which a hotel allows.
+ * morning of that day, which a hotel allows. The disabled dates reach the
+ * calendar through the connector of Flow's {@code DatePicker}, which is not
+ * public API.
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Book a stay")
@@ -92,6 +94,8 @@ public class BookAStayView extends VerticalLayout {
                 + "booked night."));
         add(ApiGap.note(6, "there is no maximum length of a range; the "
                 + "server checks the " + MAX_NIGHTS + "-night limit."));
+        add(ApiGap.note(2, "the booked nights reach the calendar through the "
+                + "connector of Flow's DatePicker, which is not public API."));
         update(null);
     }
 

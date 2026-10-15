@@ -23,7 +23,7 @@ use the web component without writing the Java side itself: the tag and npm
 package, the property synchronization for `page`, `zoom`, `sidebarOpened` and
 `toolbarCollapsed`, the event classes, serving a document from a
 `DownloadHandler`, and the texts.
-**Workaround used:** `PdfViewer` (about 400 lines with `PdfViewerI18n`) wraps
+**Workaround used:** `PdfViewer` (about 430 lines, plus about 400 for `PdfViewerI18n`) wraps
 the web component. It switches the `DownloadHandler` to inline, keeps a copy
 of `pageCount` from the load events because the property is read-only, and
 types the zoom and the error reason as enums.
@@ -281,8 +281,10 @@ every page with the rotation stored in the file. Turning the head is the only
 way to read the page.
 **Workaround used:** "Turn left" and "Turn right" buttons in the toolbar
 (#7) turn the current page on the server with PDFBox (`PageRotation`, the
-page's `/Rotate` entry) and load the document again. That also fixes the
-file for the next reader, which a viewer-only rotation would not. Flow does
+page's `/Rotate` entry) and load the document again. The file itself is
+turned, so an application that saves it fixes the page for the next reader,
+which a viewer-only rotation would not; the demo keeps it while the view is
+open. Flow does
 not send a page equal to the one it knows already, so a page set together
 with the new `src` is lost and the view sets it again on `document-load`.
 **Suggested API:** rotate buttons (optional, like the download and print

@@ -8,8 +8,8 @@ import com.example.documents.SampleDocuments;
 import com.example.pdfviewer.PdfViewer;
 import com.example.views.ApiGap;
 import com.example.views.MainLayout;
+import org.jspecify.annotations.Nullable;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -20,11 +20,13 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC8 — Viewer in the user's language.
+ * UC8 — Viewer in your language.
  * <p>
  * The viewer's buttons, tooltips, messages and screen reader texts follow the
- * user's language. The language starts as the UI's locale, which Vaadin takes
- * from the browser, and can be switched. Each switch sets the texts with
+ * user's language. The language starts as the browser's
+ * ({@code WebBrowser#getLocale}), and can be switched. The UI's locale would
+ * not do: without an {@code I18NProvider}, Vaadin leaves it at the server's
+ * default. Each switch sets the texts with
  * {@code PdfViewer#setI18n(PdfViewerI18n)}; English sets none and keeps the
  * component's defaults.
  * <p>
@@ -68,20 +70,26 @@ public class LocalizedViewerView extends VerticalLayout {
         add(ApiGap.note(8, "the viewer has no built-in translations and does "
                 + "not follow the UI's locale, so the app supplies all 38 "
                 + "texts for every language."));
-    }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        if (language.isEmpty()) {
-            language.setValue(languageOf(attachEvent.getUI().getLocale()));
-        }
+        // Start from the browser's language, unless the reader has picked one
+        // already.
+        whenAttached(ui -> {
+            if (language.isEmpty()) {
+                language.setValue(
+                        languageOf(ui.getSession().getBrowser().getLocale()));
+            }
+            return null;
+        });
     }
 
     /**
-     * The language of the select that matches a locale, English when none does.
+     * The language of the select that matches a locale, English when none does
+     * or the locale is unknown.
      */
-    static Locale languageOf(Locale locale) {
+    static Locale languageOf(@Nullable Locale locale) {
+        if (locale == null) {
+            return Locale.ENGLISH;
+        }
         return LANGUAGES.stream().filter(
                 language -> language.getLanguage().equals(locale.getLanguage()))
                 .findFirst().orElse(Locale.ENGLISH);

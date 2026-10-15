@@ -62,10 +62,21 @@ function lockRangeStart(picker: HTMLElement & { opened: boolean; open(): void; c
     (event) => {
       const cell = event.composedPath()[0];
       pressHeld = cell instanceof Element && !!(cell as any).date && !cell.part.contains('range-end');
+      if (pressHeld) {
+        // Listen on the document only while the press lasts, as it may be
+        // released outside the picker, so nothing outlives the picker.
+        const release = new AbortController();
+        const onRelease = () => {
+          pressHeld = false;
+          release.abort();
+        };
+        ['pointerup', 'pointercancel'].forEach((type) =>
+          document.addEventListener(type, onRelease, { signal: release.signal }),
+        );
+      }
     },
     true,
   );
-  ['pointerup', 'pointercancel'].forEach((type) => document.addEventListener(type, () => (pressHeld = false)));
   picker.addEventListener(
     'mousemove',
     (event) => {

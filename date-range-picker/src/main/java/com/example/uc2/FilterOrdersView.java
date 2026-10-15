@@ -112,9 +112,7 @@ public class FilterOrdersView extends VerticalLayout {
     }
 
     private void filter() {
-        @Nullable
         LocalDate start = period.getStart();
-        @Nullable
         LocalDate end = period.getEnd();
         List<Order> shown = orders.stream()
                 .filter(order -> start == null || !order.date().isBefore(start))

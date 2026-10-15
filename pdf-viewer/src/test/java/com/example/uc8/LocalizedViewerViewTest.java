@@ -10,20 +10,23 @@ import tools.jackson.databind.JsonNode;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.WebBrowser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ViewPackages(classes = LocalizedViewerView.class)
 class LocalizedViewerViewTest extends SpringBrowserlessTest {
 
     @Test
-    void theViewerStartsInTheUsersLanguage() {
-        UI.getCurrent().setLocale(Locale.GERMANY);
+    void theViewerStartsInTheBrowsersLanguage() {
+        browserLocale(Locale.GERMANY);
         navigate(LocalizedViewerView.class);
 
         assertEquals("Vergrößern", i18n().get("zoomIn").asString());
@@ -31,7 +34,7 @@ class LocalizedViewerViewTest extends SpringBrowserlessTest {
 
     @Test
     void switchingToEnglishGoesBackToTheDefaults() {
-        UI.getCurrent().setLocale(Locale.of("fi", "FI"));
+        browserLocale(Locale.of("fi", "FI"));
         navigate(LocalizedViewerView.class);
         assertEquals("Lähennä", i18n().get("zoomIn").asString());
 
@@ -58,5 +61,12 @@ class LocalizedViewerViewTest extends SpringBrowserlessTest {
     private JsonNode i18n() {
         return (JsonNode) findInView(PdfViewer.class).single().getElement()
                 .getPropertyRaw("i18n");
+    }
+
+    /** Makes the browser report the given locale, as its request would. */
+    private static void browserLocale(Locale locale) {
+        WebBrowser browser = mock(WebBrowser.class);
+        when(browser.getLocale()).thenReturn(locale);
+        VaadinSession.getCurrent().setBrowser(browser);
     }
 }
