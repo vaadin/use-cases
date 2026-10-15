@@ -98,12 +98,17 @@ one row when one row signal changes, and a reactive part name generator.
 **Symptom:** `vaadin-field-highlighter` ships with the platform, but the only
 Java surface is `FieldHighlighterInitializer.init(Element)`, which is
 `protected static`. CE's `FieldHighlighter` is not public either, but CE
-exposes it through `CollaborationBinder`. On signals there is nothing.
+exposes it through `CollaborationBinder`. On signals there is nothing. The
+web component also only flashes a user's name tag for two seconds and then
+shows it on hover; there is no option to keep it visible while the outline is.
 **Workaround used:** `SignalFieldHighlighter` extends
 `FieldHighlighterInitializer` to inherit its `@JsModule` and `@NpmPackage`,
-and calls `setUsers` through `executeJs`.
+and calls `setUsers` through `executeJs`. To keep the name tags visible it
+opens them itself and patches the private tags element so they stay open
+while anybody is in the field.
 **Suggested API:** a public `FieldHighlighter` with e.g.
-`bindUsers(HasValue<?, ?> field, Signal<List<FieldHighlighterUser>>)`.
+`bindUsers(HasValue<?, ?> field, Signal<List<FieldHighlighterUser>>)`, and
+an option to show the name tags for as long as the highlight.
 
 ## 7. No `Binder` integration
 
@@ -196,7 +201,8 @@ simulate a slow or failed confirmation either: the public constructors use
 `LocalAsynchronousSignalTree`, and the constructors that take another tree
 are `protected`. Optimistic UI is what `peekConfirmed()` exists for, and the
 one thing it cannot be used for.
-**Workaround used:** none. UC13 only shows the difference inside the callback.
+**Workaround used:** none. UC13 sets *Saving…* in the callback, which a user
+never sees, and the outcome when the operation completes.
 **Suggested API:** a way to observe pending commands from the UI, and a
 test tree whose confirmation can be delayed or rejected.
 
@@ -213,16 +219,16 @@ handles the hop back to the UI, like `Signal.effect(Component, …)`.
 
 ## 15. A transaction cannot span independent shared signals
 
-**Where it bites:** UC10 / `ConflictsView.java`, `RaceTopic.java`
+**Where it bites:** any model that keeps related collections in separate shared signals; pinned in `SharedSignalSemanticsTest`
 **Symptom:** `Signal.runInTransaction` across two top-level shared signals
 throws, because each one commits separately and "may be owned by a different
 cluster node" (`StagedTransaction`). The message says to keep the values in
-one shared signal. That is a constraint on the *data model*: UC10 moves an
-item between two lists atomically, and the lists are children of one
-`SharedNodeSignal` only for that reason. An application that has already
-modelled its state as several top-level signals must restructure.
-**Workaround used:** both lists live under one `SharedNodeSignal` in
-`RaceTopic`.
+one shared signal. That is a constraint on the *data model*: moving an item
+between two lists atomically needs both lists to be children of one
+`SharedNodeSignal`. An application that has already modelled its state as
+several top-level signals must restructure.
+**Workaround used:** keep collections that change together under one
+`SharedNodeSignal`.
 **Suggested API:** document the rule on `SharedNodeSignal` and
 `runInTransaction`, or support transactions across trees.
 
@@ -254,7 +260,7 @@ Expected to be problems, but were not:
 
 - **Atomicity.** `replace`, `incrementBy`, `update` and `verifyChild` cover
   conflicts that CE's last-write-wins map cannot express, and they report a
-  rejection instead of losing a write (UC10).
+  rejection instead of losing a write (UC10 saves with `replace`).
 - **Derived state.** `Signal.computed` removes the hand-kept counters a CE
   application needs beside its data (UC11).
 - **Topics.** A `SharedNodeSignal` with `putChildIfAbsent` is a better topic

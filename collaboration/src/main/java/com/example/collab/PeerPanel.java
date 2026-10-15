@@ -38,11 +38,14 @@ public class PeerPanel extends AppWindow {
 
         addClassName("peer-panel");
         getStyle().set("--peer-color", peer.cssColor());
-        // Every peer has the same page open, as two browsers would.
+        // Every peer has the same page open, as two browsers would. The name
+        // goes back to the pool when the window is gone, so that the next
+        // visitor does not get "Ada Bergström 2" while nobody is Ada.
         whenAttached(ui -> {
             setAddress(
                     "collab.example/" + ui.getActiveViewLocation().getPath());
-            return null;
+            PeerNames.claim(peer);
+            return () -> PeerNames.release(peer);
         });
 
         Button toggle = new Button();

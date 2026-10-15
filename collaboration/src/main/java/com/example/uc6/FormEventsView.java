@@ -14,7 +14,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -51,8 +50,9 @@ public class FormEventsView extends UseCaseView {
     public FormEventsView(FormEventsTopic topic) {
         super("UC6 — Log who changed what",
                 "The same collaborative form as UC5, with every change printed as it happens: what changed, "
-                        + "from what to what, and who is in which field. Each panel logs what it observed, so the "
-                        + "logs are not copies of one another.");
+                        + "from what to what, and who is in which field. A change is committed when you leave the "
+                        + "field or press Enter, so the log has one line per edit rather than one per keystroke. "
+                        + "Each panel logs what it observed, so the logs are not copies of one another.");
 
         add(new PeerRig(peer -> peerView(topic.form(), peer)));
 
@@ -66,10 +66,10 @@ public class FormEventsView extends UseCaseView {
         Div log = new Div();
         log.addClassName("event-log");
 
+        // The default value change mode, unlike UC5: a log line per
+        // keystroke would bury the changes the log is there to show.
         TextField name = new TextField("Name");
-        name.setValueChangeMode(ValueChangeMode.EAGER);
         EmailField email = new EmailField("E-mail address");
-        email.setValueChangeMode(ValueChangeMode.EAGER);
 
         logChanges(form, peer, name, FormEventsTopic.NAME, log);
         logChanges(form, peer, email, FormEventsTopic.EMAIL, log);

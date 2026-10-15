@@ -17,6 +17,8 @@ import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -46,6 +48,25 @@ class ChatViewTest extends SpringBrowserlessTest {
                         .anyMatch(item -> "Where is order 1041?"
                                 .equals(item.getText())),
                 "the other peer should see the message text");
+    }
+
+    @Test
+    void usersWhoLeftHandTheirNamesBack() {
+        // More users over time than there are names in the pool: as long as
+        // the earlier ones have left, nobody needs a number after their name.
+        for (int visit = 0; visit < 15; visit++) {
+            navigate(HomeView.class);
+            navigate(ChatView.class);
+            runPendingSignalsTasks();
+        }
+
+        PeerRig rig = findInView(PeerRig.class).single();
+        rig.getPanels()
+                .forEach(panel -> assertFalse(
+                        panel.getPeer().name().matches(".* \\d+"),
+                        panel.getPeer().name()));
+        assertNotEquals(rig.getPanel(0).getPeer().name(),
+                rig.getPanel(1).getPeer().name());
     }
 
     @Test

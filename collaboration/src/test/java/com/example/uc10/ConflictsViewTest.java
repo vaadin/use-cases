@@ -13,10 +13,11 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.textfield.TextField;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The race is staged rather than raced: both peers read, both peers edit, both
+ * The race is staged rather than raced: both peers load, both peers edit, both
  * peers save. That is the sequence a real conflict produces, and it is the
  * sequence a test can reproduce exactly.
  */
@@ -29,85 +30,56 @@ class ConflictsViewTest extends SpringBrowserlessTest {
     RaceTopic topic;
 
     @Test
-    void theSecondCompareAndSetIsRejectedAndTheValueIsTheFirstOnes() {
+    void theSecondSaveIsRefusedUntilItsUserLoadsTheLatestNote() {
         navigate(ConflictsView.class);
         runPendingSignalsTasks();
 
         PeerRig rig = findInView(PeerRig.class).single();
-        click(rig, 0, "Read");
-        click(rig, 1, "Read");
         draft(rig, 0).setValue("Picked by the first user");
         draft(rig, 1).setValue("Picked by the second user");
 
-        click(rig, 0, "Save (replace)");
+        click(rig, 0, "Save");
         runPendingSignalsTasks();
-        click(rig, 1, "Save (replace)");
+        click(rig, 1, "Save");
         runPendingSignalsTasks();
 
         assertEquals("Picked by the first user", topic.note().peek());
-        assertTrue(
-                rig.getPanel(1).getElement().getTextRecursively()
-                        .contains("replace: REJECTED"),
+        assertTrue(text(rig, 0).contains("Saved"));
+        assertTrue(text(rig, 1).contains("Not saved"),
                 "the second save was based on a value that had moved on");
-        assertTrue(rig.getPanel(0).getElement().getTextRecursively()
-                .contains("replace: accepted"));
+
+        click(rig, 1, "Load latest");
+        assertEquals("Picked by the first user", draft(rig, 1).getValue());
+        draft(rig, 1)
+                .setValue("Picked by the first user, packed by the second");
+        click(rig, 1, "Save");
+        runPendingSignalsTasks();
+
+        assertEquals("Picked by the first user, packed by the second",
+                topic.note().peek(), "an edit based on the latest note saves");
     }
 
     @Test
-    void aBlindSaveWinsAndSaysNothing() {
+    void savingTwiceInARowIsNotAConflict() {
         navigate(ConflictsView.class);
         runPendingSignalsTasks();
 
         PeerRig rig = findInView(PeerRig.class).single();
-        click(rig, 0, "Read");
-        click(rig, 1, "Read");
         draft(rig, 0).setValue("First");
-        draft(rig, 1).setValue("Second");
-
-        click(rig, 0, "Save (set)");
+        click(rig, 0, "Save");
         runPendingSignalsTasks();
-        click(rig, 1, "Save (set)");
+        draft(rig, 0).setValue("Second");
+        click(rig, 0, "Save");
         runPendingSignalsTasks();
 
-        // The behaviour of a last-write-wins map, made explicit: the first
-        // user's edit is gone and both operations were accepted.
+        // A successful save becomes the base of the next one, so a user is
+        // never in conflict with themselves.
         assertEquals("Second", topic.note().peek());
-        assertTrue(rig.getPanel(0).getElement().getTextRecursively()
-                .contains("set: accepted"));
+        assertFalse(text(rig, 0).contains("Not saved"));
     }
 
-    @Test
-    void concurrentIncrementsAreNeverLost() {
-        navigate(ConflictsView.class);
-        runPendingSignalsTasks();
-
-        PeerRig rig = findInView(PeerRig.class).single();
-        click(rig, 0, "+1");
-        click(rig, 1, "+1");
-        runPendingSignalsTasks();
-
-        // peek(), not getAsInt(): the convenient int accessor goes through
-        // get() and so needs a reactive context, which a test thread is not.
-        assertEquals(2, topic.tally().peek().intValue(),
-                "incrementBy sends a delta, so neither can overwrite the other");
-    }
-
-    @Test
-    void movingAnItemBetweenListsIsAllOrNothing() {
-        navigate(ConflictsView.class);
-        runPendingSignalsTasks();
-
-        PeerRig rig = findInView(PeerRig.class).single();
-        int backlog = topic.backlog().peek().size();
-
-        click(rig, 0, "Move first backlog item (transaction)");
-        runPendingSignalsTasks();
-        click(rig, 1, "Move first backlog item (transaction)");
-        runPendingSignalsTasks();
-
-        assertEquals(backlog - 2, topic.backlog().peek().size());
-        assertEquals(2, topic.done().peek().size(),
-                "two moves, two items — no duplicates and none dropped");
+    private String text(PeerRig rig, int panel) {
+        return rig.getPanel(panel).getElement().getTextRecursively();
     }
 
     private void click(PeerRig rig, int panel, String caption) {

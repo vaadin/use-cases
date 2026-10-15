@@ -57,7 +57,7 @@ public class FormAccessView extends UseCaseView {
         super("UC7 — Control who may edit",
                 "One user at a time may edit. Claim editing in one panel and the fields unlock there and lock "
                         + "everywhere else; claim it in a second panel while the first still holds it and the "
-                        + "operation is rejected, with the reason logged.");
+                        + "claim is refused, with who holds it logged.");
 
         add(new PeerRig(peer -> peerView(topic, presence, peer)));
 
@@ -85,16 +85,32 @@ public class FormAccessView extends UseCaseView {
         Div log = new Div();
         log.addClassName("event-log");
 
-        Button claim = new Button("Claim editing", event -> Outcomes.report(log,
-                "claim", topic.holder().replace(Peer.NOBODY, peer)));
+        // Claim stays enabled while somebody else holds the lock, so that a
+        // lost race can be seen: the compare-and-set is refused, and the
+        // message says by whom.
+        Button claim = new Button("Claim editing",
+                event -> Outcomes.whenDecided(
+                        topic.holder().replace(Peer.NOBODY, peer),
+                        accepted -> log(log, accepted ? "You are editing now"
+                                : "Could not claim: "
+                                        + holderName(topic.holder().peek())
+                                        + " is already editing")));
         claim.bindEnabled(Signal.not(isHolder));
 
-        Button release = new Button("Release", event -> Outcomes.report(log,
-                "release", topic.holder().replace(peer, Peer.NOBODY)));
+        Button release = new Button("Release", event -> Outcomes.whenDecided(
+                topic.holder().replace(peer, Peer.NOBODY),
+                accepted -> log(log, accepted ? "You released editing"
+                        : "Could not release: you were no longer editing")));
         release.bindEnabled(isHolder);
 
-        Button takeOver = new Button("Take over", event -> Outcomes.report(log,
-                "take over", topic.holder().set(peer)));
+        Button takeOver = new Button("Take over", event -> {
+            Peer previous = topic.holder().peek();
+            Outcomes.whenDecided(topic.holder().set(peer), accepted -> log(log,
+                    previous == null || previous.id() == Peer.NOBODY.id()
+                            || previous.id() == peer.id()
+                                    ? "You are editing now"
+                                    : "You took over from " + previous.name()));
+        });
 
         TextField name = new TextField("Name");
         name.setValueChangeMode(ValueChangeMode.EAGER);
@@ -115,4 +131,13 @@ public class FormAccessView extends UseCaseView {
         return content;
     }
 
+    private static String holderName(Peer holder) {
+        return holder == null || holder.id() == Peer.NOBODY.id()
+                ? "somebody else"
+                : holder.name();
+    }
+
+    private static void log(Div log, String line) {
+        log.addComponentAsFirst(new Div(line));
+    }
 }

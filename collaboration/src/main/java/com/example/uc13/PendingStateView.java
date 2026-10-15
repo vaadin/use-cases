@@ -11,61 +11,58 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.signals.operations.SignalOperation;
 
 /**
  * UC13 — Know if a write went through. Beyond the sampler.
  * <p>
- * A shared signal can be read two ways: {@code get()} / {@code peek()} is what
- * this client believes, including writes it has submitted, and
- * {@code peekConfirmed()} is what the shared state has actually accepted. The
- * two differ for a real and easily missed reason — inside a UI callback a
- * command has been <em>submitted</em>, not applied. It is applied when the
- * session flushes its pending signal commands, which happens after the callback
- * returns.
+ * Collaboration Kit's writes are fire-and-forget: a {@code put} on a map
+ * returns nothing a view can wait on. A shared signal write returns a
+ * {@code SignalOperation} whose result says whether the shared state accepted
+ * it, so a view can tell its user "saved" only once that is true.
  * <p>
- * So the interesting moment is inside the click handler, and that is what this
- * view records: the two readings before the write, the two readings immediately
- * after submitting it — where they disagree — and the outcome once the shared
- * state has decided.
- * <p>
- * The same detail is why {@code operation.result().getNow(null)} is never
- * useful in a UI: in the handler the answer is always "not yet". A view that
- * wants to report a rejection has to attach a callback and come back later,
- * which is what {@link Outcomes} does. See API-GAPS.md #14.
- * <p>
- * Rejection is the other half. Writing more than {@value PendingTopic#LIMIT}
- * characters goes through a handle whose validator refuses it — and that does
- * not come back as a rejected operation at all, it throws at submit time. See
- * API-GAPS.md #11.
+ * Two details make that harder than it looks, and the view handles both:
+ * <ul>
+ * <li>Inside the click handler the write has been submitted, not applied — it
+ * is applied when the session flushes its pending signal commands, after the
+ * handler returns. So the status says <em>Saving…</em> in the handler and is
+ * set to the outcome from a callback ({@link Outcomes}, API-GAPS.md #14). In a
+ * single-server deployment the flush happens before the response, so a user
+ * never actually sees <em>Saving…</em>; with a slower shared state they would
+ * (API-GAPS.md #13).</li>
+ * <li>A rule on the shared state — here, at most {@value PendingTopic#LIMIT}
+ * characters — does not come back as a failed result. It throws at submit time,
+ * so the refusal is handled in a different place from every other outcome
+ * (API-GAPS.md #11).</li>
+ * </ul>
  */
 @Route(value = "pending", layout = MainLayout.class)
 @RouteAlias(value = "uc13", layout = MainLayout.class)
 @PageTitle("UC13 — Know if a write went through")
-@UseCaseDescription("Telling a local, unconfirmed change from a confirmed one")
+@UseCaseDescription("Telling the user whether their change was accepted")
 @Menu(order = 13, title = "UC13 — Know if a write went through")
 public class PendingStateView extends UseCaseView {
 
     public PendingStateView(PendingTopic topic) {
         super("UC13 — Know if a write went through",
-                "Write a new label in any panel. The readout records what this client believed and what the shared "
-                        + "state had confirmed at three points: before the write, in the instant after submitting "
-                        + "it, and once it landed. Labels longer than "
+                "Save a new shelf label in any window. The window tells you whether the shared state accepted "
+                        + "it, rather than assuming so because you clicked. A label longer than "
                         + PendingTopic.LIMIT
-                        + " characters are refused by the shared state itself.");
+                        + " characters is refused by a rule on the shared state: you see Not saved, and the "
+                        + "other windows keep the old label.");
 
         add(new PeerRig(peer -> peerView(topic, peer)));
 
-        addNote("The middle line is the point: immediately after set() the client's own reading has changed and "
-                + "the confirmed reading has not, because the command is only applied when the session flushes. "
-                + "That is also why an operation's result is unavailable in the handler that submitted it "
-                + "(API-GAPS.md #14) — and why a validator's refusal, which is thrown at submit time instead, "
-                + "is the odd one out (API-GAPS.md #11).");
+        addNote("Whether a write was accepted is only known after the click handler returns, when the session "
+                + "applies its signal commands, so the status is set from a callback on the operation "
+                + "(API-GAPS.md #14). A rule on the shared state refuses a write by throwing instead of returning "
+                + "a failed result, so that outcome is handled separately (API-GAPS.md #11).");
     }
 
     private static Component peerView(PendingTopic topic, Peer peer) {
@@ -73,46 +70,33 @@ public class PendingStateView extends UseCaseView {
         var guarded = topic.labelFor(peer);
 
         Span current = new Span();
-        current.bindText(label.map(value -> "Shared label: " + value));
+        current.bindText(label.map(value -> "Shelf label: " + value));
 
         TextField draft = new TextField("New label");
         draft.setValue(label.peek());
 
-        // Three fixed lines rather than a log, because the three readings of
-        // one write are a sequence and a newest-first log would print them
-        // backwards.
-        Span before = new Span("before: —");
-        Span submitted = new Span("submitted: —");
-        Span outcome = new Span("outcome: —");
+        Span status = new Span();
+        status.addClassName("save-status");
 
-        Button write = new Button("Write", event -> {
-            before.setText("before: get() " + label.peek()
-                    + " / peekConfirmed() " + label.peekConfirmed());
+        Button save = new Button("Save", event -> {
+            String value = draft.getValue();
             try {
-                SignalOperation<String> operation = guarded
-                        .set(draft.getValue());
-                // Read again straight away, still inside the handler: the
-                // command has been submitted and not yet applied, so these two
-                // readings disagree.
-                submitted.setText("submitted: get() " + label.peek()
-                        + " / peekConfirmed() " + label.peekConfirmed());
-                outcome.setText("outcome: waiting for the flush");
-                Outcomes.report("outcome", operation, outcome::setText);
-            } catch (UnsupportedOperationException rejected) {
+                // Submitted, not yet applied: the outcome is not known here.
+                status.setText("Saving…");
+                Outcomes.whenDecided(guarded.set(value),
+                        accepted -> status.setText(accepted ? "Saved: " + value
+                                : "Not saved: the shared state refused it"));
+            } catch (UnsupportedOperationException refused) {
                 // A validator does not reject the operation, it refuses to
                 // submit it at all.
-                submitted.setText("submitted: nothing was submitted");
-                outcome.setText(
-                        "outcome: refused at submit time by the validator (at most "
-                                + PendingTopic.LIMIT + " characters)");
+                status.setText("Not saved: a label can be at most "
+                        + PendingTopic.LIMIT + " characters");
             }
         });
 
-        Div readout = new Div(before, submitted, outcome);
-        readout.addClassName("event-log");
-        readout.getChildren().forEach(
-                child -> child.getElement().getStyle().set("display", "block"));
+        HorizontalLayout actions = new HorizontalLayout(save, status);
+        actions.setAlignItems(Alignment.CENTER);
 
-        return new Div(current, draft, write, readout);
+        return new Div(current, draft, actions);
     }
 }

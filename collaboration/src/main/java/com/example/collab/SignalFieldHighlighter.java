@@ -59,9 +59,39 @@ public class SignalFieldHighlighter extends FieldHighlighterInitializer {
         return Registration.combine(effect, initialization);
     }
 
-    /** Replaces the peers currently highlighting a field. */
+    /**
+     * Replaces the peers currently highlighting a field, and keeps their name
+     * tags showing for as long as they are in it.
+     * <p>
+     * Left alone, the web component only flashes a name for two seconds and
+     * then shows it on hover, which in a demo reads as the name being lost
+     * while the outline stays. There is no option for it, so the script opens
+     * the tags itself and stops the component from closing them while anybody
+     * is in the field — reaching into private state, which is the price of the
+     * missing Java API (API-GAPS.md #6).
+     */
     public static void setUsers(Element element, Collection<Peer> peers) {
-        element.executeJs(FH_CLASS + ".setUsers(this, $0)", toJson(peers));
+        element.executeJs("""
+                const fh = %s;
+                const controller = fh.init(this);
+                const tags = controller.observer._tags;
+                if (!tags.__pinned) {
+                    tags.__pinned = true;
+                    const hide = tags.hide;
+                    tags.hide = function () {
+                        if (controller.users.length === 0) {
+                            hide.call(this);
+                        }
+                    };
+                }
+                if ($0.length > 0) {
+                    tags.show();
+                }
+                fh.setUsers(this, $0);
+                if ($0.length === 0) {
+                    tags.hide();
+                }
+                """.formatted(FH_CLASS), toJson(peers));
     }
 
     private static ArrayNode toJson(Collection<Peer> peers) {

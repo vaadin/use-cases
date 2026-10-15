@@ -46,10 +46,10 @@ field-highlight cleanup hangs off.
 | 7 | `form-access` | **Control who may edit.** A write lock claimed with a compare-and-set, so a lost race is reported rather than silently won, and writes refused in the shared state by a validator rather than by a disabled field. |
 | 8 | `grid` | **Collaborate in a Grid.** A shared row list behind a `Grid`, with each peer's selection visible to the others. The row *signals* are the grid's items, which is what makes identity survive an edit. |
 | 9 | `grid-pro` | **Collaborate in a Grid Pro.** Cell editing as `SharedValueSignal.update`, so two peers editing different columns of one row both keep their change. |
-| 10 | `conflicts` | **Make concurrent edits safe.** `set` against `replace` against `incrementBy`, and a two-list move inside one transaction. Beyond Collaboration Kit. |
-| 11 | `computed` | **Keep totals always in step.** Every readout computed from one shared list, with no counter to keep in step. Beyond Collaboration Kit. |
-| 12 | `rooms` | **Rooms created on demand.** A `SharedNodeSignal` as a topic namespace, so the room list is shared state a client can render. Beyond Collaboration Kit. |
-| 13 | `pending` | **Know if a write went through.** `get()` and `peekConfirmed()` disagreeing inside the callback that wrote, and what that means for reporting an operation's outcome. Beyond Collaboration Kit. |
+| 10 | `conflicts` | **Make concurrent edits safe.** *Save* is a compare-and-set (`replace`) against the value the user loaded, so a save based on an outdated note is refused instead of silently overwriting. Beyond Collaboration Kit. |
+| 11 | `computed` | **Keep totals always in step.** A small task board where every total is computed from the one shared task list, with no counter to keep in step. Beyond Collaboration Kit. |
+| 12 | `rooms` | **Rooms created on demand.** A `SharedNodeSignal` as a topic namespace, so the room list is shared state each client renders as tabs. Beyond Collaboration Kit. |
+| 13 | `pending` | **Know if a write went through.** *Saved* only once the shared state accepted the write, read from the operation's result, and *Not saved* when a rule on the shared state refuses it. Beyond Collaboration Kit. |
 
 Each view is also reachable as `/ucN`, and says in the app itself what it had
 to write by hand and which gap that is.

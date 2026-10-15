@@ -44,12 +44,14 @@ public class BoardTopic {
     @PostConstruct
     void seed() {
         if (tasks.peek().isEmpty()) {
+            // Two tasks belong to a user who is not online, so that the board
+            // does not start out as everybody's.
             tasks.insertAllLast(List.of(
                     new Task("t1", "Count the returns bin", Status.TODO, ""),
                     new Task("t2", "Call the courier", Status.TODO, ""),
-                    new Task("t3", "Restock aisle 4", Status.DOING, ""),
+                    new Task("t3", "Restock aisle 4", Status.DOING, "Mika"),
                     new Task("t4", "File the damage report", Status.TODO, ""),
-                    new Task("t5", "Close the till", Status.DONE, "")));
+                    new Task("t5", "Close the till", Status.DONE, "Mika")));
         }
     }
 }

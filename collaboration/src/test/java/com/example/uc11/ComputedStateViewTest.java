@@ -38,31 +38,46 @@ class ComputedStateViewTest extends SpringBrowserlessTest {
                 .getFirst()).click();
         runPendingSignalsTasks();
 
-        assertTrue(text(rig, 1).contains("Workload: " + claimer.name() + " 1"),
-                "the other panel computes the workload from the same list");
-        assertTrue(text(rig, 1).contains("Yours: 0"),
-                "and 'yours' is per peer, computed from the same list again");
-        assertTrue(text(rig, 0).contains("Yours: 1"));
+        assertTrue(text(rig, 1).contains(claimer.name() + " 1"),
+                "the other panel computes who claimed what from the same list: "
+                        + text(rig, 1));
+        assertTrue(text(rig, 1).contains("Your tasks: 0"),
+                "and 'your tasks' is per peer, computed from the same list again");
+        assertTrue(text(rig, 0).contains("Your tasks: 1"));
     }
 
     @Test
-    void advancingATaskMovesTheStatusCountsAndTheCompletionShare() {
+    void onlyTheClaimerCanMoveATaskOn() {
         navigate(ComputedStateView.class);
         runPendingSignalsTasks();
 
         PeerRig rig = findInView(PeerRig.class).single();
-        assertTrue(text(rig, 1).contains("To do 3 · doing 1 · done 1"));
+        assertTrue(text(rig, 1).contains("To do 3 · in progress 1 · done 1"));
         assertTrue(text(rig, 1).contains("Complete: 20%"));
 
-        // Advance a to-do task to doing in one panel.
-        test(find(Button.class, rig.getPanel(0)).withText("Advance").all()
+        test(find(Button.class, rig.getPanel(0)).withText("Claim").all()
                 .getFirst()).click();
         runPendingSignalsTasks();
+        assertTrue(visibleButtons(rig, 1, "Start").isEmpty(),
+                "a task somebody else claimed cannot be started from here");
 
-        assertTrue(text(rig, 1).contains("To do 2 · doing 2 · done 1"),
+        test(visibleButtons(rig, 0, "Start").getFirst()).click();
+        runPendingSignalsTasks();
+
+        assertTrue(text(rig, 1).contains("To do 2 · in progress 2 · done 1"),
                 "counts follow the shared list: " + text(rig, 1));
         assertTrue(text(rig, 1).contains("Complete: 20%"),
-                "and the completion share does not move for a to-do → doing");
+                "and the completion share does not move for to do → in progress");
+
+        test(visibleButtons(rig, 0, "Finish").getFirst()).click();
+        runPendingSignalsTasks();
+        assertTrue(text(rig, 1).contains("Complete: 40%"));
+    }
+
+    private java.util.List<Button> visibleButtons(PeerRig rig, int panel,
+            String caption) {
+        return find(Button.class, rig.getPanel(panel)).withText(caption).all()
+                .stream().filter(Button::isVisible).toList();
     }
 
     private String text(PeerRig rig, int panel) {

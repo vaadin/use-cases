@@ -97,7 +97,7 @@ class HomeViewTest extends SpringBrowserlessTest {
                         "Creating a shared topic per room only when someone opens it",
                         "rooms"),
                 new UseCase("UC13", "Know if a write went through",
-                        "Telling a local, unconfirmed change from a confirmed one",
+                        "Telling the user whether their change was accepted",
                         "pending")),
                 findInView(Card.class).all().stream()
                         .map(HomeViewTest::useCaseOf).toList());

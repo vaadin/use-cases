@@ -11,6 +11,10 @@ html {
     --vaadin-user-color-5: #00bcd4;
     --vaadin-user-color-6: #f44336;
     --vaadin-user-color-7: #795548;
+    /* The field highlighter's name tag defaults to 0.75em, too small to read
+       at a glance next to the field it labels. */
+    --vaadin-user-tag-font-size: var(--aura-font-size-m, 0.875rem);
+    --vaadin-user-tag-padding: 0.3em 0.5em;
 }
 
 .use-case {
@@ -93,4 +97,11 @@ vaadin-grid::part(peer-watched) {
 
 vaadin-grid-pro::part(peer-edited) {
     background: color-mix(in srgb, var(--vaadin-user-color-3) 18%, transparent);
+}
+
+/* UC5: the field highlighter's name tag stays below a field for as long as
+   somebody is in it, so the rows leave room for it instead of letting it
+   cover the next field's label. */
+.peer-body vaadin-form-layout {
+    --vaadin-form-layout-row-spacing: 1.75rem;
 }

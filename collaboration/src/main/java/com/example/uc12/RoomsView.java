@@ -1,6 +1,8 @@
 package com.example.uc12;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.example.collab.Peer;
 import com.example.collab.PeerRig;
@@ -19,7 +21,10 @@ import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -78,37 +83,55 @@ public class RoomsView extends UseCaseView {
         ValueSignal<String> selected = new ValueSignal<>(
                 RoomsTopic.DEFAULT_ROOM);
 
-        Div roomBar = new Div();
-        roomBar.addClassName("room-bar");
-
+        Tabs tabs = new Tabs();
+        // Kept across rebuilds, so a room keeps its tab while it exists.
+        Map<String, Tab> tabOfRoom = new HashMap<>();
         Div roomPanel = new Div();
 
         // Switching rooms rebuilds the room panel rather than re-pointing the
         // bindings inside it: a binding belongs to a component, so a new room
         // gets new components, and the old room panel's detach leaves the old
-        // room.
-        Runnable openSelected = () -> {
+        // room. That is also why this is Tabs over one panel and not a
+        // TabSheet, which keeps a visited tab's content attached — and so
+        // would keep the user present in every room they had looked at.
+        SerializableConsumer<String> open = room -> {
+            selected.set(room);
             roomPanel.removeAll();
-            roomPanel.add(roomView(topic, peer, selected.peek()));
+            roomPanel.add(roomView(topic, peer, room));
         };
 
-        Signal.effect(roomBar, () -> {
-            roomBar.removeAll();
-            topic.roomNames().get().forEach(name -> {
-                Button open = new Button(
-                        name + " (" + topic.messages(name).get().size() + ")",
-                        event -> {
-                            if (!name.equals(selected.peek())) {
-                                selected.set(name);
-                                openSelected.run();
-                            }
-                        });
-                open.addThemeVariants(ButtonVariant.SMALL);
-                if (name.equals(selected.peek())) {
-                    open.addThemeVariants(ButtonVariant.PRIMARY);
+        // Rebuilding the tabs selects whichever tab comes first; that is not
+        // the user choosing a room, so it is ignored.
+        boolean[] rebuilding = { false };
+        tabs.addSelectedChangeListener(event -> {
+            String room = tabOfRoom.entrySet().stream()
+                    .filter(entry -> entry.getValue()
+                            .equals(event.getSelectedTab()))
+                    .map(Map.Entry::getKey).findFirst().orElse(null);
+            if (!rebuilding[0] && room != null
+                    && !room.equals(selected.peek())) {
+                open.accept(room);
+            }
+        });
+
+        // Reads the selection as well as the room list: a room created here
+        // may reach the list before it is selected, and its tab still has to
+        // end up selected.
+        Signal.effect(tabs, () -> {
+            List<String> names = topic.roomNames().get();
+            String current = selected.get();
+            rebuilding[0] = true;
+            tabs.removeAll();
+            tabOfRoom.keySet().retainAll(names);
+            names.forEach(name -> {
+                Tab tab = tabOfRoom.computeIfAbsent(name,
+                        room -> roomTab(topic, room));
+                tabs.add(tab);
+                if (name.equals(current)) {
+                    tabs.setSelectedTab(tab);
                 }
-                roomBar.add(open);
             });
+            rebuilding[0] = false;
         });
 
         TextField newRoom = new TextField();
@@ -118,14 +141,23 @@ public class RoomsView extends UseCaseView {
             if (!name.isEmpty()) {
                 topic.room(name);
                 newRoom.clear();
+                open.accept(name);
             }
         });
         create.addThemeVariants(ButtonVariant.SMALL);
 
-        openSelected.run();
+        open.accept(RoomsTopic.DEFAULT_ROOM);
 
-        return new Div(roomBar, new HorizontalLayout(newRoom, create),
-                roomPanel);
+        return new Div(tabs, new HorizontalLayout(newRoom, create), roomPanel);
+    }
+
+    /** A room's tab, with its message count kept current. */
+    private static Tab roomTab(RoomsTopic topic, String room) {
+        var messages = topic.messages(room);
+        Span label = new Span();
+        label.bindText(Signal
+                .computed(() -> room + " (" + messages.get().size() + ")"));
+        return new Tab(label);
     }
 
     private static Component roomView(RoomsTopic topic, Peer peer,
@@ -149,9 +181,7 @@ public class RoomsView extends UseCaseView {
         input.addSubmitListener(event -> messages.insertLast(
                 new Post(peer.name(), peer.colorIndex(), event.getValue())));
 
-        Span header = new Span("Room: " + room);
-
-        Div panel = new Div(header, group, list, input);
+        Div panel = new Div(group, list, input);
         panel.whenAttached(ui -> {
             presence.put(peer.key(), peer);
             return () -> presence.remove(peer.key());

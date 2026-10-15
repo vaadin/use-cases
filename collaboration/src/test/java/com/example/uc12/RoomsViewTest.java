@@ -12,6 +12,8 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextField;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,6 +45,16 @@ class RoomsViewTest extends SpringBrowserlessTest {
                 rig.getPanel(1).getElement().getTextRecursively()
                         .contains("shipping"),
                 rig.getPanel(1).getElement().getTextRecursively());
+
+        // The peer that created it is now in it, and its tab says so.
+        assertTrue(topic.presence("shipping").peek()
+                .containsKey(rig.getPanel(0).getPeer().key()));
+        assertTrue(selectedTab(rig, 0).getElement().getTextRecursively()
+                .startsWith("shipping"));
+        assertTrue(
+                selectedTab(rig, 1).getElement().getTextRecursively()
+                        .startsWith(RoomsTopic.DEFAULT_ROOM),
+                "the other peer stays where it was");
     }
 
     @Test
@@ -63,9 +75,14 @@ class RoomsViewTest extends SpringBrowserlessTest {
 
         // Switching rooms leaves the first one and shows the second one's
         // messages, which are none.
-        test(find(Button.class, rig.getPanel(1)).withTextContaining("returns")
-                .single()).click();
+        Tabs tabs = find(Tabs.class, rig.getPanel(1)).single();
+        Tab returns = find(Tab.class, rig.getPanel(1))
+                .withTextContaining("returns").single();
+        tabs.setSelectedTab(returns);
         runPendingSignalsTasks();
+
+        assertEquals(returns, tabs.getSelectedTab(),
+                "the tab stays selected once the tabs are rebuilt");
 
         assertEquals(0,
                 test(find(MessageList.class, rig.getPanel(1)).single()).size());
@@ -75,6 +92,10 @@ class RoomsViewTest extends SpringBrowserlessTest {
                 "a peer that moved rooms is no longer present in the old one");
         assertTrue(topic.presence("returns").peek()
                 .containsKey(rig.getPanel(1).getPeer().key()));
+    }
+
+    private Tab selectedTab(PeerRig rig, int panel) {
+        return find(Tabs.class, rig.getPanel(panel)).single().getSelectedTab();
     }
 
     @Test

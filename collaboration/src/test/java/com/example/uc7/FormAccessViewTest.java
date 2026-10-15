@@ -12,6 +12,9 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -41,7 +44,9 @@ class FormAccessViewTest extends SpringBrowserlessTest {
         assertEquals(rig.getPanel(0).getPeer(), topic.holder().peek(),
                 "a compare-and-set claim must not take a held lock");
         assertTrue(rig.getPanel(1).getElement().getTextRecursively()
-                .contains("REJECTED"), "and the peer that lost has to be told");
+                .contains("Could not claim: " + rig.getPanel(0).getPeer().name()
+                        + " is already editing"),
+                "and the peer that lost has to be told by whom");
     }
 
     @Test
@@ -75,6 +80,25 @@ class FormAccessViewTest extends SpringBrowserlessTest {
     }
 
     @Test
+    void focusingAReadOnlyFieldDoesNotHighlightIt() {
+        navigate(FormAccessView.class);
+        runPendingSignalsTasks();
+
+        PeerRig rig = findInView(PeerRig.class).single();
+        claim(rig, 0);
+        runPendingSignalsTasks();
+
+        focus(name(rig, 1));
+        runPendingSignalsTasks();
+        assertTrue(topic.form().editors(AccessTopic.NAME).peek().isEmpty(),
+                "a spectator clicking into a locked field is not editing it");
+
+        focus(name(rig, 0));
+        runPendingSignalsTasks();
+        assertEquals(1, topic.form().editors(AccessTopic.NAME).peek().size());
+    }
+
+    @Test
     void releasingHandsTheLockOn() {
         navigate(FormAccessView.class);
         runPendingSignalsTasks();
@@ -96,6 +120,13 @@ class FormAccessViewTest extends SpringBrowserlessTest {
     private void claim(PeerRig rig, int panel) {
         test(find(Button.class, rig.getPanel(panel)).withText("Claim editing")
                 .single()).click();
+    }
+
+    /** The DOM event {@code FormState#bindField} listens to. */
+    private void focus(TextField field) {
+        field.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(new DomEvent(field.getElement(), "focus",
+                        JacksonUtils.createObjectNode()));
     }
 
     private TextField name(PeerRig rig, int panel) {

@@ -16,6 +16,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -35,14 +36,14 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
  * disagree about the count are then a real possibility, because the count is a
  * second source of truth.
  * <p>
- * {@code Signal.computed} removes the second copy. Every readout in this view —
- * the per-status counts, the per-user workload, "my tasks", the completion
- * share — is derived from the one shared list, on every client, and cannot be
- * stale by construction. Nothing in the application writes them.
+ * {@code Signal.computed} removes the second copy. Every total in this view —
+ * the per-status counts, who has claimed how much, "your tasks", the completion
+ * share — is derived from the one shared task list, on every client, and cannot
+ * be stale by construction. Nothing in the application writes them.
  * <p>
- * The other half of the demonstration is that a derived value re-runs for what
- * it read and no more: claiming a task changes the workload table and the
- * "unassigned" count, and the completion share does not move.
+ * The board itself is deliberately small: a task is claimed by one user, and
+ * only that user can start and finish it. Each of those steps is one
+ * {@code update} on the task's entry, and every total follows.
  */
 @Route(value = "computed", layout = MainLayout.class)
 @RouteAlias(value = "uc11", layout = MainLayout.class)
@@ -53,14 +54,15 @@ public class ComputedStateView extends UseCaseView {
 
     public ComputedStateView(BoardTopic topic) {
         super("UC11 — Keep totals always in step",
-                "One shared task list. Claim a task or move it along in any panel: every readout in every panel "
-                        + "follows, although no code writes any of them — they are all computed from the list.");
+                "A shared task list. Claim a task, then start and finish it — only the user who claimed a task "
+                        + "can move it on. The totals under the list are not stored anywhere: each window computes "
+                        + "them from the task list, so they always match it.");
 
         add(new PeerRig(peer -> peerView(topic, peer)));
 
-        addNote("There is no counter anywhere in this use case. Collaboration Kit would need one written next "
-                + "to the data and kept in step; Signal.computed derives the same numbers per client from the "
-                + "shared list, which is state that cannot drift.");
+        addNote("No code writes any of the totals. They are Signal.computed over the shared task list, so they "
+                + "change with it in every window and cannot disagree with it. With Collaboration Kit each total "
+                + "would be a separate shared value that the code has to update next to the task.");
     }
 
     private static Component peerView(BoardTopic topic, Peer peer) {
@@ -78,14 +80,14 @@ public class ComputedStateView extends UseCaseView {
         byStatus.bindText(tasks.map(list -> {
             Map<Status, Long> counts = list.stream().collect(
                     Collectors.groupingBy(Task::status, Collectors.counting()));
-            return "To do %d · doing %d · done %d".formatted(
+            return "To do %d · in progress %d · done %d".formatted(
                     counts.getOrDefault(Status.TODO, 0L),
                     counts.getOrDefault(Status.DOING, 0L),
                     counts.getOrDefault(Status.DONE, 0L));
         }));
 
-        Span workload = new Span();
-        workload.bindText(tasks.map(list -> {
+        Span claimed = new Span();
+        claimed.bindText(tasks.map(list -> {
             String assigned = list.stream()
                     .filter(task -> !task.assignee().isEmpty())
                     .collect(Collectors.groupingBy(Task::assignee,
@@ -93,12 +95,12 @@ public class ComputedStateView extends UseCaseView {
                     .entrySet().stream()
                     .map(entry -> entry.getKey() + " " + entry.getValue())
                     .sorted().collect(Collectors.joining(", "));
-            return assigned.isEmpty() ? "Nobody has claimed anything"
-                    : "Workload: " + assigned;
+            return assigned.isEmpty() ? "Nobody has claimed a task yet"
+                    : "Claimed: " + assigned;
         }));
 
         Span mine = new Span();
-        mine.bindText(tasks.map(list -> "Yours: " + list.stream()
+        mine.bindText(tasks.map(list -> "Your tasks: " + list.stream()
                 .filter(task -> task.assignee().equals(peer.name())).count()));
 
         Span share = new Span();
@@ -111,7 +113,8 @@ public class ComputedStateView extends UseCaseView {
             return "Complete: " + (100 * done / list.size()) + "%";
         }));
 
-        Div readout = new Div(byStatus, workload, mine, share);
+        Div readout = new Div(new H4("Totals, computed from the list"),
+                byStatus, claimed, mine, share);
         readout.addClassName("computed-readout");
         readout.getChildren().forEach(
                 child -> child.getElement().getStyle().set("display", "block"));
@@ -122,29 +125,63 @@ public class ComputedStateView extends UseCaseView {
     private static Component row(SharedValueSignal<Task> entry, Peer peer) {
         Span title = new Span();
         title.bindText(entry.map(task -> task == null ? ""
-                : "%s — %s%s".formatted(task.title(), task.status(),
+                : "%s — %s%s".formatted(task.title(), label(task.status()),
                         task.assignee().isEmpty() ? ""
                                 : " (" + task.assignee() + ")")));
 
-        Button claim = new Button("Claim",
-                event -> entry.update(task -> task.withAssignee(peer.name())));
-        claim.addThemeVariants(ButtonVariant.SMALL, ButtonVariant.TERTIARY);
+        // One button whose meaning follows the task: claim it while nobody
+        // has, then start and finish it — and nothing for anybody else.
+        Signal<String> caption = entry
+                .map(task -> task == null ? "" : actionFor(task, peer));
+        Button action = new Button(caption);
+        action.addClickListener(event -> entry.update(task -> act(task, peer)));
+        action.addThemeVariants(ButtonVariant.SMALL, ButtonVariant.TERTIARY);
+        action.bindVisible(caption.map(text -> !text.isEmpty()));
 
-        Button advance = new Button("Advance", event -> entry
-                .update(task -> task.withStatus(next(task.status()))));
-        advance.addThemeVariants(ButtonVariant.SMALL, ButtonVariant.TERTIARY);
-
-        HorizontalLayout row = new HorizontalLayout(title, claim, advance);
+        HorizontalLayout row = new HorizontalLayout(title, action);
         row.setAlignItems(Alignment.CENTER);
         row.setPadding(false);
         return row;
     }
 
-    private static Status next(Status status) {
+    /** What this peer can do with a task next, empty for nothing. */
+    private static String actionFor(Task task, Peer peer) {
+        if (task.assignee().isEmpty()) {
+            return "Claim";
+        }
+        if (!task.assignee().equals(peer.name())) {
+            return "";
+        }
+        return switch (task.status()) {
+        case TODO -> "Start";
+        case DOING -> "Finish";
+        case DONE -> "";
+        };
+    }
+
+    /**
+     * The change a click makes, decided again on the current value: by the time
+     * the update runs, somebody else may have claimed the task.
+     */
+    private static Task act(Task task, Peer peer) {
+        if (task.assignee().isEmpty()) {
+            return task.withAssignee(peer.name());
+        }
+        if (!task.assignee().equals(peer.name())) {
+            return task;
+        }
+        return switch (task.status()) {
+        case TODO -> task.withStatus(Status.DOING);
+        case DOING -> task.withStatus(Status.DONE);
+        case DONE -> task;
+        };
+    }
+
+    private static String label(Status status) {
         return switch (status) {
-        case TODO -> Status.DOING;
-        case DOING -> Status.DONE;
-        case DONE -> Status.TODO;
+        case TODO -> "to do";
+        case DOING -> "in progress";
+        case DONE -> "done";
         };
     }
 }

@@ -115,7 +115,7 @@ public class FormState {
 
     /**
      * Binds one field to the shared value and to the highlighter, and reports
-     * this peer as editing it while it has focus.
+     * this peer as editing it while it has focus and is not read-only.
      * <p>
      * Focus is observed as a DOM event rather than through
      * {@code Focusable#addFocusListener}, because that method is typed on the
@@ -134,8 +134,13 @@ public class FormState {
             F field, String name, Peer peer) {
         SignalFieldHighlighter.bind(field, editors(name), peer);
 
-        field.getElement().addEventListener("focus",
-                event -> enter(name, peer));
+        // A read-only field can take focus but cannot be edited, so being in
+        // one is not editing it.
+        field.getElement().addEventListener("focus", event -> {
+            if (!field.isReadOnly()) {
+                enter(name, peer);
+            }
+        });
         field.getElement().addEventListener("blur", event -> leave(name, peer));
         // A peer that is gone is not editing anything, whatever the last DOM
         // event said.
