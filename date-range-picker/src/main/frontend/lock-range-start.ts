@@ -9,6 +9,9 @@
  *   what a pick in the calendar sets.
  * - The calendar button, which normally picks the whole range from the start,
  *   opens the calendar for the end only.
+ * - In the calendar, only the end of the range can be dragged. Dragging the
+ *   start, or dragging across other dates to "paint" a new range, does not
+ *   start; a click on a date still picks the end.
  *
  * Expects `separateDatePicking`, so a click on an input picks only that date,
  * and a `min` no earlier than the start, so no end before it can be picked.
@@ -43,6 +46,31 @@ function lockRangeStart(picker: HTMLElement & { opened: boolean; open(): void; c
       } else {
         end.focus();
         picker.open();
+      }
+    },
+    true,
+  );
+
+  // The calendar starts a drag on a press and follows it on mouse moves. Only
+  // a press on the end is let move: the cell marked range-end, which is also
+  // the start in a single-day range, so dragging from it keeps the start. For
+  // any other press the moves are kept from the calendar, so the drag never
+  // leaves its first date and the release is just a click that picks the end.
+  let pressHeld = false;
+  picker.addEventListener(
+    'pointerdown',
+    (event) => {
+      const cell = event.composedPath()[0];
+      pressHeld = cell instanceof Element && !!(cell as any).date && !cell.part.contains('range-end');
+    },
+    true,
+  );
+  ['pointerup', 'pointercancel'].forEach((type) => document.addEventListener(type, () => (pressHeld = false)));
+  picker.addEventListener(
+    'mousemove',
+    (event) => {
+      if (pressHeld) {
+        event.stopPropagation();
       }
     },
     true,

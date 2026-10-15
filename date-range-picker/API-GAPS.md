@@ -133,11 +133,15 @@ has to be prevented in the browser.
 **Workaround used:** `lock-range-start.ts` blocks typing, pasting and dropping
 into the start input, marks it `aria-readonly`, takes it out of the tab order,
 moves focus from it to the end input, and makes the calendar button open the
-calendar for the end only. It depends on the picker's current light DOM
-inputs and toggle button. The server still puts the start back if a changed
+calendar for the end only. In the calendar, pressing the start date and
+dragging moves the start, and dragging across other dates "paints" a new
+range, so the script keeps mouse moves from the calendar unless the press was
+on the end date. It depends on the picker's current light DOM inputs, toggle
+button and the `range-end` part of the calendar dates. The server still puts the start back if a changed
 one arrives.
-**Suggested API:** `startReadonly` / `endReadonly`, with the calendar button
-and clicks on the field then picking only the editable end.
+**Suggested API:** `startReadonly` / `endReadonly`, with the calendar button,
+clicks on the field and drags in the calendar then changing only the editable
+end.
 
 ## 10. Month names, day names and the first day of the week are not taken from the locale
 
