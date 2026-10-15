@@ -27,6 +27,7 @@ feature flag, which `PdfViewerFeatureFlagProvider` registers and
 | UC10 | Show a document once | A confidential briefing without download or print buttons, sent by the server only for the first request; a reload says it was opened already. |
 | UC11 | Follow the contents page | A handbook whose first page links to its chapters; the view shows the current chapter and has its own "Back to contents". |
 | UC12 | Fill in a PDF form | Answers from Vaadin fields are written into the PDF form's fields with PDFBox on the server, flattened, and the filled copy is shown. |
+| UC13 | Turn a sideways scan | "Turn left" and "Turn right" in the toolbar turn the current page on the server with PDFBox, so the scan stays upright for the next reader. |
 
 ## Run
 
@@ -45,4 +46,5 @@ no way to search or highlight from code, `print()` without an outcome,
 password-protected files, fixed toolbar buttons without a slot for the app's
 own, no translations, no browserless tester, no page signal, an out-of-range
 page that is not corrected, form fields that can not be filled in, no "view
-only" mode, no way back after following a link, and no signatures.
+only" mode, no way back after following a link, no signatures, no rotation,
+and no header title apart from the file name.

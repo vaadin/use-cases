@@ -37,6 +37,11 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * ({@code network}, {@code invalid} or {@code password}), so it can say what to
  * do about it in its own words, next to the viewer's generic message. For the
  * protected file it offers the download the viewer can not.
+ * <p>
+ * The viewer's header shows the file name, {@code travel-policy.pdf}, not the
+ * name the library gives the file. The header has no title of its own, and
+ * setting the file name to "Travel policy" would also change the name the file
+ * is downloaded under (API-GAPS.md #17).
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Document library")
@@ -105,6 +110,9 @@ public class DocumentLibraryView extends VerticalLayout {
         add(layout);
         add(ApiGap.note(6, "the viewer can not open a password-protected "
                 + "PDF; it only reports the reason \"password\"."));
+        add(ApiGap.note(17, "the viewer's header shows the file name. It has "
+                + "no title of its own, so it can not show the name the "
+                + "library uses without also downloading under that name."));
         grid.select(FILES.getFirst());
     }
 

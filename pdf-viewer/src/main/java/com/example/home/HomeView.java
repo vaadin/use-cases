@@ -8,6 +8,7 @@ import com.example.uc1.ReviewBeforeSendingView;
 import com.example.uc10.ShowOnceView;
 import com.example.uc11.ContentsPageView;
 import com.example.uc12.FillFormView;
+import com.example.uc13.TurnScanView;
 import com.example.uc2.ReadBeforeAcceptingView;
 import com.example.uc3.DocumentLibraryView;
 import com.example.uc4.ManualDeepLinkView;
@@ -40,7 +41,8 @@ public class HomeView extends BaseHomeView {
                         + "<vaadin-pdf-viewer> web component.");
         addGroup("Show the right document", VaadinIcon.FILE_TEXT_O, Accent.BLUE,
                 List.of(ReviewBeforeSendingView.class,
-                        DocumentLibraryView.class, CheckReceiptView.class));
+                        DocumentLibraryView.class, CheckReceiptView.class,
+                        TurnScanView.class));
         addGroup("Guide the reader", VaadinIcon.BOOKMARK_O, Accent.GREEN,
                 List.of(ReadBeforeAcceptingView.class, ManualDeepLinkView.class,
                         JumpToClauseView.class, ContentsPageView.class));

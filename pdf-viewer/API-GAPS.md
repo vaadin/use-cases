@@ -2,7 +2,10 @@
 
 Places where the prototype `<vaadin-pdf-viewer>` web component, or the way it
 reaches a Flow application, does not cover a use case or makes one awkward.
-Each entry names the use case that surfaced it.
+Each entry names the use case that surfaced it. Where the
+[VCF PDF Viewer](https://vaadin.com/directory/component/pdf-viewer) add-on
+(Flow add-on 6.x, `vcf-pdf-viewer` 4.2) already covers a gap, the entry says
+how, as a reference for the API.
 
 The web component's API: `src`, `page` (synchronized with `page-changed`),
 `zoom` (`page-width`, `page-fit` or a number), `pageCount` (read-only),
@@ -113,7 +116,8 @@ event that says whether it was wrong.
 ## 7. The toolbar's buttons can not be chosen
 
 **Where it bites:** UC6 / `PrintLabelView.java`, UC9 /
-`ApproveInToolbarView.java`, UC10 / `ShowOnceView.java`
+`ApproveInToolbarView.java`, UC10 / `ShowOnceView.java`, UC13 /
+`TurnScanView.java`
 **Symptom:** the find, download and print buttons are always in the toolbar
 (`vaadin-pdf-viewer-toolbar-mixin.js`), and the toolbar has no slot for an
 application's own controls. In UC6 the application has its own print button
@@ -131,7 +135,10 @@ them, and nothing else decides the order.
 **Suggested API:** properties to hide built-in actions (e.g.
 `downloadVisible`, `printVisible`, `findVisible`), and a documented slot for
 application controls (e.g. `toolbar-end`) that is hidden with the toolbar when
-it collapses; in Flow, `addToToolbar(Component...)`.
+it collapses; in Flow, `addToToolbar(Component...)`. The VCF add-on has
+`setAddDownloadButton(boolean)` and `setAddPrintButton(boolean)` (print is off
+by default) and a default slot in its toolbar: its `PdfViewer` is a `Div`, so
+`add(button)` puts a button there, which is also how it adds its own buttons.
 
 ## 8. No translations, and the UI locale is not used
 
@@ -205,7 +212,11 @@ If it does: an editable form layer, the field values as a property with a
 change event (so the server sees the answers without parsing the PDF), and a
 way to get the filled file back (e.g. `getFilledDocument()`, pdf.js's
 `saveDocument()`). Saving brings its own questions: where the filled file goes,
-and whether the server should trust it.
+and whether the server should trust it. The VCF add-on renders a form layer
+by default (`setRenderInteractiveForms`, pdf.js `AnnotationMode.ENABLE_FORMS`),
+so users can type into fields, but the values never reach the server and its
+download button fetches the original file again, so the answers are lost. That
+is the half to avoid.
 
 ## 13. Nothing keeps a document in the viewer
 
@@ -260,3 +271,36 @@ application gets the user's consent, signs the file with a signing service,
 and shows the signed file. For the viewer, consider showing signature status
 (valid, invalid, unknown) once pdf.js can check it, and leave drawn
 signatures out unless a use case needs them.
+
+## 16. Pages can not be turned
+
+**Where it bites:** UC13 / `TurnScanView.java`
+**Symptom:** a page that was scanned sideways or upside down stays that way:
+the viewer has no rotate buttons and no rotation property, and it renders
+every page with the rotation stored in the file. Turning the head is the only
+way to read the page.
+**Workaround used:** "Turn left" and "Turn right" buttons in the toolbar
+(#7) turn the current page on the server with PDFBox (`PageRotation`, the
+page's `/Rotate` entry) and load the document again. That also fixes the
+file for the next reader, which a viewer-only rotation would not. Flow does
+not send a page equal to the one it knows already, so a page set together
+with the new `src` is lost and the view sets it again on `document-load`.
+**Suggested API:** rotate buttons (optional, like the download and print
+buttons of #7) and a `rotation` property (0, 90, 180, 270) for the whole
+document; for a single page, an event with the page and the rotation, so the
+application can save it. The VCF add-on has `setAddRotateClockwiseButton` and
+`setAddRotateCounterClockwiseButton`, with tooltip setters; they turn all
+pages, in the browser only.
+
+## 17. The header has no title of its own
+
+**Where it bites:** UC3 / `DocumentLibraryView.java`
+**Symptom:** with `fileNameVisible`, the header shows `fileName`, else the
+file name from the URL, else the title in the document's metadata
+(`vaadin-pdf-viewer-print-mixin.js`). The same `fileName` is the name the file
+is downloaded under. A library that calls a file "Travel policy" can not show
+that in the header and still download `travel-policy.pdf`.
+**Workaround used:** none; the header shows the file name.
+**Suggested API:** a `title` property for the header, separate from
+`fileName`. The VCF add-on has `setCustomTitle(String)`, which takes
+precedence over the file name and the metadata title.

@@ -1,11 +1,16 @@
 package com.example.documents;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
 /**
@@ -658,6 +663,34 @@ public final class SampleDocuments {
                 "The board is asked to approve the start of due diligence at "
                         + "its meeting on 21 October 2026.");
         return new Pdf("board-briefing-q3.pdf", pdf.build());
+    }
+
+    /**
+     * The scanned delivery note of UC13. The scanner fed the second page in
+     * sideways, so that page is stored turned by 90 degrees.
+     */
+    public static Pdf scannedDeliveryNote() {
+        PdfBuilder pdf = new PdfBuilder("Delivery Note DN-5521");
+        pdf.row("Supplier", "Northwind Hardware");
+        pdf.row("Delivered to", "Acme Software Ltd, Dublin");
+        pdf.row("Date", "13.10.2026");
+        pdf.heading("Items");
+        pdf.row("3 x Laptop, 14 inch", "3 boxes");
+        pdf.row("3 x Docking station", "1 box");
+        pdf.pageBreak();
+        pdf.heading("Received");
+        pdf.paragraph("Goods received in good condition, except one damaged "
+                + "box (docking stations). The damage is noted on the "
+                + "carrier's copy.");
+        pdf.row("Signed", "J. Berg, warehouse");
+        try (PDDocument document = Loader.loadPDF(pdf.build())) {
+            document.getPage(1).setRotation(90);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            document.save(out);
+            return new Pdf("delivery-note-DN-5521.pdf", out.toByteArray());
+        } catch (IOException e) {
+            throw new UncheckedIOException("Could not render the scan", e);
+        }
     }
 
     private static void section(PdfBuilder pdf, String heading,

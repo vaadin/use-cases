@@ -7,6 +7,7 @@ import com.example.uc1.ReviewBeforeSendingView;
 import com.example.uc10.ShowOnceView;
 import com.example.uc11.ContentsPageView;
 import com.example.uc12.FillFormView;
+import com.example.uc13.TurnScanView;
 import com.example.uc2.ReadBeforeAcceptingView;
 import com.example.uc3.DocumentLibraryView;
 import com.example.uc4.ManualDeepLinkView;
@@ -35,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
         ManualDeepLinkView.class, CheckReceiptView.class, PrintLabelView.class,
         JumpToClauseView.class, LocalizedViewerView.class,
         ApproveInToolbarView.class, ShowOnceView.class, ContentsPageView.class,
-        FillFormView.class })
+        FillFormView.class, TurnScanView.class })
 class HomeViewTest extends SpringBrowserlessTest {
 
     private record UseCase(String tag, String title, String problem,
@@ -88,9 +89,13 @@ class HomeViewTest extends SpringBrowserlessTest {
             "Fill in a PDF form",
             "Filling in an official PDF form and showing the filled copy",
             "uc12");
+    private static final UseCase UC13 = new UseCase("UC13",
+            "Turn a sideways scan",
+            "Turning a page that was scanned sideways, and keeping it turned",
+            "uc13");
 
     private static final List<UseCase> USE_CASES = List.of(UC1, UC2, UC3, UC4,
-            UC5, UC6, UC7, UC8, UC9, UC10, UC11, UC12);
+            UC5, UC6, UC7, UC8, UC9, UC10, UC11, UC12, UC13);
 
     @Test
     void cardsAreGroupedByKindOfProblemInMenuOrder() {
@@ -105,7 +110,8 @@ class HomeViewTest extends SpringBrowserlessTest {
                 .toList();
 
         assertEquals(List.of(
-                new Group("Show the right document", List.of(UC1, UC3, UC5)),
+                new Group("Show the right document",
+                        List.of(UC1, UC3, UC5, UC13)),
                 new Group("Guide the reader", List.of(UC2, UC4, UC7, UC11)),
                 new Group("Act on the document", List.of(UC9, UC12)),
                 new Group("Fit the app", List.of(UC6, UC8, UC10))), groups);
