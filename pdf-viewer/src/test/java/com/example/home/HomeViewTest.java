@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import com.example.uc1.ReviewBeforeSendingView;
+import com.example.uc10.ShowOnceView;
+import com.example.uc11.ContentsPageView;
+import com.example.uc12.FillFormView;
 import com.example.uc2.ReadBeforeAcceptingView;
 import com.example.uc3.DocumentLibraryView;
 import com.example.uc4.ManualDeepLinkView;
@@ -11,6 +14,7 @@ import com.example.uc5.CheckReceiptView;
 import com.example.uc6.PrintLabelView;
 import com.example.uc7.JumpToClauseView;
 import com.example.uc8.LocalizedViewerView;
+import com.example.uc9.ApproveInToolbarView;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -29,7 +33,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ViewPackages(classes = { HomeView.class, ReviewBeforeSendingView.class,
         ReadBeforeAcceptingView.class, DocumentLibraryView.class,
         ManualDeepLinkView.class, CheckReceiptView.class, PrintLabelView.class,
-        JumpToClauseView.class, LocalizedViewerView.class })
+        JumpToClauseView.class, LocalizedViewerView.class,
+        ApproveInToolbarView.class, ShowOnceView.class, ContentsPageView.class,
+        FillFormView.class })
 class HomeViewTest extends SpringBrowserlessTest {
 
     private record UseCase(String tag, String title, String problem,
@@ -66,9 +72,25 @@ class HomeViewTest extends SpringBrowserlessTest {
             "Viewer in your language",
             "Showing the viewer's controls and messages in the user's language",
             "uc8");
+    private static final UseCase UC9 = new UseCase("UC9",
+            "Approve in the toolbar",
+            "Adding the app's own actions, with tooltips, to the viewer's toolbar",
+            "uc9");
+    private static final UseCase UC10 = new UseCase("UC10",
+            "Show a document once",
+            "Showing a confidential document once, without download or print",
+            "uc10");
+    private static final UseCase UC11 = new UseCase("UC11",
+            "Follow the contents page",
+            "Moving through a document with the links on its contents page",
+            "uc11");
+    private static final UseCase UC12 = new UseCase("UC12",
+            "Fill in a PDF form",
+            "Filling in an official PDF form and showing the filled copy",
+            "uc12");
 
     private static final List<UseCase> USE_CASES = List.of(UC1, UC2, UC3, UC4,
-            UC5, UC6, UC7, UC8);
+            UC5, UC6, UC7, UC8, UC9, UC10, UC11, UC12);
 
     @Test
     void cardsAreGroupedByKindOfProblemInMenuOrder() {
@@ -84,8 +106,9 @@ class HomeViewTest extends SpringBrowserlessTest {
 
         assertEquals(List.of(
                 new Group("Show the right document", List.of(UC1, UC3, UC5)),
-                new Group("Guide the reader", List.of(UC2, UC4, UC7)),
-                new Group("Fit the app", List.of(UC6, UC8))), groups);
+                new Group("Guide the reader", List.of(UC2, UC4, UC7, UC11)),
+                new Group("Act on the document", List.of(UC9, UC12)),
+                new Group("Fit the app", List.of(UC6, UC8, UC10))), groups);
     }
 
     @Test

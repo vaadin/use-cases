@@ -1,0 +1,18 @@
+.uc12-viewer {
+    height: 75vh;
+}
+
+.uc12-form {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: var(--vaadin-gap-m, 1rem);
+}
+
+.uc12-form vaadin-form-layout {
+    width: 100%;
+}
+
+.uc12-status {
+    color: var(--vaadin-text-color-secondary);
+}

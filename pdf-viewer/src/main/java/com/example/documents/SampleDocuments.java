@@ -190,7 +190,7 @@ public final class SampleDocuments {
         return new Pdf("acme-cloud-terms.pdf", pdf.build());
     }
 
-    /** The help topics of the user guide, and where the guide covers them. */
+    /** A long document, and the page each of its chapters starts on. */
     public record Manual(Pdf pdf, Map<String, Integer> chapterPages) {
     }
 
@@ -288,6 +288,84 @@ public final class SampleDocuments {
                         + "can find the problem faster.");
         byte[] bytes = pdf.build();
         return new Manual(new Pdf("time-tracker-guide.pdf", bytes),
+                pdf.headingPages());
+    }
+
+    /**
+     * The employee handbook of UC11. Its first page is a contents page that
+     * links to each chapter; it has no bookmarks, like many handbooks.
+     */
+    public static Manual employeeHandbook() {
+        PdfBuilder pdf = new PdfBuilder("Acme Employee Handbook")
+                .withContentsPage().chaptersOnNewPages();
+        section(pdf, "Welcome to Acme",
+                "This handbook explains how we work together: your working "
+                        + "hours, holidays, travel, equipment and who to ask "
+                        + "when something is unclear. It applies to everyone "
+                        + "employed by Acme Software Ltd.",
+                "The handbook does not replace your employment contract. "
+                        + "Where the two differ, the contract applies.");
+        section(pdf, "Working hours",
+                "The standard working week is 37.5 hours. You choose when to "
+                        + "work between 7:00 and 19:00, as long as you are "
+                        + "available for your team's meetings.",
+                "Record your hours in Acme Time Tracker by the end of each "
+                        + "week. Overtime needs your manager's approval in "
+                        + "advance, and is paid or taken as time off.",
+                "You may work from home up to three days a week. Agree on the "
+                        + "days with your team.");
+        section(pdf, "Holidays and leave",
+                "You have 25 days of paid holiday a year, plus public "
+                        + "holidays. Ask for holiday in the HR portal at least "
+                        + "two weeks ahead, and four weeks ahead for more than "
+                        + "a week.",
+                "If you are ill, tell your manager before 9:00 on the first "
+                        + "day. From the fourth day, we need a doctor's "
+                        + "certificate.",
+                "Parental leave, care leave and study leave follow the law of "
+                        + "the country you work in. HR can tell you what you "
+                        + "are entitled to.");
+        section(pdf, "Pay and benefits",
+                "Salaries are paid on the 25th of each month. Your payslip is "
+                        + "in the HR portal; it is protected with a password "
+                        + "that HR sends you on your first day.",
+                "Acme pays for a lunch benefit, a sports benefit of 400 EUR a "
+                        + "year and occupational health care.",
+                "Salaries are reviewed every April, based on your role, your "
+                        + "development and the market.");
+        section(pdf, "Travel",
+                "Book business trips through the travel portal and follow the "
+                        + "travel policy. Economy class for flights under six "
+                        + "hours, and hotels up to 150 EUR a night in capital "
+                        + "cities.",
+                "Claim travel expenses within 30 days, with a receipt for "
+                        + "every item.");
+        section(pdf, "Equipment and security",
+                "You get a laptop, a phone and the accessories you need. "
+                        + "Report a lost or stolen device to IT at once, also "
+                        + "outside office hours.",
+                "Lock your screen when you leave your desk. Do not install "
+                        + "software that IT has not approved, and never share "
+                        + "your password, not even with IT.",
+                "Customer data stays in the systems it belongs to. Do not copy "
+                        + "it to your own devices or to private cloud "
+                        + "services.");
+        section(pdf, "Learning and development",
+                "Everyone has five days a year for training. Agree on the "
+                        + "courses with your manager; Acme pays the course "
+                        + "fees.",
+                "Each autumn you and your manager review the year and agree "
+                        + "on goals for the next one.");
+        section(pdf, "Who to ask",
+                "Your manager is your first contact for anything about your "
+                        + "work. HR answers questions about contracts, pay "
+                        + "and leave at hr@acme.example. IT support is at "
+                        + "extension 4000.",
+                "If you see something that is not right, and do not want to "
+                        + "raise it with your manager, use the confidential "
+                        + "reporting channel in the HR portal.");
+        byte[] bytes = pdf.build();
+        return new Manual(new Pdf("employee-handbook.pdf", bytes),
                 pdf.headingPages());
     }
 
@@ -466,6 +544,46 @@ public final class SampleDocuments {
                     List.of("Hafenstrasse 12", "20457 Hamburg", "Germany"),
                     "3.8 kg"));
 
+    /** A purchase order waiting for a manager's approval, for UC9. */
+    public record PurchaseOrder(String number, String supplier,
+            String requestedBy, List<InvoiceLine> lines) {
+
+        public BigDecimal total() {
+            return lines.stream().map(InvoiceLine::total)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+
+        public Pdf pdf() {
+            PdfBuilder pdf = new PdfBuilder("Purchase Order " + number);
+            pdf.row("Supplier", supplier);
+            pdf.row("Requested by", requestedBy);
+            pdf.heading("Items");
+            pdf.boldRow("Description", "Amount");
+            for (InvoiceLine line : lines) {
+                pdf.row(line.quantity() + " x " + line.description(),
+                        money(line.total()));
+            }
+            pdf.boldRow("Total", money(total()));
+            pdf.paragraph("Orders over 1,000.00 EUR need the approval of the "
+                    + "department manager before they are sent.");
+            return new Pdf("purchase-order-" + number + ".pdf", pdf.build());
+        }
+    }
+
+    /** The purchase orders of UC9. */
+    public static final List<PurchaseOrder> PURCHASE_ORDERS = List.of(
+            new PurchaseOrder("PO-3301", "Office Depot Nordic", "Maria Lind",
+                    List.of(new InvoiceLine("Standing desk", 6,
+                            new BigDecimal("489.00")),
+                            new InvoiceLine("Monitor arm", 6,
+                                    new BigDecimal("79.00")))),
+            new PurchaseOrder("PO-3302", "Northwind Hardware", "Jonas Berg",
+                    List.of(new InvoiceLine("Laptop, 14 inch", 3,
+                            new BigDecimal("1390.00")))),
+            new PurchaseOrder("PO-3303", "Cafe Aurora Catering", "Maria Lind",
+                    List.of(new InvoiceLine("Lunch for the customer day", 40,
+                            new BigDecimal("28.50")))));
+
     /** The travel policy of the UC3 library. */
     public static Pdf travelPolicy() {
         PdfBuilder pdf = new PdfBuilder("Travel Policy");
@@ -517,6 +635,29 @@ public final class SampleDocuments {
         pdf.row("Tax", money(new BigDecimal("-1211.40")));
         pdf.boldRow("Net salary", money(new BigDecimal("3638.60")));
         return new Pdf("payslip-2026-09.pdf", pdf.build());
+    }
+
+    /**
+     * The confidential briefing of UC10, which the reader may see only once.
+     */
+    public static Pdf boardBriefing() {
+        PdfBuilder pdf = new PdfBuilder(
+                "Board Briefing — Strictly Confidential");
+        pdf.paragraph("Prepared for the members of the board. Do not copy or "
+                + "forward. This briefing contains inside information until "
+                + "the results are published on 28 October 2026.");
+        section(pdf, "Q3 results (draft)",
+                "Revenue 18.4 million EUR, up 12% on Q3 last year. Operating "
+                        + "profit 2.1 million EUR. The order backlog grew by "
+                        + "9% to 31 million EUR.");
+        section(pdf, "Proposed acquisition",
+                "Management proposes to acquire Northwind Hardware for 6.5 "
+                        + "million EUR in cash. Talks are at an early stage "
+                        + "and the seller has not agreed to the price.");
+        section(pdf, "Decision needed",
+                "The board is asked to approve the start of due diligence at "
+                        + "its meeting on 21 October 2026.");
+        return new Pdf("board-briefing-q3.pdf", pdf.build());
     }
 
     private static void section(PdfBuilder pdf, String heading,

@@ -3,7 +3,7 @@
 A standalone Spring Boot demo of the prototype `<vaadin-pdf-viewer>` web
 component in a Vaadin Flow application. Each view shows one thing a business
 application does with PDF documents: invoices, terms, receipts, manuals,
-contracts and labels, all generated on the fly with PDFBox.
+contracts, labels, handbooks and forms, all generated on the fly with PDFBox.
 
 There is no Flow component for the viewer yet, so the module wraps the web
 component itself in `com.example.pdfviewer.PdfViewer`. The web components come
@@ -23,6 +23,10 @@ feature flag, which `PdfViewerFeatureFlagProvider` registers and
 | UC6 | Print a shipping label | "Print label" on an order row calls `print()`, waiting for `document-load` when the label is not shown yet. |
 | UC7 | Jump to a clause | A review checklist opens a contract at the page with each answer, found with PDFBox text extraction on the server. |
 | UC8 | Viewer in your language | The viewer's 38 texts in English, Finnish or German, starting from the UI's locale. |
+| UC9 | Approve in the toolbar | "Approve" and "Reject" buttons with tooltips in the viewer's toolbar; each decision opens the next waiting purchase order. |
+| UC10 | Show a document once | A confidential briefing without download or print buttons, sent by the server only for the first request; a reload says it was opened already. |
+| UC11 | Follow the contents page | A handbook whose first page links to its chapters; the view shows the current chapter and has its own "Back to contents". |
+| UC12 | Fill in a PDF form | Answers from Vaadin fields are written into the PDF form's fields with PDFBox on the server, flattened, and the filled copy is shown. |
 
 ## Run
 
@@ -38,6 +42,7 @@ from pkg.pr.new, so it needs network access.
 
 See [API-GAPS.md](API-GAPS.md): the missing Flow component and feature flag,
 no way to search or highlight from code, `print()` without an outcome,
-password-protected files, fixed toolbar buttons, no translations, no
-browserless tester, no page signal and an out-of-range page that is not
-corrected.
+password-protected files, fixed toolbar buttons without a slot for the app's
+own, no translations, no browserless tester, no page signal, an out-of-range
+page that is not corrected, form fields that can not be filled in, no "view
+only" mode, no way back after following a link, and no signatures.

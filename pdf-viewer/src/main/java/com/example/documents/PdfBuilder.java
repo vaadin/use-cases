@@ -18,6 +18,8 @@ import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDBorderStyleDictionary;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageFitWidthDestination;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
@@ -63,6 +65,7 @@ public final class PdfBuilder {
     private boolean outline;
     private boolean pageNumbers = true;
     private boolean chaptersOnNewPages;
+    private boolean contentsPage;
     private @Nullable String password;
     private final Map<String, Integer> headingPages = new LinkedHashMap<>();
 
@@ -91,6 +94,15 @@ public final class PdfBuilder {
     /** Adds a bookmark for every heading, shown in the viewer's sidebar. */
     public PdfBuilder withOutline() {
         this.outline = true;
+        return this;
+    }
+
+    /**
+     * Lists the headings on the first page, below the title, each linking to
+     * its heading. The rest of the document starts on the second page.
+     */
+    public PdfBuilder withContentsPage() {
+        this.contentsPage = true;
         return this;
     }
 
@@ -190,6 +202,8 @@ public final class PdfBuilder {
 
         private final PDDocument document;
         private final @Nullable PDDocumentOutline documentOutline;
+        private final Map<String, PDPageFitWidthDestination> destinations = new LinkedHashMap<>();
+        private float contentsTop;
         private @Nullable PDPageContentStream content;
         private @Nullable PDPage page;
         private float y;
@@ -209,6 +223,10 @@ public final class PdfBuilder {
             newPage();
             writeLines(List.of(title), BOLD, bodySize * 1.8f);
             y -= bodySize;
+            if (contentsPage) {
+                contentsTop = y;
+                newPage();
+            }
             for (Block block : blocks) {
                 switch (block) {
                 case Heading heading -> heading(heading.text());
@@ -225,21 +243,25 @@ public final class PdfBuilder {
                 }
             }
             closePage();
+            if (contentsPage) {
+                writeContents();
+            }
         }
 
         private void heading(String text) throws IOException {
             float size = bodySize * 1.3f;
-            if (chaptersOnNewPages) {
+            if (chaptersOnNewPages && !pageIsEmpty()) {
                 newPage();
             }
             // Keep a heading together with the first lines below it.
             ensureSpace(size * 1.6f + bodySize * 4);
             y -= size * 0.6f;
             headingPages.put(text, document.getNumberOfPages());
+            PDPageFitWidthDestination destination = new PDPageFitWidthDestination();
+            destination.setPage(page);
+            destination.setTop((int) (y + size * 1.2f));
+            destinations.put(text, destination);
             if (documentOutline != null) {
-                PDPageFitWidthDestination destination = new PDPageFitWidthDestination();
-                destination.setPage(page);
-                destination.setTop((int) (y + size * 1.2f));
                 PDOutlineItem item = new PDOutlineItem();
                 item.setTitle(text);
                 item.setDestination(destination);
@@ -247,6 +269,43 @@ public final class PdfBuilder {
             }
             writeLines(List.of(text), BOLD, size);
             y -= size * 0.3f;
+        }
+
+        /**
+         * Writes a line for each heading on the first page, with a link to the
+         * heading over the whole line.
+         */
+        private void writeContents() throws IOException {
+            PDPage first = document.getPage(0);
+            float size = bodySize * 1.2f;
+            float lineHeight = size * 2;
+            try (PDPageContentStream stream = new PDPageContentStream(document,
+                    first, PDPageContentStream.AppendMode.APPEND, true)) {
+                content = stream;
+                y = contentsTop - bodySize * 2;
+                text("Contents", margin, BOLD, bodySize * 1.3f);
+                for (Map.Entry<String, PDPageFitWidthDestination> entry : destinations
+                        .entrySet()) {
+                    y -= lineHeight;
+                    String pageLabel = String
+                            .valueOf(headingPages.get(entry.getKey()));
+                    text(entry.getKey(), margin, REGULAR, size);
+                    text(pageLabel,
+                            pageSize.getWidth() - margin
+                                    - width(pageLabel, REGULAR, size),
+                            REGULAR, size);
+                    PDAnnotationLink link = new PDAnnotationLink();
+                    link.setRectangle(new PDRectangle(margin, y - size * 0.4f,
+                            pageSize.getWidth() - 2 * margin, size * 1.6f));
+                    link.setDestination(entry.getValue());
+                    PDBorderStyleDictionary border = new PDBorderStyleDictionary();
+                    border.setWidth(0);
+                    link.setBorderStyle(border);
+                    first.getAnnotations().add(link);
+                }
+            } finally {
+                content = null;
+            }
         }
 
         private void row(Row row) throws IOException {
@@ -290,6 +349,10 @@ public final class PdfBuilder {
             if (y - height < bottom) {
                 newPage();
             }
+        }
+
+        private boolean pageIsEmpty() {
+            return y >= pageSize.getHeight() - margin;
         }
 
         private void newPage() throws IOException {

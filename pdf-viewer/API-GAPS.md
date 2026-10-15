@@ -112,15 +112,26 @@ event that says whether it was wrong.
 
 ## 7. The toolbar's buttons can not be chosen
 
-**Where it bites:** UC6 / `PrintLabelView.java`
-**Symptom:** the download and print buttons are always in the toolbar. In
-UC6 the application has its own print button on each row, so the toolbar
-repeats it. Applications that show confidential documents often do not want
-to offer a download at all, and there is no slot for an application's own
-toolbar actions (e.g. "Approve" next to the document).
-**Workaround used:** none.
+**Where it bites:** UC6 / `PrintLabelView.java`, UC9 /
+`ApproveInToolbarView.java`, UC10 / `ShowOnceView.java`
+**Symptom:** the find, download and print buttons are always in the toolbar
+(`vaadin-pdf-viewer-toolbar-mixin.js`), and the toolbar has no slot for an
+application's own controls. In UC6 the application has its own print button
+on each row, so the toolbar repeats it. UC9 wants "Approve" and "Reject" next
+to the document. UC10 shows a confidential document that must not be
+downloaded or printed.
+**Workaround used:** the viewer renders its buttons into its light DOM, with
+`slot="toolbar-actions"`. `PdfViewer#addToToolbar` gives the application's
+buttons the same slot (UC9); a Flow `Button` with `setTooltipText(...)` gets
+its tooltip as usual. UC10 hides the download and print buttons with a
+stylesheet (`vaadin-pdf-viewer-button[icon='download']`). Neither is API: the
+slot names and the buttons' `icon` attribute can change. Controls added
+before the viewer first renders come before its own buttons, later ones after
+them, and nothing else decides the order.
 **Suggested API:** properties to hide built-in actions (e.g.
-`downloadVisible`, `printVisible`) and a slot for custom toolbar content.
+`downloadVisible`, `printVisible`, `findVisible`), and a documented slot for
+application controls (e.g. `toolbar-end`) that is hidden with the toolbar when
+it collapses; in Flow, `addToToolbar(Component...)`.
 
 ## 8. No translations, and the UI locale is not used
 
@@ -176,13 +187,76 @@ last page when it is past the end, and corrects the address.
 **Suggested API:** the viewer clamps `page` to `1…pageCount` once the document
 has loaded and fires `page-changed`.
 
-## 12. No forms, annotations or signatures
+## 12. PDF form fields can not be filled in
 
-**Where it bites:** no view; out of scope for a viewer, but common requests
-**Symptom:** the viewer renders pages, text and links. It does not show or
-fill in PDF form fields, add comments or highlights, or sign. Applications
-that let users fill in a PDF form or annotate a document for review need
-another solution.
-**Workaround used:** none; no use case was written for this.
-**Suggested API:** a decision on whether these belong in the viewer, and if
-so, form field values and annotations exposed as properties and events.
+**Where it bites:** UC12 / `FillFormView.java`
+**Symptom:** the viewer draws each page on a canvas and has no layer for
+form fields (`pdf-viewer-page.js` renders with pdf.js's default
+`annotationMode`). A form's fields are shown with the values the file holds,
+but the user can not type into them, tick a checkbox or pick an option. The
+application also gets no field values back.
+**Workaround used:** the view asks the questions in Vaadin fields, and
+`AddressChangeForm` fills in the PDF's fields on the server with PDFBox and
+flattens them. The viewer then shows the filled copy, and its download button
+saves it. This keeps the application in charge of the answers: it validates
+them, and the file that leaves the app is the one it made.
+**Suggested API:** a decision whether the viewer should edit forms at all.
+If it does: an editable form layer, the field values as a property with a
+change event (so the server sees the answers without parsing the PDF), and a
+way to get the filled file back (e.g. `getFilledDocument()`, pdf.js's
+`saveDocument()`). Saving brings its own questions: where the filled file goes,
+and whether the server should trust it.
+
+## 13. Nothing keeps a document in the viewer
+
+**Where it bites:** UC10 / `ShowOnceView.java`
+**Symptom:** some documents may only be read in the application: no download,
+no print, shown once. Apart from the buttons of #7, the viewer offers nothing
+for this. The text layer can be selected and copied, the viewer does not stop the
+browser's own print command (Ctrl+P) from printing the web page, and the
+file is in the browser's memory. Screenshots can never be stopped.
+**Workaround used:** the server sends the file only once (`OneTimeDocument`),
+so a reload, a second tab or the file's address opened elsewhere gets 410
+Gone. This works because pdf.js fetches the file in a single request: the
+response of a Flow `DownloadHandler` has no `Accept-Ranges` header, so pdf.js
+does not switch to range requests. For a large file from a server that offers
+them, it would make several requests, and a one-time link would break.
+**Suggested API:** a documented "view only" mode that turns off download and
+print, and optionally text selection, with documentation that says what it
+can not prevent. A note in the docs on how many requests the viewer makes
+for a document, so that a one-time URL can be built safely.
+
+## 14. Following a link inside the document has no way back
+
+**Where it bites:** UC11 / `ContentsPageView.java`
+**Symptom:** links to a place in the same document work: a click on a
+contents entry scrolls to the chapter (`#followLink` in
+`vaadin-pdf-viewer-mixin.js`). But the viewer does not remember where the
+link was followed from: there is no "back", and the browser's Back button
+leaves the page instead. The application is not told that a link was
+followed; it only sees `page-changed`, like for scrolling.
+**Workaround used:** the view shows the chapter of the current page and has
+its own "Back to contents" button, which sets the page to 1. That works for a
+contents page, not for a link in the middle of the text.
+**Suggested API:** a back (and forward) control in the viewer for links
+followed inside the document, optionally tied to the browser history, and a
+`link-click` event with the target page or URL that the application can
+cancel.
+
+## 15. No signatures
+
+**Where it bites:** UC12 / `FillFormView.java`
+**Symptom:** the form in UC12 ends with a signature line that stays empty.
+The viewer can not add a signature, and it does not show whether a
+signature in a document is valid. pdf.js tracked signature validation in https://github.com/mozilla/pdf.js/issues/13351
+(closed in June 2026; the web component uses pdfjs-dist 6.3.289). Whether
+that can be used outside Firefox has not been checked. A signature drawn in
+the browser is only an image. It does not prove who signed, and
+signatures with legal weight (e.g. eIDAS advanced or qualified signatures)
+are made by a signing service, not by a viewer.
+**Workaround used:** none; the signature line stays empty.
+**Suggested API:** keep signing on the server: document a flow where the
+application gets the user's consent, signs the file with a signing service,
+and shows the signed file. For the viewer, consider showing signature status
+(valid, invalid, unknown) once pdf.js can check it, and leave drawn
+signatures out unless a use case needs them.

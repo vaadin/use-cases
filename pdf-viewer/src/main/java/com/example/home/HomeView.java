@@ -5,6 +5,9 @@ import java.util.List;
 import com.example.common.BaseHomeView;
 import com.example.common.UseCaseDescription;
 import com.example.uc1.ReviewBeforeSendingView;
+import com.example.uc10.ShowOnceView;
+import com.example.uc11.ContentsPageView;
+import com.example.uc12.FillFormView;
 import com.example.uc2.ReadBeforeAcceptingView;
 import com.example.uc3.DocumentLibraryView;
 import com.example.uc4.ManualDeepLinkView;
@@ -12,6 +15,7 @@ import com.example.uc5.CheckReceiptView;
 import com.example.uc6.PrintLabelView;
 import com.example.uc7.JumpToClauseView;
 import com.example.uc8.LocalizedViewerView;
+import com.example.uc9.ApproveInToolbarView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Text;
@@ -39,9 +43,12 @@ public class HomeView extends BaseHomeView {
                         DocumentLibraryView.class, CheckReceiptView.class));
         addGroup("Guide the reader", VaadinIcon.BOOKMARK_O, Accent.GREEN,
                 List.of(ReadBeforeAcceptingView.class, ManualDeepLinkView.class,
-                        JumpToClauseView.class));
+                        JumpToClauseView.class, ContentsPageView.class));
+        addGroup("Act on the document", VaadinIcon.EDIT, Accent.PURPLE,
+                List.of(ApproveInToolbarView.class, FillFormView.class));
         addGroup("Fit the app", VaadinIcon.COG_O, Accent.ORANGE,
-                List.of(PrintLabelView.class, LocalizedViewerView.class));
+                List.of(PrintLabelView.class, LocalizedViewerView.class,
+                        ShowOnceView.class));
         add(new Paragraph(new Text("There is no Flow component for the viewer "
                 + "yet, so this app wraps the web component itself. Where the "
                 + "API falls short, the use case says so and links to "),

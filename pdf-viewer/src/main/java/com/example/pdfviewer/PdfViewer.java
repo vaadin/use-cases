@@ -256,6 +256,26 @@ public class PdfViewer extends Component implements HasSize, HasStyle {
     }
 
     /**
+     * Adds the application's own controls to the toolbar, in the group of the
+     * viewer's actions. Controls added before the viewer is first shown come
+     * before its find, download and print buttons, later ones after them. They
+     * are hidden with the rest of the toolbar when it collapses.
+     * <p>
+     * The web component has no slot for this (API-GAPS.md #7). The controls go
+     * into the slot of the viewer's own action buttons, which works because the
+     * viewer renders those into its light DOM, but is not part of its API.
+     *
+     * @param components
+     *            the controls to add
+     */
+    public void addToToolbar(Component... components) {
+        for (Component component : components) {
+            component.getElement().setAttribute("slot", "toolbar-actions");
+            getElement().appendChild(component.getElement());
+        }
+    }
+
+    /**
      * Prints the document. The browser shows the progress and the print dialog;
      * the server is not told whether the user printed or cancelled (API-GAPS.md
      * #5).
