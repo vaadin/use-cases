@@ -9,8 +9,11 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -72,6 +75,27 @@ class ComputedStateViewTest extends SpringBrowserlessTest {
         test(visibleButtons(rig, 0, "Finish").getFirst()).click();
         runPendingSignalsTasks();
         assertTrue(text(rig, 1).contains("Complete: 40%"));
+    }
+
+    @Test
+    void aClaimThatLostTheRaceLeavesTheTaskWithTheWinner() {
+        navigate(ComputedStateView.class);
+        runPendingSignalsTasks();
+
+        PeerRig rig = findInView(PeerRig.class).single();
+        // The second browser has not heard of the first claim yet, so its
+        // Claim button is still on screen and gets clicked. The server has
+        // already hidden it, which is why the click is fired directly rather
+        // than through the tester, which refuses invisible buttons.
+        Button first = visibleButtons(rig, 0, "Claim").getFirst();
+        Button second = visibleButtons(rig, 1, "Claim").getFirst();
+        test(first).click();
+        ComponentUtil.fireEvent(second, new ClickEvent<>(second));
+        runPendingSignalsTasks();
+
+        assertEquals(rig.getPanel(0).getPeer().name(),
+                topic.tasks().peek().getFirst().peek().assignee());
+        assertTrue(text(rig, 1).contains("Your tasks: 0"));
     }
 
     private java.util.List<Button> visibleButtons(PeerRig rig, int panel,

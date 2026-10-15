@@ -74,8 +74,12 @@ public class SignalFieldHighlighter extends FieldHighlighterInitializer {
         element.executeJs("""
                 const fh = %s;
                 const controller = fh.init(this);
-                const tags = controller.observer._tags;
-                if (!tags.__pinned) {
+                // Private state: if a component update renames it, the tags
+                // only lose their stickiness, highlighting itself still works.
+                const tags = controller.observer && controller.observer._tags;
+                const pin = tags && typeof tags.show === 'function'
+                        && typeof tags.hide === 'function';
+                if (pin && !tags.__pinned) {
                     tags.__pinned = true;
                     const hide = tags.hide;
                     tags.hide = function () {
@@ -84,11 +88,11 @@ public class SignalFieldHighlighter extends FieldHighlighterInitializer {
                         }
                     };
                 }
-                if ($0.length > 0) {
+                if (pin && $0.length > 0) {
                     tags.show();
                 }
                 fh.setUsers(this, $0);
-                if ($0.length === 0) {
+                if (pin && $0.length === 0) {
                     tags.hide();
                 }
                 """.formatted(FH_CLASS), toJson(peers));

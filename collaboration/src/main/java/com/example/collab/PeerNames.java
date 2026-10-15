@@ -1,8 +1,8 @@
 package com.example.collab;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -26,7 +26,12 @@ public final class PeerNames {
 
     private static final AtomicInteger NEXT = new AtomicInteger();
 
-    private static final Set<String> IN_USE = new HashSet<>();
+    /**
+     * Name to the id of the peer holding it. Keyed by holder so that a peer can
+     * only hand back a name it holds: a window reattached after its name went
+     * to somebody else must not free that somebody's name when it leaves.
+     */
+    private static final Map<String, Integer> IN_USE = new HashMap<>();
 
     /** Number of colours defined in {@code styles.css}. */
     public static final int COLOR_COUNT = 8;
@@ -48,7 +53,7 @@ public final class PeerNames {
                 for (int index = 0; index < NAMES.size(); index++) {
                     String name = round == 1 ? NAMES.get(index)
                             : NAMES.get(index) + " " + round;
-                    if (IN_USE.add(name)) {
+                    if (IN_USE.putIfAbsent(name, id) == null) {
                         return new Peer(id, name, index % COLOR_COUNT);
                     }
                 }
@@ -56,17 +61,20 @@ public final class PeerNames {
         }
     }
 
-    /** Marks a peer's name as in use again, for a panel that is reattached. */
+    /**
+     * Marks a peer's name as in use again, for a panel that is reattached. If
+     * somebody else got the name in the meantime it stays theirs.
+     */
     static void claim(Peer peer) {
         synchronized (IN_USE) {
-            IN_USE.add(peer.name());
+            IN_USE.putIfAbsent(peer.name(), peer.id());
         }
     }
 
-    /** Hands a peer's name back to the pool. */
+    /** Hands a peer's name back to the pool, if this peer holds it. */
     static void release(Peer peer) {
         synchronized (IN_USE) {
-            IN_USE.remove(peer.name());
+            IN_USE.remove(peer.name(), peer.id());
         }
     }
 }

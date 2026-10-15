@@ -99,6 +99,28 @@ class FormAccessViewTest extends SpringBrowserlessTest {
     }
 
     @Test
+    void takingOverSaysFromWhom() {
+        navigate(FormAccessView.class);
+        runPendingSignalsTasks();
+
+        PeerRig rig = findInView(PeerRig.class).single();
+        test(find(Button.class, rig.getPanel(0)).withText("Take over").single())
+                .click();
+        runPendingSignalsTasks();
+        assertTrue(
+                rig.getPanel(0).getElement().getTextRecursively()
+                        .contains("You are editing now"),
+                "nobody held the lock, so there was nobody to take it from");
+
+        test(find(Button.class, rig.getPanel(1)).withText("Take over").single())
+                .click();
+        runPendingSignalsTasks();
+        assertEquals(rig.getPanel(1).getPeer(), topic.holder().peek());
+        assertTrue(rig.getPanel(1).getElement().getTextRecursively().contains(
+                "You took over from " + rig.getPanel(0).getPeer().name()));
+    }
+
+    @Test
     void releasingHandsTheLockOn() {
         navigate(FormAccessView.class);
         runPendingSignalsTasks();
