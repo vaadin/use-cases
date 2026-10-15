@@ -1,0 +1,7 @@
+.uc1-viewer {
+    height: 70vh;
+}
+
+.uc1-status {
+    color: var(--vaadin-text-color-secondary);
+}

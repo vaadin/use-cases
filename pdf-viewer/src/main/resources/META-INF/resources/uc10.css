@@ -1,0 +1,25 @@
+.uc10-viewer {
+    height: 70vh;
+    width: 100%;
+}
+
+/* The viewer has no property for this (API-GAPS.md #7). Its buttons are in
+   its light DOM, so a stylesheet can hide them. */
+.uc10-viewer > vaadin-pdf-viewer-button:is([icon='download'], [icon='print']) {
+    display: none;
+}
+
+.uc10-status {
+    color: var(--vaadin-text-color-secondary);
+}
+
+.uc10-demo {
+    border: 1px dashed var(--vaadin-border-color);
+    border-radius: var(--vaadin-radius-m);
+    padding: var(--vaadin-padding-m, 1rem);
+}
+
+.uc10-demo h2 {
+    font-size: var(--aura-font-size-m);
+    margin: 0;
+}
