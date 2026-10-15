@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import com.example.acme.AppWindow;
 import com.example.acme.DemoRig;
 import com.example.acme.InsightCard;
 import com.example.acme.Insights;
 import com.example.acme.Investigation;
 import com.example.acme.MeterTable;
 import com.example.acme.Telemetry;
+import com.example.common.AppWindow;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -198,7 +198,8 @@ public class InteractionLatencyView extends VerticalLayout {
                 () -> "Invoice INV-%05d issued".formatted(24_310 + ++issued));
         issue.addThemeVariants(ButtonVariant.PRIMARY);
 
-        return new AppWindow("Acme Supply — Invoicing", ROUTE, customer, lines,
+        return new AppWindow("Acme Supply — Invoicing",
+                "acme.example/" + ROUTE, customer, lines,
                 new HorizontalLayout(Alignment.CENTER, save, discounts, issue,
                         status));
     }
