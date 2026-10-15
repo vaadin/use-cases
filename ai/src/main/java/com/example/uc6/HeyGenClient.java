@@ -35,6 +35,17 @@ public class HeyGenClient {
         }
     }
 
+    /**
+     * HeyGen answered a request with an error status, so it did not do what was
+     * asked.
+     */
+    public static class HeyGenException extends RuntimeException {
+
+        public HeyGenException(String message) {
+            super(message);
+        }
+    }
+
     private final RestClient restClient;
 
     public HeyGenClient(RestClient.Builder restClientBuilder,
@@ -43,9 +54,8 @@ public class HeyGenClient {
         this.restClient = restClientBuilder.baseUrl(baseUrl)
                 .defaultHeader("X-Api-Key", apiKey).defaultStatusHandler(
                         HttpStatusCode::isError, (request, response) -> {
-                            throw new IllegalStateException(
-                                    "HeyGen: " + errorMessage(
-                                            response.getBody().readAllBytes()));
+                            throw new HeyGenException("HeyGen: " + errorMessage(
+                                    response.getBody().readAllBytes()));
                         })
                 .build();
     }

@@ -67,7 +67,8 @@ class HeyGenClientTest {
                           "message": "Insufficient credits."}}""")
                         .contentType(MediaType.APPLICATION_JSON));
 
-        IllegalStateException error = assertThrows(IllegalStateException.class,
+        HeyGenClient.HeyGenException error = assertThrows(
+                HeyGenClient.HeyGenException.class,
                 () -> client.createVideo("a", "Hello", "Title"));
         assertEquals("HeyGen: Insufficient credits.", error.getMessage());
     }

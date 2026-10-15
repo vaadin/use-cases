@@ -59,14 +59,19 @@ public class PresenterVideoView extends VerticalLayout {
 
     /**
      * A rendering job: the video's id, when it started, when its status was
-     * last checked, that status, and the error of the last call, if any.
+     * last checked, that status, and the error of the last call, if any. A job
+     * without a video id and with an error failed to start; an error on a
+     * started job is a failed status check, and polling goes on.
      */
     record Job(@Nullable String videoId, Instant startedAt, Instant checkedAt,
             @Nullable VideoStatus status, @Nullable String error) {
 
         boolean isRunning() {
-            return videoId != null && error == null
-                    && (status == null || !status.isFinished());
+            return videoId != null && (status == null || !status.isFinished());
+        }
+
+        boolean isStarting() {
+            return videoId == null && error == null;
         }
     }
 
@@ -131,8 +136,8 @@ public class PresenterVideoView extends VerticalLayout {
 
         Signal.effect(this, () -> {
             Job current = job.get();
-            boolean busy = current != null && current.error() == null
-                    && (current.videoId() == null || current.isRunning());
+            boolean busy = current != null
+                    && (current.isStarting() || current.isRunning());
             generate.setEnabled(notice == null && !busy);
             quota.setText(videos.quota().remaining() + " of "
                     + videos.quota().perDay()
@@ -185,14 +190,16 @@ public class PresenterVideoView extends VerticalLayout {
             job.set(new Job(videoId, current.startedAt(), Instant.now(), status,
                     null));
         } catch (RuntimeException e) {
+            // Keep polling: a single failed check, such as a network blip,
+            // must not abandon a render that is still going on at HeyGen.
             job.set(new Job(videoId, current.startedAt(), Instant.now(),
-                    current.status(),
-                    "Could not check the video: " + e.getMessage()));
+                    current.status(), "Could not check the video, trying "
+                            + "again: " + e.getMessage()));
         }
     }
 
     static String statusName(Job job) {
-        if (job.error() != null) {
+        if (job.error() != null && !job.isRunning()) {
             return "failed";
         }
         return job.status() == null ? "pending" : job.status().status();

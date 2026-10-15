@@ -1,8 +1,10 @@
 package com.example.uc4;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import com.example.AiTestConfiguration;
+import com.example.AiTestConfiguration.FakeDocsMcpClient;
 import com.example.FakeLlm;
 import com.example.ai.ToolCallLog;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +22,7 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -29,6 +32,9 @@ class DocsAssistantViewTest extends SpringBrowserlessTest {
 
     @Autowired
     private FakeLlm llm;
+
+    @Autowired
+    private FakeDocsMcpClient docs;
 
     @BeforeEach
     void resetLlm() {
@@ -77,14 +83,18 @@ class DocsAssistantViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void failedConnectionIsExplainedInsteadOfLeavingTheReaderWaiting() {
-        assertEquals(
-                "Could not connect to the MCP server at "
-                        + "https://docs.example.com/mcp: timed out",
-                DocsAssistantView
-                        .describe(
-                                new DocsAssistantView.ConnectionState(null,
-                                        "timed out"),
-                                "https://docs.example.com/mcp"));
+    void failedConnectionIsExplainedAndAskingStaysOff() {
+        docs.setUnreachable(true);
+        try {
+            navigate(DocsAssistantView.class);
+            runPendingSignalsTasks(1, TimeUnit.SECONDS);
+
+            assertTrue(find(Paragraph.class).all().stream().anyMatch(p -> p
+                    .getText().equals("Could not connect to the MCP server at "
+                            + "https://docs.example.com/mcp: timed out")));
+            assertFalse(find(MessageInput.class).single().isEnabled());
+        } finally {
+            docs.setUnreachable(false);
+        }
     }
 }

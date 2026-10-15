@@ -80,20 +80,44 @@ public class DocsMcpClient implements DisposableBean {
                     .clientInfo(
                             new McpSchema.Implementation("ai-use-cases", "1.0"))
                     .requestTimeout(Duration.ofSeconds(30)).build();
-            McpSchema.InitializeResult info = newClient.initialize();
-            List<McpSchema.Tool> allTools = newClient.listTools().tools();
-            client = newClient;
-            connection = new Connection(info.serverInfo().name(),
-                    info.serverInfo().version(), allTools.size(),
-                    allTools.stream().filter(
-                            tool -> offeredTools.contains(tool.name())).map(
-                                    tool -> new DocsTool(tool.name(),
-                                            tool.description(),
-                                            JSON.writeValueAsString(
-                                                    tool.inputSchema())))
-                            .toList());
+            try {
+                McpSchema.InitializeResult info = newClient.initialize();
+                List<McpSchema.Tool> allTools = newClient.listTools().tools();
+                connection = new Connection(info.serverInfo().name(),
+                        info.serverInfo().version(), allTools.size(),
+                        offered(allTools, offeredTools));
+                client = newClient;
+            } catch (RuntimeException e) {
+                newClient.close();
+                throw e;
+            }
         }
         return connection;
+    }
+
+    /**
+     * Returns the tools the model may use: those of the server's tools that are
+     * listed in {@code offeredTools}.
+     */
+    static List<DocsTool> offered(List<McpSchema.Tool> serverTools,
+            Set<String> offeredTools) {
+        return serverTools.stream()
+                .filter(tool -> offeredTools.contains(tool.name()))
+                .map(tool -> new DocsTool(tool.name(), tool.description(),
+                        JSON.writeValueAsString(tool.inputSchema())))
+                .toList();
+    }
+
+    /**
+     * Returns the text of a tool result, marked as an error when the server
+     * reported one, so the model can tell the two apart.
+     */
+    static String text(McpSchema.CallToolResult result) {
+        String text = result.content().stream()
+                .filter(McpSchema.TextContent.class::isInstance)
+                .map(content -> ((McpSchema.TextContent) content).text())
+                .collect(Collectors.joining("\n"));
+        return Boolean.TRUE.equals(result.isError()) ? "Error: " + text : text;
     }
 
     /**
@@ -105,13 +129,24 @@ public class DocsMcpClient implements DisposableBean {
             connect();
             connected = Objects.requireNonNull(client);
         }
-        McpSchema.CallToolResult result = connected
-                .callTool(new McpSchema.CallToolRequest(tool, arguments));
-        String text = result.content().stream()
-                .filter(McpSchema.TextContent.class::isInstance)
-                .map(content -> ((McpSchema.TextContent) content).text())
-                .collect(Collectors.joining("\n"));
-        return Boolean.TRUE.equals(result.isError()) ? "Error: " + text : text;
+        try {
+            return text(connected
+                    .callTool(new McpSchema.CallToolRequest(tool, arguments)));
+        } catch (RuntimeException e) {
+            // The connection is shared and kept for the app's lifetime; a
+            // server restart or an expired session would otherwise break
+            // every later call. Drop it, so the next call connects again.
+            disconnect(connected);
+            throw e;
+        }
+    }
+
+    private synchronized void disconnect(McpSyncClient failed) {
+        if (client == failed) {
+            client = null;
+            connection = null;
+            failed.close();
+        }
     }
 
     @Override

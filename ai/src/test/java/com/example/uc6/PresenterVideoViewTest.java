@@ -40,33 +40,79 @@ class PresenterVideoViewTest extends SpringBrowserlessTest {
     void pollingFollowsTheJobUntilTheVideoIsReadyToPlay() throws Exception {
         navigate(PresenterVideoView.class);
 
-        test(find(Button.class).withText("Generate video").single()).click();
-        // Start and polls run on background threads; the fake HeyGen
-        // completes the job on the third status call.
-        long deadline = System.currentTimeMillis() + 5000;
-        while (find(Video.class).all().isEmpty()
-                && System.currentTimeMillis() < deadline) {
-            runPendingSignalsTasks(100, TimeUnit.MILLISECONDS);
-        }
+        clickGenerate();
+        // The fake HeyGen completes the job on the third status call.
+        awaitVideo();
 
-        assertEquals(1, find(Video.class).all().size());
-        assertTrue(find(Span.class).withClassName("uc6-badge").single()
-                .getText().startsWith("Ready after"));
+        assertTrue(badge().startsWith("Ready after"), badge());
+        Thread.sleep(100);
         assertEquals(3, heyGen.statusCalls(),
                 "polling stops once the job is finished");
     }
 
     @Test
-    void pollingStopsWhenTheUserLeavesTheView() throws Exception {
+    void failedStatusChecksDoNotAbandonTheRender() throws Exception {
+        heyGen.failChecks(2);
         navigate(PresenterVideoView.class);
-        test(find(Button.class).withText("Generate video").single()).click();
-        runPendingSignalsTasks(1, TimeUnit.SECONDS);
+
+        clickGenerate();
+        awaitVideo();
+
+        assertTrue(badge().startsWith("Ready after"), badge());
+    }
+
+    @Test
+    void pollingStopsWhenTheUserLeavesTheView() throws Exception {
+        heyGen.stayProcessing();
+        navigate(PresenterVideoView.class);
+        clickGenerate();
+        long deadline = System.currentTimeMillis() + 5000;
+        while (heyGen.statusCalls() < 2
+                && System.currentTimeMillis() < deadline) {
+            runPendingSignalsTasks(50, TimeUnit.MILLISECONDS);
+        }
+        assertTrue(heyGen.statusCalls() >= 2, "the job is being polled");
 
         navigate(HomeView.class);
         int callsWhenLeaving = heyGen.statusCalls();
         Thread.sleep(200);
 
         assertEquals(callsWhenLeaving, heyGen.statusCalls());
+    }
+
+    @Test
+    void refusedStartIsShownAndTheUserCanTryAgain() {
+        heyGen.failStart();
+        navigate(PresenterVideoView.class);
+
+        clickGenerate();
+        long deadline = System.currentTimeMillis() + 5000;
+        while (!badge().startsWith("HeyGen")
+                && System.currentTimeMillis() < deadline) {
+            runPendingSignalsTasks(50, TimeUnit.MILLISECONDS);
+        }
+
+        assertEquals("HeyGen: Insufficient credits.", badge());
+        assertTrue(find(Button.class).withText("Generate video").single()
+                .isEnabled());
+    }
+
+    private void clickGenerate() {
+        test(find(Button.class).withText("Generate video").single()).click();
+    }
+
+    /** Start and polls run on background threads. */
+    private void awaitVideo() {
+        long deadline = System.currentTimeMillis() + 5000;
+        while (find(Video.class).all().isEmpty()
+                && System.currentTimeMillis() < deadline) {
+            runPendingSignalsTasks(100, TimeUnit.MILLISECONDS);
+        }
+        assertEquals(1, find(Video.class).all().size());
+    }
+
+    private String badge() {
+        return find(Span.class).withClassName("uc6-badge").single().getText();
     }
 
     @Test

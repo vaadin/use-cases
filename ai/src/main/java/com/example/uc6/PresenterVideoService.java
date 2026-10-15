@@ -61,7 +61,10 @@ public class PresenterVideoService {
         try {
             return heyGen.createVideo(presenter.avatarId(), script,
                     "AI use cases — UC6");
-        } catch (RuntimeException e) {
+        } catch (HeyGenClient.HeyGenException e) {
+            // HeyGen refused the video. Any other failure, such as a reply
+            // that cannot be read, may come after the video was created and
+            // paid for, so it keeps using the quota.
             quota.release();
             throw e;
         }
