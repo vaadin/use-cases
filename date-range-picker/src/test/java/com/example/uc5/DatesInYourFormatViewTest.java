@@ -65,6 +65,7 @@ class DatesInYourFormatViewTest extends SpringBrowserlessTest {
         assertEquals(Locale.GERMANY,
                 DatesInYourFormatView.localeOf(Locale.of("de", "CH")));
         assertEquals(Locale.US, DatesInYourFormatView.localeOf(Locale.JAPAN));
+        assertEquals(Locale.US, DatesInYourFormatView.localeOf(null));
     }
 
     private String server() {

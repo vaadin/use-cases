@@ -23,10 +23,10 @@ use the web component without writing the Java side itself: the tag and npm
 package, the property synchronization for `page`, `zoom`, `sidebarOpened` and
 `toolbarCollapsed`, the event classes, serving a document from a
 `DownloadHandler`, and the texts.
-**Workaround used:** `PdfViewer` (about 430 lines, plus about 400 for `PdfViewerI18n`) wraps
-the web component. It switches the `DownloadHandler` to inline, keeps a copy
-of `pageCount` from the load events because the property is read-only, and
-types the zoom and the error reason as enums.
+**Workaround used:** `PdfViewer` (about 430 lines, plus about 400 for
+`PdfViewerI18n`) wraps the web component. It switches the `DownloadHandler`
+to inline, keeps a copy of `pageCount` from the load events because the
+property is read-only, and types the zoom and the error reason as enums.
 **Suggested API:** a Flow component along the lines of the wrapper:
 `setSrc(DownloadHandler)` / `setSrc(String)`, `getPage()` / `setPage(int)`,
 `getPageCount()`, `setZoom(Zoom)` / `setZoom(double)`,
@@ -284,9 +284,9 @@ way to read the page.
 page's `/Rotate` entry) and load the document again. The file itself is
 turned, so an application that saves it fixes the page for the next reader,
 which a viewer-only rotation would not; the demo keeps it while the view is
-open. Flow does
-not send a page equal to the one it knows already, so a page set together
-with the new `src` is lost and the view sets it again on `document-load`.
+open. Flow does not send a page equal to the one it knows already, so a page
+set together with the new `src` is lost and the view sets it again on
+`document-load`.
 **Suggested API:** rotate buttons (optional, like the download and print
 buttons of #7) and a `rotation` property (0, 90, 180, 270) for the whole
 document; for a single page, an event with the page and the rotation, so the

@@ -46,6 +46,13 @@ class LocalizedViewerViewTest extends SpringBrowserlessTest {
     }
 
     @Test
+    void anUnknownLanguageFallsBackToEnglish() {
+        assertEquals(Locale.ENGLISH,
+                LocalizedViewerView.languageOf(Locale.JAPAN));
+        assertEquals(Locale.ENGLISH, LocalizedViewerView.languageOf(null));
+    }
+
+    @Test
     void everyTextIsTranslated() {
         // Texts left out would show up in English in the middle of the
         // translated ones.

@@ -42,10 +42,9 @@ from pkg.pr.new, so it needs network access.
 ## API gaps
 
 See [API-GAPS.md](API-GAPS.md): the missing Flow component and feature flag,
-a preview package pinned by hand,
-no way to search or highlight from code, `print()` without an outcome,
-password-protected files, fixed toolbar buttons without a slot for the app's
-own, no translations, no browserless tester, no page signal, an out-of-range
-page that is not corrected, form fields that can not be filled in, no "view
-only" mode, no way back after following a link, no signatures, no rotation,
-and no header title apart from the file name.
+a preview package pinned by hand, no way to search or highlight from code,
+`print()` without an outcome, password-protected files, fixed toolbar buttons
+without a slot for the app's own, no translations, no browserless tester, no
+page signal, an out-of-range page that is not corrected, form fields that can
+not be filled in, no "view only" mode, no way back after following a link, no
+signatures, no rotation, and no header title apart from the file name.

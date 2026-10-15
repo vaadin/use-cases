@@ -70,7 +70,7 @@ public class FillFormView extends VerticalLayout {
         add(new H1("UC12 — Fill in a PDF form"));
         add(new Paragraph("The pension fund only accepts its own PDF form for "
                 + "a change of address. Answer the questions and choose "
-                + " \"Fill in the form\". The server writes your answers "
+                + "\"Fill in the form\". The server writes your answers "
                 + "into the PDF and shows the filled copy. The viewer's "
                 + "download button gives you the filled form."));
 
