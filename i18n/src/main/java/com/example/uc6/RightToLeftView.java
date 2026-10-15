@@ -10,6 +10,7 @@ import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Direction;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -97,10 +98,10 @@ public class RightToLeftView extends VerticalLayout {
         languages.setWrap(true);
 
         direction.addClassName("direction");
-        // Code, not prose: it reads left to right in every language.
-        direction.getElement().setAttribute("dir", "ltr");
-        direction.bindText(ui.localeSignal().map(locale -> "dir=\""
-                + MissingAPI.directionOf(locale).getClientName() + "\""));
+        direction.bindText(ui.localeSignal().map(locale -> "Reading direction: "
+                + (MissingAPI.directionOf(locale) == Direction.RIGHT_TO_LEFT
+                        ? "right to left"
+                        : "left to right")));
 
         sample.addClassName("sample");
         mirrorIcons.bindValue(mirror, mirror::set);

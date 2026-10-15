@@ -4,7 +4,7 @@ A standalone Spring Boot demo of making a Vaadin Flow application work for users
 
 | # | View | What it shows |
 | - | ---- | ------------- |
-| UC1 | Translated texts | An order confirmation from `translations*.properties` through `getTranslation` and `LocaleChangeObserver`: parameters, a plural that follows a number, a date inside a sentence, a key only the English fallback file has, and a key no file has. |
+| UC1 | Translated texts | An order confirmation from `translations*.properties` through `getTranslation` and `LocaleChangeObserver`: parameters, a plural that follows a number, and a date inside a sentence. |
 | UC2 | Language switcher | The first language comes from the browser's `Accept-Language`; a picked language applies to every tab of the session and is remembered in a cookie, and the view shows where the current language came from. |
 | UC3 | Dates and times | Date, time and date-time pickers that follow a language switch (format, month and weekday names, first day of the week, 12/24-hour clock), next to dates formatted on the server. |
 | UC4 | Numbers and currency | Prices, VAT percentage and big numbers per locale, with the currency kept as part of the order; a `BigDecimalField` that reads the local decimal separator next to a `NumberField` that does not. |

@@ -9,7 +9,6 @@ import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -32,14 +31,12 @@ import com.vaadin.flow.router.Route;
  * <p>
  * The texts show the cases a real application runs into: parameters (the
  * customer's name and the order number), a plural that depends on a number the
- * user changes, a date formatted inside a sentence, a key that only the English
- * fallback file has, and a key that no file has at all.
+ * user changes, and a date formatted inside a sentence.
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Translated texts")
 @UseCaseDescription("Showing texts from translation files in the user's language")
 @Menu(order = 1, title = "UC1 — Translated texts")
-@StyleSheet("uc1.css")
 public class TranslatedTextView extends VerticalLayout
         implements LocaleChangeObserver {
 
@@ -52,29 +49,20 @@ public class TranslatedTextView extends VerticalLayout
     private final IntegerField quantity = new IntegerField();
     private final Paragraph items = new Paragraph();
     private final Paragraph delivery = new Paragraph();
-    private final Paragraph returns = new Paragraph();
-    private final Paragraph newsletter = new Paragraph();
     private final Button track = new Button();
 
     public TranslatedTextView() {
         add(new H1("UC1 — Translated texts"));
         add(new Paragraph("Pick another language in the top bar: every text "
                 + "in the order confirmation below is rewritten in place. "
-                + "Change the number of items to see the plural follow it. "
-                + "The returns line exists only in the English file, so other "
-                + "languages fall back to it; the newsletter line has no "
-                + "translation anywhere and shows Flow's missing-key marker."));
+                + "Change the number of items to see the plural follow it."));
 
         quantity.setValue(3);
         quantity.setMin(0);
         quantity.setStepButtonsVisible(true);
         quantity.addValueChangeListener(e -> updateItems());
 
-        returns.addClassName("uc1-fallback");
-        newsletter.addClassName("uc1-missing");
-
-        Div sample = new Div(title, greeting, quantity, items, delivery,
-                returns, newsletter, track);
+        Div sample = new Div(title, greeting, quantity, items, delivery, track);
         sample.addClassName("sample");
         add(sample);
         add(new BuiltWith(
@@ -97,8 +85,6 @@ public class TranslatedTextView extends VerticalLayout
         // JVM's default time zone: midnight there keeps the day unchanged.
         delivery.setText(getTranslation("uc1.delivery", Date.from(
                 DELIVERY.atStartOfDay(ZoneId.systemDefault()).toInstant())));
-        returns.setText(getTranslation("uc1.returns"));
-        newsletter.setText(getTranslation("uc1.newsletter"));
         track.setText(getTranslation("uc1.track"));
     }
 

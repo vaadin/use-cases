@@ -68,11 +68,15 @@ public class MixedDirectionView extends VerticalLayout {
         addClassName("uc7-view");
 
         add(new H1("UC7 — Mixed-direction text"));
-        add(new Paragraph("Switch to Hebrew or Arabic and compare the two "
-                + "messages: in the naive one the period of \"Acme Ltd.\" "
-                + "and the # of the ticket number jump to the wrong end. "
-                + "Type a name in Hebrew while the page is in English to see "
-                + "the same problem the other way round."));
+        add(new Paragraph("A support desk shows \"<customer> opened ticket "
+                + "<number>.\" in the user's language. The customer name and "
+                + "the ticket number are data written in English, so in a "
+                + "Hebrew or Arabic sentence they run in the other direction. "
+                + "Click Hebrew or Arabic below and compare the Naive and "
+                + "Isolated lines: in the naive one, \"Acme Ltd.\" shows as \".Acme "
+                + "Ltd\" and \"#4521-B\" as \"4521-B#\". The isolated line "
+                + "keeps them intact. The comment at the bottom stays aligned "
+                + "to the left, because it is English text."));
 
         HorizontalLayout languages = new HorizontalLayout(
                 new Button(SupportedLocales.nativeName(SupportedLocales.HEBREW),

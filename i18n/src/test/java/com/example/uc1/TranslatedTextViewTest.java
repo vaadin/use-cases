@@ -69,18 +69,6 @@ class TranslatedTextViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void missingTranslationsFallBackOrShowTheMarker() {
-        navigate(TranslatedTextView.class);
-
-        UI.getCurrent().setLocale(SupportedLocales.FINNISH);
-
-        // Only the English fallback file has this key.
-        assertTrue(hasParagraph("You can return any item within 30 days."));
-        // No file has this one.
-        assertTrue(hasParagraph("!fi: uc1.newsletter"));
-    }
-
-    @Test
     void showsTheTranslationFilesItIsBuiltFrom() {
         navigate(TranslatedTextView.class);
 

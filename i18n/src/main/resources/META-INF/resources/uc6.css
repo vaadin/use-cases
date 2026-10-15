@@ -1,6 +1,6 @@
 .uc6-view .direction {
-    font-family: monospace;
     align-self: center;
+    color: var(--vaadin-text-color-secondary);
 }
 
 .uc6-view .step {

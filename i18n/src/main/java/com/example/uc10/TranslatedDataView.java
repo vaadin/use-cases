@@ -8,6 +8,7 @@ import java.util.Objects;
 
 import com.example.MissingAPI;
 import com.example.SupportedLocales;
+import com.example.common.AppWindow;
 import com.example.common.UseCaseDescription;
 import com.example.uc10.CategoryCatalog.Category;
 import com.example.views.BuiltWith;
@@ -19,7 +20,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.StyleSheet;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.ListItem;
@@ -75,11 +75,11 @@ public class TranslatedDataView extends VerticalLayout {
         addClassName("uc10-view");
 
         add(new H1("UC10 — Translated data"));
-        add(new Paragraph("The left half is the administrator's editor: pick "
-                + "a category and fill in its name per language. The right "
-                + "half is what users see in the language picked in the top "
-                + "bar. Open this page in a second browser: saved edits show "
-                + "up there at once."));
+        add(new Paragraph("The left window is the administrator's editor: "
+                + "pick a category and fill in its name per language. The "
+                + "right window is what shoppers see in the language picked in "
+                + "the top bar. Open this page in a second browser: saved "
+                + "edits show up there at once."));
 
         // The admin side: the list shows each name in the admin's language.
         list.setItemLabelGenerator(
@@ -102,11 +102,12 @@ public class TranslatedDataView extends VerticalLayout {
         save.addThemeVariants(ButtonVariant.PRIMARY);
         save.addClickListener(e -> save());
         create.addClickListener(e -> list.clear());
-        VerticalLayout editor = new VerticalLayout();
-        editor.setPadding(false);
-        editor.add(new H2("Administrator"), list);
-        fields.values().forEach(editor::add);
-        editor.add(new HorizontalLayout(save, create), coverage);
+        VerticalLayout form = new VerticalLayout(list);
+        form.setPadding(false);
+        fields.values().forEach(form::add);
+        form.add(new HorizontalLayout(save, create), coverage);
+        AppWindow editor = new AppWindow("Shop admin",
+                "shop.example/admin/categories", form);
         editor.addClassName("editor");
 
         // The user side.
@@ -114,8 +115,9 @@ public class TranslatedDataView extends VerticalLayout {
         usersTitle.bindText(MissingAPI.translate("uc10.categories"));
         picker.setItemLabelGenerator(
                 category -> category.name().in(ui.getLocale()).text());
-        Div users = new Div(usersTitle, preview, picker);
-        users.addClassNames("sample", "users");
+        AppWindow users = new AppWindow("Shop", "shop.example/categories",
+                usersTitle, preview, picker);
+        users.addClassName("users");
 
         HorizontalLayout halves = new HorizontalLayout(editor, users);
         halves.setWrap(true);

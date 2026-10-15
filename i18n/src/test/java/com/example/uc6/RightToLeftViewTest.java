@@ -31,7 +31,7 @@ class RightToLeftViewTest extends SpringBrowserlessTest {
                 findInView(H1.class).single().getText());
         assertEquals("Shipping details",
                 findInView(H2.class).first().getText());
-        assertEquals("dir=\"ltr\"", view.direction());
+        assertEquals("Reading direction: left to right", view.direction());
         assertTrue(view.sample().hasClassName("mirror-icons"));
         // Only the arrows mirror; the check mark, phone and search do not.
         assertEquals(2, findInView(Icon.class).all().stream()
@@ -44,19 +44,19 @@ class RightToLeftViewTest extends SpringBrowserlessTest {
 
         test(button("العربية")).click();
         runPendingSignalsTasks();
-        assertEquals("dir=\"rtl\"", view.direction());
+        assertEquals("Reading direction: right to left", view.direction());
         assertEquals(SupportedLocales.ARABIC, UI.getCurrent().getLocale());
         assertEquals("بيانات الشحن", findInView(H2.class).first().getText());
 
         test(button("עברית")).click();
         runPendingSignalsTasks();
-        assertEquals("dir=\"rtl\"", view.direction());
+        assertEquals("Reading direction: right to left", view.direction());
         assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "טלפון".equals(f.getLabel())));
 
         test(button("Deutsch")).click();
         runPendingSignalsTasks();
-        assertEquals("dir=\"ltr\"", view.direction());
+        assertEquals("Reading direction: left to right", view.direction());
     }
 
     @Test
