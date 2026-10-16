@@ -20,6 +20,8 @@ public final class AppCatalog {
                     "https://collaboration-cases.fly.dev/"),
             new App("custom-components", "Custom Components",
                     "https://custom-components-cases.fly.dev/"),
+            new App("file-uploads", "File Uploads",
+                    "https://file-uploads-cases.fly.dev/"),
             new App("fullscreen", "Fullscreen API",
                     "https://fullscreen-cases.fly.dev/"),
             new App("geolocation", "Geolocation API",

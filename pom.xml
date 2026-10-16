@@ -18,6 +18,7 @@
         <module>common</module>
         <module>async-ui</module>
         <module>custom-components</module>
+        <module>file-uploads</module>
         <module>fullscreen</module>
         <module>geolocation</module>
         <module>i18n</module>

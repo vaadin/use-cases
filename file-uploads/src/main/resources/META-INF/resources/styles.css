@@ -1,0 +1,30 @@
+/* File upload use cases — small visual polish */
+
+.field-label {
+    font-weight: 500;
+    margin-top: var(--vaadin-padding-m);
+}
+
+.helper-text {
+    font-size: var(--aura-font-size-s);
+    color: var(--vaadin-text-color-secondary);
+}
+
+.error-text {
+    font-size: var(--aura-font-size-s);
+    color: var(--aura-red-text);
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* UC5 shows the progress the server measures; hide the upload's own list */
+.large-file-upload > vaadin-upload-file-list {
+    display: none;
+}
