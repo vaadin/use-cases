@@ -62,14 +62,6 @@ Upstream: https://github.com/vaadin/flow/issues/26382
 **Suggested API:** a `vaadin.i18n.default-locale` property, or treating the locale of the fallback `translations.properties` as the default.
 Upstream: https://github.com/vaadin/flow/issues/20967
 
-## 8. The server's default locale leaks into translations
-
-**Where it bites:** `src/main/resources/vaadin-i18n/translations_en_US.properties`
-**Symptom:** `DefaultI18NProvider` uses `ResourceBundle.getBundle` with the default control. When there is no file for the requested locale, that control looks for the JVM's default locale before it falls back to `translations.properties`. On a server running with a German default locale, English users would get German texts.
-**Workaround used:** an empty `translations_en_US.properties`, so that every supported locale has a file of its own.
-**Suggested API:** load bundles with `ResourceBundle.Control.getNoFallbackControl(FORMAT_PROPERTIES)`, so a missing locale goes straight to the fallback file.
-Upstream: https://github.com/vaadin/flow/issues/26383
-
 ## 9. `MessageFormat` is not enough for real-world messages
 
 **Where it bites:** UC1 / TranslatedTextView.java, UC9 / TranslationSignalView.java
