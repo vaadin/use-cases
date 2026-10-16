@@ -1,0 +1,9 @@
+.uc3-ticket-list > div {
+    padding: 0.35rem 0.6rem;
+    border-radius: var(--vaadin-radius-m);
+}
+
+.uc3-ticket-list > div.selected {
+    background: color-mix(in srgb, var(--aura-blue) 15%, transparent);
+    font-weight: 600;
+}

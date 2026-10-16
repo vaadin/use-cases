@@ -20,6 +20,7 @@ import com.example.uc20.DoubleClickOpenView;
 import com.example.uc21.ShortcutDownloadView;
 import com.example.uc22.KeyEventLogView;
 import com.example.uc23.KonamiCodeView;
+import com.example.uc24.DisableButtonGroupView;
 import com.example.uc3.LiveSignalCounterView;
 import com.example.uc4.JsTriggerView;
 import com.example.uc5.IdleWarningView;
@@ -60,7 +61,8 @@ public class HomeView extends BaseHomeView {
                 Accent.ORANGE,
                 List.of(SubmitAndDisableView.class, ScrollIntoViewView.class,
                         HighlightView.class, AccessibleSaveView.class,
-                        ClientFilterView.class, AtomicResetView.class));
+                        ClientFilterView.class, AtomicResetView.class,
+                        DisableButtonGroupView.class));
         addGroup("Custom gestures and live input", VaadinIcon.KEYBOARD_O,
                 Accent.PURPLE,
                 List.of(LongPressDeleteView.class, RightClickCoordsView.class,

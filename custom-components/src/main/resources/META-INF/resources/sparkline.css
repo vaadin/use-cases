@@ -1,0 +1,33 @@
+/*
+ * Sparkline. Public styling API: the color comes from currentColor, and the
+ * theme variants "success", "error" and "filled".
+ */
+svg.sparkline {
+    color: var(--aura-accent-color, #0c6ce9);
+    overflow: visible;
+}
+
+svg.sparkline .line {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+    stroke-linejoin: round;
+}
+
+svg.sparkline .area {
+    fill: none;
+}
+
+svg.sparkline[theme~="filled"] .area {
+    fill: currentColor;
+    opacity: 0.15;
+}
+
+svg.sparkline[theme~="success"] {
+    color: var(--aura-green, #16a34a);
+}
+
+svg.sparkline[theme~="error"] {
+    color: var(--aura-red, #dc2626);
+}

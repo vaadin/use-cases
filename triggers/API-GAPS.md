@@ -21,6 +21,8 @@ PR has a feedback trail.
 | Server-side feature detection | **Open** | — |
 | Public introspection of trigger wiring | **Open** | all tests |
 | Client-side test simulator | **Open** | all tests |
+| Action-written properties are invisible to the server | **Open** — manual server-side mirror | UC24 |
+| `bindEnabled` can't be combined with disable-on-click | **Open** — effect calls `setEnabled` | UC24 |
 
 ## No public `ShortcutTrigger`
 
@@ -144,3 +146,42 @@ Playwright is the source of truth for behaviour.
 `Element` exposing the installed expressions (for assertions on the
 generated JS), or a higher-level `TriggerTestKit` that mocks the
 gesture path so actions can be fired headlessly.
+
+## Action-written properties are invisible to the server
+
+**Where it bit us:** UC24 (click one of Approve / Reject / Escalate →
+disable all three before the round-trip).
+**Symptom:** `SetPropertyAction(sibling, "disabled", true)` disables the
+siblings instantly, but the server never learns about it: the property
+isn't synced back and `sibling.isEnabled()` stays `true`. When the slow
+work finishes, `sibling.setEnabled(true)` is then a no-op (no state
+change, nothing sent), so the siblings would stay disabled in the
+browser forever. `Button#setDisableOnClick` doesn't have this problem
+because the framework updates the server-side enabled state itself, but
+it only covers the clicked button.
+**Workaround used:** The click listener sets a `processing` signal, and
+an effect mirrors it onto the enabled state of the whole group. So the
+server marks all three buttons disabled before the background work
+starts, and clearing the signal later is a real change that reaches the
+browser via Push. The clicked button itself keeps using
+`setDisableOnClick(true)`.
+**Suggested API:** Either a `SetEnabledAction(HasEnabled...)` that
+disables client-side and marks the components disabled server-side when
+the event arrives (the group equivalent of `setDisableOnClick`), or a
+`Button#setDisableOnClick(HasEnabled... alsoDisable)` overload.
+
+## `bindEnabled` can't be combined with disable-on-click
+
+**Where it bit us:** UC24 (each button is disabled on click, and is
+also a sibling that the other buttons disable).
+**Symptom:** `Button#bindEnabled(signal)` throws
+`IllegalStateException` when disable-on-click is active, and
+`Button#setDisableOnClick(true)` throws when the enabled state is bound
+to a signal. A group whose enabled state should follow one "processing"
+signal therefore can't use the signal binding the rest of Flow offers.
+**Workaround used:** `Signal.effect(view, ...)` that calls
+`setEnabled(...)` on every button of the group.
+**Suggested API:** Let disable-on-click work on top of a bound enabled
+state, e.g. by disabling only until the next update of the bound
+signal, so `bindEnabled(processing.map(p -> !p))` and
+`setDisableOnClick(true)` can be used together.
