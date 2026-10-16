@@ -47,7 +47,7 @@ import com.vaadin.flow.router.Route;
  * it at ten. What it does mean is that every one of those buttons carries its
  * own {@code Clipboard.onClick} binding, torn down and rebuilt as rows recycle,
  * where one binding for the whole column would do. See
- * {@code clipboard/API-GAPS.md}.
+ * {@code clipboard/API-GAPS.md} #1.
  */
 @Route(value = "uc8", layout = MainLayout.class)
 @PageTitle("UC8 — Copy button in every grid row")
