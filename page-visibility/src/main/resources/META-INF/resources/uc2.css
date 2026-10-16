@@ -1,10 +1,10 @@
 .uc2-view {
-    .presence-you-name {
+    .uc2-you-name {
         font-weight: 600;
         color: var(--you-color);
     }
 
-    .avatar-strip {
+    .uc2-avatar-strip {
         display: flex;
         gap: 0.5rem;
         flex-wrap: wrap;
@@ -12,57 +12,57 @@
         padding: 0.5rem 0;
     }
 
-    .presence-avatar {
+    .uc2-avatar {
         transition: filter 200ms, opacity 200ms, transform 200ms,
             background-color 200ms, border-color 200ms;
         width: var(--avatar-size, 56px);
         height: var(--avatar-size, 56px);
         border-radius: 50%;
-        border: 3px solid var(--avatar-color, #888);
-        background-color: var(--avatar-color, #888);
+        border: 3px solid var(--avatar-color);
+        background-color: var(--avatar-color);
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
         box-sizing: border-box;
 
-        > .presence-avatar-initial {
+        > .uc2-avatar-initial {
             font-weight: 600;
             font-size: calc(var(--avatar-size, 56px) / 2.5);
             color: white;
             transition: color 200ms;
         }
 
-        &.presence-visible {
+        &.uc2-avatar-visible {
             filter: none;
             opacity: 1;
         }
 
-        &.presence-blurred {
+        &.uc2-avatar-blurred {
             filter: grayscale(100%) brightness(0.95);
             opacity: 0.65;
             transform: scale(0.95);
         }
 
-        &.presence-hidden {
+        &.uc2-avatar-hidden {
             background-color: var(--aura-neutral);
             border-color: var(--aura-neutral);
             opacity: 0.5;
             transform: scale(0.88);
 
-            > .presence-avatar-initial {
+            > .uc2-avatar-initial {
                 color: var(--vaadin-text-color);
             }
         }
 
-        &.presence-unknown {
+        &.uc2-avatar-unknown {
             background-color: var(--vaadin-background-container);
             border-color: var(--vaadin-border-color);
             border-style: dashed;
             opacity: 0.55;
             filter: blur(0.5px);
 
-            > .presence-avatar-initial {
+            > .uc2-avatar-initial {
                 color: var(--vaadin-text-color-secondary);
             }
         }

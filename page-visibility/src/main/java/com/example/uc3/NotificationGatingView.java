@@ -3,12 +3,13 @@ package com.example.uc3;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.ScheduledFuture;
 
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
+import org.jspecify.annotations.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -24,6 +25,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.PageVisibility;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.webpush.WebPush;
@@ -32,7 +34,7 @@ import com.vaadin.flow.server.webpush.WebPushMessage;
 import com.vaadin.flow.server.webpush.WebPushSubscription;
 
 /**
- * UC3 — Notification gating with Web Push.
+ * UC3 — Notification gating.
  * <p>
  * Demonstrates choosing the right delivery channel based on
  * {@link com.vaadin.flow.component.page.Page#pageVisibilitySignal()}: an
@@ -40,6 +42,7 @@ import com.vaadin.flow.server.webpush.WebPushSubscription;
  * notification is needed when they aren't.
  */
 @Route(value = "uc3", layout = MainLayout.class)
+@PageTitle("UC3 — Notification gating")
 @UseCaseDescription("Choosing between an in-page toast and a push notification by tab visibility")
 @Menu(order = 3, title = "UC3 — Notification gating")
 @StyleSheet("uc3.css")
@@ -54,13 +57,15 @@ public class NotificationGatingView extends VerticalLayout {
     private final Span subscriptionStatus = new Span("Not subscribed");
     private final Div log = new Div();
 
+    private @Nullable ScheduledFuture<?> pendingNotification;
+
     public NotificationGatingView(WebPush webPush,
             TaskScheduler taskScheduler) {
         this.webPush = webPush;
         this.taskScheduler = taskScheduler;
 
         addClassName("uc3-view");
-        add(new H1("UC3 — Notification gating with Web Push"));
+        add(new H1("UC3 — Notification gating"));
         add(new Paragraph("Subscribe the browser, then click \"Send in 5 "
                 + "seconds\" and immediately switch tabs or hide the "
                 + "window. The 5-second timer fires server-side, "
@@ -84,18 +89,19 @@ public class NotificationGatingView extends VerticalLayout {
         add(new HorizontalLayout(subscribe, unsubscribe), subscriptionStatus,
                 new H2("Trigger"), send, new H2("Delivery log"));
 
-        log.addClassName("notification-log");
+        log.addClassName("uc3-log");
         add(log);
         appendLog("(no notifications fired yet)");
-    }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        UI ui = attachEvent.getUI();
-        // Refresh subscription status from the browser when the view loads.
-        webPush.subscriptionExists(ui, exists -> ui.access(
-                () -> renderSubscribed(exists && hasStoredSubscription())));
+        whenAttached(ui -> {
+            // Refresh subscription status from the browser when the view
+            // loads.
+            webPush.subscriptionExists(ui, exists -> ui.access(
+                    () -> renderSubscribed(exists && hasStoredSubscription())));
+            // A notification still pending when the reader leaves the view
+            // would otherwise pop up in whichever view they opened next.
+            return this::cancelPendingNotification;
+        });
     }
 
     private void subscribe(UI ui) {
@@ -127,8 +133,17 @@ public class NotificationGatingView extends VerticalLayout {
                 "Will fire in 5 seconds — switch tab now if "
                         + "you want to test web push",
                 2500, Position.BOTTOM_START);
-        taskScheduler.schedule(ui.accessLater(() -> fireNotification(ui), null),
+        cancelPendingNotification();
+        pendingNotification = taskScheduler.schedule(
+                ui.accessLater(() -> fireNotification(ui), null),
                 Instant.now().plusSeconds(5));
+    }
+
+    private void cancelPendingNotification() {
+        if (pendingNotification != null) {
+            pendingNotification.cancel(false);
+            pendingNotification = null;
+        }
     }
 
     // Package-private so tests can drive the gating logic without waiting on
@@ -163,6 +178,12 @@ public class NotificationGatingView extends VerticalLayout {
         }
         appendLog(LocalTime.now().format(TIME) + "  state=" + state + "  →  "
                 + channel);
+    }
+
+    // Package-private test seam: whether a notification is scheduled and has
+    // not fired yet.
+    boolean hasPendingNotification() {
+        return pendingNotification != null && !pendingNotification.isDone();
     }
 
     private void renderSubscribed(boolean subscribed) {
