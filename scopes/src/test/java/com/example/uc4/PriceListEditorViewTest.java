@@ -14,6 +14,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.OrderedList;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.UnorderedList;
 
@@ -39,6 +40,7 @@ class PriceListEditorViewTest extends SpringBrowserlessTest {
                 findInView(H1.class).single().getText());
         assertEquals(3, prices().size());
         assertFalse(button("Undo").isEnabled());
+        assertTrue(emptyHistoryHint().isVisible());
     }
 
     @Test
@@ -69,6 +71,7 @@ class PriceListEditorViewTest extends SpringBrowserlessTest {
         assertEquals("Espresso machine — 499.00", prices().getFirst());
         assertFalse(button("Undo").isEnabled());
         assertEquals(List.of(), history());
+        assertTrue(emptyHistoryHint().isVisible());
     }
 
     @Test
@@ -86,6 +89,12 @@ class PriceListEditorViewTest extends SpringBrowserlessTest {
 
     private List<String> prices() {
         return items(UnorderedList.class);
+    }
+
+    private Paragraph emptyHistoryHint() {
+        return findInView(Paragraph.class).all().stream()
+                .filter(p -> p.getText().equals("No changes yet in this UI."))
+                .findFirst().orElseThrow();
     }
 
     private List<String> history() {

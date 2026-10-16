@@ -59,7 +59,7 @@ way to notice.
 example with a per-page `sessionStorage` marker) and either give it a new id or
 expose `BrowserTab#isDuplicate()` so that the application can decide.
 
-## 5. Spring `@SessionScope` is not tied to the browserless Vaadin session
+## 6. Spring `@SessionScope` is not tied to the browserless Vaadin session
 
 **Where it bites:** UC3 / OrderExportViewTest.java, UC7 / ScopePlaygroundViewTest.java
 **Symptom:** In `SpringBrowserlessTest`, Spring's `RequestContextHolder` stays
