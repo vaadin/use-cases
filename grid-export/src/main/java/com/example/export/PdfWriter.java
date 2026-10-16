@@ -32,7 +32,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * parts separately from the rows. A CSV or a spreadsheet writes the headers
  * once and streams the rows past them; a paginating writer has to re-emit the
  * headers every time it breaks a page, and it has to measure the rows before it
- * can lay any of them out. See {@code API-GAPS.md}.
+ * can lay any of them out. See {@code API-GAPS.md} #11 and #12.
  */
 public final class PdfWriter {
 

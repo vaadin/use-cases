@@ -39,7 +39,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * None of this needs new API — it is all ordinary application code. What it
  * needs is somewhere to put it. Without a per-column hook, every exporter in
  * every application grows its own private "which column is this, and what do I
- * do to it" switch. See {@code API-GAPS.md}.
+ * do to it" switch. See {@code API-GAPS.md} #9.
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @UseCaseDescription("Dropping and masking sensitive columns when exporting")

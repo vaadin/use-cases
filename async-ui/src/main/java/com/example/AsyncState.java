@@ -5,7 +5,7 @@ package com.example;
  * loaded, or failed. Held in a signal, it lets a view bind its skeleton, its
  * content and its error message to the same source.
  * <p>
- * Flow has no such type; see {@link MissingAPI#load} and API-GAPS.md.
+ * Flow has no such type; see {@link MissingAPI#load} and API-GAPS.md #1.
  */
 public sealed interface AsyncState<T> {
 

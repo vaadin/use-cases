@@ -40,10 +40,9 @@ import com.vaadin.flow.server.VaadinRequest;
  * in the URL, such as {@code uc9?subtitles=de} or {@code uc9?subtitles=off}, so
  * a shared link opens with the same subtitles.
  * <p>
- * {@code Media} only accepts {@code Source} children, so there is no way to add
- * a {@code <track>} through the component API, and nothing to select the
- * showing track from the server. {@link MissingAPI#addTextTrack} and
- * {@link MissingAPI#showTextTrack} fill in.
+ * There is no {@code Track} component to add a {@code <track>} with, and
+ * nothing to select the showing track from the server ({@code API-GAPS.md #6}).
+ * {@link MissingAPI#addTextTrack} and {@link MissingAPI#showTextTrack} fill in.
  */
 @Route(value = "uc9", layout = MainLayout.class)
 @PageTitle("UC9 — Subtitles")

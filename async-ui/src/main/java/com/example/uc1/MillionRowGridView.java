@@ -38,7 +38,7 @@ import com.vaadin.flow.router.Route;
  * an exact count so the difference shows in the query log.
  * <p>
  * Every fetch is a blocking call made on the request thread: a data provider
- * cannot answer asynchronously (see API-GAPS.md).
+ * cannot answer asynchronously (see API-GAPS.md #4).
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Browse a million rows")

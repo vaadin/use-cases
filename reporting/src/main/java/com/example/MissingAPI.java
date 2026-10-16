@@ -10,7 +10,7 @@ import com.vaadin.flow.component.html.Anchor;
  * server cannot learn the URL a handler ended up on, so it cannot open the
  * document in a new tab, hand it to an {@code <embed>}, or put it in a mail.
  * <p>
- * See {@code API-GAPS.md} for what the missing API should look like.
+ * See {@code API-GAPS.md} #2 for what the missing API should look like.
  */
 public final class MissingAPI {
 

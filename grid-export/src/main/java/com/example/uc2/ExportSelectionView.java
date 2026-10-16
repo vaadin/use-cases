@@ -33,7 +33,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * <p>
  * The fix is to keep the grid's own row order as the spine and use the
  * selection only as a filter, which is what {@code selectedRowsOnly()} does.
- * See {@code API-GAPS.md}.
+ * See {@code API-GAPS.md} #6.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @UseCaseDescription("Exporting only the rows the user selected, in the grid's order")

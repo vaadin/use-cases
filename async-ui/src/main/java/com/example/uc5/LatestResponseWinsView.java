@@ -43,7 +43,7 @@ import com.vaadin.flow.router.Route;
  * would not be enough: it does not stop the query the backend has already
  * started, and an answer can be on its way back already. Unchecking the box
  * shows the naive behaviour for comparison. Flow has no "latest wins" helper
- * for asynchronous results (see API-GAPS.md).
+ * for asynchronous results (see API-GAPS.md #3).
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Latest response wins")

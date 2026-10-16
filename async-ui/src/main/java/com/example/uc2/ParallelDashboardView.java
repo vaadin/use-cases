@@ -41,7 +41,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * <p>
  * The loading state of each widget is a signal of {@link AsyncState}, filled by
  * {@link MissingAPI#load}: the shim stands in for an asynchronous signal Flow
- * does not have yet.
+ * does not have yet (see API-GAPS.md #1).
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Parallel dashboard")

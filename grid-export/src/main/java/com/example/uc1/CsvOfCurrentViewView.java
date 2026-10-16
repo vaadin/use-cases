@@ -43,7 +43,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * Every column here is a plain {@code addColumn(ValueProvider)} column — the
  * most ordinary kind there is — and even for those the exporter has to reach
  * into a private field of {@code ColumnPathRenderer} to find out what the cell
- * says. See {@code API-GAPS.md}.
+ * says. See {@code API-GAPS.md} #1 and #2.
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @UseCaseDescription("Exporting the filtered and sorted rows a grid shows as CSV")
