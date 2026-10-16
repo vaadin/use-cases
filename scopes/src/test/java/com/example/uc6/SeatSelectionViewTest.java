@@ -66,6 +66,20 @@ class SeatSelectionViewTest extends SpringBrowserlessTest {
         assertFalse(seat("B2").isEnabled());
     }
 
+    @Test
+    void pickingAnotherSeatReleasesTheFirstOne() {
+        navigate(SeatSelectionView.class);
+        runPendingSignalsTasks();
+
+        test(seat("A1")).click();
+        test(seat("A2")).click();
+        runPendingSignalsTasks();
+
+        assertTrue(seat("A2").hasThemeName("primary"));
+        assertFalse(inventory.holders().peek().containsKey("A1"));
+        assertTrue(inventory.hold("A1", "someone-else"));
+    }
+
     private Button seat(String name) {
         return findInView(Button.class).all().stream()
                 .filter(b -> name.equals(b.getText())).findFirst()

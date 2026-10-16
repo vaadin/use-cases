@@ -9,7 +9,6 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.textfield.TextField;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,7 +33,6 @@ class PassengerViewTest extends SpringBrowserlessTest {
 
         navigate(PassengerView.class);
         assertTrue(hasText("Seat A3 is held for you."));
-        test(findInView(TextField.class).single()).setValue("Alex Doe");
     }
 
     private boolean hasText(String text) {
