@@ -18,14 +18,21 @@ public, supported API, and no view in this module imports `internal`:
   ancestor's title without instantiating the view, honouring `@PageTitle`,
   `@DynamicPageTitle` and `PageTitleGenerator`. It returns an empty `Optional`
   when the target declares no title, so a caller picks its own fallback.
+- `MenuConfiguration#getMenuEntriesTree()` + `MenuEntry#children()` give the
+  menu as a tree (UC8), which is also how `MainLayout` keeps the flat main
+  navigation to top-level entries — depth comes from the tree rather than from
+  re-deriving it out of URL paths. `@Menu(parent = ...)` (also UC8) regroups an
+  entry in that tree without touching its route.
 
-## Resolved: the resolution entry points were internal API
+The one gap left is in the test API.
 
-`UpLink` (UC5) and `SitemapView` (UC7) used to call
-`com.vaadin.flow.router.internal.RouteUtil#getRouteParent` /
-`#getRouteHierarchy` and `com.vaadin.flow.internal.menu.MenuRegistry#getTitle`
-directly. Those are now promoted to `RouteConfiguration`
-([flow#24550](https://github.com/vaadin/flow/pull/24550)) and
-`Router#resolvePageTitle`
-([flow#24647](https://github.com/vaadin/flow/pull/24647)), and both views use
-the public methods.
+## 1. `BreadcrumbsTester` exposes no per-crumb path
+
+**Where it bites:** UC4 / `ParameterPreservingTrailTest.java`
+**Symptom:** `BreadcrumbsTester` offers `getItemTexts()` and `clickItem(...)`
+only, so a test can not assert that ancestor links keep `:projectId` (and drop
+`:taskId`) through the tester.
+**Workaround used:** the test reads `BreadcrumbsItem#getPath()` from the
+component's children. See the testing notes in [`README.md`](README.md).
+**Suggested API:** `List<String> BreadcrumbsTester#getItemPaths()` — the
+resolved `href` per crumb, empty for the current page.

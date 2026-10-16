@@ -1,0 +1,46 @@
+/*
+ * RatingStars. Public styling API: the CSS variables below and the theme
+ * variants "small", "large" and "compact".
+ */
+rating-stars {
+    --rating-stars-size: 1.5rem;
+    --rating-stars-color: var(--aura-yellow, #f59e0b);
+    --rating-stars-off-color: var(--vaadin-border-color, #c8c8c8);
+    display: inline-flex;
+    gap: 0.125rem;
+}
+
+rating-stars[theme~="small"] {
+    --rating-stars-size: 1rem;
+}
+
+rating-stars[theme~="large"] {
+    --rating-stars-size: 2.25rem;
+}
+
+rating-stars[theme~="compact"] {
+    gap: 0;
+}
+
+rating-stars vaadin-button.star {
+    --vaadin-button-background: transparent;
+    --vaadin-button-border-color: transparent;
+    --vaadin-button-shadow: none;
+    --vaadin-button-padding: 0 0.0625em;
+    --aura-surface-opacity: 0;
+    background: none;
+    box-shadow: none;
+    min-width: 0;
+    height: auto;
+    font-size: var(--rating-stars-size);
+    line-height: 1;
+    color: var(--rating-stars-off-color);
+}
+
+rating-stars vaadin-button.star.on {
+    color: var(--rating-stars-color);
+}
+
+rating-stars vaadin-button.star[disabled] {
+    opacity: 1;
+}

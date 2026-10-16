@@ -1,5 +1,6 @@
 /* The "Feedback" and "View source" overlay of BaseMainLayout: side by side,
-   with "View source" at the right edge, or stacked with "Feedback" below on
+   with "View source" at the end edge (the left one in right-to-left
+   languages, where the navbar is mirrored), or stacked with "Feedback" below on
    narrow screens, where a row would cover the navbar title. */
 .use-case-overlay {
     display: flex;
@@ -11,4 +12,14 @@
         flex-direction: column-reverse;
         align-items: flex-end;
     }
+}
+
+/* The banner BaseMainLayout shows above a view marked @UnreleasedApi. */
+.unreleased-api-banner {
+    padding: 0.5em 1em;
+    border-inline-start: 4px solid var(--aura-yellow);
+    background: color-mix(in srgb, var(--aura-yellow) 20%,
+            var(--vaadin-background-color));
+    color: var(--vaadin-text-color);
+    font-size: var(--aura-font-size-s);
 }

@@ -18,21 +18,30 @@
         <module>common</module>
         <module>ai</module>
         <module>async-ui</module>
+        <module>custom-components</module>
+        <module>file-uploads</module>
         <module>fullscreen</module>
         <module>geolocation</module>
+        <module>grid-export</module>
+        <module>i18n</module>
         <module>multimedia</module>
         <module>clipboard</module>
+        <module>collaboration</module>
         <module>page-visibility</module>
         <module>reporting</module>
         <module>printing</module>
         <module>route-hierarchy</module>
+        <module>scopes</module>
+        <module>testing</module>
         <module>text-selection</module>
+        <module>theming</module>
         <module>web-share</module>
         <module>screen-orientation</module>
         <module>observability</module>
         <module>signals</module>
         <module>triggers</module>
         <module>wake-lock</module>
+        <module>web-notifications</module>
     </modules>
 
     <properties>

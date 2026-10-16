@@ -21,6 +21,7 @@ import com.example.uc20.DoubleClickOpenView;
 import com.example.uc21.ShortcutDownloadView;
 import com.example.uc22.KeyEventLogView;
 import com.example.uc23.KonamiCodeView;
+import com.example.uc24.DisableButtonGroupView;
 import com.example.uc3.LiveSignalCounterView;
 import com.example.uc4.JsTriggerView;
 import com.example.uc5.IdleWarningView;
@@ -52,8 +53,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
         LiveSizeReadoutView.class, PointerTrackerView.class,
         AtomicResetView.class, AutoSaveSignalView.class,
         DynamicResponsiveStylingView.class, DoubleClickOpenView.class,
-        ShortcutDownloadView.class, KeyEventLogView.class,
-        KonamiCodeView.class })
+        ShortcutDownloadView.class, KeyEventLogView.class, KonamiCodeView.class,
+        DisableButtonGroupView.class })
 class HomeViewTest extends SpringBrowserlessTest {
 
     private record UseCase(String tag, String title, String problem) {
@@ -115,10 +116,13 @@ class HomeViewTest extends SpringBrowserlessTest {
             "Logging every key press with its modifiers as it happens");
     private static final UseCase UC23 = new UseCase("UC23", "Konami code",
             "Reacting to a key sequence tracked entirely in the browser");
+    private static final UseCase UC24 = new UseCase("UC24",
+            "Disable button group",
+            "Disabling a whole group of buttons in the browser as soon as one is clicked");
 
     private static final List<UseCase> USE_CASES = List.of(UC1, UC2, UC3, UC4,
             UC5, UC6, UC7, UC8, UC9, UC10, UC11, UC12, UC13, UC14, UC15, UC16,
-            UC17, UC18, UC19, UC20, UC21, UC22, UC23);
+            UC17, UC18, UC19, UC20, UC21, UC22, UC23, UC24);
 
     @Test
     void cardsAreGroupedByKindOfProblemInMenuOrder() {
@@ -136,7 +140,7 @@ class HomeViewTest extends SpringBrowserlessTest {
                 new Group("Browser APIs that need a gesture",
                         List.of(UC1, UC3, UC4, UC20, UC21)),
                 new Group("Instant feedback in the browser",
-                        List.of(UC2, UC9, UC10, UC12, UC13, UC17)),
+                        List.of(UC2, UC9, UC10, UC12, UC13, UC17, UC24)),
                 new Group("Custom gestures and live input",
                         List.of(UC8, UC11, UC16, UC18, UC22, UC23)),
                 new Group("Adapting to the available size",
