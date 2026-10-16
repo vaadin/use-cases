@@ -98,7 +98,7 @@ public class SubtitlesView extends VerticalLayout
             String file = "subtitles/" + subtitles.language() + ".vtt";
             Element track = MissingAPI.addTextTrack(video, "subtitles",
                     subtitles.language(), subtitles.label(),
-                    MediaLibrary.serve(file));
+                    MediaLibrary.serve(file).withContentType("text/vtt"));
             tracks.put(subtitles.language(), track);
         }
         add(video);
