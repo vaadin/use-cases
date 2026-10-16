@@ -1,6 +1,6 @@
 # Async UI & Performance — use cases
 
-A standalone Spring Boot demo of keeping a Vaadin Flow UI fast while the work behind it is slow: loading data page by page, answering in the background through server push, building only what the user looks at, and sending the browser no more than it needs. Each view exercises a single realistic scenario; `API-GAPS.md` records what Flow does not cover yet.
+A standalone Spring Boot demo of keeping a Vaadin Flow UI fast while the work behind it is slow: loading data page by page, answering in the background through server push, building only what the user looks at, and sending the browser no more than it needs. Each view exercises a single realistic scenario; [`API-GAPS.md`](API-GAPS.md) records what Flow does not cover yet.
 
 | # | View | What it shows |
 | - | ---- | ------------- |

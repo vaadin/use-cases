@@ -45,7 +45,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * a failed search an error with a retry button. Typing on while a search is
  * running replaces it; an older answer is never shown.
  * <p>
- * The Grid has no loading state the server can set (see API-GAPS.md), so the
+ * The Grid has no loading state the server can set (see API-GAPS.md #5), so the
  * view builds one from a CSS class, a progress bar and the empty-state
  * component.
  */
