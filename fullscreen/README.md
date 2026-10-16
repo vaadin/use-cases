@@ -12,8 +12,8 @@ current `FullscreenState`. Each view exercises a single realistic scenario.
 | UC2 | Slideshow / presentation | Component fullscreen on the slide stage via `Fullscreen.onClick(present).enter(stage)`, with prev/next shortcuts that keep working in fullscreen. |
 | UC3 | Distraction-free editor | An editor pane expands via `Fullscreen.onClick(expand).enter(editorPane)`; the rest of the app chrome is hidden by the wrapper, and Done exits with `Fullscreen.exit()`. |
 | UC4 | Reactive layout | A six-card dashboard reformats itself purely through `bindClassName` subscriptions to `Fullscreen.stateSignal()` — no observer code. |
-| UC5 | Kiosk: detect unexpected exit | Differentiates Escape-initiated exits from programmatic ones by toggling an `expectingExit` flag around `Fullscreen.exit()`, reconstructing the distinction from the global state signal. |
-| UC6 | Chart expand | A dashboard of chart cards, each with its own Expand button that fullscreens just that card via `Fullscreen.onClick(expand).enter(card)`. |
+| UC5 | Kiosk: detect unexpected exit | Differentiates Escape-initiated exits from programmatic ones by toggling an `expectingExit` flag around `Fullscreen.exit()`, reconstructing the distinction from the global state signal (`API-GAPS.md` #2). |
+| UC6 | Chart expand | A dashboard of chart cards, each with its own Expand button that fullscreens just that card via `Fullscreen.onClick(expand).enter(card)`; the active card is tracked in the view (`API-GAPS.md` #2). |
 | UC7 | View app fullscreen | Whole-page fullscreen via `Fullscreen.onClick(enter).enter()` — kiosk-style "hide the browser chrome". |
 
 ## Run
@@ -37,4 +37,4 @@ Open <http://localhost:8080/>.
   element and hides the rest of the view, so Vaadin theming and overlay
   components (Notification, ContextMenu, ComboBox dropdowns) keep working in
   fullscreen; the component is restored to its original DOM position on exit.
-- See `API-GAPS.md` for the rough edges this module surfaced.
+- Where the API falls short is recorded in [API-GAPS.md](API-GAPS.md).
