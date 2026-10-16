@@ -30,7 +30,8 @@ import com.vaadin.flow.function.SerializableFunction;
  * <pre>
  * ExportedGrid report = GridExport.of(grid).withTitle("Employees")
  *         .selectedRowsOnly().excludeColumns(idColumn)
- *         .withColumnConverter(cardColumn, GridExport::mask).export();
+ *         .withColumnConverter(cardColumn, RedactedExportView::maskCardNumber)
+ *         .export();
  * </pre>
  *
  * What it does <em>not</em> do is style: the issue's "keep as much styling as

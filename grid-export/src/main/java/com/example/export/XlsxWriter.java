@@ -19,6 +19,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jspecify.annotations.Nullable;
 
@@ -97,8 +98,10 @@ public final class XlsxWriter {
     }
 
     private static void write(Workbook workbook, ExportedGrid exported) {
-        Sheet sheet = workbook.createSheet(
-                exported.title().isEmpty() ? "Export" : exported.title());
+        // Sheet names are capped at 31 characters and may not contain
+        // [ ] : * ? / \ — a title such as "Q1 2026/01 – 2026/03" would throw.
+        Sheet sheet = workbook.createSheet(exported.title().isEmpty() ? "Export"
+                : WorkbookUtil.createSafeSheetName(exported.title()));
         CellStyle titleStyle = titleStyle(workbook);
         CellStyle headerStyle = headerStyle(workbook);
         CellStyle footerStyle = footerStyle(workbook);
