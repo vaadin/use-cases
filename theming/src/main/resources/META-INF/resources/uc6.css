@@ -1,0 +1,21 @@
+.uc6-view .sample h2 {
+    margin: 0;
+    font-size: var(--aura-font-size-l, 1.125rem);
+}
+
+/* A look no variant offers, through the button's own tokens. */
+.uc6-view vaadin-button.gradient {
+    --vaadin-button-background: linear-gradient(135deg, #7c3aed, #db2777);
+    --vaadin-button-text-color: white;
+    --vaadin-button-border-color: transparent;
+    --vaadin-button-font-weight: 600;
+}
+
+.uc6-view .pill {
+    padding: 0.125rem 0.625rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--vaadin-text-color);
+    border: 1px dashed currentColor;
+}

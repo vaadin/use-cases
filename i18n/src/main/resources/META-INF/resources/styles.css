@@ -1,0 +1,102 @@
+/* Internationalization use cases — shared polish */
+
+.language-picker-wrapper {
+    margin-inline-start: 1rem;
+}
+
+.language-picker {
+    width: 10rem;
+}
+
+/* The part of a view that plays the translated application. Logical
+   properties, so that it mirrors in right-to-left languages. */
+.sample {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vaadin-gap-m, 0.75rem);
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 960px;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--vaadin-border-color-secondary, #ddd);
+    border-radius: var(--vaadin-radius-l, 12px);
+}
+
+/* Controls keep their natural width; lists and grids take the full width. */
+.sample {
+    align-items: flex-start;
+}
+
+.sample > vaadin-grid,
+.sample > vaadin-horizontal-layout,
+.sample > .cards {
+    align-self: stretch;
+}
+
+.sample > p,
+.sample > ul,
+.sample > h2 {
+    margin-block: 0;
+}
+
+.facts .fact-value,
+.summary,
+.totals,
+.parsed {
+    font-variant-numeric: tabular-nums;
+}
+
+/* How a use case is built, shown in the page. */
+.built-with {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 960px;
+}
+
+.built-with h2 {
+    margin: 0.5rem 0 0;
+    font-size: 1.125rem;
+}
+
+.built-with .technique {
+    color: var(--vaadin-text-color-secondary);
+    font-size: 0.875rem;
+}
+
+.built-with .points {
+    margin: 0.5rem 0;
+    padding-inline-start: 1.25rem;
+}
+
+.built-with .source {
+    margin: 0 0 0.5rem;
+    padding: 0.75rem;
+    max-height: 28rem;
+    overflow: auto;
+    font-size: 0.8125rem;
+    border-radius: var(--vaadin-radius-m, 6px);
+    background: var(--vaadin-background-container, #f4f4f4);
+}
+
+/* Long words wrap and code scrolls in its own box on narrow screens. */
+vaadin-vertical-layout h1,
+.built-with .points {
+    overflow-wrap: anywhere;
+}
+
+pre {
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+/* Narrow screens: rows of controls wrap instead of overflowing. */
+@media (max-width: 640px) {
+    .sample {
+        padding: 0.75rem;
+    }
+
+    .sample vaadin-horizontal-layout {
+        flex-wrap: wrap;
+    }
+}
