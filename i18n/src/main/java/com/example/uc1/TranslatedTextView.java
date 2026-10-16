@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 
+import com.example.common.BuiltWith;
 import com.example.common.UseCaseDescription;
-import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;

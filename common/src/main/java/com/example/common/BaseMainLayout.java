@@ -8,8 +8,6 @@ import java.util.regex.Pattern;
 import com.example.common.SlackFeedback.UseCase;
 import org.jspecify.annotations.Nullable;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
@@ -89,8 +87,7 @@ public abstract class BaseMainLayout extends AppLayout
         DrawerToggle toggle = new DrawerToggle();
 
         H1 h1 = new H1(title);
-        h1.getStyle().set("font-size", "var(--aura-font-size-l)").set("margin",
-                "0");
+        h1.addClassName("base-main-layout-title");
 
         addToNavbar(toggle, h1);
 
@@ -153,26 +150,17 @@ public abstract class BaseMainLayout extends AppLayout
     private static Element buildSourceCodeOverlay(Anchor link,
             Button feedbackButton) {
         Div container = new Div();
-        container.getStyle().set("position", "fixed").set("top",
-                "calc(var(--vaadin-app-layout-navbar-offset-top) + 0.5em)")
-                .set("inset-inline-end",
-                        "calc(var(--aura-app-layout-inset, 0px) + 1em)")
-                .set("z-index", "100").set("pointer-events", "auto");
         container.addClassName("use-case-overlay");
 
-        Icon codeIcon = overlayIcon(VaadinIcon.CODE);
-
         link.setTarget("_blank");
-        styleOverlayItem(link);
+        link.addClassName("use-case-overlay-item");
 
-        Span content = new Span(codeIcon);
+        Span content = new Span(overlayIcon(VaadinIcon.CODE));
         content.add("View source");
         link.removeAll();
         link.add(content);
 
-        styleOverlayItem(feedbackButton);
-        feedbackButton.getStyle().set("border", "none").set("cursor",
-                "pointer");
+        feedbackButton.addClassName("use-case-overlay-item");
 
         container.add(feedbackButton, link);
         return container.getElement();
@@ -180,34 +168,8 @@ public abstract class BaseMainLayout extends AppLayout
 
     private static Icon overlayIcon(VaadinIcon vaadinIcon) {
         Icon icon = vaadinIcon.create();
-        icon.setSize("16px");
-        icon.getStyle().set("color", "var(--vaadin-text-color-secondary)")
-                .set("margin-inline-end", "0.5em");
+        icon.addClassName("use-case-overlay-icon");
         return icon;
-    }
-
-    private static <T extends Component & HasStyle> void styleOverlayItem(
-            T item) {
-        item.getStyle().set("display", "inline-flex")
-                .set("align-items", "center")
-                .set("background-color", "rgba(255, 255, 255, 0.95)")
-                .set("padding", "0.5em 0.75em").set("border-radius", "4px")
-                .set("box-shadow", "0 2px 4px rgba(0, 0, 0, 0.1)")
-                .set("color", "var(--aura-accent-text-color)")
-                .set("text-decoration", "none")
-                .set("font-size", "var(--aura-font-size-s)")
-                .set("transition", "box-shadow 0.2s");
-
-        item.getElement()
-                .addEventListener("mouseenter",
-                        e -> item.getStyle().set("box-shadow",
-                                "0 4px 8px rgba(0, 0, 0, 0.15)"))
-                .addEventData("event.preventDefault");
-        item.getElement()
-                .addEventListener("mouseleave",
-                        e -> item.getStyle().set("box-shadow",
-                                "0 2px 4px rgba(0, 0, 0, 0.1)"))
-                .addEventData("event.preventDefault");
     }
 
     @Override
@@ -256,10 +218,24 @@ public abstract class BaseMainLayout extends AppLayout
      */
     static String sourceUrl(@Nullable String ref, String moduleId,
             Class<?> viewClass) {
+        return gitHubUrl("tree", ref, moduleId, "src/main/java/"
+                + viewClass.getName().replace('.', '/') + ".java");
+    }
+
+    /**
+     * The GitHub URL of a file of this app, such as
+     * {@code src/main/resources/META-INF/resources/styles.css}, at the same Git
+     * commit or branch as "View source".
+     */
+    String fileUrl(String path) {
+        return gitHubUrl("blob", SOURCE_REF, moduleId, path);
+    }
+
+    private static String gitHubUrl(String kind, @Nullable String ref,
+            String moduleId, String path) {
         String sourceRef = ref == null || ref.isBlank() ? "main" : ref;
-        return "https://github.com/vaadin/use-cases/tree/" + sourceRef + "/"
-                + moduleId + "/src/main/java/"
-                + viewClass.getName().replace('.', '/') + ".java";
+        return "https://github.com/vaadin/use-cases/" + kind + "/" + sourceRef
+                + "/" + moduleId + "/" + path;
     }
 
     private static String useCaseTitle(Class<?> viewClass) {

@@ -3,8 +3,8 @@ package com.example.uc6;
 import java.util.List;
 
 import com.example.Appearance;
+import com.example.common.BuiltWith;
 import com.example.common.UseCaseDescription;
-import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;

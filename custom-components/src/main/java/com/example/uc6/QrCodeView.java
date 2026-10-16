@@ -1,8 +1,8 @@
 package com.example.uc6;
 
+import com.example.common.BuiltWith;
 import com.example.common.UseCaseDescription;
 import com.example.components.QrCode;
-import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import com.example.views.Sample;
 
