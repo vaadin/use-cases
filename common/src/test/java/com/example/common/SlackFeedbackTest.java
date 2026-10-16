@@ -71,6 +71,19 @@ class SlackFeedbackTest {
     }
 
     @Test
+    void send_escapesTheUseCaseUrl() throws Exception {
+        UseCase useCase = new UseCase("Printing", "UC2 — Print a route",
+                "com.example.uc2.PackingSlipView",
+                "https://printing-cases.fly.dev/uc2/slip/a|b>c&d");
+
+        webhook.slackFeedback().send(new Feedback(useCase, "Hello", ""));
+
+        assertTrue(webhook.texts().get(0).contains(
+                "*Use case:* <https://printing-cases.fly.dev/uc2/slip/a%7Cb&gt;c&amp;d|UC2 — Print a route>"),
+                webhook.texts().get(0));
+    }
+
+    @Test
     void send_rejectedBySlack_throws() {
         webhook.respondWith(400);
 

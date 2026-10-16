@@ -112,9 +112,10 @@ public class SlackFeedback {
                 .collect(Collectors.joining("\n"));
         UseCase useCase = feedback.useCase();
         String text = "*Use-case feedback*\n" + "*App:* "
-                + escape(useCase.app()) + "\n" + "*Use case:* <" + useCase.url()
-                + "|" + escape(useCase.title()) + "> (`" + useCase.viewClass()
-                + "`)\n" + "*From:* " + contact + "\n" + quote;
+                + escape(useCase.app()) + "\n" + "*Use case:* <"
+                + escapeUrl(useCase.url()) + "|" + escape(useCase.title())
+                + "> (`" + useCase.viewClass() + "`)\n" + "*From:* " + contact
+                + "\n" + quote;
         return JsonMapper.shared().writeValueAsString(
                 Map.of("text", text, "unfurl_links", false));
     }
@@ -126,6 +127,16 @@ public class SlackFeedback {
     static String escape(String text) {
         return text.replace("&", "&amp;").replace("<", "&lt;").replace(">",
                 "&gt;");
+    }
+
+    /**
+     * Escapes a URL for a Slack {@code <url|label>} link: the characters of
+     * {@link #escape(String)}, and {@code |}, which would otherwise end the URL
+     * and start the label. A route parameter in the path of a use case can hold
+     * any of them.
+     */
+    private static String escapeUrl(String url) {
+        return escape(url).replace("|", "%7C");
     }
 
     private static String truncate(String text, int maxLength) {
