@@ -1,0 +1,27 @@
+.uc1-view {
+    .uc1-url {
+        width: min(100%, 32rem);
+    }
+
+    .uc1-status {
+        display: inline-block;
+        padding: 0.15rem 0.6rem;
+        border-radius: 999px;
+        font-size: var(--aura-font-size-s);
+        background: color-mix(in srgb, var(--aura-blue) 15%, transparent);
+        color: var(--aura-blue-text);
+        border: 1px solid color-mix(in srgb, var(--aura-blue) 35%, transparent);
+    }
+
+    .uc1-status.uc1-unsupported {
+        background: color-mix(in srgb, var(--aura-orange) 18%, transparent);
+        color: var(--aura-orange-text);
+        border-color: color-mix(in srgb, var(--aura-orange) 35%, transparent);
+    }
+
+    .uc1-status.uc1-unknown {
+        background: var(--vaadin-background-container);
+        color: var(--vaadin-text-color-secondary);
+        border-color: var(--vaadin-border-color);
+    }
+}

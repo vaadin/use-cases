@@ -1,13 +1,15 @@
 .uc5-view {
-    .share-feedback-log {
+    .uc5-log {
         font-family: monospace;
-        font-size: 0.85rem;
+        font-size: var(--aura-font-size-s);
         background: var(--vaadin-background-container);
         border: 1px solid var(--vaadin-border-color);
         border-radius: var(--vaadin-radius-m);
         padding: 0.5rem 0.75rem;
         max-height: 220px;
         overflow-y: auto;
+        width: min(100%, 40rem);
+        box-sizing: border-box;
 
         > div {
             padding: 0.1rem 0;
@@ -16,6 +18,26 @@
 
         > div:last-child {
             border-bottom: none;
+        }
+    }
+
+    .uc5-empty {
+        color: var(--vaadin-text-color-secondary);
+    }
+
+    /* The fake outcomes sit in their own dashed box, apart from the feature. */
+    .uc5-simulate {
+        margin-top: 1rem;
+        padding: 0 1rem 1rem;
+        border: 1px dashed var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
+        width: min(100%, 40rem);
+        box-sizing: border-box;
+
+        > div {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
     }
 }
