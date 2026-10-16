@@ -215,7 +215,7 @@ test tree whose confirmation can be delayed or rejected.
 **Symptom:** `operation.result().getNow(null)` returns `null` in every UI
 callback, for the same reason as #13. It is a quiet trap: the first version
 of UC7 read it there and reported "not confirmed yet" for every claim.
-**Workaround used:** `Outcomes.report` uses a future callback plus
+**Workaround used:** `Outcomes.whenDecided` uses a future callback plus
 `ui.access`, which every call site would otherwise repeat.
 **Suggested API:** e.g. `operation.onOutcome(Component, consumer)` that
 handles the hop back to the UI, like `Signal.effect(Component, …)`.
@@ -237,25 +237,23 @@ several top-level signals must restructure.
 
 ## 16. Smaller edges
 
-**Where it bites:** UC5 / helper `FormState#leave`; any view rendering a `SharedMapSignal` or counter
+**Where it bites:** UC5 / helper `FormState#leave`; any view rendering a `SharedMapSignal`
 **Symptom:**
 
 - `SharedListSignal.remove` takes the entry's signal; there is no
   remove-by-value.
 - `SharedListSignal` has `getValues()` / `peekValues()`; `SharedMapSignal`
   has no equivalent.
-- `SharedNumberSignal.getAsInt()` calls `get()` and so needs a reactive
-  context; there is no `peekAsInt()`.
 - `SharedMapSignal` does not document the order of its entries. The
   implementation keeps insertion order, but nothing promises it.
 
 **Workaround used:**
 `peek().stream().filter(…).findFirst().ifPresent(list::remove)`; unwrapping
-map values by hand; `peek().intValue()`; views sort map entries by a key of
+map values by hand; views sort map entries by a key of
 their own before rendering.
 **Suggested API:** `SharedListSignal.removeIf(Predicate<T>)`,
-`SharedMapSignal.getValues()` / `peekValues()`,
-`SharedNumberSignal.peekAsInt()`, and a documented entry order.
+`SharedMapSignal.getValues()` / `peekValues()`, and a documented entry
+order.
 
 ## Not a gap
 

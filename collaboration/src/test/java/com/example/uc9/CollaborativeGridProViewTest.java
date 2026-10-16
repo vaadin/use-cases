@@ -7,11 +7,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import tools.jackson.databind.node.ObjectNode;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.gridpro.GridPro;
 import com.vaadin.flow.component.gridpro.GridProTester;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,15 +72,46 @@ class CollaborativeGridProViewTest extends SpringBrowserlessTest {
 
         // GridPro reports the item but not the column, so the mark is a row
         // and this is as precise as the view can be.
-        topic.editing().put(peer.key(), "p1");
+        startEditing(rig, 0, 0);
         runPendingSignalsTasks();
+        assertEquals("p1", topic.editing().peek().get(peer.key()).peek());
         assertTrue(rig.getPanel(1).getElement().getTextRecursively()
                 .contains("1 other user(s) editing a row"));
+
+        tester(rig, 0).setValue(0, 0, "Hex bolt M10");
+        runPendingSignalsTasks();
+        assertEquals(0, topic.editing().peek().size(),
+                "the write is what ends the edit");
+    }
+
+    @Test
+    void aPeerThatLeavesMidEditStopsMarkingTheRow() {
+        navigate(CollaborativeGridProView.class);
+        runPendingSignalsTasks();
+
+        PeerRig rig = findInView(PeerRig.class).single();
+        startEditing(rig, 0, 0);
+        runPendingSignalsTasks();
 
         rig.getPanel(0).setConnected(false);
         runPendingSignalsTasks();
         assertEquals(0, topic.editing().peek().size(),
                 "a peer that left is not editing anything");
+    }
+
+    /**
+     * The event the web component sends when a cell editor opens. The tester
+     * has no call for it, only for committing a value.
+     */
+    private void startEditing(PeerRig rig, int panel, int row) {
+        @SuppressWarnings("unchecked")
+        GridPro<SharedValueSignal<Product>> grid = find(GridPro.class,
+                rig.getPanel(panel)).single();
+        ObjectNode item = JacksonUtils.createObjectNode();
+        item.put("key", grid.getDataCommunicator().getKeyMapper()
+                .key(topic.rows().peek().get(row)));
+        ComponentUtil.fireEvent(grid,
+                new GridPro.CellEditStartedEvent<>(grid, true, item, "col0"));
     }
 
     private GridProTester<GridPro<SharedValueSignal<Product>>, SharedValueSignal<Product>> tester(

@@ -98,6 +98,31 @@ class ComputedStateViewTest extends SpringBrowserlessTest {
         assertTrue(text(rig, 1).contains("Your tasks: 0"));
     }
 
+    @Test
+    void aNewUserGivenAReturnedNameDoesNotInheritItsTasks() {
+        navigate(ComputedStateView.class);
+        runPendingSignalsTasks();
+
+        PeerRig rig = findInView(PeerRig.class).single();
+        var claimer = rig.getPanel(0).getPeer();
+        test(visibleButtons(rig, 0, "Claim").getFirst()).click();
+        runPendingSignalsTasks();
+
+        // Leaving hands the names back, so coming back gets the same names
+        // for new peers.
+        navigate(HomeView.class);
+        navigate(ComputedStateView.class);
+        runPendingSignalsTasks();
+
+        PeerRig again = findInView(PeerRig.class).single();
+        var successor = again.getPanel(0).getPeer();
+        assertEquals(claimer.name(), successor.name());
+        assertTrue(text(again, 0).contains("Your tasks: 0"),
+                "the claim belongs to the peer who made it, not to the name: "
+                        + text(again, 0));
+        assertTrue(visibleButtons(again, 0, "Start").isEmpty());
+    }
+
     private java.util.List<Button> visibleButtons(PeerRig rig, int panel,
             String caption) {
         return find(Button.class, rig.getPanel(panel)).withText(caption).all()

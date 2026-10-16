@@ -88,8 +88,7 @@ public class ComputedStateView extends UseCaseView {
 
         Span claimed = new Span();
         claimed.bindText(tasks.map(list -> {
-            String assigned = list.stream()
-                    .filter(task -> !task.assignee().isEmpty())
+            String assigned = list.stream().filter(Task::hasAssignee)
                     .collect(Collectors.groupingBy(Task::assignee,
                             Collectors.counting()))
                     .entrySet().stream()
@@ -101,7 +100,7 @@ public class ComputedStateView extends UseCaseView {
 
         Span mine = new Span();
         mine.bindText(tasks.map(list -> "Your tasks: " + list.stream()
-                .filter(task -> task.assignee().equals(peer.name())).count()));
+                .filter(task -> task.isAssignedTo(peer)).count()));
 
         Span share = new Span();
         share.bindText(tasks.map(list -> {
@@ -126,7 +125,7 @@ public class ComputedStateView extends UseCaseView {
         Span title = new Span();
         title.bindText(entry.map(task -> task == null ? ""
                 : "%s — %s%s".formatted(task.title(), label(task.status()),
-                        task.assignee().isEmpty() ? ""
+                        !task.hasAssignee() ? ""
                                 : " (" + task.assignee() + ")")));
 
         // One button whose meaning follows the task: claim it while nobody
@@ -146,10 +145,10 @@ public class ComputedStateView extends UseCaseView {
 
     /** What this peer can do with a task next, empty for nothing. */
     private static String actionFor(Task task, Peer peer) {
-        if (task.assignee().isEmpty()) {
+        if (!task.hasAssignee()) {
             return "Claim";
         }
-        if (!task.assignee().equals(peer.name())) {
+        if (!task.isAssignedTo(peer)) {
             return "";
         }
         return switch (task.status()) {
@@ -164,10 +163,10 @@ public class ComputedStateView extends UseCaseView {
      * the update runs, somebody else may have claimed the task.
      */
     private static Task act(Task task, Peer peer) {
-        if (task.assignee().isEmpty()) {
-            return task.withAssignee(peer.name());
+        if (!task.hasAssignee()) {
+            return task.withAssignee(peer);
         }
-        if (!task.assignee().equals(peer.name())) {
+        if (!task.isAssignedTo(peer)) {
             return task;
         }
         return switch (task.status()) {

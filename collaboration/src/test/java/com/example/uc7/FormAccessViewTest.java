@@ -139,6 +139,25 @@ class FormAccessViewTest extends SpringBrowserlessTest {
         assertEquals(rig.getPanel(1).getPeer(), topic.holder().peek());
     }
 
+    @Test
+    void aHolderThatDisconnectsReleasesTheLock() {
+        navigate(FormAccessView.class);
+        runPendingSignalsTasks();
+
+        PeerRig rig = findInView(PeerRig.class).single();
+        claim(rig, 0);
+        runPendingSignalsTasks();
+
+        rig.getPanel(0).setConnected(false);
+        runPendingSignalsTasks();
+
+        assertEquals(Peer.NOBODY, topic.holder().peek(),
+                "a peer that left cannot keep everybody else read-only");
+        claim(rig, 1);
+        runPendingSignalsTasks();
+        assertEquals(rig.getPanel(1).getPeer(), topic.holder().peek());
+    }
+
     private void claim(PeerRig rig, int panel) {
         test(find(Button.class, rig.getPanel(panel)).withText("Claim editing")
                 .single()).click();

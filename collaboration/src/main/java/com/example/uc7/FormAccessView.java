@@ -128,6 +128,10 @@ public class FormAccessView extends UseCaseView {
         Div content = new Div(group, status,
                 new HorizontalLayout(claim, release, takeOver), fields, log);
         presence.bind(content, TOPIC, peer);
+        // A peer that leaves while holding the lock hands it back, or the
+        // others would be locked out by somebody who is no longer there.
+        content.whenAttached(
+                ui -> () -> topic.holder().replace(peer, Peer.NOBODY));
         return content;
     }
 
