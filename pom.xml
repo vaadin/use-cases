@@ -30,6 +30,7 @@
         <module>reporting</module>
         <module>printing</module>
         <module>route-hierarchy</module>
+        <module>scopes</module>
         <module>testing</module>
         <module>text-selection</module>
         <module>theming</module>
