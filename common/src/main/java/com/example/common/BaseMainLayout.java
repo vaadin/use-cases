@@ -155,7 +155,8 @@ public abstract class BaseMainLayout extends AppLayout
         Div container = new Div();
         container.getStyle().set("position", "fixed").set("top",
                 "calc(var(--vaadin-app-layout-navbar-offset-top) + 0.5em)")
-                .set("right", "calc(var(--aura-app-layout-inset, 0px) + 1em)")
+                .set("inset-inline-end",
+                        "calc(var(--aura-app-layout-inset, 0px) + 1em)")
                 .set("z-index", "100").set("pointer-events", "auto");
         container.addClassName("use-case-overlay");
 
@@ -181,7 +182,7 @@ public abstract class BaseMainLayout extends AppLayout
         Icon icon = vaadinIcon.create();
         icon.setSize("16px");
         icon.getStyle().set("color", "var(--vaadin-text-color-secondary)")
-                .set("margin-right", "0.5em");
+                .set("margin-inline-end", "0.5em");
         return icon;
     }
 
