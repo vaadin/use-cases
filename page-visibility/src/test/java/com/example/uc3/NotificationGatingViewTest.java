@@ -1,6 +1,7 @@
 package com.example.uc3;
 
 import com.example.PageVisibilityTestSupport;
+import com.example.home.HomeView;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -11,21 +12,24 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.page.PageVisibility;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ViewPackages(classes = NotificationGatingView.class)
+@ViewPackages(classes = { NotificationGatingView.class, HomeView.class })
 class NotificationGatingViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersWithSubscribeAndSendButtons() {
-        navigate(NotificationGatingView.class);
+    void leavingTheViewCancelsAPendingNotification() {
+        NotificationGatingView view = navigate(NotificationGatingView.class);
+        test($(Button.class).withText("Send me a notification in 5 seconds")
+                .single()).click();
+        assertTrue(view.hasPendingNotification());
 
-        assertTrue(findInView(Button.class).all().stream().anyMatch(
-                b -> "Enable browser notifications".equals(b.getText())));
-        assertTrue(findInView(Button.class).all().stream()
-                .anyMatch(b -> "Send me a notification in 5 seconds"
-                        .equals(b.getText())));
+        navigate(HomeView.class);
+
+        assertFalse(view.hasPendingNotification(),
+                "the notification should not pop up in the next view");
     }
 
     @Test

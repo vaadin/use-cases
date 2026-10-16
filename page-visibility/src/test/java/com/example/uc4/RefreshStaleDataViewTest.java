@@ -12,26 +12,10 @@ import com.vaadin.flow.component.page.PageVisibility;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ViewPackages(classes = RefreshStaleDataView.class)
 class RefreshStaleDataViewTest extends SpringBrowserlessTest {
-
-    @Test
-    void viewRendersWithRateAndManualRefresh() {
-        navigate(RefreshStaleDataView.class);
-        runPendingSignalsTasks();
-
-        // The card shows a 4-decimal exchange rate.
-        assertTrue(findInView(Span.class).all().stream().anyMatch(s -> {
-            String t = s.getText();
-            return t != null && t.matches("\\d+\\.\\d{4}");
-        }), "rate value should be rendered as 0.0000-style number");
-
-        assertTrue(findInView(Button.class).all().stream()
-                .anyMatch(b -> "Refresh now".equals(b.getText())));
-    }
 
     @Test
     void manualRefreshUpdatesRateValue() {
@@ -79,6 +63,25 @@ class RefreshStaleDataViewTest extends SpringBrowserlessTest {
 
         assertNotEquals(before, view.currentRate(),
                 "rate should auto-refresh after returning from a long hide");
+    }
+
+    @Test
+    void returningToAnUnfocusedWindowAlsoRefreshes() {
+        RefreshStaleDataView view = navigate(RefreshStaleDataView.class);
+        runPendingSignalsTasks();
+        double before = view.currentRate();
+
+        PageVisibilityTestSupport.setPageVisibility(PageVisibility.HIDDEN);
+        runPendingSignalsTasks();
+        view.backdateHiddenAt(10);
+
+        // The tab is shown again in a window that does not have the focus.
+        PageVisibilityTestSupport
+                .setPageVisibility(PageVisibility.VISIBLE_NOT_FOCUSED);
+        runPendingSignalsTasks();
+
+        assertNotEquals(before, view.currentRate(),
+                "rate should auto-refresh as soon as the tab is visible again");
     }
 
     @Test
