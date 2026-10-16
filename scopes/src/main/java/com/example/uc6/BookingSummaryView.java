@@ -1,5 +1,6 @@
 package com.example.uc6;
 
+import com.example.common.UnreleasedApi;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -15,6 +16,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Last step of the UC6 booking wizard; see {@link SeatSelectionView}.
  */
+@UnreleasedApi("https://github.com/vaadin/flow/pull/25901")
 @Route(value = "uc6/confirm", layout = MainLayout.class)
 @PageTitle("UC6 — Booking wizard")
 public class BookingSummaryView extends VerticalLayout {

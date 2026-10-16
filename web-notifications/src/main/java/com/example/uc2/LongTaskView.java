@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ScheduledFuture;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
@@ -46,6 +47,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * Without permission the result is announced with an in-app notification
  * instead.
  */
+@UnreleasedApi("https://github.com/vaadin/flow/pull/26495")
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Task finished")
 @UseCaseDescription("Telling the user that a slow server job has finished while they work in another tab")

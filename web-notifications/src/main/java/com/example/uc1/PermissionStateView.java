@@ -1,5 +1,6 @@
 package com.example.uc1;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -35,6 +36,7 @@ import com.vaadin.flow.signals.Signal;
  * "unsupported" for browsers without the API or pages that aren't served over
  * HTTPS. Once permission is granted, a test notification can be sent.
  */
+@UnreleasedApi("https://github.com/vaadin/flow/pull/26495")
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Ask for permission")
 @UseCaseDescription("Asking for notification permission on a click and showing its state live")

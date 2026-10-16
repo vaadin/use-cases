@@ -81,8 +81,11 @@ module too when you merge `main` into a long-lived branch.
 
 Feature APIs come from the Vaadin snapshot pinned in the parent pom. A pull
 request may build against a branch snapshot while the Flow change it needs is
-under review; switch it back to the mainline snapshot, and remove the
-workarounds the change makes unnecessary, once that change is merged.
+under review. Mark each view that uses the unreleased API with
+`@UnreleasedApi("<pull request URL>")`, so the app shows a banner that links
+to the pull request. Once that change is merged, switch back to the mainline
+snapshot, remove the annotations and remove the workarounds the change makes
+unnecessary.
 
 When a use case needs a standard format or algorithm (source maps, an image
 hash, PDF output), look for a small, maintained library first. Compare size

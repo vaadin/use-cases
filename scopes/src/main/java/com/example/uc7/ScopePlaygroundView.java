@@ -4,6 +4,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,6 +28,7 @@ import com.vaadin.flow.router.Route;
  * the table says which user actions each scope is expected to survive, so the
  * reader can try an action and check the counts against the expectation.
  */
+@UnreleasedApi("https://github.com/vaadin/flow/pull/25901")
 @Route(value = "uc7", layout = MainLayout.class)
 @UseCaseDescription("Seeing which scope survives a reload, a new tab or another browser")
 @PageTitle("UC7 — Scope playground")

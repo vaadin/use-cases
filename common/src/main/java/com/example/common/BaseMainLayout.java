@@ -2,6 +2,7 @@ package com.example.common;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.example.common.SlackFeedback.UseCase;
@@ -36,8 +37,10 @@ import com.vaadin.flow.server.menu.MenuEntry;
  * and the auto-generated side navigation, and a fixed-position "View source"
  * overlay that links the current route's view class to its source on GitHub
  * next to a "Feedback" button that opens a {@link FeedbackDialog} for it. The
- * button is only shown when {@link SlackFeedback} is enabled. Subclasses only
- * need to pass their module id and display title.
+ * button is only shown when {@link SlackFeedback} is enabled. Above a view
+ * marked {@link UnreleasedApi} it shows a banner that links to the pull request
+ * the API comes from. Subclasses only need to pass their module id and display
+ * title.
  */
 @StyleSheet("base-main-layout.css")
 public abstract class BaseMainLayout extends AppLayout
@@ -45,6 +48,9 @@ public abstract class BaseMainLayout extends AppLayout
 
     private static final SlackFeedback SLACK_FEEDBACK = SlackFeedback
             .fromEnvironment();
+
+    private static final Pattern PULL_REQUEST_URL = Pattern
+            .compile("https://github\\.com/([^/]+/[^/]+)/pull/(\\d+)/?");
 
     /**
      * The environment variable naming the Git commit or branch "View source"
@@ -61,6 +67,8 @@ public abstract class BaseMainLayout extends AppLayout
     private final SlackFeedback slackFeedback;
     private final Anchor sourceCodeLink;
     private final Button feedbackButton;
+    private final Anchor unreleasedApiLink;
+    private final Div unreleasedApiBanner;
     private @Nullable UseCase useCase;
 
     protected BaseMainLayout(String moduleId, String title) {
@@ -96,6 +104,18 @@ public abstract class BaseMainLayout extends AppLayout
         feedbackButton.setVisible(false);
         getElement().appendChild(
                 buildSourceCodeOverlay(sourceCodeLink, feedbackButton));
+
+        unreleasedApiLink = new Anchor();
+        unreleasedApiLink.setTarget("_blank");
+        unreleasedApiBanner = new Div(
+                new Span("This use case uses API that is not released yet. It"
+                        + " comes from "),
+                unreleasedApiLink, new Span("."));
+        unreleasedApiBanner.addClassName("unreleased-api-banner");
+        unreleasedApiBanner.setVisible(false);
+        // Without a slot name the banner shares the content slot with the
+        // view, so being the first child puts it above the view.
+        getElement().insertChild(0, unreleasedApiBanner.getElement());
 
         addToDrawer(AppCatalog.createSelector(moduleId));
 
@@ -207,6 +227,24 @@ public abstract class BaseMainLayout extends AppLayout
                                 .getPathWithQueryParameters())
                 : null;
         feedbackButton.setVisible(useCase != null && slackFeedback.isEnabled());
+
+        UnreleasedApi unreleasedApi = viewClass
+                .getAnnotation(UnreleasedApi.class);
+        if (unreleasedApi != null) {
+            unreleasedApiLink.setHref(unreleasedApi.value());
+            unreleasedApiLink.setText(pullRequestLabel(unreleasedApi.value()));
+        }
+        unreleasedApiBanner.setVisible(unreleasedApi != null);
+    }
+
+    /**
+     * A short label for a GitHub pull request URL, such as
+     * {@code vaadin/flow#26495}, or the URL itself when it is not one.
+     */
+    static String pullRequestLabel(String url) {
+        Matcher matcher = PULL_REQUEST_URL.matcher(url);
+        return matcher.matches() ? matcher.group(1) + "#" + matcher.group(2)
+                : url;
     }
 
     /**

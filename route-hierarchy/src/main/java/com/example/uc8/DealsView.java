@@ -1,5 +1,6 @@
 package com.example.uc8;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.uc1.CatalogView;
 import com.example.views.MainLayout;
@@ -28,6 +29,7 @@ import com.vaadin.flow.router.RouterLink;
  * when the page really does live under another page; use
  * {@code @Menu(parent = ...)} when only the menu should group it that way.
  */
+@UnreleasedApi("https://github.com/vaadin/flow/pull/24556")
 @Route(value = "deals", layout = MainLayout.class)
 @PageTitle("Deals")
 @UseCaseDescription("A top-level page that the menu groups under Catalog")

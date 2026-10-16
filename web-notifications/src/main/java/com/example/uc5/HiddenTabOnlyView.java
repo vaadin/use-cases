@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.springframework.scheduling.TaskScheduler;
@@ -45,6 +46,7 @@ import com.vaadin.flow.signals.Signal;
  * this only works while the tab is open — for delivery to closed tabs see the
  * Web Push use case in the page-visibility module.
  */
+@UnreleasedApi("https://github.com/vaadin/flow/pull/26495")
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Only when hidden")
 @UseCaseDescription("Notifying through the OS only when the user isn't looking at the tab")
