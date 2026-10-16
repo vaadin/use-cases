@@ -155,8 +155,9 @@ public abstract class BaseMainLayout extends AppLayout
         Div container = new Div();
         container.getStyle().set("position", "fixed").set("top",
                 "calc(var(--vaadin-app-layout-navbar-offset-top) + 0.5em)")
-                .set("inset-inline-end", "1em").set("z-index", "100")
-                .set("pointer-events", "auto");
+                .set("inset-inline-end",
+                        "calc(var(--aura-app-layout-inset, 0px) + 1em)")
+                .set("z-index", "100").set("pointer-events", "auto");
         container.addClassName("use-case-overlay");
 
         Icon codeIcon = overlayIcon(VaadinIcon.CODE);
