@@ -1,19 +1,21 @@
 package com.example.uc2;
 
-import java.util.Objects;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
+import com.example.data.Invoices;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Span;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -21,27 +23,31 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class OpenInNewTabViewTest extends SpringBrowserlessTest {
 
     @Test
-    void theLinkOpensTheDocumentItselfInANewTab() {
+    void theLinkOpensTheDocumentItselfInANewTab() throws IOException {
         navigate(OpenInNewTabView.class);
 
         Anchor view = findInView(Anchor.class).id("view-link");
         assertEquals("_blank", view.getTarget().orElseThrow());
-        assertFalse(view.getHref().isEmpty());
+
+        ByteArrayOutputStream pdf = new ByteArrayOutputStream();
+        test(view).download(pdf);
+        try (PDDocument document = Loader.loadPDF(pdf.toByteArray())) {
+            assertTrue(new PDFTextStripper().getText(document)
+                    .contains("Invoice " + Invoices.sampleInvoice().number()));
+        }
     }
 
     @Test
-    void theServerHasToGoThroughAHiddenAnchorToOpenTheSameDocument() {
+    void theButtonHasTheDocumentBoundForANewTab() {
         navigate(OpenInNewTabView.class);
+        Button open = findInView(Button.class).id("open-button");
 
-        test(findInView(Button.class).id("open-button")).click();
-
-        assertFalse(
-                findInView(Span.class).id("resolved-url").getText().isEmpty(),
-                "The URL only becomes visible through Anchor#getHref()");
+        // OpenInNewTab registers the handler on the button itself, under an
+        // internal attribute; there is no browserless tester that fetches it
+        // (API-GAPS.md #6).
         assertTrue(
-                Objects.requireNonNull(UI.getCurrent()).getInternals()
-                        .containsPendingJavascript("this.click()"),
-                "Page#open cannot take a DownloadHandler, so the anchor is "
-                        + "clicked from JavaScript instead");
+                open.getElement().getAttributeNames().anyMatch(
+                        name -> name.startsWith("data-flow-download-")),
+                "The handler is registered on the button");
     }
 }
