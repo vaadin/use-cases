@@ -40,7 +40,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * after a drag, {@link Grid#getColumns()} still returns the declaration order.
  * The only place the user's order exists is the {@code ColumnReorderEvent}, so
  * this view keeps its own copy of the order and hands it to the exporter. See
- * {@code API-GAPS.md}.
+ * {@code API-GAPS.md} #7.
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @UseCaseDescription("Exporting only the columns the user kept, in the order they dragged them")

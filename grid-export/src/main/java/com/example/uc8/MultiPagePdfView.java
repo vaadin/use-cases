@@ -45,7 +45,8 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * <em>and</em> it needs to measure every row before it can place the first one
  * — to size the columns and to print a truthful "Page 1 of 12". An export API
  * that only hands out a flat list of rows is not enough for it, and the column
- * widths it needs are not on the server at all. See {@code API-GAPS.md}.
+ * widths it needs are not on the server at all. See {@code API-GAPS.md} #11 and
+ * #12.
  */
 @Route(value = "uc8", layout = MainLayout.class)
 @UseCaseDescription("Printing a multi-page PDF that repeats the headers on every page")

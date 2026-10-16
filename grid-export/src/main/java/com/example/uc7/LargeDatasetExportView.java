@@ -46,7 +46,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * exporter can page through the backend by asking for one window at a time. The
  * single-shot alternative, {@code getLazyDataView().getItems()}, asks the
  * backend for {@code Integer.MAX_VALUE} rows in one query, which is exactly
- * what a large export must not do. See {@code API-GAPS.md}.
+ * what a large export must not do. See {@code API-GAPS.md} #10.
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @UseCaseDescription("Streaming a large, lazily loaded grid to a file a page at a time")

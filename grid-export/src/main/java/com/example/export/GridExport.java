@@ -39,7 +39,7 @@ import com.vaadin.flow.server.streams.DownloadEvent;
  *
  * What it does <em>not</em> do is style: the issue's "keep as much styling as
  * possible" goal needs per-cell style information that the server does not
- * have. See {@code API-GAPS.md}.
+ * have. See {@code API-GAPS.md} #13.
  *
  * @param <T>
  *            the grid's item type
@@ -285,7 +285,7 @@ public final class GridExport<T> {
     // The next four methods are the same method twice over. Header cells and
     // footer cells share an API (getText(), getComponent()) and a supertype
     // (AbstractRow.AbstractCell), but that supertype is package-private, so
-    // there is nothing to write the shared version against. See API-GAPS.md.
+    // there is nothing to write the shared version against. See API-GAPS.md #8.
 
     private static HeaderRow.@Nullable HeaderCell cellOf(HeaderRow row,
             Grid.Column<?> column) {
