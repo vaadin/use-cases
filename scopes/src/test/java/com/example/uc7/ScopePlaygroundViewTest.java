@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Checks the counters for everything browserless tests can simulate: navigation
- * within a UI and a new session. Reloads and tab duplication cannot be
- * simulated yet; see API-GAPS.md #2.
+ * within a UI and a new session. Reloads are not covered yet; tab duplication
+ * cannot be simulated; see API-GAPS.md #2.
  */
 @SpringBootTest
 @ViewPackages(packages = "com.example")

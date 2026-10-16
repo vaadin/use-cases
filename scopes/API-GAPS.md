@@ -20,19 +20,21 @@ backed by a `VaadinBrowserTabScope` registered in `VaadinScopesConfig` next to
 the existing scopes, and the CDI equivalent in vaadin-cdi.
 Upstream: https://github.com/vaadin/flow/issues/13468
 
-## 2. Browser tabs cannot be simulated in browserless tests
+## 2. Some browser tab behaviour cannot be simulated in browserless tests
 
 **Where it bites:** UC6 and UC7 tests
-**Symptom:** The mock UI has no `window.name`, so every UI becomes its own
-browser tab. There is no way to simulate the things the scope exists for: a
-reload (a new UI in the same tab), a second tab in the same session, a
-duplicated tab, or a closed tab expiring after the heartbeat timeout
-(`BrowserTab.destroyInactiveTabs` is package-private). The tests only cover
-rendering, the non-tab state, and tab destruction at session end.
+**Symptom:** `BaseBrowserlessTest#reload()` keeps the window name, so a reload
+now stays in the same `BrowserTab`. A second tab in the same session needs
+`BrowserlessUserContext#newWindow()`, which `SpringBrowserlessTest` does not
+offer. Two things the scope exists for can not be simulated at all: a
+duplicated tab (a second UI with the same window name), and a closed tab
+expiring after the heartbeat timeout (`BrowserTab.destroyInactiveTabs` is
+package-private). The tests cover rendering, the non-tab state, and tab
+destruction at session end.
 **Workaround used:** None; tab behaviour was checked manually in a browser.
-**Suggested API:** browserless helpers such as `reload()` (new UI, same window
-name), `openTab()` / `duplicateTab()`, and a way to expire inactive tabs or
-advance the heartbeat clock.
+**Suggested API:** browserless helpers such as `duplicateTab()`, a way to expire
+inactive tabs or advance the heartbeat clock, and `newWindow()` in
+`SpringBrowserlessTest`.
 
 ## 3. A closed tab keeps its state until the heartbeat timeout
 
@@ -68,10 +70,13 @@ bound to Spring Test's own `MockHttpServletRequest` for the whole test method.
 session and HTTP session, but `@SessionScope` beans keep resolving to the old
 Spring mock session. UC7's test therefore has to expect the HTTP session
 counter to keep counting in the "new session" case.
+`SpringBrowserlessApplicationContext` already binds each user's request to
+`RequestContextHolder` (vaadin/browserless-test#110), but
+`SpringBrowserlessTest#initVaadinEnvironment()` does not.
 Related, and also true in production: `@SessionScope` beans only resolve on
 threads that are handling an HTTP request, so they cannot be used from
 `UI.access` in background threads or from server push.
 **Workaround used:** The test expectation documents the behaviour.
-**Suggested API:** `browserless-test-spring` could bind `RequestContextHolder`
-to the mock Vaadin request (and rebind it in `initVaadinEnvironment()`), so
-that Spring web scopes follow the simulated session.
+**Suggested API:** `SpringBrowserlessTest` could bind `RequestContextHolder`
+to the mock Vaadin request in `initVaadinEnvironment()`, as the multi-user
+context does, so that Spring web scopes follow the simulated session.
