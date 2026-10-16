@@ -28,6 +28,6 @@ the easiest browser to verify the fallback path in UC2.
 
 ## API gaps
 
-See [API-GAPS.md](API-GAPS.md) for everything we wanted but the current
-API doesn't expose (file sharing / Web Share Level 2, `navigator.canShare`
-pre-check, browserless test simulator, SSR-time feature detection, …).
+See [API-GAPS.md](API-GAPS.md) for what the current API doesn't expose:
+file sharing / Web Share Level 2 (#1), a `navigator.canShare` check for one
+payload (#2) and a browserless test simulator (#3).
