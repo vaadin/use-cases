@@ -37,7 +37,8 @@ Upstream: https://github.com/vaadin/flow/issues/25867
 **Symptom:** CE has a `Backend` abstraction with Hazelcast and Redis
 implementations. A shared signal keeps its tree in the JVM that created it:
 the public constructors (e.g. `SharedNodeSignal()`) use
-`LocalAsynchronousSignalTree`, documented as "does not support clustering".
+`LocalAsynchronousSignalTree`, a single-JVM tree, and their Javadoc says
+"does not support clustering".
 Nothing in this module works across two servers. This is the one gap that
 stops an application from replacing CE today.
 **Workaround used:** none. The module runs on a single node.
@@ -91,6 +92,7 @@ vaadin/flow-components#8954.)
 `getDataProvider().refreshAll()` from an effect for part names.
 **Suggested API:** `Grid.bindItems(Signal<List<Signal<T>>>)` that refreshes
 one row when one row signal changes, and a reactive part name generator.
+Upstream: https://github.com/vaadin/flow/issues/23659
 
 ## 6. The field highlighter has no public Java API
 
