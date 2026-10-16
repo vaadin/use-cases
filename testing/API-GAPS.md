@@ -22,14 +22,6 @@ Upstream: https://github.com/vaadin/browserless-test/issues/282
 **Suggested API:** one simulator per browser-backed API, following `GeolocationSimulator`: `PageVisibilitySimulator.current().hide()`, `ClientDetailsSimulator.current().setTimeZone(ZoneId)`, request locales and cookies for the next session, and media-query answers.
 Upstream: https://github.com/vaadin/browserless-test/issues/166
 
-## 3. Browserless: the Grid tester cannot sort by header
-
-**Where it bites:** UC4 / OrdersViewTest.java
-**Symptom:** `GridTester` reads cells, selects rows and finds cell components, but has no way to click a column header to sort, which is how users sort.
-**Workaround used:** `grid.sort(GridSortOrder.desc(column).build())` directly on the component.
-**Suggested API:** `GridTester#sortBy(String columnKey, SortDirection)` that goes through the same path as a header click.
-Upstream: https://github.com/vaadin/browserless-test/issues/283
-
 ## 4. Browserless: a link to a view outside `@ViewPackages` breaks the navigation
 
 **Where it bites:** UC8 / EndToEndViewTest.java
