@@ -1,4 +1,4 @@
-package com.example.uc8;
+package com.example.uc7;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ class ScopePlaygroundViewTest extends SpringBrowserlessTest {
     void firstVisitCountsOneInEveryScope() {
         navigate(ScopePlaygroundView.class);
 
-        assertEquals("UC8 — Scope playground",
+        assertEquals("UC7 — Scope playground",
                 findInView(H1.class).single().getText());
         assertEquals(List.of(1, 1, 1, 1, 1, 1), visits());
     }
@@ -46,7 +46,7 @@ class ScopePlaygroundViewTest extends SpringBrowserlessTest {
         // A new Vaadin session: everything except the application scope
         // starts over. The Spring HTTP session keeps counting only because
         // browserless tests do not give Spring a new HTTP session here; see
-        // API-GAPS.md #6. In a real browser it is 1 as well.
+        // API-GAPS.md #5. In a real browser it is 1 as well.
         cleanVaadinEnvironment();
         initVaadinEnvironment();
         navigate(ScopePlaygroundView.class);
@@ -59,7 +59,6 @@ class ScopePlaygroundViewTest extends SpringBrowserlessTest {
      */
     private List<Integer> visits() {
         return findInView(Span.class).withClassName("scope-badge").all()
-                .stream().map(s -> Integer.parseInt(s.getText().split(" ")[0]))
-                .toList();
+                .stream().map(s -> Integer.parseInt(s.getText())).toList();
     }
 }

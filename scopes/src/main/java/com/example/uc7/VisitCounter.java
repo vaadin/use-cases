@@ -1,7 +1,6 @@
-package com.example.uc8;
+package com.example.uc7;
 
 import java.io.Serializable;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -11,19 +10,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class VisitCounter implements Serializable {
 
-    private final String instanceId = UUID.randomUUID().toString().substring(0,
-            8);
     private final AtomicInteger visits = new AtomicInteger();
 
     public int visit() {
         return visits.incrementAndGet();
-    }
-
-    public int getVisits() {
-        return visits.get();
-    }
-
-    public String getInstanceId() {
-        return instanceId;
     }
 }

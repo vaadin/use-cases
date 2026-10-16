@@ -27,10 +27,11 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * UC4 — Undo history for one editor window (UI scope).
  * <p>
  * A shop manager adjusts a price list. The undo button lives in a separate
- * toolbar component, and the editor records every change in the same
- * {@link UndoHistory}. Both get it by injection because it is {@code @UIScope}:
- * shared by everything in this UI, but not with the price list open in another
- * tab, where undoing would revert changes the user cannot see.
+ * toolbar component, a third component lists the whole history, and the editor
+ * records every change in the same {@link UndoHistory}. All of them get it by
+ * injection because it is {@code @UIScope}: shared by everything in this UI,
+ * but not with the price list open in another tab, where undoing would revert
+ * changes the user cannot see.
  * <p>
  * Reload the page to see the other side of UI scope: the reload creates a new
  * UI and the history is gone.
@@ -51,13 +52,15 @@ public class PriceListEditorView extends VerticalLayout {
 
     private final UndoHistory history;
 
-    public PriceListEditorView(UndoHistory history, UndoToolbar toolbar) {
+    public PriceListEditorView(UndoHistory history, UndoToolbar toolbar,
+            UndoHistoryList historyList) {
         this.history = history;
 
         add(new H1("UC4 — Undo history"));
-        add(new Paragraph("The toolbar and the editor are separate "
-                + "components that share a @UIScope undo history. Another "
-                + "tab has its own history, and a reload starts a new one."));
+        add(new Paragraph("The toolbar, the editor and the history list are "
+                + "separate components that share a @UIScope undo history. "
+                + "Another tab has its own history, and a reload starts a "
+                + "new one."));
 
         Span uiId = new Span("UI #" + UI.getCurrentOrThrow().getUIId());
         uiId.addClassName("scope-badge");
@@ -78,7 +81,7 @@ public class PriceListEditorView extends VerticalLayout {
             prices.get().forEach(p -> list
                     .add(new ListItem(p.product() + " — " + p.amount())));
         });
-        add(list);
+        add(list, historyList);
     }
 
     private void change(String description,

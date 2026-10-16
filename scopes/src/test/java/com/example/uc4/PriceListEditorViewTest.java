@@ -9,10 +9,13 @@ import org.springframework.context.ApplicationContext;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.HtmlContainer;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.ListItem;
+import com.vaadin.flow.component.html.OrderedList;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.UnorderedList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -34,7 +37,7 @@ class PriceListEditorViewTest extends SpringBrowserlessTest {
 
         assertEquals("UC4 — Undo history",
                 findInView(H1.class).single().getText());
-        assertEquals(3, findInView(ListItem.class).all().size());
+        assertEquals(3, prices().size());
         assertFalse(button("Undo").isEnabled());
     }
 
@@ -52,15 +55,20 @@ class PriceListEditorViewTest extends SpringBrowserlessTest {
         assertTrue(findInView(Span.class).all().stream().anyMatch(
                 s -> s.getText().equals("Last change: Removed the last product "
                         + "(2 in history)")));
+        assertEquals(
+                List.of("Raised all prices by 10%", "Removed the last product"),
+                history());
 
         test(button("Undo")).click();
         runPendingSignalsTasks();
         assertEquals(3, prices().size());
+        assertEquals(List.of("Raised all prices by 10%"), history());
 
         test(button("Undo")).click();
         runPendingSignalsTasks();
         assertEquals("Espresso machine — 499.00", prices().getFirst());
         assertFalse(button("Undo").isEnabled());
+        assertEquals(List.of(), history());
     }
 
     @Test
@@ -77,8 +85,16 @@ class PriceListEditorViewTest extends SpringBrowserlessTest {
     }
 
     private List<String> prices() {
-        return findInView(ListItem.class).all().stream().map(ListItem::getText)
-                .toList();
+        return items(UnorderedList.class);
+    }
+
+    private List<String> history() {
+        return items(OrderedList.class);
+    }
+
+    private List<String> items(Class<? extends HtmlContainer> listType) {
+        return find(ListItem.class).from(findInView(listType).single()).all()
+                .stream().map(ListItem::getText).toList();
     }
 
     private Button button(String text) {

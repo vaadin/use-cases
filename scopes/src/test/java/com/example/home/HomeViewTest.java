@@ -11,8 +11,7 @@ import com.example.uc3.OrderExportView;
 import com.example.uc4.PriceListEditorView;
 import com.example.uc5.CustomerDetailsView;
 import com.example.uc6.SeatSelectionView;
-import com.example.uc7.TicketPerTabView;
-import com.example.uc8.ScopePlaygroundView;
+import com.example.uc7.ScopePlaygroundView;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -30,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ViewPackages(classes = { HomeView.class, MaintenanceBannerView.class,
         SharedCartView.class, OrderExportView.class, PriceListEditorView.class,
         CustomerDetailsView.class, SeatSelectionView.class,
-        TicketPerTabView.class, ScopePlaygroundView.class })
+        ScopePlaygroundView.class })
 class HomeViewTest extends SpringBrowserlessTest {
 
     private record UseCase(String tag, String title, String problem) {
@@ -52,13 +51,11 @@ class HomeViewTest extends SpringBrowserlessTest {
             "Keeping a draft across the pages of an editor and dropping it on leaving");
     private static final UseCase UC6 = new UseCase("UC6", "Booking wizard",
             "Keeping a multi-step booking through reloads, separate in each tab");
-    private static final UseCase UC7 = new UseCase("UC7", "Ticket per tab",
-            "Keeping a different ticket and reply draft in each browser tab");
-    private static final UseCase UC8 = new UseCase("UC8", "Scope playground",
+    private static final UseCase UC7 = new UseCase("UC7", "Scope playground",
             "Seeing which scope survives a reload, a new tab or another browser");
 
     private static final List<UseCase> USE_CASES = List.of(UC1, UC2, UC3, UC4,
-            UC5, UC6, UC7, UC8);
+            UC5, UC6, UC7);
 
     @Test
     void cardsAreGroupedByKindOfProblemInMenuOrder() {
@@ -76,8 +73,8 @@ class HomeViewTest extends SpringBrowserlessTest {
                 new Group("Shared by users and sessions",
                         List.of(UC1, UC2, UC3)),
                 new Group("Kept for one window or editor", List.of(UC4, UC5)),
-                new Group("Kept per browser tab", List.of(UC6, UC7)),
-                new Group("All scopes side by side", List.of(UC8))), groups);
+                new Group("Kept per browser tab", List.of(UC6)),
+                new Group("All scopes side by side", List.of(UC7))), groups);
     }
 
     private static UseCase useCaseOf(Card card) {

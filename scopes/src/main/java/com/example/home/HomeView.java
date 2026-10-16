@@ -10,8 +10,7 @@ import com.example.uc3.OrderExportView;
 import com.example.uc4.PriceListEditorView;
 import com.example.uc5.CustomerDetailsView;
 import com.example.uc6.SeatSelectionView;
-import com.example.uc7.TicketPerTabView;
-import com.example.uc8.ScopePlaygroundView;
+import com.example.uc7.ScopePlaygroundView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -38,7 +37,7 @@ public class HomeView extends BaseHomeView {
                 Accent.PURPLE,
                 List.of(PriceListEditorView.class, CustomerDetailsView.class));
         addGroup("Kept per browser tab", VaadinIcon.BROWSER, Accent.GREEN,
-                List.of(SeatSelectionView.class, TicketPerTabView.class));
+                List.of(SeatSelectionView.class));
         addGroup("All scopes side by side", VaadinIcon.SLIDERS, Accent.ORANGE,
                 List.of(ScopePlaygroundView.class));
     }

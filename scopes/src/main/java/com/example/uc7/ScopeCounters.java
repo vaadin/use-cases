@@ -1,4 +1,4 @@
-package com.example.uc8;
+package com.example.uc7;
 
 import com.example.MissingAPI.BrowserTabScope;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +10,7 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 
 /**
- * One {@link VisitCounter} per scope for the UC8 playground.
+ * One {@link VisitCounter} per scope for the UC7 playground.
  */
 @Configuration(proxyBeanMethods = false)
 public class ScopeCounters {
