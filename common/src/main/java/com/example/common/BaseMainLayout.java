@@ -1,5 +1,6 @@
 package com.example.common;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -99,7 +100,7 @@ public abstract class BaseMainLayout extends AppLayout
         addToDrawer(AppCatalog.createSelector(moduleId));
 
         SideNav nav = new SideNav();
-        MenuConfiguration.getMenuEntries().forEach(entry -> {
+        mainNavEntries().forEach(entry -> {
             SideNavItem item = new SideNavItem(entry.title(), entry.path());
             UseCaseDescription description = descriptionOf(entry);
             if (description != null) {
@@ -108,6 +109,16 @@ public abstract class BaseMainLayout extends AppLayout
             nav.addItem(item);
         });
         addToDrawer(nav);
+    }
+
+    /**
+     * The menu entries listed in the main side navigation, in order. The
+     * default is the flat {@link MenuConfiguration#getMenuEntries()}; a module
+     * whose menu nests routes can override this to keep the deeper entries out
+     * of the flat nav.
+     */
+    protected List<MenuEntry> mainNavEntries() {
+        return MenuConfiguration.getMenuEntries();
     }
 
     /**

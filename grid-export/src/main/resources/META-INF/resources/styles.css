@@ -1,0 +1,24 @@
+/* Grid data export use cases — small visual polish */
+
+/* The export preview: every view shows the bytes it would hand the browser,
+   so the export is observable without downloading a file. */
+.export-preview {
+    font-size: var(--aura-font-size-s);
+    background: var(--vaadin-background-container);
+    border: 1px solid var(--vaadin-border-color);
+    border-radius: var(--vaadin-radius-m);
+    padding: 0.75rem 1rem;
+    max-height: 22rem;
+    overflow: auto;
+    white-space: pre;
+    margin: 0;
+}
+
+.export-note {
+    color: var(--vaadin-text-color-secondary);
+    font-size: var(--aura-font-size-s);
+}
+
+.export-grid {
+    max-height: 20rem;
+}

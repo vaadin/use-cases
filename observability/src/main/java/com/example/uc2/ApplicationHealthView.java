@@ -5,11 +5,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.example.acme.AppWindow;
 import com.example.acme.DemoRig;
 import com.example.acme.Investigation;
 import com.example.acme.MeterTable;
 import com.example.acme.Telemetry;
+import com.example.common.AppWindow;
 import com.example.common.UseCaseDescription;
 import com.example.uc2.ProductCatalogService.CatalogLoad;
 import com.example.uc2.ProductCatalogService.Line;
@@ -215,7 +215,8 @@ public class ApplicationHealthView extends VerticalLayout {
         emptyRow.addClassName("order-empty");
         catalogTable.addRows(emptyRow);
 
-        return new AppWindow("Acme Supply — Inventory", ROUTE,
+        return new AppWindow("Acme Supply — Inventory",
+                "acme.example/" + ROUTE,
                 new HorizontalLayout(Alignment.CENTER, refresh,
                         catalogSummary),
                 catalogTable);

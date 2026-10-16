@@ -5,64 +5,6 @@
     margin: 0;
 }
 
-/* The Acme app window: what a user of the fictional app sees, framed as a
-   window so it reads apart from the observability readout below it. */
-.app-window {
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 760px;
-    border: 1px solid var(--vaadin-border-color);
-    border-radius: var(--vaadin-radius-l, 12px);
-    overflow: hidden;
-    box-shadow: 0 12px 32px rgb(0 0 0 / 14%);
-    background: var(--vaadin-background-color);
-}
-
-.app-window-chrome {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 0.75rem;
-    background: var(--vaadin-background-container);
-    border-bottom: 1px solid var(--vaadin-border-color);
-}
-
-.app-window-dots {
-    display: flex;
-    gap: 0.375rem;
-}
-
-.app-window-dots > div {
-    width: 0.625rem;
-    height: 0.625rem;
-    border-radius: 50%;
-    background: color-mix(in srgb,
-        var(--vaadin-text-color-secondary) 40%, transparent);
-}
-
-.app-window-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-}
-
-.app-window-url {
-    margin-inline-start: auto;
-    font-family: var(--vaadin-font-family-monospace, monospace);
-    font-size: 0.75rem;
-    color: var(--vaadin-text-color-secondary);
-    background: var(--vaadin-background-color);
-    border: 1px solid var(--vaadin-border-color);
-    border-radius: 999px;
-    padding: 0.125rem 0.625rem;
-}
-
-.app-window-body {
-    display: flex;
-    flex-direction: column;
-    gap: var(--vaadin-gap-container, 1rem);
-    padding: var(--vaadin-padding-l, 1.5rem);
-}
-
 /* The perspective flip: everything above is the app, everything below is
    what the kit records about it. */
 .lens-divider {
