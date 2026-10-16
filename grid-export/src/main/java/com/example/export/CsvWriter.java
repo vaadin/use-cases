@@ -84,7 +84,7 @@ public final class CsvWriter {
             event.setFileName(fileName);
             event.setContentType(CONTENT_TYPE);
             PrintWriter writer = event.getWriter();
-            writer.write(toCsv(report.get()));
+            writer.write(toCsv(GridExport.exportFor(event, report)));
             writer.flush();
         };
     }

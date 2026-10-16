@@ -6,6 +6,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.example.MissingAPI;
@@ -19,6 +21,7 @@ import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.server.streams.DownloadEvent;
 
 /**
  * Reads a {@link Grid} for export, as the single facade asked for in
@@ -195,6 +198,19 @@ public final class GridExport<T> {
                 streamRows().toList(),
                 includeFooters ? footerRows(columns) : List.of(),
                 emptyStateText());
+    }
+
+    /**
+     * Builds the report for a download. A download handler runs outside the
+     * session lock and without a current UI, but reading the grid needs both: a
+     * formatted column builds a component to get at its text (see
+     * {@code API-GAPS.md} #3).
+     */
+    static ExportedGrid exportFor(DownloadEvent event,
+            Supplier<ExportedGrid> report) {
+        AtomicReference<ExportedGrid> exported = new AtomicReference<>();
+        event.getUI().accessSynchronously(() -> exported.set(report.get()));
+        return exported.get();
     }
 
     private static Alignment alignmentOf(Grid.Column<?> column) {

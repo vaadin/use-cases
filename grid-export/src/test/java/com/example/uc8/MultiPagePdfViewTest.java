@@ -3,6 +3,7 @@ package com.example.uc8;
 import java.util.List;
 
 import com.example.data.Employee;
+import com.example.export.Downloads;
 import com.example.export.ExportedGrid.Alignment;
 import com.example.export.PdfWriter;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -106,5 +108,16 @@ class MultiPagePdfViewTest extends SpringBrowserlessTest {
         }
         assertFalse(all.contains("?"),
                 "the demo data should not need character substitution");
+    }
+
+    @Test
+    void downloadLinkServesThePdf() {
+        MultiPagePdfView view = navigate(MultiPagePdfView.class);
+
+        byte[] downloaded = Downloads
+                .download(findInView(Anchor.class).single());
+
+        assertEquals(PdfWriter.readBackPages(view.pdf()),
+                PdfWriter.readBackPages(downloaded));
     }
 }

@@ -61,7 +61,7 @@ public final class XlsxWriter {
     public static DownloadHandler download(String fileName,
             Supplier<ExportedGrid> report) {
         return event -> {
-            byte[] bytes = toBytes(report.get());
+            byte[] bytes = toBytes(GridExport.exportFor(event, report));
             event.setFileName(fileName);
             event.setContentType(CONTENT_TYPE);
             event.setContentLength(bytes.length);
