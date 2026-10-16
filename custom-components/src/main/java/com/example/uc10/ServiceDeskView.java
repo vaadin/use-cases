@@ -2,6 +2,7 @@ package com.example.uc10;
 
 import java.util.List;
 
+import com.example.common.BuiltWith;
 import com.example.common.UseCaseDescription;
 import com.example.components.RatingStars;
 import com.example.components.RatingStarsVariant;
@@ -9,7 +10,6 @@ import com.example.components.Sparkline;
 import com.example.desk.Ticket;
 import com.example.desk.TicketDetail;
 import com.example.desk.TicketStore;
-import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;

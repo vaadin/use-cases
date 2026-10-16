@@ -5,8 +5,8 @@ import java.util.Locale;
 import com.example.LanguagePreference;
 import com.example.MissingAPI;
 import com.example.SupportedLocales;
+import com.example.common.BuiltWith;
 import com.example.common.UseCaseDescription;
-import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;

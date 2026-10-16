@@ -10,7 +10,8 @@ plugin for every module.
 - `common/` — shared code every app depends on: `BaseMainLayout` (side
   navigation, application selector, "View source" and "Feedback"),
   `BaseHomeView` (home page cards), `@UseCaseDescription`, `AppCatalog` (the
-  list of all apps) and `OpenGraphTags` (link previews).
+  list of all apps), `OpenGraphTags` (link previews) and `BuiltWith` (the
+  "how it is built" section of a view).
 - `<module>/` — one standalone Spring Boot app per feature area (`clipboard`,
   `observability`, `multimedia`, …). Each is built, tested and deployed on its
   own.

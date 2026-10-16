@@ -5,8 +5,8 @@ import java.util.stream.IntStream;
 
 import com.example.Appearance;
 import com.example.BaseTheme;
+import com.example.common.BuiltWith;
 import com.example.common.UseCaseDescription;
-import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
