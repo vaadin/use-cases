@@ -27,6 +27,10 @@ import com.vaadin.flow.server.menu.MenuEntry;
  * param-free nested use cases — Catalog › Electronics › Laptops, Settings ›
  * Security › Active sessions, Dashboard › Team — show their structure here.
  * <p>
+ * One entry is nested by the menu alone: {@link DealsView} is a top-level route
+ * at {@code /deals}, but {@code @Menu(parent = CatalogView.class)} places it
+ * under Catalog in this tree while its breadcrumb stays Home › Deals.
+ * <p>
  * Like the breadcrumb's walker ({@code RouteConfiguration.getRouteHierarchy}),
  * {@code getMenuEntriesTree()} is public, supported API — here in
  * {@code com.vaadin.flow.server.menu}.
@@ -48,7 +52,11 @@ public class HierarchicalMenuView extends VerticalLayout {
                         + "@Menu set returned by MenuConfiguration."
                         + "getMenuEntriesTree(), nested by route hierarchy: open "
                         + "Catalog, Settings or Dashboard to see their child "
-                        + "routes that the flat navigation hides."));
+                        + "routes that the flat navigation hides. Deals sits "
+                        + "under Catalog too, but only in the menu: its URL is "
+                        + "/deals, and @Menu(parent = CatalogView.class) "
+                        + "groups it there without moving the route — open it "
+                        + "and its breadcrumb reads Home › Deals."));
 
         SideNav tree = new SideNav();
         tree.setId(MENU_ID);

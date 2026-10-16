@@ -21,7 +21,7 @@ public, supported API, and no view in this module imports `internal`:
 - `MenuConfiguration#getMenuEntriesTree()` + `MenuEntry#children()` give the
   menu as a tree (UC8), which is also how `MainLayout` keeps the flat main
   navigation to top-level entries — depth comes from the tree rather than from
-  re-deriving it out of URL paths. `@Menu(parent = ...)` (UC9) regroups an
+  re-deriving it out of URL paths. `@Menu(parent = ...)` (also UC8) regroups an
   entry in that tree without touching its route.
 
 The one gap left is in the test API.

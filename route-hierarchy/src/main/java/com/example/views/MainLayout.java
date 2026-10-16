@@ -21,8 +21,9 @@ public class MainLayout extends BaseMainLayout {
      * route hierarchy, so depth is a property of the entry rather than
      * something to re-derive from URL paths (a logical parent need not share a
      * URL prefix). The landing page is not a menu parent, so the roots are Home
-     * and UC1–UC9; the nested {@code @Menu} views (Electronics, Security, Team,
-     * ...) stay out of the flat nav and surface only in UC8's tree.
+     * and UC1–UC8; the nested {@code @Menu} views (Electronics, Deals,
+     * Security, Team, ...) stay out of the flat nav and surface only in UC8's
+     * tree.
      */
     @Override
     protected List<MenuEntry> mainNavEntries() {

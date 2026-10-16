@@ -12,7 +12,6 @@ import com.example.uc5.SettingsView;
 import com.example.uc6.DashboardView;
 import com.example.uc7.SitemapView;
 import com.example.uc8.HierarchicalMenuView;
-import com.example.uc9.ReportsView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -37,7 +36,7 @@ public class HomeView extends BaseHomeView {
                         + "add(new Breadcrumbs()); there is no per-view plumbing. "
                         + "UC5 and UC7 build other consumers — an up-link and a "
                         + "sitemap — directly on the same route-hierarchy API, "
-                        + "and UC8 and UC9 build the navigation menu as a tree.");
+                        + "and UC8 builds the navigation menu as a tree.");
         addGroup("Finding a page's parents", VaadinIcon.SITEMAP, Accent.BLUE,
                 List.of(CatalogView.class, OrdersView.class));
         addGroup("Getting each crumb right", VaadinIcon.LINK, Accent.GREEN,
@@ -46,6 +45,6 @@ public class HomeView extends BaseHomeView {
                 Accent.PURPLE, List.of(SettingsView.class, DashboardView.class,
                         SitemapView.class));
         addGroup("Building the menu", VaadinIcon.MENU, Accent.ORANGE,
-                List.of(HierarchicalMenuView.class, ReportsView.class));
+                List.of(HierarchicalMenuView.class));
     }
 }

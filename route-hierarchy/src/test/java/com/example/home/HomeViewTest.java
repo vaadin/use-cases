@@ -13,7 +13,6 @@ import com.example.uc5.SettingsView;
 import com.example.uc6.DashboardView;
 import com.example.uc7.SitemapView;
 import com.example.uc8.HierarchicalMenuView;
-import com.example.uc9.ReportsView;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -30,8 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @ViewPackages(classes = { HomeView.class, CatalogView.class, OrdersView.class,
         UsersView.class, ProjectsView.class, SettingsView.class,
-        DashboardView.class, SitemapView.class, HierarchicalMenuView.class,
-        ReportsView.class })
+        DashboardView.class, SitemapView.class, HierarchicalMenuView.class })
 class HomeViewTest extends SpringBrowserlessTest {
 
     private record UseCase(String tag, String title, String problem) {
@@ -59,11 +57,9 @@ class HomeViewTest extends SpringBrowserlessTest {
             "Generating a sitemap from the route hierarchy");
     private static final UseCase UC8 = new UseCase("UC8", "Hierarchical menu",
             "Showing the menu as a tree that follows the route hierarchy");
-    private static final UseCase UC9 = new UseCase("UC9", "Menu-only nesting",
-            "Grouping a page in the menu without moving its route");
 
     private static final List<UseCase> USE_CASES = List.of(UC1, UC2, UC3, UC4,
-            UC5, UC6, UC7, UC8, UC9);
+            UC5, UC6, UC7, UC8);
 
     @Test
     void cardsAreGroupedByKindOfProblemInMenuOrder() {
@@ -81,7 +77,7 @@ class HomeViewTest extends SpringBrowserlessTest {
                 new Group("Finding a page's parents", List.of(UC1, UC2)),
                 new Group("Getting each crumb right", List.of(UC3, UC4)),
                 new Group("Navigation beyond one view", List.of(UC5, UC6, UC7)),
-                new Group("Building the menu", List.of(UC8, UC9))), groups);
+                new Group("Building the menu", List.of(UC8))), groups);
     }
 
     private static UseCase useCaseOf(Card card) {
