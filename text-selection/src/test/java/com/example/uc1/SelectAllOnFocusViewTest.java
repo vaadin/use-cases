@@ -5,10 +5,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.textfield.TextField;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -29,5 +31,13 @@ class SelectAllOnFocusViewTest extends SpringBrowserlessTest {
         navigate(SelectAllOnFocusView.class);
         assertTrue(find(TextField.class).single().isAutoselect(),
                 "the field should drive selection via setAutoselect(true)");
+    }
+
+    @Test
+    void releasedApi_showsNoUnreleasedApiBanner() {
+        navigate(SelectAllOnFocusView.class);
+
+        assertFalse($(Anchor.class).all().stream()
+                .anyMatch(a -> a.getHref().contains("/pull/")));
     }
 }

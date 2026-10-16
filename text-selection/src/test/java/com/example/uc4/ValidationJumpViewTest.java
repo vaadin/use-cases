@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
@@ -22,6 +23,15 @@ class ValidationJumpViewTest extends SpringBrowserlessTest {
 
         assertTrue(findInView(H1.class).all().stream().anyMatch(
                 h -> "UC4 — Jump to validation error".equals(h.getText())));
+    }
+
+    @Test
+    void bannerLinksToThePullRequestOfTheUnreleasedApi() {
+        navigate(ValidationJumpView.class);
+
+        assertTrue($(Anchor.class).all().stream().anyMatch(
+                a -> "https://github.com/vaadin/flow-components/pull/10356"
+                        .equals(a.getHref())));
     }
 
     @Test
