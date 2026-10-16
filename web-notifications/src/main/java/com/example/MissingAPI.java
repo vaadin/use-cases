@@ -61,6 +61,9 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * request (e.g. a trigger action in the style of {@code WebShare.onClick}), and
  * {@code showNotification} with the framework's show method. See
  * {@code API-GAPS.md} for the suggested shape.
+ *
+ * @see <a href=
+ *      "https://github.com/vaadin/flow/issues/26493">vaadin/flow#26493</a>
  */
 public final class MissingAPI {
 
