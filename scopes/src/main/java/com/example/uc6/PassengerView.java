@@ -20,7 +20,9 @@ import com.vaadin.flow.router.Route;
 @PageTitle("UC6 — Booking wizard")
 public class PassengerView extends VerticalLayout {
 
+    // tag::scope[]
     public PassengerView(BookingDraft booking) {
+        // end::scope[]
         add(new H1("UC6 — Booking wizard"), new BookingSteps());
         add(new H2("2. Who is coming?"));
 

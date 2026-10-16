@@ -1,5 +1,6 @@
 package com.example.uc1;
 
+import com.example.common.BuiltWith;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -34,7 +35,9 @@ import com.vaadin.flow.router.Route;
 @Menu(order = 1, title = "UC1 — Maintenance banner")
 public class MaintenanceBannerView extends VerticalLayout {
 
+    // tag::scope[]
     public MaintenanceBannerView(MaintenanceNotice notice) {
+        // end::scope[]
         add(new H1("UC1 — Maintenance banner"));
         add(new Paragraph("The banner below is stored in an "
                 + "application-scoped bean: one instance shared by all "
@@ -43,8 +46,10 @@ public class MaintenanceBannerView extends VerticalLayout {
 
         Div banner = new Div();
         banner.addClassName("maintenance-banner");
+        // tag::scope[]
         banner.bindText(notice.message());
         banner.bindVisible(notice.message().map(text -> !text.isEmpty()));
+        // end::scope[]
         add(banner);
 
         add(new H2("Operator console"));
@@ -62,5 +67,12 @@ public class MaintenanceBannerView extends VerticalLayout {
         HorizontalLayout console = new HorizontalLayout(text, publish, clear);
         console.setDefaultVerticalComponentAlignment(Alignment.BASELINE);
         add(console);
+
+        add(new BuiltWith("A singleton Spring bean holding a shared signal")
+                .point("A plain @Component is one instance for the whole application. CDI calls this @ApplicationScoped.")
+                .point("Many sessions read and write the notice at the same time, so it is a SharedValueSignal: thread-safe, and every UI bound to it is updated.")
+                .point("The view gets the bean through its constructor and binds the banner to the signal.")
+                .java("uc1/MaintenanceNotice", "scope")
+                .java("uc1/MaintenanceBannerView", "scope"));
     }
 }

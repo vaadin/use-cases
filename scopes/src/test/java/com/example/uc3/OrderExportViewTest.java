@@ -32,8 +32,8 @@ class OrderExportViewTest extends SpringBrowserlessTest {
 
         assertEquals("UC3 — Export settings",
                 findInView(H1.class).single().getText());
-        assertEquals(OrderExportController.PATH,
-                findInView(Anchor.class).single().getHref());
+        assertEquals(OrderExportController.PATH, findInView(Anchor.class)
+                .withText("Download orders.csv").single().getHref());
         assertEquals(EnumSet.allOf(Column.class),
                 findInView(CheckboxGroup.class).single().getValue());
     }

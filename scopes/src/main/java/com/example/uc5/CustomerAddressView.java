@@ -16,7 +16,9 @@ import com.vaadin.flow.router.Route;
 @PageTitle("UC5 — Customer draft")
 public class CustomerAddressView extends VerticalLayout {
 
+    // tag::scope[]
     public CustomerAddressView(CustomerDraft draft) {
+        // end::scope[]
         setPadding(false);
         Span badge = new Span(draft.describe());
         badge.addClassName("scope-badge");

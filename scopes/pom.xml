@@ -52,6 +52,20 @@
 
     <build>
         <defaultGoal>spring-boot:run</defaultGoal>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <!-- The views show how they are built, from the sources packaged
+                 with the application. -->
+            <resource>
+                <directory>src/main/java</directory>
+                <targetPath>shown-sources</targetPath>
+                <includes>
+                    <include>**/*.java</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

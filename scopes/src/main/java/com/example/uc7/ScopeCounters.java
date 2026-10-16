@@ -15,6 +15,7 @@ import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 @Configuration(proxyBeanMethods = false)
 public class ScopeCounters {
 
+    // tag::scope[]
     @Bean
     public VisitCounter applicationCounter() {
         return new VisitCounter();
@@ -53,4 +54,5 @@ public class ScopeCounters {
     public VisitCounter routeCounter() {
         return new VisitCounter();
     }
+    // end::scope[]
 }

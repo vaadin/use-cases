@@ -1,5 +1,6 @@
 package com.example.uc3;
 
+import com.example.common.BuiltWith;
 import com.example.common.UseCaseDescription;
 import com.example.uc3.ExportPreferences.Column;
 import com.example.views.MainLayout;
@@ -31,7 +32,9 @@ import com.vaadin.flow.router.Route;
 @Menu(order = 3, title = "UC3 — Export settings")
 public class OrderExportView extends VerticalLayout {
 
+    // tag::scope[]
     public OrderExportView(ExportPreferences preferences) {
+        // end::scope[]
         add(new H1("UC3 — Export settings"));
         add(new Paragraph("These settings are stored in a Spring "
                 + "@SessionScope bean. The download link is served by a "
@@ -59,5 +62,14 @@ public class OrderExportView extends VerticalLayout {
         download.setRouterIgnore(true);
 
         add(columns, delimiter, download);
+
+        add(new BuiltWith(
+                "A Spring @SessionScope bean, read by a plain Spring MVC controller")
+                .point("@SessionScope binds the bean to the HTTP session. CDI calls this @SessionScoped.")
+                .point("The download is not a Vaadin request, so a @VaadinSessionScope bean is out of reach there. An HTTP session bean is not.")
+                .point("The controller is a singleton. Spring injects a proxy that finds the instance of the current request's session.")
+                .java("uc3/ExportPreferences", "scope")
+                .java("uc3/OrderExportController", "scope")
+                .java("uc3/OrderExportView", "scope"));
     }
 }

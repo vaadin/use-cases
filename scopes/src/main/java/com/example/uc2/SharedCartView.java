@@ -2,6 +2,7 @@ package com.example.uc2;
 
 import java.util.List;
 
+import com.example.common.BuiltWith;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -40,7 +41,9 @@ public class SharedCartView extends VerticalLayout {
     static final List<String> PRODUCTS = List.of("Espresso machine",
             "Coffee grinder", "Milk frother", "Travel mug");
 
+    // tag::scope[]
     public SharedCartView(ShoppingCart cart) {
+        // end::scope[]
         add(new H1("UC2 — Shared shopping cart"));
         add(new Paragraph("The cart is a @VaadinSessionScope bean: one per "
                 + "user and browser. Open this page in a second tab and "
@@ -70,5 +73,13 @@ public class SharedCartView extends VerticalLayout {
         });
 
         add(empty, list, new Button("Empty cart", e -> cart.clear()));
+
+        add(new BuiltWith(
+                "A @VaadinSessionScope bean holding a shared list signal")
+                .point("@VaadinSessionScope gives one cart per VaadinSession: every tab of the same browser gets the same instance, another browser gets its own.")
+                .point("Each open tab is its own UI, and all of them show the cart, so the items are a SharedListSignal that updates every tab.")
+                .point("The view gets the cart through its constructor, like any Spring bean.")
+                .java("uc2/ShoppingCart", "scope")
+                .java("uc2/SharedCartView", "scope"));
     }
 }

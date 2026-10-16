@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
+import com.example.common.BuiltWith;
 import com.example.common.UseCaseDescription;
 import com.example.uc4.PriceList.Price;
 import com.example.views.MainLayout;
@@ -48,8 +49,10 @@ public class PriceListEditorView extends VerticalLayout {
     private final ValueSignal<List<Price>> prices;
     private final UndoHistory history;
 
+    // tag::scope[]
     public PriceListEditorView(PriceList priceList, UndoHistory history,
             UndoToolbar toolbar, UndoHistoryList historyList) {
+        // end::scope[]
         this.prices = priceList.prices();
         this.history = history;
 
@@ -79,6 +82,14 @@ public class PriceListEditorView extends VerticalLayout {
                     .add(new ListItem(p.product() + " — " + p.amount())));
         });
         add(list, historyList);
+
+        add(new BuiltWith("A @UIScope bean shared by separate components")
+                .point("@UIScope gives one undo history per UI. A second tab or a reload is a new UI, with a new history.")
+                .point("The toolbar and the history list are prototype-scoped components. Spring creates them for this view and injects the history of the current UI.")
+                .point("No component passes the history to another one. They only share the UI.")
+                .java("uc4/UndoHistory", "scope")
+                .java("uc4/UndoToolbar", "scope")
+                .java("uc4/PriceListEditorView", "scope"));
     }
 
     private void change(String description,

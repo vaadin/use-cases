@@ -27,7 +27,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Every use case shows how it is built: only the code that uses the scope it is
- * about, not whole files.
+ * about, not whole files. UC5 shows it in the editor layout, outside the view,
+ * so the whole UI is searched.
  */
 @SpringBootTest
 @ViewPackages(packages = "com.example")
@@ -60,10 +61,10 @@ class HowItIsBuiltTest extends SpringBrowserlessTest {
         navigate(view);
         runPendingSignalsTasks();
 
-        assertTrue(findInView(H2.class).all().stream()
+        assertTrue($(H2.class).all().stream()
                 .anyMatch(h -> "How it is built".equals(h.getText())));
-        String shown = String.join("\n", findInView(Pre.class).all().stream()
-                .map(Pre::getText).toList());
+        String shown = String.join("\n",
+                $(Pre.class).all().stream().map(Pre::getText).toList());
         scopeCode.forEach(code -> assertTrue(shown.contains(code),
                 () -> "Expected the shown code to contain " + code));
         // Excerpts, not whole files.

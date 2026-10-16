@@ -17,12 +17,14 @@ import com.vaadin.flow.spring.annotation.VaadinSessionScope;
  * observe the same cart and each of them must be updated when another tab adds
  * an item.
  */
+// tag::scope[]
 @SpringComponent
 @VaadinSessionScope
 public class ShoppingCart {
 
     private final SharedListSignal<String> items = new SharedListSignal<>(
             String.class);
+    // end::scope[]
 
     public Signal<List<String>> items() {
         return Signal.computed(() -> items.getValues().toList());

@@ -2,6 +2,7 @@ package com.example.uc4;
 
 import java.util.List;
 
+import com.example.common.BuiltWith;
 import com.example.home.HomeView;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -103,8 +104,14 @@ class PriceListEditorViewTest extends SpringBrowserlessTest {
     }
 
     private List<String> items(Class<? extends HtmlContainer> listType) {
-        return find(ListItem.class).from(findInView(listType).single()).all()
-                .stream().map(ListItem::getText).toList();
+        // Not the points of "How it is built".
+        HtmlContainer list = findInView(listType).all().stream()
+                .filter(l -> l.findAncestor(BuiltWith.class) == null)
+                .reduce((a, b) -> {
+                    throw new IllegalStateException("More than one list");
+                }).orElseThrow();
+        return find(ListItem.class).from(list).all().stream()
+                .map(ListItem::getText).toList();
     }
 
     private Button button(String text) {

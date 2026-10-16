@@ -4,8 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -35,6 +41,8 @@ public class BuiltWith extends Div {
 
     private static final String SHOWN_SOURCES = "shown-sources/";
     private static final String WEB_RESOURCES = "META-INF/resources/";
+    private static final Pattern MARKER = Pattern
+            .compile("// (tag|end)::[\\w-]+\\[\\]");
 
     private final UnorderedList points = new UnorderedList();
     private final Div files = new Div();
@@ -76,6 +84,19 @@ public class BuiltWith extends Div {
     }
 
     /**
+     * Only the regions of a Java source tagged {@code tag}, such as
+     * {@code uc2/ShoppingCart} and {@code scope}. A region starts after a
+     * {@code // tag::<tag>[]} line and ends before a {@code // end::<tag>[]}
+     * line; the full file is a click away on GitHub.
+     */
+    public BuiltWith java(String path, String tag) {
+        String classpathPath = SHOWN_SOURCES + "com/example/" + path + ".java";
+        return show(classpathPath,
+                "src/main/java/com/example/" + path + ".java",
+                excerpt(read(classpathPath), tag), "excerpt · ");
+    }
+
+    /**
      * A test-side Java source that is part of what is shown, such as
      * {@code components/RatingStarsTester}.
      */
@@ -103,13 +124,18 @@ public class BuiltWith extends Div {
 
     private BuiltWith file(String repositoryPath, String classpathPath) {
         String source = read(classpathPath);
+        return show(classpathPath, repositoryPath, source, "");
+    }
+
+    private BuiltWith show(String classpathPath, String repositoryPath,
+            String source, String kind) {
         String name = classpathPath
                 .substring(classpathPath.lastIndexOf('/') + 1);
         Pre code = new Pre(source);
         code.addClassName("source");
         Anchor github = new Anchor("", "Open on GitHub", AnchorTarget.BLANK);
         githubLinks.put(github, repositoryPath);
-        Details details = new Details(name + " · " + lines(source),
+        Details details = new Details(name + " · " + kind + lines(source),
                 new Div(code, github));
         details.addClassName("file");
         files.add(details);
@@ -130,6 +156,44 @@ public class BuiltWith extends Div {
     private static String lines(String source) {
         long count = source.lines().count();
         return count + (count == 1 ? " line" : " lines");
+    }
+
+    /**
+     * The regions of {@code source} tagged {@code tag}, each without its common
+     * indentation, separated by a {@code // ...} line. Marker lines of other
+     * tags inside a region are left out.
+     */
+    static String excerpt(String source, String tag) {
+        String start = "// tag::" + tag + "[]";
+        String end = "// end::" + tag + "[]";
+        List<List<String>> regions = new ArrayList<>();
+        @Nullable
+        List<String> region = null;
+        for (String line : source.lines().toList()) {
+            String marker = line.strip();
+            if (marker.equals(start)) {
+                region = new ArrayList<>();
+            } else if (marker.equals(end) && region != null) {
+                regions.add(region);
+                region = null;
+            } else if (region != null && !MARKER.matcher(marker).matches()) {
+                region.add(line);
+            }
+        }
+        if (regions.isEmpty()) {
+            throw new IllegalArgumentException("No region tagged " + tag);
+        }
+        return regions.stream().map(BuiltWith::dedent)
+                .collect(Collectors.joining("\n// ...\n", "", "\n"));
+    }
+
+    private static String dedent(List<String> lines) {
+        int indent = lines.stream().filter(line -> !line.isBlank())
+                .mapToInt(line -> line.length() - line.stripLeading().length())
+                .min().orElse(0);
+        return lines.stream()
+                .map(line -> line.isBlank() ? "" : line.substring(indent))
+                .collect(Collectors.joining("\n"));
     }
 
     static String read(String classpathPath) {
