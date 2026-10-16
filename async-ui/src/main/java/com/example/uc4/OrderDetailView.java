@@ -45,7 +45,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * <p>
  * The router offers no asynchronous navigation hook, so a missing order can no
  * longer be turned into the application's real not-found page once the lookup
- * has finished (see API-GAPS.md).
+ * has finished (see API-GAPS.md #6).
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Detail that streams in")
