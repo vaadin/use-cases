@@ -3,9 +3,8 @@ package com.example.uc3;
 import java.time.Instant;
 import java.util.concurrent.ScheduledFuture;
 
-import com.example.MissingAPI.NotificationPermission;
-import com.example.MissingAPI.ShownNotification;
 import com.example.WebNotificationSimulator;
+import com.example.WebNotificationSimulator.ShownNotification;
 import com.example.home.HomeView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +19,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.webnotification.WebNotificationPermission;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -59,7 +59,8 @@ class ClickToOpenViewTest extends SpringBrowserlessTest {
     @Test
     void clickingTheNotificationOpensTheTicket() {
         ClickToOpenView view = navigate(ClickToOpenView.class);
-        WebNotificationSimulator.setPermission(NotificationPermission.GRANTED);
+        WebNotificationSimulator
+                .setPermission(WebNotificationPermission.GRANTED);
         runPendingSignalsTasks();
 
         ClickToOpenView.Ticket ticket = view.assignTicket(UI.getCurrent());
@@ -80,14 +81,15 @@ class ClickToOpenViewTest extends SpringBrowserlessTest {
         assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> s.getText() != null && s.getText()
                         .startsWith("Opened from notification click")));
-        // The shim closes the notification after the click.
+        // The browser closes the notification after the click.
         assertTrue(WebNotificationSimulator.shown().isEmpty());
     }
 
     @Test
     void withoutPermissionTheInAppOpenButtonOpensTheTicket() {
         ClickToOpenView view = navigate(ClickToOpenView.class);
-        WebNotificationSimulator.setPermission(NotificationPermission.DENIED);
+        WebNotificationSimulator
+                .setPermission(WebNotificationPermission.DENIED);
         runPendingSignalsTasks();
 
         ClickToOpenView.Ticket ticket = view.assignTicket(UI.getCurrent());

@@ -3,7 +3,6 @@ package com.example.uc2;
 import java.time.Instant;
 import java.util.concurrent.ScheduledFuture;
 
-import com.example.MissingAPI.NotificationPermission;
 import com.example.WebNotificationSimulator;
 import com.example.home.HomeView;
 import org.junit.jupiter.api.Test;
@@ -19,6 +18,8 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.webnotification.WebNotificationError;
+import com.vaadin.flow.component.webnotification.WebNotificationPermission;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -50,7 +51,8 @@ class LongTaskViewTest extends SpringBrowserlessTest {
     @Test
     void startingDisablesButtonAndFinishingSendsOsNotification() {
         LongTaskView view = navigate(LongTaskView.class);
-        WebNotificationSimulator.setPermission(NotificationPermission.GRANTED);
+        WebNotificationSimulator
+                .setPermission(WebNotificationPermission.GRANTED);
         runPendingSignalsTasks();
 
         test(startButton()).click();
@@ -83,7 +85,8 @@ class LongTaskViewTest extends SpringBrowserlessTest {
     @Test
     void finishingWithoutPermissionFallsBackToInApp() {
         LongTaskView view = navigate(LongTaskView.class);
-        WebNotificationSimulator.setPermission(NotificationPermission.DENIED);
+        WebNotificationSimulator
+                .setPermission(WebNotificationPermission.DENIED);
         runPendingSignalsTasks();
 
         view.finish(UI.getCurrent());
@@ -95,12 +98,15 @@ class LongTaskViewTest extends SpringBrowserlessTest {
     @Test
     void browserRefusalFallsBackToInApp() {
         LongTaskView view = navigate(LongTaskView.class);
-        WebNotificationSimulator.setPermission(NotificationPermission.GRANTED);
+        WebNotificationSimulator
+                .setPermission(WebNotificationPermission.GRANTED);
         view.finish(UI.getCurrent());
 
+        // e.g. Chrome on Android, which only shows notifications through a
+        // service worker
         WebNotificationSimulator.fail(WebNotificationSimulator.shown().get(0),
-                "TypeError");
-        assertLogContains("OS notification refused (TypeError) → in-app");
+                WebNotificationError.Reason.UNKNOWN, "Illegal constructor");
+        assertLogContains("OS notification refused (UNKNOWN) → in-app");
     }
 
     private Button startButton() {

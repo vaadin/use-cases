@@ -3,14 +3,18 @@
 A standalone Spring Boot demo of native OS notifications shown by a Vaadin Flow
 app while its tab is open, using the browser's
 [Notifications API](https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API).
-Flow has no API for it yet, so every view goes through a small shim,
-`MissingAPI` (with its browser half in `src/main/frontend/web-notifications.ts`).
-It asks for permission inside the click, exposes the permission as a signal and
-reports notification clicks back to the server.
+Every view uses Flow's `WebNotification` API
+(`com.vaadin.flow.component.webnotification`): it asks for permission inside the
+click, exposes the permission as a signal and reports notification clicks back
+to the server.
+
+The API is not in the mainline snapshot yet, so this module builds against the
+`25.4.web-notification-api-SNAPSHOT` Flow build from
+[vaadin/flow#26495](https://github.com/vaadin/flow/pull/26495).
 
 | # | View | What it shows |
 | - | ---- | ------------- |
-| UC1 | Ask for permission | Asks for permission only when the user clicks, and shows the permission (default, granted, denied, unsupported) live, including changes made later in the site settings. |
+| UC1 | Ask for permission | Asks for permission only when the user clicks, and shows the permission (prompt, granted, denied, unsupported) live, including changes made later in the site settings. |
 | UC2 | Task finished | A ten-second server job; when it finishes, the user gets an OS notification, or an in-app one without permission. The click that starts the job also asks for permission. |
 | UC3 | Click to open | A ticket assigned after five seconds raises a notification; clicking it brings the tab back and opens the ticket on the server. |
 | UC4 | Collapse repeated alerts | With a `tag`, repeated messages replace one "N new messages" notification instead of stacking; untick the option to compare. |
@@ -31,5 +35,4 @@ operating system must also allow notifications from the browser.
 
 ## API gaps
 
-See [`API-GAPS.md`](API-GAPS.md) for what the shim works around and the API
-that would remove it.
+See [`API-GAPS.md`](API-GAPS.md) for what the API still leaves open.

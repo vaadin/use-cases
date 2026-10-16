@@ -12,6 +12,17 @@
     </parent>
 
     <properties>
+        <!--
+          The Web Notifications API (vaadin/flow#26495: WebNotification,
+          WebNotificationHandle, WebNotificationOptions and the permission
+          signal) has not landed in 25.4-SNAPSHOT yet, so this module pins
+          Flow to the feature snapshot while the rest of the repo stays on the
+          baseline 25.4-SNAPSHOT. flow-bom is imported first in the parent's
+          dependencyManagement, so this Flow build wins over the version
+          transitively pulled by the components/vaadin BOMs. The
+          flow-maven-plugin version follows the same property.
+        -->
+        <flow.version>25.4.web-notification-api-SNAPSHOT</flow.version>
     </properties>
 
     <dependencies>

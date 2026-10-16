@@ -6,9 +6,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ScheduledFuture;
 
-import com.example.MissingAPI;
-import com.example.MissingAPI.NotificationOptions;
-import com.example.MissingAPI.NotificationPermission;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
@@ -27,6 +24,9 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.webnotification.WebNotification;
+import com.vaadin.flow.component.webnotification.WebNotificationOptions;
+import com.vaadin.flow.component.webnotification.WebNotificationPermission;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -88,7 +88,7 @@ public class LongTaskView extends VerticalLayout {
         permissionBadge.addClassName("status-badge");
 
         // Ask inside the click gesture; the server listener starts the task.
-        MissingAPI.requestPermissionOnClick(startButton);
+        WebNotification.onClick(startButton).requestPermission();
         startButton.addClickListener(e -> start(UI.getCurrent()));
 
         HorizontalLayout row = new HorizontalLayout(startButton,
@@ -107,17 +107,17 @@ public class LongTaskView extends VerticalLayout {
         case DONE -> "Report ready.";
         }));
 
-        Signal<NotificationPermission> permission = MissingAPI
-                .permissionSignal(UI.getCurrent());
+        Signal<WebNotificationPermission> permission = WebNotification
+                .permissionSignal();
         permissionBadge.bindText(permission.map(p -> switch (p) {
         case GRANTED -> "on";
         case DENIED -> "blocked — in-app fallback";
         case UNSUPPORTED -> "unsupported — in-app fallback";
-        case DEFAULT -> "not decided";
+        case PROMPT -> "not decided";
         case UNKNOWN -> "checking…";
         }));
         permissionBadge.bindClassName("paused",
-                permission.map(p -> p != NotificationPermission.GRANTED));
+                permission.map(p -> p != WebNotificationPermission.GRANTED));
 
         // A report still running when the user leaves is cancelled, so it
         // doesn't notify from another view.
@@ -142,15 +142,16 @@ public class LongTaskView extends VerticalLayout {
         taskState.set(TaskState.DONE);
         String body = "Q3 sales report finished at "
                 + LocalTime.now().format(TIME) + ".";
-        if (MissingAPI.permissionSignal(ui)
-                .peek() == NotificationPermission.GRANTED) {
-            MissingAPI
-                    .showNotification(ui, "Your report is ready",
-                            NotificationOptions.body(body)
-                                    .withTag("report-ready"))
-                    .onError(reason -> {
+        if (WebNotification.permissionSignal(ui)
+                .peek() == WebNotificationPermission.GRANTED) {
+            WebNotification
+                    .show("Your report is ready",
+                            WebNotificationOptions.builder().body(body)
+                                    .tag("report-ready").build(),
+                            ui)
+                    .addErrorListener(error -> {
                         inApp(body);
-                        appendLog("OS notification refused (" + reason
+                        appendLog("OS notification refused (" + error.reason()
                                 + ") → in-app");
                     });
             appendLog("report finished → OS notification");
