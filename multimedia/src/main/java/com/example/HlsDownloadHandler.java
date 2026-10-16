@@ -22,7 +22,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * the browser request paths the registry does not know. This handler therefore
  * rewrites every URI in the playlists it serves to {@code ?file=<path>} on its
  * own URL and serves the requested file from the query parameter. See
- * {@code API-GAPS.md}.
+ * {@code API-GAPS.md #8}.
  */
 public class HlsDownloadHandler implements DownloadHandler {
 
