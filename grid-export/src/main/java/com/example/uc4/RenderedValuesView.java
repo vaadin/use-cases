@@ -58,7 +58,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * The "Contact" column below is that case, and it needs an explicit extractor —
  * press the button to see what the exporter says without one.</li>
  * </ul>
- * See {@code API-GAPS.md}.
+ * See {@code API-GAPS.md} #3, #4 and #5.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @UseCaseDescription("Turning badges, checkboxes and formatted cells into plain text for export")

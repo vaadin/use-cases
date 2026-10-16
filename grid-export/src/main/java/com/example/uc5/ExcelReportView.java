@@ -42,7 +42,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * fact that the same cell instance answers for each of them, because
  * {@code AbstractCell#getColumn()} is protected. And a cell holding a component
  * has no text at all, so the exporter has to invent a text alternative for it.
- * See {@code API-GAPS.md}.
+ * See {@code API-GAPS.md} #5 and #8.
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @UseCaseDescription("Exporting a spreadsheet with merged group headers and a totals row")

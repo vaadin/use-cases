@@ -61,7 +61,8 @@ public final class MissingAPI {
      * Stands in for a missing {@code Grid#getItems()}. Flow does have
      * {@code getListDataView().getItems()}, but only for in-memory data; this
      * works for any data provider because it asks the {@link DataCommunicator}
-     * for the same {@link Query} the grid itself would send.
+     * for the same {@link Query} the grid itself would send. See
+     * {@code API-GAPS.md} #2.
      */
     public static <T> List<T> rowsInViewOrder(Grid<T> grid) {
         return fetchPage(grid, 0, Integer.MAX_VALUE);
@@ -71,7 +72,8 @@ public final class MissingAPI {
      * The same rows, fetched lazily {@code pageSize} at a time, so a report
      * over a large backend data set never holds more than one page in memory.
      * <p>
-     * Stands in for a missing paged/streaming export entry point.
+     * Stands in for a missing paged/streaming export entry point. See
+     * {@code API-GAPS.md} #10.
      */
     public static <T> Stream<T> rowsInViewOrder(Grid<T> grid, int pageSize) {
         if (pageSize < 1) {
@@ -117,7 +119,8 @@ public final class MissingAPI {
 
     /**
      * The plain text a column shows for an item — what
-     * {@code Column#getCellContent(item)} would return if it existed.
+     * {@code Column#getCellContent(item)} would return if it existed. See
+     * {@code API-GAPS.md} #1, #3 and #4.
      *
      * @return the cell's text, or {@code null} when the renderer keeps it out
      *         of reach and the caller has to supply an extractor instead
@@ -163,7 +166,7 @@ public final class MissingAPI {
      * its icon name, anything else its text content.
      * <p>
      * Stands in for the "text alternative" a component renderer has no way to
-     * declare.
+     * declare. See {@code API-GAPS.md} #5.
      */
     public static String componentText(@Nullable Component component) {
         if (component == null) {
@@ -249,7 +252,7 @@ public final class MissingAPI {
         if (field == null) {
             throw new IllegalStateException(
                     "ColumnPathRenderer no longer keeps its ValueProvider in a "
-                            + "'provider' field — see grid-export/API-GAPS.md");
+                            + "'provider' field — see grid-export/API-GAPS.md #1");
         }
         try {
             @SuppressWarnings("unchecked")
