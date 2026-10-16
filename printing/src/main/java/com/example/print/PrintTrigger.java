@@ -22,7 +22,7 @@ import com.vaadin.flow.shared.Registration;
  * not pile up another listener.
  * <p>
  * Built on Flow's trigger API, which still lives in an {@code internal}
- * package; see {@code API-GAPS.md}.
+ * package; see {@code API-GAPS.md} #4.
  */
 public final class PrintTrigger extends Trigger {
 
