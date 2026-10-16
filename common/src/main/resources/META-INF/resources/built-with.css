@@ -34,3 +34,36 @@
     border-radius: var(--vaadin-radius-m, 6px);
     background: var(--vaadin-background-container, #f4f4f4);
 }
+
+/* Syntax highlighting by highlight.js, in the light or dark color scheme. */
+.built-with .source .hljs-keyword,
+.built-with .source .hljs-built_in,
+.built-with .source .hljs-literal,
+.built-with .source .hljs-selector-tag {
+    color: light-dark(#cf222e, #ff7b72);
+}
+
+.built-with .source .hljs-string,
+.built-with .source .hljs-regexp {
+    color: light-dark(#0a3069, #a5d6ff);
+}
+
+.built-with .source .hljs-comment {
+    color: light-dark(#6e7781, #8b949e);
+    font-style: italic;
+}
+
+.built-with .source .hljs-meta,
+.built-with .source .hljs-title,
+.built-with .source .hljs-selector-class,
+.built-with .source .hljs-selector-id {
+    color: light-dark(#8250df, #d2a8ff);
+}
+
+.built-with .source .hljs-type,
+.built-with .source .hljs-attr,
+.built-with .source .hljs-attribute,
+.built-with .source .hljs-number,
+.built-with .source .hljs-variable {
+    color: light-dark(#0550ae, #79c0ff);
+}
