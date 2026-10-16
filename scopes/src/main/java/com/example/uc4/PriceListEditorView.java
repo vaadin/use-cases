@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 
 import com.example.common.UseCaseDescription;
+import com.example.uc4.PriceList.Price;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
@@ -33,8 +34,10 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * but not with the price list open in another tab, where undoing would revert
  * changes the user cannot see.
  * <p>
- * Reload the page to see the other side of UI scope: the reload creates a new
- * UI and the history is gone.
+ * The price list is UI-scoped too ({@link PriceList}), so navigating away and
+ * back keeps both, and undo still acts on the list on screen. Reload the page
+ * to see the other side of UI scope: the reload creates a new UI and the
+ * history is gone.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @UseCaseDescription("Keeping one undo history per editor window, shared by its components")
@@ -42,18 +45,12 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Menu(order = 4, title = "UC4 — Undo history")
 public class PriceListEditorView extends VerticalLayout {
 
-    record Price(String product, BigDecimal amount) {
-    }
-
-    private final ValueSignal<List<Price>> prices = new ValueSignal<>(
-            List.of(new Price("Espresso machine", new BigDecimal("499.00")),
-                    new Price("Coffee grinder", new BigDecimal("129.00")),
-                    new Price("Milk frother", new BigDecimal("59.00"))));
-
+    private final ValueSignal<List<Price>> prices;
     private final UndoHistory history;
 
-    public PriceListEditorView(UndoHistory history, UndoToolbar toolbar,
-            UndoHistoryList historyList) {
+    public PriceListEditorView(PriceList priceList, UndoHistory history,
+            UndoToolbar toolbar, UndoHistoryList historyList) {
+        this.prices = priceList.prices();
         this.history = history;
 
         add(new H1("UC4 — Undo history"));
