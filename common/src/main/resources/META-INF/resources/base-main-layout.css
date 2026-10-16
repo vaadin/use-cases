@@ -12,3 +12,13 @@
         align-items: flex-end;
     }
 }
+
+/* The banner BaseMainLayout shows above a view marked @UnreleasedApi. */
+.unreleased-api-banner {
+    padding: 0.5em 1em;
+    border-inline-start: 4px solid var(--aura-yellow);
+    background: color-mix(in srgb, var(--aura-yellow) 20%,
+            var(--vaadin-background-color));
+    color: var(--vaadin-text-color);
+    font-size: var(--aura-font-size-s);
+}

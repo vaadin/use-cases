@@ -2,6 +2,7 @@ package com.example.uc6;
 
 import java.util.Map;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -30,6 +31,7 @@ import com.vaadin.flow.signals.Signal;
  * UI scope loses the booking on reload, and session scope mixes up the two
  * tabs. {@link BookingDraft} is therefore browser-tab scoped.
  */
+@UnreleasedApi("https://github.com/vaadin/flow/pull/25901")
 @Route(value = "uc6", layout = MainLayout.class)
 @UseCaseDescription("Keeping a multi-step booking through reloads, separate in each tab")
 @PageTitle("UC6 — Booking wizard")

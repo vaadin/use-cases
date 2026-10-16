@@ -2,6 +2,7 @@ package com.example.uc7;
 
 import java.util.function.UnaryOperator;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -25,6 +26,7 @@ import com.vaadin.flow.signals.Signal;
  * action replaces the current selection in the value, then re-selects the
  * result so transforms can chain (UPPERCASE → "Quote" with one click each).
  */
+@UnreleasedApi("https://github.com/vaadin/flow-components/pull/10356")
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Selection-driven transform toolbar")
 @UseCaseDescription("Enabling toolbar actions that transform the selection")

@@ -3,6 +3,7 @@ package com.example.uc6;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -41,6 +42,7 @@ import com.vaadin.flow.signals.Signal;
  * browser reports the change, at the latest when the user returns to the tab)
  * and switches back to OS notifications without a reload.
  */
+@UnreleasedApi("https://github.com/vaadin/flow/pull/26495")
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Denied permission")
 @UseCaseDescription("Explaining how to re-enable blocked notifications and falling back to in-app messages")

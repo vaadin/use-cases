@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -39,6 +40,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * behaviour; "Mark all as read" resets the counter and closes the tagged
  * notification.
  */
+@UnreleasedApi("https://github.com/vaadin/flow/pull/26495")
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Collapse repeated alerts")
 @UseCaseDescription("Replacing one notification instead of stacking a new one for every message")

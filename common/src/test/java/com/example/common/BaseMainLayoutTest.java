@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.example.common.layout.About;
 import com.example.common.layout.ParallelLoadingView;
+import com.example.common.layout.UnreleasedApiView;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,8 @@ import com.vaadin.browserless.BrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.TextArea;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -118,6 +121,33 @@ class BaseMainLayoutTest extends BrowserlessTest {
         navigate(ParallelLoadingView.class);
 
         assertTrue($(Button.class).withText("Feedback").all().isEmpty());
+    }
+
+    @Test
+    void unreleasedApi_showsABannerLinkingToThePullRequest() {
+        navigate(UnreleasedApiView.class);
+
+        Anchor link = $(Anchor.class).withText("vaadin/flow#26495").single();
+        assertEquals("https://github.com/vaadin/flow/pull/26495",
+                link.getHref());
+    }
+
+    @Test
+    void unreleasedApi_bannerIsHiddenOnAViewWithoutIt() {
+        navigate(UnreleasedApiView.class);
+        navigate(ParallelLoadingView.class);
+
+        assertTrue($(Div.class).withClassName("unreleased-api-banner").all()
+                .isEmpty());
+    }
+
+    @Test
+    void pullRequestLabel_shortensAGitHubPullRequestUrl() {
+        assertEquals("vaadin/flow-components#10356",
+                BaseMainLayout.pullRequestLabel(
+                        "https://github.com/vaadin/flow-components/pull/10356"));
+        assertEquals("https://example.com/change/1", BaseMainLayout
+                .pullRequestLabel("https://example.com/change/1"));
     }
 
     private Button feedbackButton() {

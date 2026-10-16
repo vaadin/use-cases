@@ -10,6 +10,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
@@ -49,6 +50,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * agent acts on it. Without permission, an in-app notification with an "Open"
  * button does the same job.
  */
+@UnreleasedApi("https://github.com/vaadin/flow/pull/26495")
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Click to open")
 @UseCaseDescription("Opening the related item when the user clicks a notification")
