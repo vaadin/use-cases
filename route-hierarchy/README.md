@@ -55,32 +55,17 @@ mvn spring-boot:run
 
 Open <http://localhost:8080/>.
 
-## Testing notes — what's missing in `BreadcrumbsTester`
+## Testing notes
 
 The browserless tests drive the component through `BreadcrumbsTester`
-(`browserless-test-shared`) via `test(breadcrumbs)`. Its current API covers
-labels and navigation only:
+(`browserless-test-shared`) via `test(breadcrumbs)`:
 
 - `List<String> getItemTexts()` — the ordered crumb labels
+- `List<String> getItemPaths()` — the resolved path per crumb, `null` for a
+  crumb with no link (the current page)
 - `clickItem(String | int)` — navigate by clicking a crumb
 
-That is enough for UC1–UC3 and UC6, which assert the **exact trail** with
-`getItemTexts()` (in `ROUTER` mode the last item is the current page and the
-only non-link, so the linked crumbs are simply "all but the last"). UC1 also
-exercises `clickItem(...)` to verify a crumb navigates.
-
-UC4 is the exception: it verifies that ancestor **links carry the right route
-parameters** (`:projectId` is preserved, `:taskId` is not), which needs each
-crumb's resolved `href` — something the tester does not expose. That one test
-therefore drops to the component API (`BreadcrumbsItem#getPath()`).
-
-**What would close the gap (browserless project):** add a path accessor to
-`BreadcrumbsTester`, e.g.
-
-- `List<String> getItemPaths()` — the resolved `href` per crumb (empty for the
-  current page), so parameter-preserving links can be asserted through the
-  tester.
-
-(No "current item" accessor is needed: the current page is by definition the
-last, path-less crumb.) With `getItemPaths()`, UC4 could use the tester alone
-and no breadcrumb test would need `getChildren()` / `BreadcrumbsItem`.
+UC1–UC3 and UC6 assert the **exact trail** with `getItemTexts()`. UC1 also
+exercises `clickItem(...)` to verify a crumb navigates. UC4 asserts that
+ancestor **links carry the right route parameters** (`:projectId` is
+preserved, `:taskId` is not) with `getItemPaths()`.
