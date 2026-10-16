@@ -26,6 +26,8 @@ public final class AppCatalog {
                     "https://fullscreen-cases.fly.dev/"),
             new App("geolocation", "Geolocation API",
                     "https://geo-cases.fly.dev/"),
+            new App("grid-export", "Grid Data Export",
+                    "https://grid-export-cases.fly.dev/"),
             new App("i18n", "Internationalization",
                     "https://i18n-cases.fly.dev/"),
             new App("multimedia", "Video & Audio",

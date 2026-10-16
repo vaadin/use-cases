@@ -21,6 +21,7 @@
         <module>file-uploads</module>
         <module>fullscreen</module>
         <module>geolocation</module>
+        <module>grid-export</module>
         <module>i18n</module>
         <module>multimedia</module>
         <module>clipboard</module>
