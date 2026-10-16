@@ -84,10 +84,8 @@ import com.vaadin.observability.micrometer.trace.ObservationNames;
  * their own rather than waiting for something they called, next to what the
  * meters know about the same interaction, which is that it succeeded; <b>4)</b>
  * where the trail begins and ends — it starts on the server rather than at the
- * click, its root span calls this screen by its class name rather than its
- * route, only the kit's request span says which session it came from, and the
- * application has to name its own hops (see {@code API-GAPS.md} #3, #14 and
- * #15).
+ * click, only the kit's request span says which session it came from, and the
+ * application has to name its own hops (see {@code API-GAPS.md} #3 and #14).
  * <p>
  * Nothing here reads a tracing backend: {@link InteractionTrail} is a
  * {@code SpanReporter}, the same SPI Zipkin, Tempo and OTLP exporters
@@ -432,28 +430,6 @@ public class InteractionTraceView extends VerticalLayout {
                         "API-GAPS.md #3"),
                 new Span(")."));
 
-        Paragraph uri = new Paragraph();
-        uri.add(new Span("That root span is also where the kit's route "
-                + "attribution stops agreeing with itself. Every kit meter "
-                + "and span below it is tagged "),
-                Telemetry.chip(TAG_ROUTE + "=" + ROUTE), new Span(", but the "),
-                Telemetry.chip("uri"),
-                new Span(" the kit lifts into Spring's HTTP observation reads "
-                        + "this view's class name instead of its route "
-                        + "template, so a dashboard grouping "),
-                Telemetry.chip("http.server.requests"),
-                new Span(" by URI and one grouping the kit's own timers by "
-                        + "route disagree about what to call the same screen "
-                        + "("),
-                new Anchor(
-                        "https://github.com/vaadin/use-cases/blob/main/"
-                                + "observability/API-GAPS.md",
-                        "API-GAPS.md #15"),
-                new Span(", tracked in "),
-                new Anchor("https://github.com/vaadin/observability-kit/"
-                        + "issues/417", "observability-kit#417"),
-                new Span(")."));
-
         Paragraph session = new Paragraph();
         session.add(new Span("The trail does know whose it is. With "),
                 Telemetry.chip("vaadin.observability.traces-session-id=true"),
@@ -507,7 +483,7 @@ public class InteractionTraceView extends VerticalLayout {
                 new Span(" so the dispatch you just made is the one you can "
                         + "read."));
 
-        limits.add(root, uri, session, own, snippetBox, export);
+        limits.add(root, session, own, snippetBox, export);
         return limits;
     }
 
