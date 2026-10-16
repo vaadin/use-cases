@@ -28,6 +28,7 @@
         <module>route-hierarchy</module>
         <module>testing</module>
         <module>text-selection</module>
+        <module>theming</module>
         <module>web-share</module>
         <module>screen-orientation</module>
         <module>observability</module>
