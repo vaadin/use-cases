@@ -3,7 +3,7 @@ package com.example.uc1;
 import java.util.List;
 
 import com.example.AppearanceSetup;
-import com.example.views.BuiltWith;
+import com.example.common.BuiltWith;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
