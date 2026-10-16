@@ -7,13 +7,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import com.example.acme.AcmeCatalog;
-import com.example.acme.AppWindow;
 import com.example.acme.DemoRig;
 import com.example.acme.InsightCard;
 import com.example.acme.Insights;
 import com.example.acme.Investigation;
 import com.example.acme.MeterTable;
 import com.example.acme.Telemetry;
+import com.example.common.AppWindow;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import io.micrometer.core.instrument.DistributionSummary;
@@ -197,7 +197,8 @@ public class LazyListLatencyView extends VerticalLayout {
         orderLines.addHeaderRow("Product", "Qty");
         orderLines.addRows(noLines);
 
-        return new AppWindow("Acme Supply — Order Desk", ROUTE, customer,
+        return new AppWindow("Acme Supply — Order Desk",
+                "acme.example/" + ROUTE, customer,
                 new HorizontalLayout(Alignment.END, product, quantity,
                         addLine),
                 orderLines);

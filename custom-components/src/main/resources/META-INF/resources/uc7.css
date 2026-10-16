@@ -1,0 +1,7 @@
+/* The label whose color the picker sets; the background is set inline. */
+.uc7-label {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    color: white;
+    font-weight: 600;
+}

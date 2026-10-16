@@ -1,0 +1,21 @@
+.uc3-view .tenant-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.uc3-view .tenant-header h2 {
+    margin: 0;
+}
+
+/* The customer stylesheet sets --tenant-color; without one, the accent. */
+.uc3-view .tenant-logo {
+    display: inline-grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--vaadin-radius-m, 6px);
+    font-weight: 700;
+    color: white;
+    background: var(--tenant-color, var(--aura-accent-color, #0c6ce9));
+}
