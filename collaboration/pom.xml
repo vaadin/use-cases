@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>collaboration-use-cases</artifactId>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>com.example</groupId>
+        <artifactId>use-cases-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>use-cases-common</artifactId>
+            <version>${project.version}</version>
+            <!-- Same reason as below. Collaboration Engine reaches this
+                 module by three routes - the common module, the platform
+                 artifact and the Spring starter - and one exclusion left out
+                 is enough to put it back on the classpath. -->
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>collaboration-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--
+          The full platform artifact rather than vaadin-core: UC9 mirrors the
+          CE sampler's Grid Pro sample, and the field highlighter that UC5-UC7
+          drive (vaadin-field-highlighter-flow) also ships here. Nothing else
+          in the module needs a Pro key.
+
+          Collaboration Engine is excluded rather than merely left unused. It
+          comes with the platform artifact, and the whole point of this module
+          is what shared signals can do without it — an accidental import
+          would make a view prove the opposite of what it claims. With the
+          exclusion in place, the compiler enforces it.
+        -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>collaboration-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>collaboration-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>browserless-test-spring</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <defaultGoal>spring-boot:run</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
