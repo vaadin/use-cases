@@ -1,0 +1,104 @@
+/* Testing use cases — shared polish */
+
+.home-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 1rem;
+    width: 100%;
+    max-width: 960px;
+}
+
+.home-card .home-card-tag {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary);
+    letter-spacing: 0.05em;
+}
+
+/* The part of a view that plays the application under test. */
+.sample {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--vaadin-gap-m, 0.75rem);
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 960px;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--vaadin-border-color-secondary, #ddd);
+    border-radius: var(--vaadin-radius-l, 12px);
+}
+
+.sample > vaadin-grid,
+.sample > vaadin-form-layout {
+    align-self: stretch;
+}
+
+.sample > h2,
+.sample > p {
+    margin-block: 0;
+}
+
+/* The tests of a use case, shown in the page. */
+.tests {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 960px;
+}
+
+.tests h2 {
+    margin: 0.5rem 0 0;
+    font-size: 1.125rem;
+}
+
+.tests .test-kind {
+    color: var(--vaadin-text-color-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.tests .test-code {
+    margin: 0;
+    padding: 0.75rem;
+    overflow-x: auto;
+    font-size: 0.8125rem;
+    border-radius: var(--vaadin-radius-m, 6px);
+    background: var(--vaadin-background-container, #f4f4f4);
+}
+
+.tests .test-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.tests .test-run {
+    font-family: monospace;
+    color: var(--vaadin-text-color-secondary);
+}
+
+/* Long words wrap and code scrolls in its own box on narrow screens. */
+vaadin-vertical-layout h1 {
+    overflow-wrap: anywhere;
+}
+
+pre {
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+@media (max-width: 640px) {
+    .sample {
+        padding: 0.75rem;
+    }
+
+    .sample vaadin-horizontal-layout {
+        flex-wrap: wrap;
+    }
+}

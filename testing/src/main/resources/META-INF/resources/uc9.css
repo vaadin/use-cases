@@ -1,0 +1,16 @@
+.uc9-view .invoice {
+    max-width: 720px;
+}
+
+.uc9-view .invoice-total {
+    display: flex;
+    justify-content: space-between;
+    align-self: stretch;
+    font-weight: 700;
+    font-size: 1.125rem;
+}
+
+.uc9-view .volatile {
+    font-size: 0.8125rem;
+    color: var(--vaadin-text-color-secondary);
+}
