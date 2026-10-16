@@ -55,6 +55,11 @@ it against the feature's source, not against your expectation of it.
   the result also appears in the default setup (e.g. without a license key in
   development), or tell the reader why it does not.
 - If a value shown is application-wide rather than about this view, say so.
+- If a view uses API that is not released yet (it builds against a branch
+  snapshot), it must show the unreleased-API banner: annotate the view class
+  with `@UnreleasedApi("<pull request URL>")`, and `BaseMainLayout` shows a
+  banner that links to the pull request, so a reader does not look for the API in
+  the current Vaadin release. See [Dependencies](repository.md#dependencies).
 - When the feature changes, update every place that repeats the claim.
 
 Remove code the reader can never reach: a styling branch that can not
