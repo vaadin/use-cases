@@ -40,6 +40,8 @@ n.addCloseListener(e -> ...);
 n.close();
 ```
 
+Upstream: https://github.com/vaadin/flow/issues/26493
+
 ## 2. Permission request has to run inside the click gesture
 
 **Where it bites:** UC1 / PermissionStateView.java, UC2 / LongTaskView.java
