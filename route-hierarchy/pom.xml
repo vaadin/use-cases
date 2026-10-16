@@ -14,7 +14,7 @@
     <properties>
         <!--
           The hierarchical menu (#24556: MenuConfiguration.getMenuEntriesTree +
-          MenuEntry.children for UC8, and @Menu(parent) for UC9) has not landed
+          MenuEntry.children, and @Menu(parent), both for UC8) has not landed
           in 25.4-SNAPSHOT yet, so this module pins flow-server to the feature
           snapshot while the rest of the repo stays on the baseline
           25.4-SNAPSHOT. The rest of the route-hierarchy API this module builds
