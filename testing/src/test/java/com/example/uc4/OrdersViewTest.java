@@ -17,7 +17,6 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,13 +50,12 @@ class OrdersViewTest extends SpringBrowserlessTest {
         OrdersView view = navigate(OrdersView.class);
         Grid<Order> grid = view.grid();
 
-        // Gap: the tester cannot click a column header to sort.
-        grid.sort(GridSortOrder.desc(grid.getColumnByKey("number")).build());
+        test(grid).sortByColumn("number", SortDirection.DESCENDING);
 
         assertEquals(String.valueOf(OrderHistory.PAST_ORDERS),
                 test(grid).getCellText(0, 0));
         assertEquals(SortDirection.DESCENDING,
-                grid.getSortOrder().getFirst().getDirection());
+                test(grid).getSortDirection("number"));
     }
 
     @Test
