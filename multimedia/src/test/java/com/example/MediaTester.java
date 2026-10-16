@@ -15,7 +15,7 @@ import com.vaadin.flow.internal.JacksonUtils;
  * browserless tests: fires the media events the browser would send and exposes
  * the JavaScript calls ({@code play()}, {@code load()}, seeking, ...) the
  * server queued for the element. There is no media simulator in the test kit;
- * see {@code API-GAPS.md}.
+ * see {@code API-GAPS.md #10}.
  */
 public class MediaTester extends ComponentTester<Media> {
 
