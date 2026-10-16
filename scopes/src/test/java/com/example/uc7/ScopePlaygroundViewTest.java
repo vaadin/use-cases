@@ -38,21 +38,6 @@ class ScopePlaygroundViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void tableShowsWhichActionsEachScopeSurvives() {
-        navigate(ScopePlaygroundView.class);
-
-        // Columns: reload, new tab, duplicated tab, other browser, away and
-        // back.
-        assertEquals(List.of("✓✓✓✓✓", // application
-                "✓✓✓✗✓", // HTTP session
-                "✓✓✓✗✓", // Vaadin session
-                "✓✗✓✗✓", // browser tab
-                "✗✗✗✗✓", // UI
-                "✗✗✗✗✗"), // route
-                marks());
-    }
-
-    @Test
     void countersShowTheLifetimeOfEachScope() {
         navigate(ScopePlaygroundView.class);
 

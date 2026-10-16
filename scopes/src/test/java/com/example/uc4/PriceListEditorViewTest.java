@@ -2,10 +2,9 @@ package com.example.uc4;
 
 import java.util.List;
 
+import com.example.home.HomeView;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
@@ -20,16 +19,11 @@ import com.vaadin.flow.component.html.UnorderedList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ViewPackages(classes = PriceListEditorView.class)
+@ViewPackages(classes = { PriceListEditorView.class, HomeView.class })
 class PriceListEditorViewTest extends SpringBrowserlessTest {
-
-    @Autowired
-    private ApplicationContext context;
 
     @Test
     void viewRendersToolbarAndPriceList() {
@@ -75,16 +69,23 @@ class PriceListEditorViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void historyIsSharedWithinAUiButNotAcrossUis() {
+    void undoAfterNavigatingAwayAndBackRestoresTheListOnScreen() {
         navigate(PriceListEditorView.class);
-        UndoHistory first = context.getBean(UndoHistory.class);
-        assertSame(first, context.getBean(UndoHistory.class));
+        runPendingSignalsTasks();
+        test(button("Remove last product")).click();
 
-        // A reload or another tab means a new UI, and a new history.
-        cleanVaadinEnvironment();
-        initVaadinEnvironment();
+        // Same UI, new view instance: the UI-scoped list and history are both
+        // kept. A second UI in the same session (another tab) can not be
+        // simulated in browserless tests; see API-GAPS.md #2.
+        navigate(HomeView.class);
         navigate(PriceListEditorView.class);
-        assertNotSame(first, context.getBean(UndoHistory.class));
+        runPendingSignalsTasks();
+        assertEquals(2, prices().size());
+        assertEquals(List.of("Removed the last product"), history());
+
+        test(button("Undo")).click();
+        runPendingSignalsTasks();
+        assertEquals(3, prices().size());
     }
 
     private List<String> prices() {
