@@ -68,7 +68,7 @@
                  application. -->
             <resource>
                 <directory>src/main/java</directory>
-                <targetPath>component-sources</targetPath>
+                <targetPath>shown-sources</targetPath>
                 <includes>
                     <include>com/example/components/*.java</include>
                     <include>com/example/desk/*.java</include>
@@ -78,7 +78,7 @@
                  build minifies the copies it serves. -->
             <resource>
                 <directory>src/main/resources/META-INF/resources</directory>
-                <targetPath>component-sources/web</targetPath>
+                <targetPath>shown-sources/web</targetPath>
                 <includes>
                     <include>*.css</include>
                     <include>frontend/*</include>
@@ -86,7 +86,7 @@
             </resource>
             <resource>
                 <directory>src/test/java</directory>
-                <targetPath>component-sources</targetPath>
+                <targetPath>shown-sources</targetPath>
                 <includes>
                     <include>com/example/components/*Tester.java</include>
                     <include>com/example/components/*Element.java</include>

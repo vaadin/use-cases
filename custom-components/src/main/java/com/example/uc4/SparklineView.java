@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.example.common.BuiltWith;
 import com.example.common.UseCaseDescription;
 import com.example.components.Sparkline;
 import com.example.components.SparklineVariant;
-import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import com.example.views.Sample;
 

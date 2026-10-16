@@ -9,9 +9,9 @@ import java.util.Objects;
 import com.example.MissingAPI;
 import com.example.SupportedLocales;
 import com.example.common.AppWindow;
+import com.example.common.BuiltWith;
 import com.example.common.UseCaseDescription;
 import com.example.uc10.CategoryCatalog.Category;
-import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 

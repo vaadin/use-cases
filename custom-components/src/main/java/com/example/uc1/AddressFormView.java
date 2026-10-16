@@ -1,9 +1,9 @@
 package com.example.uc1;
 
+import com.example.common.BuiltWith;
 import com.example.common.UseCaseDescription;
 import com.example.components.Address;
 import com.example.components.AddressForm;
-import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import com.example.views.Sample;
 

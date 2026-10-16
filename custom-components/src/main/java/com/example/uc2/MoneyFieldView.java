@@ -2,10 +2,10 @@ package com.example.uc2;
 
 import java.math.BigDecimal;
 
+import com.example.common.BuiltWith;
 import com.example.common.UseCaseDescription;
 import com.example.components.Money;
 import com.example.components.MoneyField;
-import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import com.example.views.Sample;
 import org.jspecify.annotations.Nullable;

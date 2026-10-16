@@ -34,7 +34,8 @@ source". Each view therefore explains itself:
   section on the page: the technique in one line, the few points that make it
   work, and the relevant source collapsed below it. Read the source shown on
   the page from the files packaged with the app, so it can not drift from the
-  code that runs.
+  code that runs. `BuiltWith` in `common` does this; its Javadoc says what the
+  module has to package.
 
 Keep it from becoming overwhelming: collapse code and detail by default, and
 show one idea per view.

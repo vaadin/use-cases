@@ -2,6 +2,7 @@ package com.example.uc8;
 
 import java.util.List;
 
+import com.example.common.BuiltWith;
 import com.example.common.UseCaseDescription;
 import com.example.components.QrCode;
 import com.example.components.RatingStars;
@@ -9,7 +10,6 @@ import com.example.components.RatingStarsVariant;
 import com.example.components.SignaturePad;
 import com.example.components.Sparkline;
 import com.example.components.SparklineVariant;
-import com.example.views.BuiltWith;
 import com.example.views.MainLayout;
 import com.example.views.Sample;
 

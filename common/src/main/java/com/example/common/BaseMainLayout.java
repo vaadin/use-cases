@@ -256,10 +256,24 @@ public abstract class BaseMainLayout extends AppLayout
      */
     static String sourceUrl(@Nullable String ref, String moduleId,
             Class<?> viewClass) {
+        return gitHubUrl("tree", ref, moduleId, "src/main/java/"
+                + viewClass.getName().replace('.', '/') + ".java");
+    }
+
+    /**
+     * The GitHub URL of a file of this app, such as
+     * {@code src/main/resources/META-INF/resources/styles.css}, at the same Git
+     * commit or branch as "View source".
+     */
+    String fileUrl(String path) {
+        return gitHubUrl("blob", SOURCE_REF, moduleId, path);
+    }
+
+    private static String gitHubUrl(String kind, @Nullable String ref,
+            String moduleId, String path) {
         String sourceRef = ref == null || ref.isBlank() ? "main" : ref;
-        return "https://github.com/vaadin/use-cases/tree/" + sourceRef + "/"
-                + moduleId + "/src/main/java/"
-                + viewClass.getName().replace('.', '/') + ".java";
+        return "https://github.com/vaadin/use-cases/" + kind + "/" + sourceRef
+                + "/" + moduleId + "/" + path;
     }
 
     private static String useCaseTitle(Class<?> viewClass) {

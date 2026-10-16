@@ -2,8 +2,8 @@ package com.example.uc2;
 
 import com.example.Appearance;
 import com.example.MissingAPI;
+import com.example.common.BuiltWith;
 import com.example.common.UseCaseDescription;
-import com.example.views.BuiltWith;
 import com.example.views.ComponentShowcase;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
