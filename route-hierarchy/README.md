@@ -15,21 +15,36 @@ each crumb with the route's page title — including instance-free
 `PageTitleGenerator`s, resolved without instantiating ancestor views. No
 `BeforeEnterObserver`, no manual seeding.
 
-UC5 and UC7 are not breadcrumbs: they consume the same route-hierarchy API
-directly — `UpLink` calls `getRouteParent` for a single up-one-level control,
-and `SitemapView` uses `getRouteHierarchy` as a graph-builder, both on
-`RouteConfiguration`, with titles from `Router#resolvePageTitle`. No view
-imports internal API; see [`API-GAPS.md`](API-GAPS.md).
+UC5, UC7 and UC8 are not breadcrumbs: they consume the same route-hierarchy API
+directly — `UpLink` calls `RouteConfiguration.getRouteParent` for a single
+up-one-level control, `SitemapView` uses `getRouteHierarchy` as a
+graph-builder, and `HierarchicalMenuView` renders
+`MenuConfiguration.getMenuEntriesTree()` as a nested `SideNav`. UC5 and UC7
+label their crumbs with `Router.resolvePageTitle(class, parameters)`, which
+resolves a title without instantiating the view (UC8 gets its labels from
+`MenuEntry.title()`). No view here imports `internal`; see
+[`API-GAPS.md`](API-GAPS.md).
+
+UC8 also shows where the two hierarchies come apart: `@Menu(parent = ...)`
+regroups an entry in the menu tree only, leaving the route — and therefore the
+breadcrumb — untouched. Use `@RouteParent` when a page really does live under
+another page, and `@Menu(parent = ...)` when only the navigation menu should
+group it that way.
+
+The hierarchical menu and `@Menu(parent = ...)` have not landed in the baseline
+Flow version yet, so this module pins `flow.version` to
+`25.4.hierarchical-menu-SNAPSHOT` (see [`pom.xml`](pom.xml)).
 
 | # | View | What it shows |
 | - | ---- | ------------- |
 | UC1 | URL-prefix trail | `uc1` → `uc1/electronics` → `uc1/electronics/laptops` with no annotations; the trail comes purely from `getRouteHierarchy`'s URL-prefix fallback. |
 | UC2 | `@RouteParent` override | A detail page at `order-detail/:orderId` whose URL shares no prefix with its conceptual parent `uc2`; `@RouteParent(OrdersView.class)` is what links them. |
-| UC3 | Dynamic leaf label | A profile at `uc3/:userId` implementing `HasDynamicTitle`; the current crumb shows the resolved person name, not the static `@PageTitle`. |
+| UC3 | Dynamic leaf label | A profile at `uc3/:userId` with `@DynamicPageTitle`; the current crumb shows the person name, resolved from `:userId` by a `PageTitleGenerator` without a view instance. |
 | UC4 | Parameter-preserving links | A four-level parameterised hierarchy where each ancestor link keeps the live `:projectId` (and only the parameters its own template needs). |
 | UC5 | Up-one-level button | A single "↑ Up to <parent>" control built from `getRouteParent(...)`, hidden at the hierarchy root. |
 | UC6 | Layout-wide auto breadcrumbs | One `Breadcrumbs` component in a parent layout, shared by every child view; in `ROUTER` mode it rebuilds on every navigation with no `AfterNavigationObserver` and no manual seeding. |
 | UC7 | Route-tree sitemap | `getRouteHierarchy` used as a graph-builder: leaf routes from across the demo are expanded and merged into a nested sitemap tree. |
+| UC8 | Hierarchical menu | `MenuConfiguration.getMenuEntriesTree()` renders the same `@Menu` set the flat drawer shows, nested by route hierarchy via `MenuEntry.children()`; `@Menu(parent = ...)` additionally nests the top-level `/deals` route under Catalog in the tree while its breadcrumb stays at the top level. |
 
 ## Run
 
