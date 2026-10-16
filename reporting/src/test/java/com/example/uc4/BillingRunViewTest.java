@@ -1,10 +1,10 @@
 package com.example.uc4;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 
 import com.example.data.Invoice;
-import com.example.pdf.InvoicePdf;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -54,8 +54,9 @@ class BillingRunViewTest extends SpringBrowserlessTest {
         assertEquals("3 selected",
                 findInView(Span.class).id("batch-status").getText());
 
-        byte[] pdf = InvoicePdf.render(view.selection());
-        try (PDDocument document = Loader.loadPDF(pdf)) {
+        ByteArrayOutputStream pdf = new ByteArrayOutputStream();
+        test(findInView(Anchor.class).id("batch-link")).download(pdf);
+        try (PDDocument document = Loader.loadPDF(pdf.toByteArray())) {
             assertEquals(3, document.getNumberOfPages());
             String text = new PDFTextStripper().getText(document);
             assertTrue(text.indexOf("Invoice 2026-0001") < text

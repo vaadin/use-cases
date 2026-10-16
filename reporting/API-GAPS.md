@@ -26,16 +26,17 @@ in their own way.
 
 ## 2. A `DownloadHandler` has no URL the server can use
 
-**Where it bites:** UC2 / `OpenInNewTabView.java`
-**Symptom:** `Page#open(String)` needs a URL, and a `DownloadHandler` has no
-URL until it is bound to an element. Only `Anchor#getHref()` gives it back.
-`OpenInNewTab.onClick(component, DownloadHandler)` (Flow 25.4) now opens a
-handler in a new tab on a click. It does not help when the server decides
-later to open the document: after saving a draft, after a confirm dialog, or
-from a context menu item. It also does not help anything else that needs the
-URL: a mail body, a QR code.
-**Workaround used:** a hidden `Anchor` with `target="_blank"` that the server
-clicks through JavaScript (`MissingAPI#openInNewTab`).
+**Where it bites:** opening a generated document from server code, next to
+UC2 / `OpenInNewTabView.java`
+**Symptom:** UC2's button opens the document with
+`OpenInNewTab.onClick(component, DownloadHandler)`, but that only works for a
+click. `Page#open(String)` needs a URL, and a `DownloadHandler` has no URL
+until it is bound to an element. Only `Anchor#getHref()` gives it back. So
+nothing helps when the server decides later to open the document: after
+saving a draft, after a confirm dialog, or from a context menu item. Nor
+anything else that needs the URL: a mail body, a QR code.
+**Workaround used:** none in this module. An application would keep a hidden
+`Anchor` with `target="_blank"` and click it through JavaScript.
 **Suggested API:** `Page#open(DownloadHandler)`, or a way to register a
 handler on the UI and read back its URL.
 Upstream: https://github.com/vaadin/flow/issues/21929
@@ -99,9 +100,9 @@ that the handler sets, and there is no tester for an `IFrame` source or for
 link delivers the right file under the right name, which is the main
 behaviour of this module.
 **Workaround used:** the document generation is a plain class with its own
-test (`InvoicePdfTest` reads the PDFs back with PDFBox). The view tests check
-only the server side: the anchor resolves to a URL, the preview is
-regenerated, the delivery book is updated.
+test (`InvoicePdfTest` reads the PDFs back with PDFBox). The view tests
+download the anchors and read the PDF back, but for UC2's button and UC3's
+frame they check only that a handler is bound.
 **Suggested API:** a download result in the browserless test kit, e.g.
 `test(anchor).download()` that returns the bytes, the file name, the content
 type and the disposition, and the same for an `IFrame` and for components

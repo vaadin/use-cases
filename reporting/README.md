@@ -17,7 +17,7 @@ helping — most usefully the one the community already filed,
 | # | View | What it shows |
 | - | ---- | ------------- |
 | UC1 | Download the invoice | A PDF generated per row and delivered through `DownloadHandler.fromInputStream`, with the invoice number as the file name. |
-| UC2 | Open it in a new tab | Inline delivery via `AttachmentType.INLINE`, and the hidden-anchor trick the server needs because a handler has no URL it can pass to `Page#open`. |
+| UC2 | Open it in a new tab | Inline delivery via `AttachmentType.INLINE` on a link, and `OpenInNewTab.onClick` for a button. |
 | UC3 | Check it before sending | The real generated document in an `IFrame`, beside the application's own rendering of the same invoice. |
 | UC4 | The monthly billing run | A multi-select billing run rendered as one document with continuous page numbers, plus transfer progress. |
 | UC5 | Know that it arrived | An invoice marked sent only when the transfer completed, in an application-scoped book every session sees. |
@@ -49,9 +49,11 @@ three-invoice batch. UC5 also covers the cross-session case — a delivery
 recorded in one session is visible in the next.
 
 A browserless test cannot check the file name or content type of a download
-(API-GAPS.md #6), so the view tests assert the parts that stay on the server:
-that the handler resolves to a URL, that the preview regenerates when another
-invoice is chosen, and that the delivery book is what the badges read from.
+(API-GAPS.md #6), so the view tests download what each anchor links to and
+read the PDF back, and otherwise assert the parts that stay on the server:
+that UC2's button has a handler bound, that the preview regenerates when
+another invoice is chosen, and that the delivery book is what the badges read
+from.
 
 The four delivery paths were also checked against the running application in
 headless Chromium, by fetching what each link and the preview frame point at:
