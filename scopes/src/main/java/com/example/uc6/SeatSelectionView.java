@@ -2,6 +2,7 @@ package com.example.uc6;
 
 import java.util.Map;
 
+import com.example.common.BuiltWith;
 import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
@@ -38,7 +39,9 @@ import com.vaadin.flow.signals.Signal;
 @Menu(order = 6, title = "UC6 — Booking wizard")
 public class SeatSelectionView extends VerticalLayout {
 
+    // tag::scope[]
     public SeatSelectionView(BookingDraft booking, SeatInventory inventory) {
+        // end::scope[]
         add(new H1("UC6 — Booking wizard"));
         add(new Paragraph("Your booking is kept per browser tab: reload or "
                 + "move between the steps and it stays. Open the wizard in "
@@ -66,5 +69,14 @@ public class SeatSelectionView extends VerticalLayout {
             seats.add(button);
         }
         add(seats);
+
+        add(new BuiltWith(
+                "A browser tab scoped bean, released with @PreDestroy")
+                .point("@BrowserTabScope keeps one booking per browser tab, across reloads and full page navigation. Vaadin has no such scope yet: MissingAPI adds it on top of BrowserTab.")
+                .point("Each step of the wizard is its own route and gets the booking through its constructor.")
+                .point("When the tab is gone and its heartbeat times out, Spring calls the @PreDestroy method and the seat goes back on sale.")
+                .java("uc6/BookingDraft", "scope")
+                .java("uc6/SeatSelectionView", "scope")
+                .java("uc6/PassengerView", "scope"));
     }
 }

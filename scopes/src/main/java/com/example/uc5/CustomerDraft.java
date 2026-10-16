@@ -17,10 +17,12 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
  * inside the editor gets the same draft, and leaving the editor discards it.
  * The next visit starts a fresh draft.
  */
+// tag::scope[]
 @SpringComponent
 @RouteScope
 @RouteScopeOwner(CustomerEditorLayout.class)
 public class CustomerDraft {
+    // end::scope[]
 
     private static final AtomicInteger COUNTER = new AtomicInteger();
 

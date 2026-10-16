@@ -18,9 +18,11 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
  * booking. When the tab is closed and its heartbeat times out, Spring calls
  * {@link #releaseHold()} and the held seat goes back on sale.
  */
+// tag::scope[]
 @SpringComponent
 @BrowserTabScope
 public class BookingDraft {
+    // end::scope[]
 
     private final SeatInventory inventory;
     private final String holderId = UUID.randomUUID().toString();
@@ -74,6 +76,7 @@ public class BookingDraft {
         passenger = "";
     }
 
+    // tag::scope[]
     @PreDestroy
     public void releaseHold() {
         if (seat != null) {
@@ -81,4 +84,5 @@ public class BookingDraft {
             seat = null;
         }
     }
+    // end::scope[]
 }

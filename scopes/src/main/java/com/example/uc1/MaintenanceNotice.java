@@ -14,11 +14,13 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
  * it concurrently, the state lives in a {@link SharedValueSignal}, which is
  * thread-safe and pushes changes to every UI that shows it.
  */
+// tag::scope[]
 @Component
 public class MaintenanceNotice {
 
     private final SharedValueSignal<String> message = new SharedValueSignal<>(
             "");
+    // end::scope[]
 
     public Signal<String> message() {
         return message.asReadonly();

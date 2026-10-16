@@ -12,11 +12,13 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
  * UI-scoped {@link UndoHistory}. In a real application it would sit in the main
  * layout's navbar.
  */
+// tag::scope[]
 @SpringComponent
 @Scope("prototype")
 public class UndoToolbar extends HorizontalLayout {
 
     public UndoToolbar(UndoHistory history) {
+        // end::scope[]
         Button undo = new Button("Undo", e -> history.undo());
         undo.bindEnabled(history.entries().map(list -> !list.isEmpty()));
 

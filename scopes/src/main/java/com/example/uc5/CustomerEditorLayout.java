@@ -1,8 +1,10 @@
 package com.example.uc5;
 
+import com.example.common.BuiltWith;
 import com.example.home.HomeView;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -30,5 +32,19 @@ public class CustomerEditorLayout extends Div implements RouterLayout {
                 new RouterLink("1. Contact details", CustomerDetailsView.class),
                 new RouterLink("2. Address", CustomerAddressView.class),
                 new RouterLink("Leave the editor", HomeView.class)));
+        add(new BuiltWith("A @RouteScope bean owned by the editor layout")
+                .point("@RouteScope ties the draft to navigation. @RouteScopeOwner(CustomerEditorLayout.class) keeps it while this layout is part of the route.")
+                .point("Both pages are routes inside the layout and get the same draft through their constructors.")
+                .point("Leaving the editor removes the layout, and the draft with it. The next visit gets a new one.")
+                .java("uc5/CustomerDraft", "scope")
+                .java("uc5/CustomerDetailsView", "scope")
+                .java("uc5/CustomerAddressView", "scope"));
+    }
+
+    @Override
+    public void showRouterLayoutContent(HasElement content) {
+        // The page goes above "How it is built".
+        getElement().insertChild(getElement().getChildCount() - 1,
+                content.getElement());
     }
 }

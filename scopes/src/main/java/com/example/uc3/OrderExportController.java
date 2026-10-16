@@ -19,8 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
  * {@link OrderExportView}. It reads the same HTTP-session-scoped
  * {@link ExportPreferences} instance as the view.
  */
+// tag::scope[]
 @RestController
 public class OrderExportController {
+    // end::scope[]
 
     public static final String PATH = "uc3/orders.csv";
 
@@ -35,6 +37,7 @@ public class OrderExportController {
             new Order("A-1003", "Lumen Studio", LocalDate.of(2026, 9, 7),
                     new BigDecimal("430.20")));
 
+    // tag::scope[]
     private final ExportPreferences preferences;
 
     public OrderExportController(ExportPreferences preferences) {
@@ -49,6 +52,7 @@ public class OrderExportController {
                 .contentType(new MediaType("text", "csv"))
                 .body(toCsv(preferences));
     }
+    // end::scope[]
 
     static String toCsv(ExportPreferences preferences) {
         List<Column> columns = preferences.getColumns().stream().sorted()

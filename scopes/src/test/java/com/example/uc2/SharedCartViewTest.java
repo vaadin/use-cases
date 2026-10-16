@@ -1,5 +1,8 @@
 package com.example.uc2;
 
+import java.util.List;
+
+import com.example.common.BuiltWith;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -38,7 +41,7 @@ class SharedCartViewTest extends SpringBrowserlessTest {
 
         test(button("Add Travel mug")).click();
         runPendingSignalsTasks();
-        assertEquals(1, findInView(ListItem.class).all().size());
+        assertEquals(1, cartItems().size());
 
         // A new view instance in the same session sees the same cart, like a
         // second tab would.
@@ -52,7 +55,14 @@ class SharedCartViewTest extends SpringBrowserlessTest {
         initVaadinEnvironment();
         navigate(SharedCartView.class);
         runPendingSignalsTasks();
-        assertTrue(findInView(ListItem.class).all().isEmpty());
+        assertTrue(cartItems().isEmpty());
+    }
+
+    /** The cart's items, not the points of "How it is built". */
+    private List<ListItem> cartItems() {
+        return findInView(ListItem.class).all().stream()
+                .filter(item -> item.findAncestor(BuiltWith.class) == null)
+                .toList();
     }
 
     private Button button(String text) {

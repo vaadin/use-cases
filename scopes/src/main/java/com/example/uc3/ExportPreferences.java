@@ -18,9 +18,11 @@ import org.springframework.web.context.annotation.SessionScope;
  * instance from the current request, so it only works on threads that are
  * handling an HTTP request.
  */
+// tag::scope[]
 @Component
 @SessionScope
 public class ExportPreferences implements Serializable {
+    // end::scope[]
 
     public enum Column {
         ORDER_ID("Order"), CUSTOMER("Customer"), DATE("Date"), TOTAL("Total");

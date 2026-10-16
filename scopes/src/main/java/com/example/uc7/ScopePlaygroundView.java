@@ -4,6 +4,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
+import com.example.common.BuiltWith;
 import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
@@ -53,6 +54,7 @@ public class ScopePlaygroundView extends VerticalLayout {
             Set<Action> keptAfter) {
     }
 
+    // tag::scope[]
     public ScopePlaygroundView(
             @Qualifier("applicationCounter") VisitCounter application,
             @Qualifier("httpSessionCounter") VisitCounter httpSession,
@@ -60,6 +62,7 @@ public class ScopePlaygroundView extends VerticalLayout {
             @Qualifier("browserTabCounter") VisitCounter browserTab,
             @Qualifier("uiCounter") VisitCounter ui,
             @Qualifier("routeCounter") VisitCounter route) {
+        // end::scope[]
         add(new H1("UC7 — Scope playground"));
         add(new Paragraph("Each opening of this page counts one visit in a "
                 + "bean of every scope. Do one of the actions in the table "
@@ -108,6 +111,13 @@ public class ScopePlaygroundView extends VerticalLayout {
                 + "to the duplicate.");
         note.addClassName("hint");
         add(note);
+
+        add(new BuiltWith(
+                "One counter bean per scope, told apart with @Qualifier")
+                .point("Each @Bean method declares the same VisitCounter class with a different scope annotation. No annotation means a singleton.")
+                .point("The view asks for all of them by name and counts one visit in each.")
+                .java("uc7/ScopeCounters", "scope")
+                .java("uc7/ScopePlaygroundView", "scope"));
     }
 
     private static void addRow(Div table, ScopeRow row) {

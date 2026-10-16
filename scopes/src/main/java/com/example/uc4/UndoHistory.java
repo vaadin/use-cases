@@ -20,9 +20,11 @@ import com.vaadin.flow.spring.annotation.UIScope;
  * the wrong choice for anything the user expects to survive a reload. A local
  * {@link ValueSignal} is enough because only one UI ever touches it.
  */
+// tag::scope[]
 @SpringComponent
 @UIScope
 public class UndoHistory {
+    // end::scope[]
 
     public record Entry(String description, SerializableRunnable undo) {
     }

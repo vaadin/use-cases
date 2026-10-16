@@ -30,7 +30,9 @@ import com.vaadin.flow.router.Route;
 @Menu(order = 5, title = "UC5 — Customer draft")
 public class CustomerDetailsView extends VerticalLayout {
 
+    // tag::scope[]
     public CustomerDetailsView(CustomerDraft draft) {
+        // end::scope[]
         setPadding(false);
         Span badge = new Span(draft.describe());
         badge.addClassName("scope-badge");

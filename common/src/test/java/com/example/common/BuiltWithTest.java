@@ -9,6 +9,7 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Pre;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ViewPackages(classes = BuiltWithView.class)
 class BuiltWithTest extends BrowserlessTest {
@@ -26,5 +27,41 @@ class BuiltWithTest extends BrowserlessTest {
                 $(Anchor.class).all().stream()
                         .filter(a -> "Open on GitHub".equals(a.getText()))
                         .findFirst().orElseThrow().getHref());
+    }
+
+    @Test
+    void excerpt_showsOnlyTheTaggedRegionsEachWithoutItsIndentation() {
+        String source = """
+                package com.example;
+
+                // tag::scope[]
+                @UIScope
+                public class History {
+                    // end::scope[]
+
+                    private int size;
+
+                    public History(Store store) {
+                        // tag::scope[]
+                        // tag::other[]
+                        store.listen(this);
+                        // end::other[]
+
+                        store.load();
+                        // end::scope[]
+                    }
+                }
+                """;
+
+        assertEquals("""
+                @UIScope
+                public class History {
+                // ...
+                store.listen(this);
+
+                store.load();
+                """, BuiltWith.excerpt(source, "scope"));
+        assertThrows(IllegalArgumentException.class,
+                () -> BuiltWith.excerpt(source, "missing"));
     }
 }
