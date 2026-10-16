@@ -35,10 +35,7 @@ Safari requires byte ranges for video and is not expected to play it at all
 from its start on every seek, so it does not suit long recordings.
 **Workaround used:** `MediaLibrary` copies each bundled file to a temporary
 directory once when the app runs from the packaged jar, and serves it with
-`forFile`. `forFile` took the MIME type from the servlet container only, so
-`application.properties` maps `.vtt` to `text/vtt` for the subtitles of UC9.
-`AbstractDownloadHandler#withContentType(String)` now covers that part; the
-mapping has not been replaced yet.
+`forFile`.
 **Suggested API:** `Media#addSource(DownloadHandler, type)` logs a
 development-mode warning when `isRangeRequestsEnabled()` is `false`.
 
