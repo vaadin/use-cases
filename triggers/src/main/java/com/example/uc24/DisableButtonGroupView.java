@@ -43,9 +43,10 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * <p>
  * The server-side mirror is required: a property written by an action is not
  * synced back, so without it the server still believes the siblings are enabled
- * and the final {@code setEnabled(true)} would be a no-op. The buttons can't
- * use {@code bindEnabled} for it, because Flow doesn't allow a signal binding
- * on the enabled state together with disable-on-click (see API-GAPS.md).
+ * and the final {@code setEnabled(true)} would be a no-op (API-GAPS.md #8). The
+ * buttons can't use {@code bindEnabled} for it, because Flow doesn't allow a
+ * signal binding on the enabled state together with disable-on-click
+ * (API-GAPS.md #9).
  */
 @Route(value = "uc24", layout = MainLayout.class)
 @PageTitle("UC24 — Disable button group")
