@@ -1,6 +1,5 @@
 package com.example.uc1;
 
-import com.example.MissingAPI.NotificationPermission;
 import com.example.WebNotificationSimulator;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,6 +9,7 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.webnotification.WebNotificationPermission;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -41,18 +41,18 @@ class PermissionStateViewTest extends SpringBrowserlessTest {
         assertFalse(button("Allow notifications").get().isEnabled());
         assertFalse(button("Send a test notification").get().isEnabled());
 
-        setPermission(NotificationPermission.DEFAULT);
+        setPermission(WebNotificationPermission.PROMPT);
         assertBadge("Not decided (default)");
         assertTrue(button("Allow notifications").get().isEnabled());
 
-        setPermission(NotificationPermission.DENIED);
+        setPermission(WebNotificationPermission.DENIED);
         assertBadge("Blocked (denied)");
         assertFalse(button("Allow notifications").get().isEnabled());
 
-        setPermission(NotificationPermission.UNSUPPORTED);
+        setPermission(WebNotificationPermission.UNSUPPORTED);
         assertBadge("Not supported");
 
-        setPermission(NotificationPermission.GRANTED);
+        setPermission(WebNotificationPermission.GRANTED);
         assertBadge("Allowed (granted)");
         assertFalse(button("Allow notifications").get().isEnabled());
         assertTrue(button("Send a test notification").get().isEnabled());
@@ -61,7 +61,7 @@ class PermissionStateViewTest extends SpringBrowserlessTest {
     @Test
     void testButtonShowsNotificationWhenGranted() {
         navigate(PermissionStateView.class);
-        setPermission(NotificationPermission.GRANTED);
+        setPermission(WebNotificationPermission.GRANTED);
 
         test(button("Send a test notification").get()).click();
 
@@ -82,7 +82,7 @@ class PermissionStateViewTest extends SpringBrowserlessTest {
                 "expected badge \"" + text + "\"");
     }
 
-    private void setPermission(NotificationPermission permission) {
+    private void setPermission(WebNotificationPermission permission) {
         WebNotificationSimulator.setPermission(permission);
         runPendingSignalsTasks();
     }

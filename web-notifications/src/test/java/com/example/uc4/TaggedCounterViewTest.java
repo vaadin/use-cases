@@ -1,6 +1,5 @@
 package com.example.uc4;
 
-import com.example.MissingAPI.NotificationPermission;
 import com.example.WebNotificationSimulator;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +11,7 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.webnotification.WebNotificationPermission;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -35,7 +35,8 @@ class TaggedCounterViewTest extends SpringBrowserlessTest {
     @Test
     void taggedNotificationsReplaceEachOther() {
         navigate(TaggedCounterView.class);
-        WebNotificationSimulator.setPermission(NotificationPermission.GRANTED);
+        WebNotificationSimulator
+                .setPermission(WebNotificationPermission.GRANTED);
         runPendingSignalsTasks();
 
         test(button("Receive 3 in a burst")).click();
@@ -57,7 +58,8 @@ class TaggedCounterViewTest extends SpringBrowserlessTest {
     @Test
     void untaggedNotificationsStack() {
         navigate(TaggedCounterView.class);
-        WebNotificationSimulator.setPermission(NotificationPermission.GRANTED);
+        WebNotificationSimulator
+                .setPermission(WebNotificationPermission.GRANTED);
         runPendingSignalsTasks();
 
         test(findInView(Checkbox.class).single()).click();
@@ -71,14 +73,15 @@ class TaggedCounterViewTest extends SpringBrowserlessTest {
     @Test
     void withoutPermissionOnlyTheCounterUpdates() {
         navigate(TaggedCounterView.class);
-        WebNotificationSimulator.setPermission(NotificationPermission.DEFAULT);
+        WebNotificationSimulator
+                .setPermission(WebNotificationPermission.PROMPT);
         runPendingSignalsTasks();
 
         test(button("Receive a message")).click();
         runPendingSignalsTasks();
 
         assertSpan("1 unread");
-        assertLogContains("not shown — permission is default");
+        assertLogContains("not shown — permission is prompt");
         assertTrue(WebNotificationSimulator.shown().isEmpty());
     }
 

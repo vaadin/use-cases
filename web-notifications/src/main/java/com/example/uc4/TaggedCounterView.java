@@ -4,9 +4,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import com.example.MissingAPI;
-import com.example.MissingAPI.NotificationOptions;
-import com.example.MissingAPI.NotificationPermission;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -22,6 +19,9 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.webnotification.WebNotification;
+import com.vaadin.flow.component.webnotification.WebNotificationOptions;
+import com.vaadin.flow.component.webnotification.WebNotificationPermission;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -68,9 +68,9 @@ public class TaggedCounterView extends VerticalLayout {
                 + "unticked, every message stacks its own notification."));
 
         Button allow = new Button("Allow notifications");
-        MissingAPI.requestPermissionOnClick(allow);
-        allow.bindEnabled(MissingAPI.permissionSignal(UI.getCurrent())
-                .map(p -> p == NotificationPermission.DEFAULT));
+        WebNotification.onClick(allow).requestPermission();
+        allow.bindEnabled(WebNotification.permissionSignal()
+                .map(p -> p == WebNotificationPermission.PROMPT));
 
         Button receiveOne = new Button("Receive a message",
                 e -> receive(UI.getCurrent(), 1));
@@ -111,15 +111,15 @@ public class TaggedCounterView extends VerticalLayout {
         String title = useTag
                 ? total + (total == 1 ? " new message" : " new messages")
                 : "Message from " + sender;
-        NotificationOptions options = NotificationOptions
-                .body(sender + ": " + text);
+        WebNotificationOptions.Builder options = WebNotificationOptions
+                .builder().body(sender + ": " + text);
         if (useTag) {
-            options = options.withTag(TAG).withRenotify(true);
+            options.tag(TAG).renotify(true);
         }
-        NotificationPermission permission = MissingAPI.permissionSignal(ui)
-                .peek();
-        if (permission == NotificationPermission.GRANTED) {
-            MissingAPI.showNotification(ui, title, options);
+        WebNotificationPermission permission = WebNotification
+                .permissionSignal(ui).peek();
+        if (permission == WebNotificationPermission.GRANTED) {
+            WebNotification.show(title, options.build(), ui);
             appendLog("\"" + title + "\"  tag=" + (useTag ? TAG : "(none)"));
         } else {
             appendLog("\"" + title + "\"  not shown — permission is "
@@ -129,7 +129,7 @@ public class TaggedCounterView extends VerticalLayout {
 
     private void markAllRead(UI ui) {
         unread.set(0);
-        MissingAPI.closeNotifications(ui, TAG);
+        WebNotification.closeByTag(TAG, ui);
         appendLog("marked all as read → closed tag=" + TAG);
     }
 

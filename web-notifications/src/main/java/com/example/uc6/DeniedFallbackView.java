@@ -3,9 +3,6 @@ package com.example.uc6;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-import com.example.MissingAPI;
-import com.example.MissingAPI.NotificationOptions;
-import com.example.MissingAPI.NotificationPermission;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -24,6 +21,9 @@ import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.webnotification.WebNotification;
+import com.vaadin.flow.component.webnotification.WebNotificationOptions;
+import com.vaadin.flow.component.webnotification.WebNotificationPermission;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -38,8 +38,8 @@ import com.vaadin.flow.signals.Signal;
  * denied state, explains how to re-enable notifications in the common browsers,
  * and keeps working by falling back to in-app Vaadin notifications. When the
  * user re-enables notifications in the site settings, the view notices (the
- * browser reports the change, or "Check again" re-reads it) and switches back
- * to OS notifications without a reload.
+ * browser reports the change, at the latest when the user returns to the tab)
+ * and switches back to OS notifications without a reload.
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Denied permission")
@@ -63,7 +63,7 @@ public class DeniedFallbackView extends VerticalLayout {
                 + "the browser settings). The view explains how to undo "
                 + "it and keeps delivering messages in-app meanwhile."));
 
-        MissingAPI.requestPermissionOnClick(allow);
+        WebNotification.onClick(allow).requestPermission();
         allow.addThemeVariants(ButtonVariant.PRIMARY);
         Button send = new Button("Send me a notification",
                 e -> send(UI.getCurrent()));
@@ -77,27 +77,27 @@ public class DeniedFallbackView extends VerticalLayout {
         log.addClassName("notification-log");
         add(row, helpPanel, new H2("Delivery log"), log);
 
-        Signal<NotificationPermission> permission = MissingAPI
-                .permissionSignal(UI.getCurrent());
+        Signal<WebNotificationPermission> permission = WebNotification
+                .permissionSignal();
         helpPanel.bindVisible(
-                permission.map(p -> p == NotificationPermission.DENIED));
+                permission.map(p -> p == WebNotificationPermission.DENIED));
         allow.bindVisible(
-                permission.map(p -> p == NotificationPermission.DEFAULT
-                        || p == NotificationPermission.UNKNOWN));
+                permission.map(p -> p == WebNotificationPermission.PROMPT
+                        || p == WebNotificationPermission.UNKNOWN));
         allow.bindEnabled(
-                permission.map(p -> p == NotificationPermission.DEFAULT));
+                permission.map(p -> p == WebNotificationPermission.PROMPT));
         statusBadge.bindText(permission.map(p -> switch (p) {
         case GRANTED -> "OS notifications on";
         case DENIED -> "Blocked — using in-app notifications";
         case UNSUPPORTED -> "Unsupported — using in-app notifications";
-        case DEFAULT -> "Not decided — using in-app notifications";
+        case PROMPT -> "Not decided — using in-app notifications";
         case UNKNOWN -> "Checking…";
         }));
         statusBadge.bindClassName("hidden",
-                permission.map(p -> p == NotificationPermission.DENIED));
+                permission.map(p -> p == WebNotificationPermission.DENIED));
         statusBadge.bindClassName("paused",
-                permission.map(p -> p != NotificationPermission.GRANTED
-                        && p != NotificationPermission.DENIED));
+                permission.map(p -> p != WebNotificationPermission.GRANTED
+                        && p != WebNotificationPermission.DENIED));
     }
 
     private void buildHelpPanel() {
@@ -114,27 +114,28 @@ public class DeniedFallbackView extends VerticalLayout {
                 new ListItem("Also check that notifications for the browser "
                         + "itself are enabled in the operating system "
                         + "settings."));
-        Button checkAgain = new Button("Check again",
-                e -> MissingAPI.refreshPermission(UI.getCurrent()));
         helpPanel.add(new H3("Notifications are blocked"),
                 new Paragraph("Your browser won't ask again, so the "
                         + "\"Allow\" button can't help any more. You'll "
                         + "keep getting messages inside the app. To get "
                         + "OS notifications again:"),
-                steps, checkAgain);
+                steps, new Paragraph("Then come back to this tab: the view "
+                        + "notices the change on its own."));
     }
 
     // Package-private so tests can call it without a click.
     void send(UI ui) {
-        NotificationPermission permission = MissingAPI.permissionSignal(ui)
-                .peek();
-        if (permission == NotificationPermission.GRANTED) {
-            MissingAPI
-                    .showNotification(ui, "Build #218 passed",
-                            NotificationOptions.body("All 1,204 tests green."))
-                    .onError(reason -> {
+        WebNotificationPermission permission = WebNotification
+                .permissionSignal(ui).peek();
+        if (permission == WebNotificationPermission.GRANTED) {
+            WebNotification
+                    .show("Build #218 passed",
+                            WebNotificationOptions.builder()
+                                    .body("All 1,204 tests green.").build(),
+                            ui)
+                    .addErrorListener(error -> {
                         inApp();
-                        appendLog("OS notification refused (" + reason
+                        appendLog("OS notification refused (" + error.reason()
                                 + ") → in-app fallback");
                     });
             appendLog("OS notification");

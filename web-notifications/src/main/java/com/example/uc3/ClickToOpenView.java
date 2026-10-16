@@ -10,9 +10,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.example.MissingAPI;
-import com.example.MissingAPI.NotificationOptions;
-import com.example.MissingAPI.NotificationPermission;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
@@ -31,6 +28,9 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.webnotification.WebNotification;
+import com.vaadin.flow.component.webnotification.WebNotificationOptions;
+import com.vaadin.flow.component.webnotification.WebNotificationPermission;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -94,7 +94,7 @@ public class ClickToOpenView extends VerticalLayout {
                 + "back and opens the ticket."));
 
         Button allow = new Button("Allow notifications");
-        MissingAPI.requestPermissionOnClick(allow);
+        WebNotification.onClick(allow).requestPermission();
         Button assign = new Button("Assign me a ticket in 5 seconds",
                 e -> scheduleAssignment(UI.getCurrent()));
         assign.addThemeVariants(ButtonVariant.PRIMARY);
@@ -135,10 +135,10 @@ public class ClickToOpenView extends VerticalLayout {
 
         // Button disabled only while the browser hasn't reported yet or once
         // the user has decided.
-        Signal<NotificationPermission> permission = MissingAPI
-                .permissionSignal(UI.getCurrent());
+        Signal<WebNotificationPermission> permission = WebNotification
+                .permissionSignal();
         allow.bindEnabled(
-                permission.map(p -> p == NotificationPermission.DEFAULT));
+                permission.map(p -> p == WebNotificationPermission.PROMPT));
 
         // Assignments still pending when the user leaves are dropped, so they
         // don't notify from another view.
@@ -166,16 +166,16 @@ public class ClickToOpenView extends VerticalLayout {
                 template.subject());
         tickets.insertLast(ticket);
 
-        if (MissingAPI.permissionSignal(ui)
-                .peek() == NotificationPermission.GRANTED) {
-            MissingAPI
-                    .showNotification(ui,
-                            "Ticket #" + number + " assigned to you",
-                            NotificationOptions
+        if (WebNotification.permissionSignal(ui)
+                .peek() == WebNotificationPermission.GRANTED) {
+            WebNotification
+                    .show("Ticket #" + number + " assigned to you",
+                            WebNotificationOptions.builder()
                                     .body(ticket.subject() + " — "
                                             + ticket.customer())
-                                    .withRequireInteraction(true))
-                    .onClick(n -> open(ticket, "notification click"));
+                                    .requireInteraction(true).build(),
+                            ui)
+                    .addClickListener(() -> open(ticket, "notification click"));
         } else {
             Notification toast = new Notification();
             toast.setDuration(8000);

@@ -1,6 +1,5 @@
 package com.example.uc6;
 
-import com.example.MissingAPI.NotificationPermission;
 import com.example.WebNotificationSimulator;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +11,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.webnotification.WebNotificationPermission;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -34,7 +34,8 @@ class DeniedFallbackViewTest extends SpringBrowserlessTest {
     @Test
     void deniedShowsHelpAndFallsBackToInApp() {
         DeniedFallbackView view = navigate(DeniedFallbackView.class);
-        WebNotificationSimulator.setPermission(NotificationPermission.DENIED);
+        WebNotificationSimulator
+                .setPermission(WebNotificationPermission.DENIED);
         runPendingSignalsTasks();
 
         assertTrue(helpPanelShown());
@@ -47,25 +48,14 @@ class DeniedFallbackViewTest extends SpringBrowserlessTest {
 
         // User re-enables notifications in site settings; the browser
         // reports the change and the view switches back.
-        WebNotificationSimulator.setPermission(NotificationPermission.GRANTED);
+        WebNotificationSimulator
+                .setPermission(WebNotificationPermission.GRANTED);
         runPendingSignalsTasks();
         assertFalse(helpPanelShown());
 
         view.send(UI.getCurrent());
         assertLogContains("OS notification");
         assertEquals(1, WebNotificationSimulator.shown().size());
-    }
-
-    @Test
-    void checkAgainButtonIsOffered() {
-        navigate(DeniedFallbackView.class);
-        WebNotificationSimulator.setPermission(NotificationPermission.DENIED);
-        runPendingSignalsTasks();
-
-        // The client re-reads the permission; nothing observable server-side
-        // until it reports, but the click must not fail.
-        test(button("Check again")).click();
-        assertTrue(helpPanelShown());
     }
 
     // findInView only returns visible components, so the heading inside the

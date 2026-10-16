@@ -1,12 +1,8 @@
 package com.example.uc1;
 
-import com.example.MissingAPI;
-import com.example.MissingAPI.NotificationOptions;
-import com.example.MissingAPI.NotificationPermission;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H1;
@@ -16,6 +12,9 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.webnotification.WebNotification;
+import com.vaadin.flow.component.webnotification.WebNotificationOptions;
+import com.vaadin.flow.component.webnotification.WebNotificationPermission;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -27,12 +26,14 @@ import com.vaadin.flow.signals.Signal;
  * Browsers only show the notification permission prompt when
  * {@code Notification.requestPermission()} is called from inside a user gesture
  * such as a click, and they penalise sites that prompt on page load. This view
- * asks only when the user clicks "Allow notifications". The request is bound to
- * the button on the client, because a round-trip to the server would lose the
- * gesture. The current permission is shown reactively: {@code default} (not
- * decided yet), {@code granted}, {@code denied}, or "unsupported" for browsers
- * without the API or pages that aren't served over HTTPS. Once permission is
- * granted, a test notification can be sent.
+ * asks only when the user clicks "Allow notifications", with
+ * {@code WebNotification.onClick(button).requestPermission()}: the request runs
+ * in the browser's own click handler, because a round-trip to the server would
+ * lose the gesture. The current permission, from
+ * {@code WebNotification.permissionSignal()}, is shown reactively:
+ * {@code default} (not decided yet), {@code granted}, {@code denied}, or
+ * "unsupported" for browsers without the API or pages that aren't served over
+ * HTTPS. Once permission is granted, a test notification can be sent.
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Ask for permission")
@@ -62,45 +63,45 @@ public class PermissionStateView extends VerticalLayout {
         row.setWrap(true);
         add(row, explanation, new H2("Try it"), testButton);
 
-        // Bound on the client: requestPermission() runs in the click gesture.
-        MissingAPI.requestPermissionOnClick(allowButton);
-        testButton.addClickListener(e -> MissingAPI.showNotification(
-                UI.getCurrent(), "Hello from Vaadin",
-                NotificationOptions.body("Notifications are working.")));
+        // Runs in the browser's own click handler, inside the user gesture.
+        WebNotification.onClick(allowButton).requestPermission();
+        testButton.addClickListener(e -> WebNotification
+                .show("Hello from Vaadin", WebNotificationOptions.builder()
+                        .body("Notifications are working.").build()));
 
-        Signal<NotificationPermission> permission = MissingAPI
-                .permissionSignal(UI.getCurrent());
+        Signal<WebNotificationPermission> permission = WebNotification
+                .permissionSignal();
 
         statusBadge.bindText(permission.map(PermissionStateView::badgeText));
         statusBadge.bindClassName("paused",
-                permission.map(p -> p == NotificationPermission.DEFAULT
-                        || p == NotificationPermission.UNKNOWN));
+                permission.map(p -> p == WebNotificationPermission.PROMPT
+                        || p == WebNotificationPermission.UNKNOWN));
         statusBadge.bindClassName("hidden",
-                permission.map(p -> p == NotificationPermission.DENIED
-                        || p == NotificationPermission.UNSUPPORTED));
+                permission.map(p -> p == WebNotificationPermission.DENIED
+                        || p == WebNotificationPermission.UNSUPPORTED));
         explanation.bindText(permission.map(PermissionStateView::explain));
 
-        // Only a "default" permission can still be prompted for.
+        // Only an undecided permission can still be prompted for.
         allowButton.bindEnabled(
-                permission.map(p -> p == NotificationPermission.DEFAULT));
+                permission.map(p -> p == WebNotificationPermission.PROMPT));
         testButton.bindEnabled(
-                permission.map(p -> p == NotificationPermission.GRANTED));
+                permission.map(p -> p == WebNotificationPermission.GRANTED));
     }
 
-    static String badgeText(NotificationPermission permission) {
+    static String badgeText(WebNotificationPermission permission) {
         return switch (permission) {
         case UNKNOWN -> "Checking…";
-        case DEFAULT -> "Not decided (default)";
+        case PROMPT -> "Not decided (default)";
         case GRANTED -> "Allowed (granted)";
         case DENIED -> "Blocked (denied)";
         case UNSUPPORTED -> "Not supported";
         };
     }
 
-    private static String explain(NotificationPermission permission) {
+    private static String explain(WebNotificationPermission permission) {
         return switch (permission) {
         case UNKNOWN -> "Waiting for the browser to report the permission.";
-        case DEFAULT -> "You haven't decided yet. Clicking the button shows "
+        case PROMPT -> "You haven't decided yet. Clicking the button shows "
                 + "the browser's prompt.";
         case GRANTED -> "This site may show notifications. The browser won't "
                 + "prompt again, so the button is disabled.";

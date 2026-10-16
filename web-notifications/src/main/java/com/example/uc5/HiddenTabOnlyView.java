@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 
-import com.example.MissingAPI;
-import com.example.MissingAPI.NotificationOptions;
-import com.example.MissingAPI.NotificationPermission;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.springframework.scheduling.TaskScheduler;
@@ -28,6 +25,9 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.PageVisibility;
+import com.vaadin.flow.component.webnotification.WebNotification;
+import com.vaadin.flow.component.webnotification.WebNotificationOptions;
+import com.vaadin.flow.component.webnotification.WebNotificationPermission;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -71,9 +71,9 @@ public class HiddenTabOnlyView extends VerticalLayout {
                 + "notification instead."));
 
         Button allow = new Button("Allow notifications");
-        MissingAPI.requestPermissionOnClick(allow);
-        allow.bindEnabled(MissingAPI.permissionSignal(UI.getCurrent())
-                .map(p -> p == NotificationPermission.DEFAULT));
+        WebNotification.onClick(allow).requestPermission();
+        allow.bindEnabled(WebNotification.permissionSignal()
+                .map(p -> p == WebNotificationPermission.PROMPT));
         Button send = new Button("Send me a message in 5 seconds",
                 e -> schedule(UI.getCurrent()));
         send.addThemeVariants(ButtonVariant.PRIMARY);
@@ -92,7 +92,7 @@ public class HiddenTabOnlyView extends VerticalLayout {
 
         UI ui = UI.getCurrent();
         Signal<PageVisibility> visibility = ui.getPage().pageVisibilitySignal();
-        Signal<NotificationPermission> permission = MissingAPI
+        Signal<WebNotificationPermission> permission = WebNotification
                 .permissionSignal(ui);
 
         visibilityBadge.bindText(
@@ -101,7 +101,7 @@ public class HiddenTabOnlyView extends VerticalLayout {
                 visibility.map(HiddenTabOnlyView::userIsAway));
         permissionBadge.bindText(permission.map(p -> p.name().toLowerCase()));
         permissionBadge.bindClassName("paused",
-                permission.map(p -> p != NotificationPermission.GRANTED));
+                permission.map(p -> p != WebNotificationPermission.GRANTED));
 
         // Messages still pending when the user leaves are dropped, so they
         // don't notify from another view.
@@ -123,19 +123,22 @@ public class HiddenTabOnlyView extends VerticalLayout {
     // Package-private so tests can drive the gating logic directly.
     void deliver(UI ui) {
         PageVisibility visibility = ui.getPage().pageVisibilitySignal().peek();
-        NotificationPermission permission = MissingAPI.permissionSignal(ui)
-                .peek();
+        WebNotificationPermission permission = WebNotification
+                .permissionSignal(ui).peek();
         String channel;
         if (!userIsAway(visibility)) {
             inApp();
             channel = "in-app (user is looking)";
-        } else if (permission == NotificationPermission.GRANTED) {
-            MissingAPI.showNotification(ui, "New message from Alice",
-                    NotificationOptions.body("Did you see the new designs?")
-                            .withTag("uc5-message"))
-                    .onError(reason -> {
+        } else if (permission == WebNotificationPermission.GRANTED) {
+            WebNotification
+                    .show("New message from Alice",
+                            WebNotificationOptions.builder()
+                                    .body("Did you see the new designs?")
+                                    .tag("uc5-message").build(),
+                            ui)
+                    .addErrorListener(error -> {
                         inApp();
-                        appendLog("OS notification refused (" + reason
+                        appendLog("OS notification refused (" + error.reason()
                                 + ") → in-app");
                     });
             channel = "OS notification (user is away)";

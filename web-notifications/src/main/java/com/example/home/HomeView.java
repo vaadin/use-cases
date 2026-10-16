@@ -25,11 +25,10 @@ public class HomeView extends BaseHomeView {
         super("Web Notifications API — use cases",
                 "Each card below shows native OS notifications from a Flow "
                         + "app while its tab is open, using the browser's "
-                        + "Notification API. Flow has no API for it yet, so "
-                        + "the views use a small shim (MissingAPI) that asks "
-                        + "for permission inside the click, exposes the "
-                        + "permission as a signal and reports notification "
-                        + "clicks back to the server.");
+                        + "Notifications API through Flow's WebNotification: "
+                        + "it asks for permission inside the click, exposes "
+                        + "the permission as a signal and reports "
+                        + "notification clicks back to the server.");
         addGroup("Getting permission", VaadinIcon.KEY, Accent.BLUE,
                 List.of(PermissionStateView.class, DeniedFallbackView.class));
         addGroup("Notifying at the right moment", VaadinIcon.BELL,

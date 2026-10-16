@@ -3,7 +3,6 @@ package com.example.uc5;
 import java.time.Instant;
 import java.util.concurrent.ScheduledFuture;
 
-import com.example.MissingAPI.NotificationPermission;
 import com.example.PageVisibilityTestSupport;
 import com.example.WebNotificationSimulator;
 import com.example.home.HomeView;
@@ -21,6 +20,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.page.PageVisibility;
+import com.vaadin.flow.component.webnotification.WebNotificationPermission;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -63,7 +63,8 @@ class HiddenTabOnlyViewTest extends SpringBrowserlessTest {
     @Test
     void channelDependsOnVisibilityAndPermission() {
         HiddenTabOnlyView view = navigate(HiddenTabOnlyView.class);
-        WebNotificationSimulator.setPermission(NotificationPermission.GRANTED);
+        WebNotificationSimulator
+                .setPermission(WebNotificationPermission.GRANTED);
         runPendingSignalsTasks();
 
         setVisibility(PageVisibility.VISIBLE);
@@ -85,7 +86,8 @@ class HiddenTabOnlyViewTest extends SpringBrowserlessTest {
     @Test
     void awayWithoutPermissionFallsBackToInApp() {
         HiddenTabOnlyView view = navigate(HiddenTabOnlyView.class);
-        WebNotificationSimulator.setPermission(NotificationPermission.DENIED);
+        WebNotificationSimulator
+                .setPermission(WebNotificationPermission.DENIED);
         setVisibility(PageVisibility.HIDDEN);
 
         view.deliver(UI.getCurrent());
