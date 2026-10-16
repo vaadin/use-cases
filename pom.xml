@@ -17,6 +17,7 @@
     <modules>
         <module>common</module>
         <module>async-ui</module>
+        <module>custom-components</module>
         <module>fullscreen</module>
         <module>geolocation</module>
         <module>multimedia</module>

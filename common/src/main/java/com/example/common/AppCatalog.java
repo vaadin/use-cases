@@ -16,6 +16,8 @@ public final class AppCatalog {
                     "https://async-ui-cases.fly.dev/"),
             new App("clipboard", "Clipboard API",
                     "https://clipboard-cases.fly.dev/"),
+            new App("custom-components", "Custom Components",
+                    "https://custom-components-cases.fly.dev/"),
             new App("fullscreen", "Fullscreen API",
                     "https://fullscreen-cases.fly.dev/"),
             new App("geolocation", "Geolocation API",
