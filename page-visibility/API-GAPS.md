@@ -13,6 +13,7 @@ it, and browserless-test has no tester for it.
 package-private setter through reflection.
 **Suggested API:** a browserless helper such as
 `setPageVisibility(PageVisibility)` in `BrowserlessTest`.
+Upstream: https://github.com/vaadin/browserless-test/issues/166
 
 ## 2. No time of the last visibility change
 
