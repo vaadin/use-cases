@@ -2,6 +2,8 @@ package com.example.common;
 
 import com.example.common.layout.BuiltWithView;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import com.vaadin.browserless.BrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
@@ -9,6 +11,7 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Pre;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ViewPackages(classes = BuiltWithView.class)
@@ -27,6 +30,25 @@ class BuiltWithTest extends BrowserlessTest {
                 $(Anchor.class).all().stream()
                         .filter(a -> "Open on GitHub".equals(a.getText()))
                         .findFirst().orElseThrow().getHref());
+    }
+
+    @ParameterizedTest
+    @CsvSource(nullValues = "none", value = { "ShoppingCart.java, java",
+            "uc6.css, css", "signature-pad.ts, typescript",
+            "color-picker.tsx, typescript",
+            "translations.properties, properties",
+            "com.vaadin.flow.server.VaadinServiceInitListener, none" })
+    void language_isTheHighlightJsLanguageOfTheFileExtension(String fileName,
+            String language) {
+        assertEquals(language, BuiltWith.language(fileName));
+    }
+
+    @Test
+    void aFileWithoutALanguageIsShownAsPlainText() {
+        navigate(BuiltWithView.class);
+
+        assertFalse($(Pre.class).single().getClassNames().stream()
+                .anyMatch(name -> name.startsWith("language-")));
     }
 
     @Test

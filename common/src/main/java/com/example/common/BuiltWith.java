@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Anchor;
@@ -35,14 +37,23 @@ import com.vaadin.flow.component.html.UnorderedList;
  * {@code src/test/java} files it shows) as they are, and
  * {@code src/main/resources/META-INF/resources} as {@code shown-sources/web},
  * because the production build minifies the copies it serves.
+ * <p>
+ * Java, CSS, TypeScript and properties sources are syntax highlighted in the
+ * browser with highlight.js; other files are shown as plain text.
  */
 @StyleSheet("built-with.css")
+@NpmPackage(value = "highlight.js", version = "11.11.1")
+@JsModule("./built-with.ts")
 public class BuiltWith extends Div {
 
     private static final String SHOWN_SOURCES = "shown-sources/";
     private static final String WEB_RESOURCES = "META-INF/resources/";
     private static final Pattern MARKER = Pattern
             .compile("// (tag|end)::[\\w-]+\\[\\]");
+    /** The highlight.js language of each file extension that is highlighted. */
+    private static final Map<String, String> LANGUAGES = Map.of("java", "java",
+            "css", "css", "ts", "typescript", "tsx", "typescript", "properties",
+            "properties");
 
     private final UnorderedList points = new UnorderedList();
     private final Div files = new Div();
@@ -133,6 +144,15 @@ public class BuiltWith extends Div {
                 .substring(classpathPath.lastIndexOf('/') + 1);
         Pre code = new Pre(source);
         code.addClassName("source");
+        String language = language(name);
+        if (language != null) {
+            code.addClassName("language-" + language);
+            // Flow recreates the element on re-attach; highlight it each time.
+            code.whenAttached(ui -> {
+                code.getElement().executeJs("window.highlightSource(this)");
+                return null;
+            });
+        }
         Anchor github = new Anchor("", "Open on GitHub", AnchorTarget.BLANK);
         githubLinks.put(github, repositoryPath);
         Details details = new Details(name + " · " + kind + lines(source),
@@ -151,6 +171,11 @@ public class BuiltWith extends Div {
             githubLinks.forEach(
                     (link, path) -> link.setHref(layout.fileUrl(path)));
         }
+    }
+
+    /** The highlight.js language of a file name, or null if it has none. */
+    static @Nullable String language(String fileName) {
+        return LANGUAGES.get(fileName.substring(fileName.lastIndexOf('.') + 1));
     }
 
     private static String lines(String source) {
