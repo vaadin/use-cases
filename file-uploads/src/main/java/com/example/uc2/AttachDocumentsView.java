@@ -113,6 +113,7 @@ public class AttachDocumentsView extends VerticalLayout {
     private boolean sending;
     private int expected;
     private int finished;
+    private int failures;
     private boolean dropAllowed;
 
     public AttachDocumentsView() {
@@ -139,7 +140,7 @@ public class AttachDocumentsView extends VerticalLayout {
                     @Override
                     public void onError(TransferContext context,
                             IOException reason) {
-                        receiptFailed(context.fileName(),
+                        receiptRefused(context.fileName(),
                                 reason instanceof UploadRejectedException
                                         && reason.getMessage() != null
                                                 ? reason.getMessage()
@@ -209,6 +210,7 @@ public class AttachDocumentsView extends VerticalLayout {
             return;
         }
         failed.clear();
+        failures = 0;
         if (queued == 0) {
             // Everything already arrived on an earlier attempt.
             process();
@@ -237,10 +239,20 @@ public class AttachDocumentsView extends VerticalLayout {
         }
     }
 
+    private void receiptRefused(String fileName, String reason) {
+        // The browser reports the same file as an upload error right after;
+        // that is where it is counted. Only the reason is known here.
+        if (sending) {
+            failed.putIfAbsent(fileName, reason);
+        }
+    }
+
     private void receiptFailed(String fileName, String reason) {
-        // A file refused by the server is reported twice: first here with the
-        // reason, then by the browser as an upload error. Keep the first.
-        if (sending && failed.putIfAbsent(fileName, reason) == null) {
+        // Counted per event, not per name: two receipts with the same name
+        // that both fail are two files that will never arrive.
+        if (sending) {
+            failed.putIfAbsent(fileName, reason);
+            failures++;
             finished++;
             processWhenAllArrived();
         }
@@ -282,9 +294,8 @@ public class AttachDocumentsView extends VerticalLayout {
                     + String.join("; ", failed.values())
                     + ". Remove or replace the file and send again.");
             // The browser reports the queue only when files are added or
-            // removed,
-            // and right now only the failed files are still waiting.
-            queued = failed.size();
+            // removed, and right now only the failed files are still waiting.
+            queued = failures;
             return;
         }
         ClaimForm form = binder.getBean();

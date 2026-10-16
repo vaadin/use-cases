@@ -72,6 +72,7 @@ class AttachDocumentsViewTest extends SpringBrowserlessTest {
         clickSend();
         upload().startUpload("taxi.pdf");
         upload().startUpload("dinner.pdf");
+        browser().reportFailed("dinner.pdf");
 
         assertEquals(0, test(claims()).size());
         assertEquals(
@@ -96,6 +97,24 @@ class AttachDocumentsViewTest extends SpringBrowserlessTest {
         clickSend();
 
         assertEquals(List.of("taxi.pdf"), test(claims()).getRow(0).receipts());
+    }
+
+    @Test
+    void twoReceiptsWithTheSameNameThatBothFail_endTheSend() {
+        navigate(AttachDocumentsView.class);
+        fillInFields();
+        queue("scan.pdf", "application/pdf", TestFiles.text("not a pdf"));
+        queue("scan.pdf", "application/pdf", TestFiles.text("not a pdf"));
+        browser().reportQueued(2);
+
+        clickSend();
+        browser().reportFailed("scan.pdf");
+        browser().reportFailed("scan.pdf");
+
+        assertEquals(0, test(claims()).size());
+        assertTrue(
+                find(Button.class).withText("Send claim").single().isEnabled(),
+                "The form is usable again");
     }
 
     @Test

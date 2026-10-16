@@ -8,6 +8,7 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
@@ -55,6 +56,7 @@ import com.vaadin.flow.server.streams.UploadMetadata;
 @UseCaseDescription("Adding many photos at once and browsing them as thumbnails")
 @Menu(order = 4, title = "UC4 — Photo album")
 @StyleSheet("photos.css")
+@JsModule("./file-drop-guard.ts")
 public class PhotoAlbumView extends VerticalLayout {
 
     private final PhotoAlbum album;
