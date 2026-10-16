@@ -92,11 +92,11 @@ component, which can be any `Component` that implements `ClickNotifier`
    only materialises the rows it renders, so the buttons follow the
    viewport rather than the row count; what does scale with scrolling is
    one clipboard binding per rendered row, which is the cost written up
-   in [API-GAPS.md](API-GAPS.md).
+   in [API-GAPS.md #1](API-GAPS.md).
 
 The remaining PRD item (availability signal) is omitted because the
 underlying API is still not part of this Flow branch — see
-[API-GAPS.md](API-GAPS.md).
+[API-GAPS.md #5](API-GAPS.md).
 
 ## Running the Application
 
