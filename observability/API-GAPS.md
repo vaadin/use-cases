@@ -123,16 +123,19 @@ application:
    `connection-lost`). That is right, because Flow enters `connection-lost`
    only after its retries fail. But the length of a whole outage is the sum of
    both tags, and each consumer has to find that out.
+3. `vaadin.client.connection` is tagged by `state` only, and the collector
+   posts it once the browser has the server back, so nothing says what the
+   last known connection state of one UI is.
 **Workaround used:** UC5 recomputes its readout on the screen's own
 interactions, and the script that simulates the recovery calls a
 `@ClientCallable` on the view once the browser has the server back — a
 stand-in for the missing event that a real outage would not make. UC5 adds the
-two downtime tags itself. UC2's health badge still reports the cadence of its
-own poll requests: it was written before the kit had a connection meter, and
-does not read `vaadin.client.connection` yet.
+two downtime tags itself. UC2's health badge, which is about one tab, reports
+the cadence of that UI's own poll requests.
 **Suggested API:** a service event when client samples are recorded (e.g. a
-`ClientSamplesRecordedEvent`), and a documented whole-outage meter or
-recording rule.
+`ClientSamplesRecordedEvent`), a documented whole-outage meter or recording
+rule, and the last reported connection state per UI (e.g. on the
+`<vaadin-metrics-collector>` element).
 
 ## 6. UI-state size: bytes are configured, and there is no per-session view
 
@@ -260,27 +263,6 @@ supported API, on either side, to say "send what you have now".
 **Suggested API:** a public flush on the client collector (e.g.
 `window.Vaadin.observability.flush(): Promise<void>`) and/or a server-side
 counterpart on the `<vaadin-metrics-collector>` element.
-Upstream: https://github.com/vaadin/observability-kit/issues/427
-
-## 13. Database meters are cumulative — no per-interaction attribution
-
-**Where it bites:** UC2 / ApplicationHealthView.java (the N+1 join-table demo)
-**Symptom:** with `vaadin.observability.database=true` the kit records every
-JDBC result-set fetch into the `vaadin.db.fetch.rows` `DistributionSummary`,
-and a `vaadin.db.query` span per query under the request span. The summary is
-an application-wide aggregate, tagged by route but not by interaction, so there
-is no way to ask "how many fetches did *this click* cost?" — the question an
-N+1 is diagnosed by. The spans have that attribution, but only in a trace
-backend.
-**Workaround used:** `ApplicationHealthView#loadCatalog` reads the fetch count
-and row total just before and after `ProductCatalogService#loadCatalog` and
-shows the difference. That is right for one click on one server, and quietly
-wrong under concurrent traffic, since another request's fetches land in the
-same summary in between.
-**Suggested API:** per-interaction database figures readable from application
-code, e.g. a scoped accessor for the fetches recorded during the current RPC
-invocation, or a per-request `vaadin.db.fetch.count` next to
-`vaadin.rpc.duration`.
 Upstream: https://github.com/vaadin/observability-kit/issues/427
 
 ## 14. The session id is only on the request span, and in the clear
