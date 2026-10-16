@@ -1,15 +1,18 @@
 package com.example.uc4;
 
+import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
 import com.example.data.Employee;
+import com.example.export.Downloads;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -87,5 +90,16 @@ class RenderedValuesViewTest extends SpringBrowserlessTest {
                         + message);
         assertTrue(message.contains("withColumnExtractor"),
                 "the message should say what to do about it: " + message);
+    }
+
+    @Test
+    void downloadLinkServesTheRenderedCsv() {
+        RenderedValuesView view = navigate(RenderedValuesView.class);
+
+        byte[] downloaded = Downloads
+                .download(findInView(Anchor.class).single());
+
+        assertEquals(view.csv(),
+                new String(downloaded, StandardCharsets.UTF_8));
     }
 }

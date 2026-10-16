@@ -4,7 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
+import com.example.export.Downloads;
 import com.example.export.ExportedGrid.HeaderCell;
+import com.example.export.XlsxWriter;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -14,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -100,5 +103,16 @@ class ExcelReportViewTest extends SpringBrowserlessTest {
             assertEquals(footer.get(2),
                     sheet.getRow(lastRow).getCell(2).getStringCellValue());
         }
+    }
+
+    @Test
+    void downloadLinkServesTheWorkbook() {
+        ExcelReportView view = navigate(ExcelReportView.class);
+
+        byte[] downloaded = Downloads
+                .download(findInView(Anchor.class).single());
+
+        assertEquals(XlsxWriter.readBack(view.workbook()),
+                XlsxWriter.readBack(downloaded));
     }
 }

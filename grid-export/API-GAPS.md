@@ -101,9 +101,17 @@ column for the underlying `45000.0` that Excel would want to sum. A report
 generator needs both — the number for the cell, the format for the cell style —
 and can get neither together.
 
+Building that `Span` also needs a current UI. A `DownloadHandler` runs without
+one, so an exporter that reads the grid from inside the download request fails
+with "No currently active UI found" unless it wraps the read in
+`event.getUI().accessSynchronously(…)`. `accessSynchronously` only takes a
+`Command`, so the result has to be passed out through an `AtomicReference`.
+
 **Workaround used:** `MissingAPI#cellText` routes `BasicRenderer` subclasses
 through `createComponent(item)` and reads the element text. UC5's totals are
 computed from the items directly, not from the exported cells.
+The download handlers build the report through `GridExport#exportFor`, which
+runs it inside `UI#accessSynchronously`.
 **Suggested API:** promote `BasicRenderer#getFormattedValue` and
 `#getValueProvider` to public, or return both from
 `Column#getCellContent(item)` — e.g. a `CellContent(Object value, String text)`
