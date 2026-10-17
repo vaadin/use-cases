@@ -5,7 +5,6 @@ import java.util.List;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
@@ -22,20 +21,20 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.popover.Popover;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
 /**
  * UC8 — Overlays in fullscreen.
  * <p>
- * The whole point of {@code Component#requestFullscreen()} (here through
+ * The browser only paints the fullscreen element and what is inside it. If an
+ * app called the browser's {@code element.requestFullscreen()} on the panel
+ * directly, an overlay rendered outside the panel would not be visible.
  * {@link Fullscreen#onClick(com.vaadin.flow.component.Component)
- * Fullscreen.onClick(enter).enter(panel)}) over a page-level fullscreen is that
- * it wraps a single component <em>together with the UI's overlay container</em>.
- * The browser only paints the fullscreen element and its descendants, so an
- * overlay attached to {@code document.body} would vanish the moment you go
- * fullscreen. Because Vaadin moves the overlay container inside the fullscreen
- * wrapper, every flyout — {@link MenuBar} sub-menus, a {@link Popover}, a
+ * Fullscreen.onClick(enter).enter(panel)} avoids this: it moves the panel into
+ * a Vaadin wrapper, hides the rest of the app and fullscreens the whole
+ * document. So every flyout — {@link MenuBar} sub-menus, a {@link Popover}, a
  * right-click {@link ContextMenu}, a {@link Select} dropdown, tooltips — keeps
  * opening on top of the fullscreened panel.
  * <p>
@@ -45,6 +44,7 @@ import com.vaadin.flow.signals.Signal;
  * observable (and testable) without a real browser.
  */
 @Route(value = "uc8", layout = MainLayout.class)
+@PageTitle("UC8 — Overlays in fullscreen")
 @UseCaseDescription("Keeping menus, popovers and dropdowns visible in fullscreen")
 @Menu(order = 8, title = "UC8 — Overlays in fullscreen")
 @StyleSheet("uc8.css")
@@ -58,13 +58,15 @@ public class OverlaysFullscreenView extends VerticalLayout {
         addClassName("uc8-view");
         add(new H1("UC8 — Overlays in fullscreen"));
         add(new Paragraph(
-                "Component#requestFullscreen() wraps a single component along "
-                        + "with the UI's overlay container, so flyouts stay "
-                        + "visible in fullscreen — unlike page-level "
-                        + "fullscreen, where an overlay rendered on the body "
-                        + "would be clipped away. Enter fullscreen, then open "
-                        + "the menu, popover, dropdown, right-click context "
-                        + "menu and tooltip: each one renders on top of the "
+                "The browser only shows the fullscreen element and what is "
+                        + "inside it, so a menu or dropdown rendered outside "
+                        + "a fullscreen panel would not be visible. "
+                        + "Fullscreen.onClick(enter).enter(panel) moves the "
+                        + "panel into a wrapper, hides the rest of the app "
+                        + "and fullscreens the whole document, so flyouts "
+                        + "keep working. Enter fullscreen, then open the "
+                        + "menu, popover, dropdown, right-click context menu "
+                        + "and tooltip: each one renders on top of the "
                         + "fullscreened panel."));
 
         stateBadge.addClassName("status-badge");
@@ -79,20 +81,27 @@ public class OverlaysFullscreenView extends VerticalLayout {
         Button exit = new Button("Exit fullscreen", e -> Fullscreen.exit());
         add(new HorizontalLayout(enter, exit));
 
-        panel.addClassName("overlay-panel");
+        panel.addClassName("uc8-panel");
         panel.add(buildToolbar());
 
         Paragraph status = new Paragraph("Last overlay action: ");
-        lastAction.addClassName("last-action");
+        lastAction.addClassName("uc8-last-action");
         status.add(lastAction);
         panel.add(status);
 
         add(panel);
+
+        Signal<FullscreenState> fs = Fullscreen.stateSignal();
+        stateBadge.bindText(fs.map(OverlaysFullscreenView::badgeText));
+        stateBadge.bindClassName("unsupported",
+                fs.map(s -> s == FullscreenState.UNSUPPORTED));
+        panel.bindClassName("uc8-panel-fullscreen",
+                fs.map(s -> s == FullscreenState.FULLSCREEN));
     }
 
     private HorizontalLayout buildToolbar() {
         HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.addClassName("overlay-toolbar");
+        toolbar.addClassName("uc8-toolbar");
 
         toolbar.add(menuBar(), popoverTrigger(), select(), contextMenuTarget(),
                 tooltipButton());
@@ -113,7 +122,8 @@ public class OverlaysFullscreenView extends VerticalLayout {
         Button trigger = new Button("Popover");
 
         Popover popover = new Popover();
-        VerticalLayout content = new VerticalLayout(new Span("Inside a popover"),
+        VerticalLayout content = new VerticalLayout(
+                new Span("Inside a popover"),
                 new Button("Action", e -> record("Popover: Action")));
         content.setSpacing(false);
         content.setPadding(false);
@@ -150,26 +160,13 @@ public class OverlaysFullscreenView extends VerticalLayout {
         lastAction.setText(action);
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        Signal<FullscreenState> fs = Fullscreen.stateSignal();
-        stateBadge.bindText(fs.map(OverlaysFullscreenView::badgeText));
-        stateBadge.bindClassName("fullscreen",
-                fs.map(s -> s == FullscreenState.FULLSCREEN));
-        stateBadge.bindClassName("unsupported",
-                fs.map(s -> s == FullscreenState.UNSUPPORTED));
-        panel.bindClassName("fullscreen",
-                fs.map(s -> s == FullscreenState.FULLSCREEN));
-    }
-
     private static String badgeText(FullscreenState state) {
         // The panel (and this badge lives outside it) is what goes fullscreen,
         // so a FULLSCREEN-specific message wouldn't be visible. Keep the idle
         // prompt instead.
         return switch (state) {
-        case FULLSCREEN, NOT_FULLSCREEN -> "Enter fullscreen, then open a "
-                + "menu, popover or dropdown";
+        case FULLSCREEN, NOT_FULLSCREEN ->
+            "Enter fullscreen, then open a menu, popover or dropdown";
         case UNSUPPORTED -> "Fullscreen not supported in this browser";
         case UNKNOWN -> "Detecting fullscreen support…";
         };

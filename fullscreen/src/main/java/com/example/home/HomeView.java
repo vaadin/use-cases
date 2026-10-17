@@ -25,14 +25,16 @@ public class HomeView extends BaseHomeView {
 
     public HomeView() {
         super("Fullscreen API — use cases",
-                "Each card below exercises one scenario of the new Fullscreen "
-                        + "API. Component#requestFullscreen() wraps a single "
-                        + "component (overlays and theming keep working), "
-                        + "Page#requestFullscreen() takes the entire document "
-                        + "fullscreen, and Page#fullscreenSignal() reactively "
-                        + "reports FULLSCREEN, NOT_FULLSCREEN, UNSUPPORTED or "
-                        + "UNKNOWN. Browsers require a real user click to "
-                        + "enter fullscreen.");
+                "Each card below shows one scenario of the Fullscreen API. "
+                        + "Fullscreen.onClick(button).enter(component) shows "
+                        + "a single component fullscreen (overlays and "
+                        + "theming keep working), "
+                        + "Fullscreen.onClick(button).enter() takes the whole "
+                        + "page fullscreen, Fullscreen.exit() leaves it, and "
+                        + "Fullscreen.stateSignal() reports FULLSCREEN, "
+                        + "NOT_FULLSCREEN or UNSUPPORTED. Browsers only "
+                        + "enter fullscreen on a real user click, so the "
+                        + "request is bound to the button's click.");
         addGroup("Showing one thing big", VaadinIcon.EXPAND_SQUARE, Accent.BLUE,
                 List.of(ImageLightboxView.class, SlideshowView.class,
                         DistractionFreeEditorView.class,

@@ -5,9 +5,7 @@ import java.time.format.DateTimeFormatter;
 
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
-import org.jspecify.annotations.Nullable;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -26,31 +24,34 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * UC5 — Kiosk: visitor sign-in with PIN-protected staff exit.
+ * UC5 — Kiosk with staff exit.
  * <p>
- * A realistic kiosk: the kiosk stage is fullscreened with
+ * A visitor sign-in kiosk: the kiosk stage is fullscreened with
  * {@link Fullscreen#onClick(com.vaadin.flow.component.Component)
  * Fullscreen.onClick(enter).enter(stage)}, so only the kiosk UI fills the
- * viewport — the app's heading, navigation, intro paragraph and activity log
- * are naturally hidden by the fullscreen wrapper, just like a dedicated
- * terminal. Visitors sign in via a small three-screen flow (landing → form →
- * confirmation). A "Staff" button in the kiosk header opens an inline PIN
- * prompt; the correct PIN ({@value #STAFF_PIN}) calls {@link Fullscreen#exit()}
- * for an expected exit. The fullscreen API exposes a single global
- * {@link Fullscreen#stateSignal() state signal}, so expected exits are told
- * apart from Escape with an {@code expectingExit} flag set right before the
+ * screen — the app's heading, navigation, intro paragraph and activity log are
+ * hidden while it is fullscreen, like on a dedicated terminal. Visitors sign in
+ * via a small three-screen flow (landing → form → confirmation). A "Staff"
+ * button in the kiosk header opens an inline PIN prompt; the correct PIN
+ * ({@value #STAFF_PIN}) calls {@link Fullscreen#exit()} for an expected exit.
+ * <p>
+ * The fullscreen API only exposes the global {@link Fullscreen#stateSignal()
+ * state signal}; it does not say why fullscreen ended (API-GAPS.md #2). As a
+ * workaround, the view sets an {@code expectingExit} flag right before the
  * programmatic exit: a transition out of {@link FullscreenState#FULLSCREEN
- * FULLSCREEN} with the flag unset means the user pressed Escape, which surfaces
- * a warning.
+ * FULLSCREEN} with the flag unset means the user left (e.g. pressed Escape),
+ * which shows a warning.
  */
 @Route(value = "uc5", layout = MainLayout.class)
+@PageTitle("UC5 — Kiosk with staff exit")
 @UseCaseDescription("Running a fullscreen kiosk that only staff can exit with a PIN")
-@Menu(order = 5, title = "UC5 — Kiosk")
+@Menu(order = 5, title = "UC5 — Kiosk with staff exit")
 @StyleSheet("uc5.css")
 public class KioskExitDetectionView extends VerticalLayout {
 
@@ -69,15 +70,17 @@ public class KioskExitDetectionView extends VerticalLayout {
             false);
     private final ValueSignal<String> staffError = new ValueSignal<>("");
 
-    private final H1 heading = new H1("UC5 — Kiosk: visitor sign-in");
+    private final H1 heading = new H1("UC5 — Kiosk with staff exit");
     private final Paragraph intro = new Paragraph(
             "Click ‘Enter kiosk’ to fullscreen the kiosk stage with "
                     + "Fullscreen.onClick(enter).enter(stage) — only the kiosk "
-                    + "UI is shown, the surrounding app chrome is hidden by the "
-                    + "wrapper. Inside, the Staff button opens a PIN prompt "
-                    + "(hint shown in the dialog) that calls Fullscreen.exit() "
-                    + "— an expected exit. Pressing Escape leaves unexpectedly "
-                    + "and is recorded with a warning in the activity log.");
+                    + "UI is shown, the rest of the app is hidden. Inside, the "
+                    + "Staff button opens a PIN prompt (hint shown in the "
+                    + "prompt) that calls Fullscreen.exit() — an expected "
+                    + "exit. Pressing Escape leaves unexpectedly and is "
+                    + "recorded with a warning in the activity log. The API "
+                    + "does not say why fullscreen ended, so the view keeps "
+                    + "track of the exits it started itself.");
     private final HorizontalLayout controlsRow = new HorizontalLayout();
     private final Paragraph logHeading = new Paragraph("Activity log:");
     private final Div log = new Div();
@@ -105,7 +108,7 @@ public class KioskExitDetectionView extends VerticalLayout {
 
     // The fullscreen API exposes only the global state signal, so expected
     // (staff-PIN) exits are tracked here: set right before the programmatic
-    // exit, read when the state signal leaves FULLSCREEN.
+    // exit, read when the state signal leaves FULLSCREEN (API-GAPS.md #2).
     private boolean expectingExit;
     private FullscreenState previousState = FullscreenState.UNKNOWN;
 
@@ -114,7 +117,7 @@ public class KioskExitDetectionView extends VerticalLayout {
         add(heading, intro);
 
         stateBadge.addClassName("status-badge");
-        unexpectedWarning.addClassName("unexpected-warning");
+        unexpectedWarning.addClassName("uc5-warning");
 
         Button enter = new Button("Enter kiosk", e -> {
             unexpectedWarning.setText("");
@@ -126,8 +129,7 @@ public class KioskExitDetectionView extends VerticalLayout {
         // Fullscreen needs the click's user gesture, so bind the request to the
         // Enter button's click trigger; a rejected request is logged.
         Fullscreen.onClick(enter).enter(stage, () -> {
-        }, err -> appendLog("Request REJECTED: " + err.message(),
-                "unexpected"));
+        }, err -> appendLog("Request REJECTED: " + err.message(), true));
 
         Button clear = new Button("Clear log", e -> log.removeAll());
 
@@ -135,29 +137,61 @@ public class KioskExitDetectionView extends VerticalLayout {
         controlsRow.setAlignItems(Alignment.CENTER);
         add(controlsRow);
 
-        stage.addClassName("kiosk-stage");
+        stage.addClassName("uc5-stage");
         stage.add(buildKioskShell());
         add(stage);
 
-        log.addClassName("kiosk-log");
+        log.addClassName("uc5-log");
         add(logHeading, log);
+
+        Signal<FullscreenState> fs = Fullscreen.stateSignal();
+        Signal<Boolean> isFullscreen = fs
+                .map(s -> s == FullscreenState.FULLSCREEN);
+
+        // Derive entered / expected-exit / unexpected-exit transitions from the
+        // global state signal.
+        Signal.effect(this, () -> {
+            FullscreenState state = fs.get();
+            if (state == FullscreenState.FULLSCREEN
+                    && previousState != FullscreenState.FULLSCREEN) {
+                appendLog("Entered kiosk mode", false);
+            } else if (previousState == FullscreenState.FULLSCREEN
+                    && state == FullscreenState.NOT_FULLSCREEN) {
+                if (expectingExit) {
+                    appendLog("Exit (expected)", false);
+                } else {
+                    appendLog("Exit (UNEXPECTED — user pressed Escape)", true);
+                    unexpectedWarning.setText("Kiosk exited unexpectedly!");
+                }
+                expectingExit = false;
+            }
+            previousState = state;
+        });
+
+        stateBadge.bindText(fs.map(KioskExitDetectionView::badgeText));
+        stateBadge.bindClassName("unsupported",
+                fs.map(s -> s == FullscreenState.UNSUPPORTED));
+        stage.bindClassName("uc5-stage-live", isFullscreen);
+        // Staff exit only makes sense once the kiosk is locked; outside
+        // fullscreen the small kiosk preview shouldn't expose the button.
+        staffButton.bindVisible(isFullscreen);
     }
 
     private Div buildKioskShell() {
         Div shell = new Div();
-        shell.addClassName("kiosk-shell");
+        shell.addClassName("uc5-shell");
 
         Span title = new Span("Acme HQ Visitor Sign-In");
-        title.addClassName("kiosk-title");
-        staffButton.addClassName("kiosk-staff-btn");
+        title.addClassName("uc5-title");
+        staffButton.addClassName("uc5-staff-button");
         HorizontalLayout header = new HorizontalLayout(title, staffButton);
-        header.addClassName("kiosk-header");
+        header.addClassName("uc5-header");
         header.setWidthFull();
         header.setJustifyContentMode(JustifyContentMode.BETWEEN);
         header.setAlignItems(Alignment.CENTER);
 
         Div content = new Div();
-        content.addClassName("kiosk-content");
+        content.addClassName("uc5-content");
 
         Div landingPanel = buildLandingPanel();
         Div formPanel = buildFormPanel();
@@ -180,7 +214,7 @@ public class KioskExitDetectionView extends VerticalLayout {
 
     private Div buildLandingPanel() {
         Div panel = new Div();
-        panel.addClassName("kiosk-panel");
+        panel.addClassName("uc5-panel");
         H2 title = new H2("Welcome to Acme HQ");
         Paragraph subtitle = new Paragraph("Touch Start to sign in.");
         Button start = new Button("Start sign-in", e -> {
@@ -196,7 +230,7 @@ public class KioskExitDetectionView extends VerticalLayout {
 
     private Div buildFormPanel() {
         Div panel = new Div();
-        panel.addClassName("kiosk-panel");
+        panel.addClassName("uc5-panel");
         H2 title = new H2("Sign in");
 
         nameField.setRequiredIndicatorVisible(true);
@@ -222,7 +256,7 @@ public class KioskExitDetectionView extends VerticalLayout {
 
     private Div buildConfirmationPanel() {
         Div panel = new Div();
-        panel.addClassName("kiosk-panel");
+        panel.addClassName("uc5-panel");
         H2 title = new H2();
         title.bindText(lastVisitorName.map(n -> "Thanks, "
                 + (n == null || n.isBlank() ? "visitor" : n) + "!"));
@@ -237,14 +271,14 @@ public class KioskExitDetectionView extends VerticalLayout {
 
     private Div buildStaffPanel() {
         Div panel = new Div();
-        panel.addClassName("kiosk-panel");
-        panel.addClassName("kiosk-staff-panel");
+        panel.addClassName("uc5-panel");
+        panel.addClassName("uc5-staff-panel");
         H2 title = new H2("Staff exit");
         Paragraph hint = new Paragraph(
                 "Demo hint: the staff PIN is " + STAFF_PIN + ".");
-        hint.addClassName("kiosk-staff-hint");
+        hint.addClassName("uc5-staff-hint");
         Span error = new Span();
-        error.addClassName("unexpected-warning");
+        error.addClassName("uc5-warning");
         error.bindText(staffError);
 
         Button cancel = new Button("Cancel", e -> {
@@ -278,13 +312,13 @@ public class KioskExitDetectionView extends VerticalLayout {
         String purpose = purposeField.getValue();
         lastVisitorName.set(name);
         appendLog("Signed in: " + name + " (party of " + partySize + ", "
-                + purpose + ")", null);
+                + purpose + ")", false);
         screenSignal.set(Screen.CONFIRMATION);
     }
 
     private void attemptStaffExit() {
         if (STAFF_PIN.equals(pinField.getValue())) {
-            appendLog("Staff exit confirmed", null);
+            appendLog("Staff exit confirmed", false);
             staffPromptOpen.set(false);
             staffError.set("");
             // Mark this as an expected exit before requesting it, so the
@@ -293,58 +327,17 @@ public class KioskExitDetectionView extends VerticalLayout {
             expectingExit = true;
             Fullscreen.exit();
         } else {
-            appendLog("Failed staff exit attempt", "unexpected");
+            appendLog("Failed staff exit attempt", true);
             staffError.set("Incorrect PIN");
             pinField.clear();
         }
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        Signal<FullscreenState> fs = Fullscreen.stateSignal();
-        Signal<Boolean> isFullscreen = fs
-                .map(s -> s == FullscreenState.FULLSCREEN);
-
-        // Derive entered / expected-exit / unexpected-exit transitions from the
-        // global state signal.
-        Signal.effect(this, () -> {
-            FullscreenState state = fs.get();
-            if (state == FullscreenState.FULLSCREEN
-                    && previousState != FullscreenState.FULLSCREEN) {
-                appendLog("Entered kiosk mode", null);
-            } else if (previousState == FullscreenState.FULLSCREEN
-                    && state == FullscreenState.NOT_FULLSCREEN) {
-                if (expectingExit) {
-                    appendLog("Exit (expected)", null);
-                } else {
-                    appendLog("Exit (UNEXPECTED — user pressed Escape)",
-                            "unexpected");
-                    unexpectedWarning.setText("Kiosk exited unexpectedly!");
-                }
-                expectingExit = false;
-            }
-            previousState = state;
-        });
-
-        stateBadge.bindText(fs.map(KioskExitDetectionView::badgeText));
-        stateBadge.bindClassName("unsupported",
-                fs.map(s -> s == FullscreenState.UNSUPPORTED));
-        stage.bindClassName("live", isFullscreen);
-        // Staff exit only makes sense once the kiosk is locked; outside
-        // fullscreen the small kiosk preview shouldn't expose the button.
-        staffButton.bindVisible(isFullscreen);
-        // The Component#requestFullscreen() wrapper visually hides the rest
-        // of the document, so we don't need to bindVisible developer chrome
-        // ourselves — heading, intro, controls row and log are simply not
-        // rendered while the kiosk stage is fullscreen.
-    }
-
-    private void appendLog(String message, @Nullable String cls) {
+    private void appendLog(String message, boolean unexpected) {
         Div line = new Div();
         line.setText("[" + LocalTime.now().format(TIME) + "] " + message);
-        if (cls != null) {
-            line.addClassName(cls);
+        if (unexpected) {
+            line.addClassName("uc5-log-unexpected");
         }
         log.addComponentAsFirst(line);
     }

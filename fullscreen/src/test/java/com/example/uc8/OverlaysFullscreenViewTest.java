@@ -8,12 +8,10 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.fullscreen.FullscreenState;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.select.Select;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -21,63 +19,34 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class OverlaysFullscreenViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersHeadingPanelAndOverlayControls() {
-        navigate(OverlaysFullscreenView.class);
-
-        assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h -> "UC8 — Overlays in fullscreen".equals(h.getText())),
-                "expected the UC8 heading");
-
-        assertEquals(1,
-                findInView(Div.class).all().stream()
-                        .filter(d -> d.getClassNames().contains("overlay-panel"))
-                        .count(),
-                "expected the fullscreenable overlay panel");
-
-        assertEquals(1, findInView(MenuBar.class).all().size(),
-                "expected the MenuBar overlay control");
-        assertEquals(1, findInView(Select.class).all().size(),
-                "expected the Select dropdown overlay control");
-    }
-
-    @Test
     void selectingFromDropdownRecordsTheAction() {
         navigate(OverlaysFullscreenView.class);
-        runPendingSignalsTasks();
 
         @SuppressWarnings("unchecked")
         Select<String> select = findInView(Select.class).single();
-        select.setValue("Green");
-        runPendingSignalsTasks();
+        test(select).selectItem("Green");
 
-        assertTrue(findInView(Span.class).all().stream()
-                .anyMatch(s -> s.getClassNames().contains("last-action")
-                        && "Select: Green".equals(s.getText())),
+        assertTrue(
+                findInView(Span.class).all().stream()
+                        .anyMatch(s -> s.hasClassName("uc8-last-action")
+                                && "Select: Green".equals(s.getText())),
                 "selecting a value should record the overlay action");
     }
 
     @Test
-    void stateBadgeReflectsFullscreenSignal() {
+    void panelFillsTheScreenOnlyWhileFullscreen() {
         navigate(OverlaysFullscreenView.class);
-        runPendingSignalsTasks();
+        Div panel = findInView(Div.class).all().stream()
+                .filter(d -> d.hasClassName("uc8-panel")).findFirst()
+                .orElseThrow();
 
-        assertBadgeContains("Detecting");
+        FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
+        runPendingSignalsTasks();
+        assertTrue(panel.hasClassName("uc8-panel-fullscreen"));
 
         FullscreenTestSupport
                 .setFullscreenState(FullscreenState.NOT_FULLSCREEN);
         runPendingSignalsTasks();
-        assertBadgeContains("Enter fullscreen");
-
-        FullscreenTestSupport.setFullscreenState(FullscreenState.UNSUPPORTED);
-        runPendingSignalsTasks();
-        assertBadgeContains("not supported");
-    }
-
-    private void assertBadgeContains(String fragment) {
-        assertTrue(findInView(Span.class).all().stream()
-                .anyMatch(s -> s.getClassNames().contains("status-badge")
-                        && s.getText() != null
-                        && s.getText().contains(fragment)),
-                "expected status badge to contain \"" + fragment + "\"");
+        assertFalse(panel.hasClassName("uc8-panel-fullscreen"));
     }
 }
