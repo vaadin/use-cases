@@ -33,10 +33,11 @@ up front whether fullscreen is allowed.
 `FullscreenBinding.enter(Component)` returns nothing, so the app can not ask
 which component is fullscreen now. The state change does not say whether the
 exit came from `Fullscreen.exit()` or from the user (Escape).
-**Workaround used:** UC6 keeps its own `activeOwner` signal: it is set on the
-Expand click and cleared when the state leaves `FULLSCREEN`. UC5 sets an
-`expectingExit` flag right before `Fullscreen.exit()` and reads it on the next
-`FULLSCREEN` → `NOT_FULLSCREEN` change, to tell a staff PIN exit from Escape.
+**Workaround used:** UC6 keeps its own `activeCard` signal: it is set on the
+Expand click, and a card looks expanded only while it is the active card and
+the state is `FULLSCREEN`. UC5 sets an `expectingExit` flag right before
+`Fullscreen.exit()` and reads it on the next `FULLSCREEN` → `NOT_FULLSCREEN`
+change, to tell a staff PIN exit from Escape.
 **Suggested API:** a handle returned from `enter(...)` with `owner()` and an
 exit cause, or on the facade a signal of the fullscreen component and an exit
 cause on the state change.
@@ -46,8 +47,9 @@ cause on the state change.
 **Where it bites:** every test of the module / `FullscreenTestSupport.java`
 **Symptom:** the tests set the state with
 `Fullscreen.setStateFromClient(ui, state.name())`, wrapped by
-`FullscreenTestSupport`. That moves the global signal, but a test can not make
-a single request succeed or fail. So the `onSuccess` / `onError` callbacks of
+`FullscreenTestSupport`. The Javadoc of `setStateFromClient` says it is not
+intended for application code. It moves the global signal, but a test can not
+make a single request succeed or fail. So the `onSuccess` / `onError` callbacks of
 `FullscreenBinding.enter(..., onSuccess, onError)`, for example the
 "Request REJECTED" log line in UC5, are not tested.
 **Workaround used:** the tests check only the UI that follows the signal. The

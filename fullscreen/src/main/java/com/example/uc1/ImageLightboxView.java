@@ -5,7 +5,6 @@ import java.util.List;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.fullscreen.Fullscreen;
 import com.vaadin.flow.component.fullscreen.FullscreenState;
@@ -15,6 +14,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
@@ -24,10 +24,12 @@ import com.vaadin.flow.signals.Signal;
  * A grid of image thumbnails. Clicking one swaps it into the preview pane below
  * and immediately fullscreens that pane via
  * {@link Fullscreen#onClick(com.vaadin.flow.component.Component)
- * Fullscreen.onClick(...).enter(stage)}. The browser renders only the wrapped
- * stage; pressing Escape returns to the gallery.
+ * Fullscreen.onClick(...).enter(stage)}. Flow moves the stage into its
+ * fullscreen wrapper and hides the rest of the app, so only the stage is shown;
+ * pressing Escape returns to the gallery and puts the stage back.
  */
 @Route(value = "uc1", layout = MainLayout.class)
+@PageTitle("UC1 — Image lightbox")
 @UseCaseDescription("Opening a clicked thumbnail as a fullscreen image preview")
 @Menu(order = 1, title = "UC1 — Image lightbox")
 @StyleSheet("uc1.css")
@@ -63,13 +65,13 @@ public class ImageLightboxView extends VerticalLayout {
                         + "Escape (or the browser's close gesture) to return. "
                         + "The lightbox is a single Div fullscreened with "
                         + "Fullscreen.onClick(thumb).enter(stage); the rest of "
-                        + "the view is hidden by the wrapper."));
+                        + "the app is hidden while it is fullscreen."));
 
         stateBadge.addClassName("status-badge");
         add(stateBadge);
 
         Div grid = new Div();
-        grid.addClassName("lightbox-grid");
+        grid.addClassName("uc1-grid");
         for (Photo photo : PHOTOS) {
             grid.add(thumbnail(photo));
         }
@@ -79,32 +81,28 @@ public class ImageLightboxView extends VerticalLayout {
         note.add(selectedName);
         add(note);
 
-        stage.addClassName("lightbox-stage");
+        stage.addClassName("uc1-stage");
         stage.add(stageImage);
-        stageImage.addClassName("lightbox-image");
+        stageImage.addClassName("uc1-image");
         showPhoto(PHOTOS.get(0));
         add(stage);
-    }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
         Signal<FullscreenState> fs = Fullscreen.stateSignal();
-
         stateBadge.bindText(fs.map(ImageLightboxView::badgeText));
         stateBadge.bindClassName("unsupported",
                 fs.map(s -> s == FullscreenState.UNSUPPORTED));
-        stage.bindClassName("active",
+        // The stage is hidden in the gallery and only shown while fullscreen.
+        stage.bindClassName("uc1-stage-active",
                 fs.map(s -> s == FullscreenState.FULLSCREEN));
     }
 
     private Div thumbnail(Photo photo) {
         Div thumb = new Div();
-        thumb.addClassName("lightbox-thumb");
+        thumb.addClassName("uc1-thumb");
         thumb.setText(photo.name());
         // Per-photo gradient is data, not a discrete state — pass it through
         // as a CSS custom property so the rule lives in uc1.css.
-        thumb.getStyle().set("--lightbox-thumb-bg", photo.gradient());
+        thumb.getStyle().set("--uc1-thumb-bg", photo.gradient());
         thumb.addClickListener(e -> showPhoto(photo));
         // Fullscreen needs the click's user gesture, so bind the request to the
         // thumbnail's click trigger.
@@ -116,7 +114,7 @@ public class ImageLightboxView extends VerticalLayout {
         selectedName.setText(photo.name());
         // Same pattern as the thumbnail: the gradient is dynamic per photo,
         // exposed to uc1.css via a custom property.
-        stageImage.getStyle().set("--lightbox-image-bg", photo.gradient());
+        stageImage.getStyle().set("--uc1-image-bg", photo.gradient());
     }
 
     private static String badgeText(FullscreenState state) {

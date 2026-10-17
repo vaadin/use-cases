@@ -1,5 +1,9 @@
 package com.example.uc6;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.example.FullscreenTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,93 +13,73 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.fullscreen.FullscreenState;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ViewPackages(classes = ChartExpandView.class)
 class ChartExpandViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersWithThreeChartCardsAndExpandButtons() {
+    void onlyTheClickedCardLooksExpandedWhileFullscreen() {
         navigate(ChartExpandView.class);
-
-        assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h -> "UC6 — Chart expand-to-fullscreen".equals(h.getText())));
-
-        long chartCardCount = findInView(Div.class).all().stream()
-                .filter(d -> d.getClassNames().contains("chart-card")).count();
-        assertEquals(3, chartCardCount, "expected three chart cards");
-
-        long expandButtons = findInView(Button.class).all().stream()
-                .filter(b -> "Expand".equals(b.getText())).count();
-        assertEquals(3, expandButtons, "expected one Expand button per card");
-    }
-
-    @Test
-    void expandingASingleCardSetsExpandedClassOnThatCardOnly() {
-        navigate(ChartExpandView.class);
-        runPendingSignalsTasks();
-
-        // Before any click, no card carries the expanded class.
-        assertExpandedTitles();
-
-        // Click the Expand button next to the "Conversion" card. The middle
-        // Expand button corresponds to it (cards are added in CHART_TITLES
-        // order: Visitors, Conversion, Revenue).
-        Button conversionExpand = findInView(Button.class).all().stream()
-                .filter(b -> "Expand".equals(b.getText())).skip(1).findFirst()
-                .orElseThrow();
-        test(conversionExpand).click();
-        runPendingSignalsTasks();
-
-        assertExpandedTitles("Conversion");
-    }
-
-    @Test
-    void sessionEndExitedByUserClearsExpandedClass() {
-        navigate(ChartExpandView.class);
-        runPendingSignalsTasks();
-
-        Button visitorsExpand = findInView(Button.class).all().stream()
-                .filter(b -> "Expand".equals(b.getText())).findFirst()
-                .orElseThrow();
-        test(visitorsExpand).click();
-        runPendingSignalsTasks();
-        assertExpandedTitles("Visitors");
-
-        // Drive the global signal through FULLSCREEN so the simulator marks
-        // the open session as EXITED_BY_USER on the way back out.
-        FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
-        runPendingSignalsTasks();
         FullscreenTestSupport
                 .setFullscreenState(FullscreenState.NOT_FULLSCREEN);
         runPendingSignalsTasks();
 
-        assertExpandedTitles();
+        clickExpandOf("Conversion");
+        runPendingSignalsTasks();
+        // Not fullscreen yet (or the request was rejected): no card changes.
+        assertEquals(Set.of(), expandedCards());
+
+        FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
+        runPendingSignalsTasks();
+        assertEquals(Set.of("Conversion"), expandedCards());
+
+        // Escape: the card goes back to its dashboard size.
+        FullscreenTestSupport
+                .setFullscreenState(FullscreenState.NOT_FULLSCREEN);
+        runPendingSignalsTasks();
+        assertEquals(Set.of(), expandedCards());
     }
 
-    /**
-     * Asserts that the cards whose first header span matches one of the given
-     * titles carry the {@code expanded} class, and no other cards do.
-     */
-    private void assertExpandedTitles(String... titles) {
-        java.util.Set<String> expected = java.util.Set.of(titles);
-        java.util.Set<String> actual = new java.util.LinkedHashSet<>();
-        for (Div card : findInView(Div.class).all().stream()
-                .filter(d -> d.getClassNames().contains("chart-card"))
-                .toList()) {
-            if (card.getClassNames().contains("expanded")) {
-                card.getChildren().flatMap(c -> c.getChildren())
-                        .filter(c -> c instanceof Span)
-                        .map(c -> ((Span) c).getText()).findFirst()
-                        .ifPresent(actual::add);
-            }
-        }
-        assertEquals(expected, actual,
-                "wrong set of cards carrying the expanded class");
+    @Test
+    void expandingAnotherCardMovesTheExpandedLook() {
+        navigate(ChartExpandView.class);
+
+        clickExpandOf("Visitors");
+        FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
+        runPendingSignalsTasks();
+        assertEquals(Set.of("Visitors"), expandedCards());
+
+        FullscreenTestSupport
+                .setFullscreenState(FullscreenState.NOT_FULLSCREEN);
+        clickExpandOf("Revenue");
+        FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
+        runPendingSignalsTasks();
+        assertEquals(Set.of("Revenue"), expandedCards());
+    }
+
+    private void clickExpandOf(String title) {
+        Div card = cards().stream().filter(c -> title.equals(titleOf(c)))
+                .findFirst().orElseThrow();
+        test(find(Button.class).from(card).single()).click();
+    }
+
+    private List<Div> cards() {
+        return findInView(Div.class).all().stream()
+                .filter(d -> d.hasClassName("uc6-card")).toList();
+    }
+
+    private Set<String> expandedCards() {
+        return cards().stream().filter(c -> c.hasClassName("uc6-card-expanded"))
+                .map(ChartExpandViewTest::titleOf).collect(Collectors.toSet());
+    }
+
+    private static String titleOf(Div card) {
+        return card.getChildren().flatMap(c -> c.getChildren())
+                .filter(Span.class::isInstance).map(c -> ((Span) c).getText())
+                .findFirst().orElseThrow();
     }
 }
