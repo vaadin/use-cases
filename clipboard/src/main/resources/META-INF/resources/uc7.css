@@ -1,10 +1,16 @@
 .uc7-view {
-    .file-log {
-        font-family: monospace;
-        white-space: pre-wrap;
-        padding: 8px;
-        background: #f4f4f4;
+    .uc7-file-log {
         display: block;
-        border-radius: 4px;
+        font-family: monospace;
+        font-size: var(--aura-font-size-s);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        padding: var(--vaadin-padding-s);
+        background: var(--vaadin-background-container);
+        border-radius: var(--vaadin-radius-m);
+    }
+
+    .uc7-preview {
+        max-width: min(400px, 100%);
     }
 }

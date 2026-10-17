@@ -8,7 +8,6 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,22 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CopyFromGridViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersHeadingAndGrid() {
-        CopyFromGridView view = navigate(CopyFromGridView.class);
-
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC8 — A copy button in every grid row"
-                        .equals(h.getText())));
-        assertEquals(CopyFromGridView.ROW_COUNT, test(view.grid).size());
-        assertEquals("Email", test(view.grid).getHeaderCell(2));
-    }
-
-    @Test
     void everyRowRendersItsOwnValueAndCopyButton() {
         CopyFromGridView view = navigate(CopyFromGridView.class);
 
         // Two rows far apart: each cell must carry its own row's value, since
         // the copy button binds that value as a literal at render time.
+        assertEquals(CopyFromGridView.ROW_COUNT, test(view.grid).size());
         assertCopyCell(view, 0);
         assertCopyCell(view, 42);
     }

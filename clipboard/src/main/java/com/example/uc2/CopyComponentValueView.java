@@ -16,24 +16,26 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC2 — Copy the current value of another component.
+ * UC2 — Copy a field's value.
  * <p>
- * The user can edit the field freely; whatever is in it at the moment of the
- * click is what gets copied. The value is read client-side from the source
- * element at click time, so there is still no server round-trip and the user
- * gesture is preserved.
+ * {@code Clipboard.onClick(button).writeText(linkField, onCopied, onError)}
+ * copies whatever the field holds at the moment of the click. The browser reads
+ * the field's {@code value} property in the click handler, so an edit the
+ * server has not seen yet is copied too, and the user gesture is still valid.
+ * The notification shows the text the browser reports as copied.
  */
 @Route(value = "uc2", layout = MainLayout.class)
-@PageTitle("UC2 — Copy current value of a component")
+@PageTitle("UC2 — Copy a field's value")
 @UseCaseDescription("Copying whatever a field holds at the moment of the click")
-@Menu(order = 2, title = "UC2 — Copy component value")
+@Menu(order = 2, title = "UC2 — Copy a field's value")
 public class CopyComponentValueView extends VerticalLayout {
 
     public CopyComponentValueView() {
-        add(new H1("UC2 — Copy the current value of a component"));
+        add(new H1("UC2 — Copy a field's value"));
         add(new Paragraph(
-                "The text field's value is read client-side at click time — "
-                        + "edit it and the copy reflects whatever you typed."));
+                "Edit the link, then click Copy. The browser reads the "
+                        + "field when you click, so the copy holds exactly "
+                        + "what you typed."));
 
         TextField linkField = new TextField("Share link");
         linkField.setValue("https://example.com/share/abc123");
@@ -41,7 +43,7 @@ public class CopyComponentValueView extends VerticalLayout {
 
         Button copyButton = new Button("Copy");
         Clipboard.onClick(copyButton).writeText(linkField,
-                written -> Notification.show("Link copied"),
+                copied -> Notification.show("Copied " + copied),
                 error -> Notification.show("Copy failed: " + error.message()));
 
         HorizontalLayout row = new HorizontalLayout(linkField, copyButton);
