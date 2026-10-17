@@ -1,6 +1,5 @@
 package com.example.uc4;
 
-import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
 import com.example.common.UseCaseDescription;
@@ -17,17 +16,15 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.StreamResource;
 
 /**
- * UC4 — Copy image data.
+ * UC4 — Copy image.
  * <p>
- * {@link Clipboard#onClick(com.vaadin.flow.component.Component)
- * Clipboard.onClick(button).writeImage(image)} draws the source component's
- * root {@code <img>} onto a canvas in the browser and writes the resulting PNG
- * to the clipboard, all inside the click handler so the user gesture is
- * preserved. The {@link Image} here is backed by a {@link StreamResource} that
- * produces a small SVG, so the example doesn't depend on any external assets.
+ * {@code Clipboard.onClick(button).writeImage(image, onCopied, onError)} draws
+ * the {@code <img>} of the source component onto a canvas in the browser and
+ * writes the resulting PNG to the clipboard, all inside the click handler, so
+ * the user gesture is still valid. The {@link Image} here is built from the
+ * bytes of a small SVG, so the example does not depend on external assets.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Copy image")
@@ -51,17 +48,14 @@ public class CopyImageView extends VerticalLayout {
     public CopyImageView() {
         add(new H1("UC4 — Copy image"));
         add(new Paragraph(
-                "The image is rasterised to PNG on the client and written to "
-                        + "the clipboard inside the click handler, so the user "
-                        + "gesture is preserved. Paste into an image-aware "
-                        + "destination (chat, doc editor, image viewer)."));
+                "Click Copy chart, then paste into an app that accepts "
+                        + "images (a chat, a document editor, an image "
+                        + "viewer). The browser turns the image into a PNG "
+                        + "when you click and puts that on the clipboard."));
 
-        StreamResource resource = new StreamResource("chart.svg",
-                () -> new ByteArrayInputStream(
-                        CHART_SVG.getBytes(StandardCharsets.UTF_8)));
-        resource.setContentType("image/svg+xml");
-
-        Image preview = new Image(resource, "Sample chart");
+        Image preview = new Image(CHART_SVG.getBytes(StandardCharsets.UTF_8),
+                "chart.svg", "image/svg+xml");
+        preview.setAlt("Sample chart");
         preview.setWidth("300px");
 
         Button copyButton = new Button("Copy chart");
@@ -71,6 +65,8 @@ public class CopyImageView extends VerticalLayout {
 
         HorizontalLayout row = new HorizontalLayout(preview, copyButton);
         row.setAlignItems(Alignment.START);
+        // The button moves below the image on a narrow screen.
+        row.setWrap(true);
         add(row);
     }
 }
