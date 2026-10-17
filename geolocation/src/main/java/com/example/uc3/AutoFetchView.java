@@ -5,7 +5,6 @@ import java.time.Duration;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.Geolocation;
 import com.vaadin.flow.component.geolocation.GeolocationAvailability;
@@ -17,46 +16,51 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.signals.Signal;
 
 /**
- * UC3 — Auto-fetch on view load, gated on permission.
+ * UC3 — Locate returning visitors.
  * <p>
- * If the user has previously granted permission for this origin, fetch the
- * location silently on attach (so returning visitors see location-sensitive
- * content immediately). First-time visitors see the page without a surprise
- * prompt — they trigger the request by clicking the explicit button.
+ * If the user has granted permission for this origin before, the view fetches
+ * the location each time it is attached, without a click, so returning visitors
+ * see location-based content at once. First-time visitors see the page without
+ * a surprise permission prompt: they start the request with the button. The
+ * hint at the top is bound to {@link Geolocation#availabilityHintSignal()} and
+ * follows permission changes while the view is open.
  */
 @Route(value = "uc3", layout = MainLayout.class)
-@PageTitle("UC3 — Auto-fetch on view load, gated on permission")
+@PageTitle("UC3 — Locate returning visitors")
 @UseCaseDescription("Locating returning visitors without a surprise prompt")
-@Menu(order = 3, title = "UC3 — Auto-fetch on attach")
+@Menu(order = 3, title = "UC3 — Locate returning visitors")
 public class AutoFetchView extends VerticalLayout {
 
     private final Span localContent = new Span("(no local content yet)");
-    private final Span permissionHint = new Span();
-    private final Button locate = new Button("Use my location");
 
     public AutoFetchView() {
-        add(new H1("UC3 — Auto-fetch on view load, gated on permission"));
-        add(new Paragraph(
-                "If permission was already granted on a previous visit, "
-                        + "this view fetches the location automatically. "
-                        + "Otherwise the explicit button is used."));
+        add(new H1("UC3 — Locate returning visitors"));
+        add(new Paragraph("If you allowed this site to read your location "
+                + "before, this view fetches it as soon as it opens. "
+                + "Otherwise nothing happens until you click the button, "
+                + "so a first-time visitor never gets a surprise "
+                + "permission prompt. The first line shows the permission "
+                + "state the browser reports, and follows changes while "
+                + "the view is open."));
 
-        locate.addClickListener(e -> fetchAndPopulate());
-        add(permissionHint, locate, localContent);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        var availability = Geolocation
-                .availabilityHintSignal(attachEvent.getUI());
+        Signal<GeolocationAvailability> availability = Geolocation
+                .availabilityHintSignal();
+        Span permissionHint = new Span();
         permissionHint.bindText(availability.map(AutoFetchView::hintFor));
-        if (availability.peek() == GeolocationAvailability.GRANTED) {
-            fetchAndPopulate();
-        }
-        // PROMPT / DENIED / UNKNOWN / UNSUPPORTED: do nothing automatic.
+
+        Button locate = new Button("Use my location", e -> fetchAndPopulate());
+        add(permissionHint, locate, localContent);
+
+        whenAttached(ui -> {
+            // PROMPT, DENIED, UNKNOWN and UNSUPPORTED: nothing automatic.
+            if (availability.peek() == GeolocationAvailability.GRANTED) {
+                fetchAndPopulate();
+            }
+            return null;
+        });
     }
 
     private static String hintFor(GeolocationAvailability availability) {
@@ -66,7 +70,8 @@ public class AutoFetchView extends VerticalLayout {
         case DENIED -> "Location permission was denied for this site.";
         case UNSUPPORTED ->
             "Location is not available in this browser context.";
-        case UNKNOWN -> "Location permission state is not known.";
+        case UNKNOWN ->
+            "Location permission state is not known (Safari never reports it).";
         };
     }
 
