@@ -1,5 +1,6 @@
 package com.example.uc23;
 
+import com.example.TriggerCallbacks;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -9,19 +10,25 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ViewPackages(classes = KonamiCodeView.class)
 class KonamiCodeViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersWithHint() {
-        navigate(KonamiCodeView.class);
+    void eachCompletedSequenceCountsAsOneUnlock() {
+        KonamiCodeView view = navigate(KonamiCodeView.class);
+        assertEquals("UC23 — Konami code",
+                findInView(H1.class).single().getText());
+        Span hint = findInView(Span.class).id("hint");
+        assertEquals("(no unlocks yet)", hint.getText());
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC23 — Konami code".equals(h.getText())));
-        assertEquals("(no unlocks yet)",
-                findInView(Span.class).id("hint").getText());
+        TriggerCallbacks.fire(view);
+        runPendingSignalsTasks();
+        assertEquals("🎉 Unlocked 1 time", hint.getText());
+
+        TriggerCallbacks.fire(view);
+        runPendingSignalsTasks();
+        assertEquals("🎉 Unlocked 2 times", hint.getText());
     }
 }

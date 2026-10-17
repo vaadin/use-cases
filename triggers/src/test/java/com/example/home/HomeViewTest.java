@@ -16,14 +16,14 @@ import com.example.uc16.PointerTrackerView;
 import com.example.uc17.AtomicResetView;
 import com.example.uc18.AutoSaveSignalView;
 import com.example.uc19.DynamicResponsiveStylingView;
-import com.example.uc2.SubmitAndDisableView;
+import com.example.uc2.ImageGalleryView;
 import com.example.uc20.DoubleClickOpenView;
 import com.example.uc21.ShortcutDownloadView;
 import com.example.uc22.KeyEventLogView;
 import com.example.uc23.KonamiCodeView;
 import com.example.uc24.DisableButtonGroupView;
-import com.example.uc3.LiveSignalCounterView;
-import com.example.uc4.JsTriggerView;
+import com.example.uc3.HiddenShareLinkView;
+import com.example.uc4.DoubleClickCopyView;
 import com.example.uc5.IdleWarningView;
 import com.example.uc6.NetworkStatusView;
 import com.example.uc7.CrossTabBroadcastView;
@@ -44,16 +44,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @ViewPackages(classes = { HomeView.class, ShortcutSaveView.class,
-        SubmitAndDisableView.class, LiveSignalCounterView.class,
-        JsTriggerView.class, IdleWarningView.class, NetworkStatusView.class,
-        CrossTabBroadcastView.class, LongPressDeleteView.class,
-        ScrollIntoViewView.class, HighlightView.class,
-        RightClickCoordsView.class, AccessibleSaveView.class,
-        ClientFilterView.class, ResponsiveCardsView.class,
-        LiveSizeReadoutView.class, PointerTrackerView.class,
-        AtomicResetView.class, AutoSaveSignalView.class,
-        DynamicResponsiveStylingView.class, DoubleClickOpenView.class,
-        ShortcutDownloadView.class, KeyEventLogView.class, KonamiCodeView.class,
+        ImageGalleryView.class, HiddenShareLinkView.class,
+        DoubleClickCopyView.class, IdleWarningView.class,
+        NetworkStatusView.class, CrossTabBroadcastView.class,
+        LongPressDeleteView.class, ScrollIntoViewView.class,
+        HighlightView.class, RightClickCoordsView.class,
+        AccessibleSaveView.class, ClientFilterView.class,
+        ResponsiveCardsView.class, LiveSizeReadoutView.class,
+        PointerTrackerView.class, AtomicResetView.class,
+        AutoSaveSignalView.class, DynamicResponsiveStylingView.class,
+        DoubleClickOpenView.class, ShortcutDownloadView.class,
+        KeyEventLogView.class, KonamiCodeView.class,
         DisableButtonGroupView.class })
 class HomeViewTest extends SpringBrowserlessTest {
 

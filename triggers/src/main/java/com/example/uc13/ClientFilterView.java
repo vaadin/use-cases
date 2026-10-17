@@ -18,16 +18,15 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC13 — Search field + server-loaded list, filtered client-side.
+ * UC13 — Client-side filter.
  * <p>
  * The full list comes from the server (loaded once at view construction). A
  * {@link DomEventTrigger} on the search field's {@code input} event fires a
  * {@link FilterListAction} that hides non-matching rows entirely in JS. No
  * server round-trip on each keystroke; the server only sees the data once.
  * <p>
- * Contrast with {@code SetSignalAction} (UC3) — there the keystrokes would push
- * to a signal and the server would react; here the goal is the opposite, keep
- * the server out of the loop.
+ * Compare with UC18, where every keystroke goes to a signal on the server. Here
+ * the goal is the opposite: keep the server out of the loop.
  */
 @Route(value = "uc13", layout = MainLayout.class)
 @PageTitle("UC13 — Client-side filter")
@@ -46,24 +45,23 @@ public class ClientFilterView extends VerticalLayout {
     public ClientFilterView() {
         addClassName("uc13-view");
         add(new H1("UC13 — Client-side filter"));
-        add(new Paragraph(
-                "The list below is rendered once from the server. Typing in "
-                        + "the search field fires a custom FilterListAction "
-                        + "that hides non-matching rows purely in JS — no "
-                        + "round-trip on each keystroke."));
+        add(new Paragraph("The server sends the list below once. Type in "
+                + "the search field: a custom FilterListAction hides the "
+                + "rows that do not match, in the browser, without a "
+                + "round-trip on each keystroke."));
 
         TextField search = new TextField();
         search.setId("search");
         search.setPlaceholder("Filter…");
         search.setClearButtonVisible(true);
-        search.addClassName("search-field");
+        search.addClassName("uc13-search");
 
         Div list = new Div();
         list.setId("list");
-        list.addClassName("filter-list");
+        list.addClassName("uc13-list");
         for (String item : ITEMS) {
             Div row = new Div(item);
-            row.addClassName("row");
+            row.addClassName("uc13-row");
             list.add(row);
         }
 

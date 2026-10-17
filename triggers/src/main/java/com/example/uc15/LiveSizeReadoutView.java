@@ -37,20 +37,18 @@ public class LiveSizeReadoutView extends VerticalLayout {
     public LiveSizeReadoutView() {
         addClassName("uc15-view");
         add(new H1("UC15 — Live size readout"));
-        add(new Paragraph(
-                "Resize the window. The readout below updates without a "
-                        + "server round-trip — SizeTrigger fires on every "
-                        + "ResizeObserver tick, and SetPropertyAction wires the "
-                        + "width and height directly into the Spans' "
-                        + "textContent. No callback, no Java handler."));
+        add(new Paragraph("Resize the browser window. The width and height "
+                + "of this view update as you resize, without a server "
+                + "round-trip: SizeTrigger fires on every size change, and "
+                + "two SetPropertyActions write the numbers into the page."));
 
         Span widthValue = new Span("?");
         widthValue.setId("width");
-        widthValue.addClassName("readout");
+        widthValue.addClassName("uc15-readout");
 
         Span heightValue = new Span("?");
         heightValue.setId("height");
-        heightValue.addClassName("readout");
+        heightValue.addClassName("uc15-readout");
 
         new SizeTrigger(this).triggers(
                 new SetPropertyAction<>(widthValue, "textContent",
@@ -59,14 +57,14 @@ public class LiveSizeReadoutView extends VerticalLayout {
                         SizeTrigger.EventData.height));
 
         Span widthLabel = new Span("Width:");
-        widthLabel.addClassName("label");
+        widthLabel.addClassName("uc15-label");
         Span heightLabel = new Span("Height:");
-        heightLabel.addClassName("label");
+        heightLabel.addClassName("uc15-label");
 
         Span widthLine = new Span(widthLabel, widthValue, new Span("px"));
-        widthLine.addClassName("line");
+        widthLine.addClassName("uc15-line");
         Span heightLine = new Span(heightLabel, heightValue, new Span("px"));
-        heightLine.addClassName("line");
+        heightLine.addClassName("uc15-line");
 
         add(widthLine, heightLine);
     }
