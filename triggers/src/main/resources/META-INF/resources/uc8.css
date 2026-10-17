@@ -1,15 +1,14 @@
 .uc8-view {
-    .delete-button {
-        background: color-mix(in srgb, var(--aura-red) 80%, transparent);
-        color: white;
+    .uc8-delete {
         user-select: none;
+        -webkit-user-select: none;
+        /* Without these, a long press on a phone selects text or opens the
+           browser menu instead. */
+        -webkit-touch-callout: none;
+        touch-action: none;
     }
 
-    .delete-button:hover {
-        background: color-mix(in srgb, var(--aura-red) 90%, transparent);
-    }
-
-    .status {
+    .uc8-status {
         font-family: monospace;
         color: var(--vaadin-text-color-secondary);
         align-self: center;

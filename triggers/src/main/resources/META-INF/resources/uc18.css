@@ -1,17 +1,18 @@
 .uc18-view {
-    .draft {
+    .uc18-draft {
         width: 100%;
         max-width: 36rem;
         min-height: 8rem;
     }
 
-    .counts {
+    .uc18-counts {
         gap: 1.5rem;
+        flex-wrap: wrap;
     }
 
-    .count {
+    .uc18-count {
         font-family: monospace;
-        font-size: 0.95rem;
+        font-size: var(--aura-font-size-s);
         padding: 0.3rem 0.8rem;
         background: var(--vaadin-background-container);
         border: 1px solid var(--vaadin-border-color);

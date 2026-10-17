@@ -1,24 +1,25 @@
 .uc20-view {
-    .link-list {
-        max-width: 36rem;
+    .uc20-list {
+        width: 36rem;
+        max-width: 100%;
         margin-top: 0.5rem;
         border: 1px solid var(--vaadin-border-color);
         border-radius: var(--vaadin-radius-m);
         background: var(--vaadin-background-container);
     }
 
-    .link-list .row {
+    .uc20-row {
         padding: 0.6rem 1rem;
         border-bottom: 1px solid var(--vaadin-border-color);
         cursor: pointer;
         user-select: none;
     }
 
-    .link-list .row:last-child {
+    .uc20-row:last-child {
         border-bottom: none;
     }
 
-    .link-list .row:hover {
-        background: color-mix(in srgb, var(--aura-accent) 8%, transparent);
+    .uc20-row:hover {
+        background: color-mix(in srgb, var(--aura-accent-color) 8%, transparent);
     }
 }

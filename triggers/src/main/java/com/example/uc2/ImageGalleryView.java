@@ -20,47 +20,41 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC2 — Click an image to dim its siblings atomically.
+ * UC2 — Image gallery select.
  * <p>
- * Three {@link Image} tiles. One {@link ClickTrigger} per tile fires three
- * {@link SetPropertyAction} calls in sequence on the same gesture — mark self
- * {@code selected}, set the other two to {@code dimmed} — so the three DOM
- * mutations land before the next paint with no server round-trip between them.
- * A "Reset" button fans out three more actions to clear all classes.
+ * Three {@link Image} tiles. One {@link ClickTrigger} per tile runs three
+ * {@link SetPropertyAction}s in the same click: the clicked tile gets the
+ * {@code uc2-selected} class and the other two get {@code uc2-dimmed}. A
+ * "Reset" button clears the classes of all three the same way. Nothing goes to
+ * the server.
  * <p>
- * The framework analogue would attach three server-side click listeners and
- * call {@code img.getElement().getClassList().add(...)} for each target; every
- * click costs one round-trip and the mid-sequence states (one image selected,
- * the others still pristine) are observable. Triggers ship the whole transition
- * as one atomic client-side handler. The same applies to any
- * non-{@code HasEnabled} target — {@link Image} doesn't have a
- * {@code setEnabled}, but {@link SetPropertyAction} can write any DOM property
- * regardless.
+ * With server-side click listeners, the same change would arrive after a
+ * round-trip. {@link SetPropertyAction} writes any property of any element, so
+ * the targets do not need to be components with an API for it.
  */
 @Route(value = "uc2", layout = MainLayout.class)
-@PageTitle("UC2 — Click an image to dim its siblings")
+@PageTitle("UC2 — Image gallery select")
 @UseCaseDescription("Highlighting a clicked image and dimming the others in one client-side step")
 @Menu(order = 2, title = "UC2 — Image gallery select")
 @StyleSheet("uc2.css")
-public class SubmitAndDisableView extends VerticalLayout {
+public class ImageGalleryView extends VerticalLayout {
 
-    public SubmitAndDisableView() {
+    public ImageGalleryView() {
         addClassName("uc2-view");
-        add(new H1("UC2 — Click an image to dim its siblings"));
-        add(new Paragraph(
-                "Click one tile: the other two fade to grayscale and the "
-                        + "selected one gets a primary border — all three DOM "
-                        + "mutations land in one event, no server round-trip "
-                        + "between them. Image isn't HasEnabled, but "
-                        + "SetPropertyAction writes any property on any "
-                        + "element. Reset clears everything in one trigger."));
+        add(new H1("UC2 — Image gallery select"));
+        add(new Paragraph("Click one tile: it gets a border and the other two "
+                + "fade to gray, in the same click and without a server "
+                + "round-trip. One ClickTrigger per tile runs three "
+                + "SetPropertyActions that set the class names of the three "
+                + "images. Reset clears them the same way."));
 
+        // The tile colors are part of the pictures, not of the page style.
         Image a = tile("a", "ALPHA", "1976d2");
         Image b = tile("b", "BETA", "d81b60");
         Image c = tile("c", "GAMMA", "388e3c");
 
         HorizontalLayout gallery = new HorizontalLayout(a, b, c);
-        gallery.addClassName("gallery");
+        gallery.addClassName("uc2-gallery");
 
         wire(a, b, c);
         wire(b, a, c);
@@ -68,6 +62,7 @@ public class SubmitAndDisableView extends VerticalLayout {
 
         Button reset = new Button("Reset");
         reset.setId("reset");
+        reset.addClassName("uc2-reset");
         new ClickTrigger(reset).triggers(
                 new SetPropertyAction<>(a, "className", ""),
                 new SetPropertyAction<>(b, "className", ""),
@@ -78,9 +73,9 @@ public class SubmitAndDisableView extends VerticalLayout {
 
     private static void wire(Image self, Image other1, Image other2) {
         new ClickTrigger(self).triggers(
-                new SetPropertyAction<>(self, "className", "selected"),
-                new SetPropertyAction<>(other1, "className", "dimmed"),
-                new SetPropertyAction<>(other2, "className", "dimmed"));
+                new SetPropertyAction<>(self, "className", "uc2-selected"),
+                new SetPropertyAction<>(other1, "className", "uc2-dimmed"),
+                new SetPropertyAction<>(other2, "className", "uc2-dimmed"));
     }
 
     private static Image tile(String id, String label, String hexColor) {

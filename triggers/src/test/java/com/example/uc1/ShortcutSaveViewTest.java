@@ -22,8 +22,7 @@ class ShortcutSaveViewTest extends SpringBrowserlessTest {
         navigate(ShortcutSaveView.class);
 
         assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC1 — Ctrl+S writes a snapshot to the clipboard"
-                        .equals(h.getText())));
+                .anyMatch(h -> "UC1 — Ctrl+S snapshot".equals(h.getText())));
         assertNotNull(findInView(TextArea.class).id("notes"));
         assertEquals("(no snapshot yet)",
                 findInView(Span.class).id("status").getText());

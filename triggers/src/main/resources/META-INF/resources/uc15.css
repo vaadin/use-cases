@@ -1,19 +1,19 @@
 .uc15-view {
-    .line {
+    .uc15-line {
         display: inline-flex;
         gap: 0.4rem;
         align-items: baseline;
         font-family: monospace;
-        font-size: 1.1rem;
+        font-size: var(--aura-font-size-l);
         margin-right: 1.5rem;
     }
 
-    .label {
+    .uc15-label {
         color: var(--vaadin-text-color-secondary);
     }
 
-    .readout {
-        font-weight: 600;
+    .uc15-readout {
+        font-weight: var(--aura-font-weight-semibold);
         min-width: 4ch;
         text-align: right;
     }

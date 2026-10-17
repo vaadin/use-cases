@@ -1,10 +1,14 @@
 .uc7-view {
-    .last-message {
+    .uc7-row {
+        flex-wrap: wrap;
+    }
+
+    .uc7-last-message {
         display: inline-block;
         padding: 0.3rem 0.9rem;
         border-radius: var(--vaadin-radius-m);
         font-family: monospace;
-        font-size: 0.95rem;
+        font-size: var(--aura-font-size-s);
         background: var(--vaadin-background-container);
         border: 1px solid var(--vaadin-border-color);
         min-width: 12rem;

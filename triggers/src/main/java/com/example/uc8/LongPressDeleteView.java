@@ -4,6 +4,7 @@ import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -11,19 +12,20 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.trigger.internal.CallbackAction;
-import com.vaadin.flow.component.trigger.internal.LiteralInput;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * UC8 — Long-press to confirm a destructive action.
+ * UC8 — Long-press to delete.
  * <p>
- * Press and hold the red button for 800ms. The custom {@link LongPressTrigger}
- * fires once the hold threshold elapses, runs a {@link CallbackAction} that
- * pretends to delete a row, and updates the status badge. Releasing early
- * cancels — and a regular short click is also suppressed so accidental taps
- * never delete anything.
+ * Press and hold the red button for 800 ms to delete a row. The custom
+ * {@link LongPressTrigger} starts a timer in the browser on {@code pointerdown}
+ * and cancels it when the pointer is released or leaves the button, so only a
+ * full hold reaches the server, through a {@link CallbackAction}. The button
+ * has no click listener, so a short click or an accidental tap does nothing.
+ * The click that follows a completed hold is swallowed by the trigger.
  */
 @Route(value = "uc8", layout = MainLayout.class)
 @PageTitle("UC8 — Long-press to delete")
@@ -32,31 +34,29 @@ import com.vaadin.flow.router.Route;
 @StyleSheet("uc8.css")
 public class LongPressDeleteView extends VerticalLayout {
 
-    private int deleteCount = 0;
-
     public LongPressDeleteView() {
         addClassName("uc8-view");
         add(new H1("UC8 — Long-press to delete"));
-        add(new Paragraph(
-                "Press and hold the Delete button for 800ms to confirm. "
-                        + "A regular click does nothing — the trigger suppresses "
-                        + "it. Real-world: touch-friendly destructive actions "
-                        + "without a confirm dialog."));
+        add(new Paragraph("Press and hold the button for 800 ms to delete a "
+                + "row. A short click or tap does nothing, and letting go "
+                + "early cancels. This confirms a destructive action on a "
+                + "touch screen without a confirmation dialog."));
+
+        ValueSignal<Integer> deleted = new ValueSignal<>(0);
 
         Button deleteButton = new Button("Hold to delete");
         deleteButton.setId("delete");
-        deleteButton.addClassName("delete-button");
+        deleteButton.addClassName("uc8-delete");
+        deleteButton.addThemeVariants(ButtonVariant.ERROR);
 
-        Span status = new Span("0 rows deleted");
+        Span status = new Span();
         status.setId("status");
-        status.addClassName("status");
+        status.addClassName("uc8-status");
+        status.bindText(deleted.map(count -> count + " row"
+                + (count == 1 ? "" : "s") + " deleted"));
 
-        new LongPressTrigger(deleteButton, 800)
-                .triggers(new CallbackAction<>(String.class, payload -> {
-                    deleteCount++;
-                    status.setText(deleteCount + " row"
-                            + (deleteCount == 1 ? "" : "s") + " deleted");
-                }, new LiteralInput<>("delete")));
+        new LongPressTrigger(deleteButton, 800).triggers(
+                new CallbackAction<>(() -> deleted.update(count -> count + 1)));
 
         add(new HorizontalLayout(deleteButton, status));
     }

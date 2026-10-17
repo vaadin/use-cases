@@ -1,6 +1,5 @@
 package com.example.uc23;
 
-import com.example.SequenceTrigger;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -11,22 +10,21 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.trigger.internal.CallbackAction;
-import com.vaadin.flow.component.trigger.internal.LiteralInput;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * UC23 — Konami code Easter egg via SequenceTrigger.
+ * UC23 — Konami code.
  * <p>
- * A {@link SequenceTrigger} tracks the ordered sequence ↑ ↑ ↓ ↓ ← → ← → B A
- * client-side. Only when the user completes the full sequence does the trigger
- * fire a {@link CallbackAction} that bumps a counter and reveals an Easter-egg
- * message. Partial progress never crosses the network — the state lives in a
- * closure inside the install JS.
+ * A {@link SequenceTrigger} watches for the key sequence ↑ ↑ ↓ ↓ ← → ← → B A in
+ * the browser. Only a completed sequence runs the {@link CallbackAction}, which
+ * counts the unlocks on the server. The keys pressed on the way never reach the
+ * server.
  * <p>
- * Demonstrates {@code SequenceTrigger} (a local port of the
- * feature/triggers-actions class).
+ * Flow has no trigger for a key sequence, so {@code SequenceTrigger} is a local
+ * class (API-GAPS.md #11).
  */
 @Route(value = "uc23", layout = MainLayout.class)
 @PageTitle("UC23 — Konami code")
@@ -35,28 +33,26 @@ import com.vaadin.flow.router.Route;
 @StyleSheet("uc23.css")
 public class KonamiCodeView extends VerticalLayout {
 
-    private int unlocks = 0;
-
     public KonamiCodeView() {
         addClassName("uc23-view");
         add(new H1("UC23 — Konami code"));
         add(new Paragraph("Type the Konami code anywhere on this page: "
-                + "↑ ↑ ↓ ↓ ← → ← → B A. Only the full match fires the "
-                + "callback; partial progress stays in the browser and "
-                + "the server never sees the wrong keys."));
+                + "↑ ↑ ↓ ↓ ← → ← → B A. Only the full sequence reaches the "
+                + "server. The browser keeps track of the keys on the way, "
+                + "and extra presses before the sequence do not spoil it."));
 
-        Span hint = new Span("(no unlocks yet)");
+        ValueSignal<Integer> unlocks = new ValueSignal<>(0);
+
+        Span hint = new Span();
         hint.setId("hint");
-        hint.addClassName("hint");
+        hint.addClassName("uc23-hint");
+        hint.bindText(unlocks.map(count -> count == 0 ? "(no unlocks yet)"
+                : "🎉 Unlocked " + count + " time" + (count == 1 ? "" : "s")));
 
         new SequenceTrigger(this, Key.ARROW_UP, Key.ARROW_UP, Key.ARROW_DOWN,
                 Key.ARROW_DOWN, Key.ARROW_LEFT, Key.ARROW_RIGHT, Key.ARROW_LEFT,
-                Key.ARROW_RIGHT, Key.KEY_B, Key.KEY_A)
-                .triggers(new CallbackAction<>(String.class, ignored -> {
-                    unlocks++;
-                    hint.setText("🎉 Unlocked " + unlocks + " time"
-                            + (unlocks == 1 ? "" : "s"));
-                }, new LiteralInput<>("konami")));
+                Key.ARROW_RIGHT, Key.KEY_B, Key.KEY_A).triggers(
+                        new CallbackAction<>(() -> unlocks.update(c -> c + 1)));
 
         add(hint);
     }
