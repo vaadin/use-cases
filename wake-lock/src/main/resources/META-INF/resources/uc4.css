@@ -1,12 +1,12 @@
 .uc4-view {
-    .timer-clock {
-        font-size: 3rem;
+    .uc4-clock {
+        font-size: calc(2.5 * var(--aura-font-size-xl));
         font-family: monospace;
-        font-weight: 600;
+        font-weight: var(--aura-font-weight-semibold);
     }
 
-    .timer-phase {
-        font-size: 1rem;
+    .uc4-phase {
+        font-size: var(--aura-font-size-m);
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: var(--vaadin-text-color-secondary);

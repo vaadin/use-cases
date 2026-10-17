@@ -29,12 +29,12 @@ class HomeViewTest extends SpringBrowserlessTest {
     }
 
     private static final List<UseCase> USE_CASES = List.of(
-            new UseCase("UC1", "Manual toggle",
+            new UseCase("UC1", "Keep-awake toggle",
                     "Letting users switch keep-screen-awake on and off", "uc1"),
-            new UseCase("UC2", "Recipe",
+            new UseCase("UC2", "Step-by-step recipe",
                     "Keeping the screen on while someone follows step-by-step instructions",
                     "uc2"),
-            new UseCase("UC3", "Slideshow",
+            new UseCase("UC3", "Presentation slideshow",
                     "Keeping the screen awake only while a presentation is running",
                     "uc3"),
             new UseCase("UC4", "Workout timer",
