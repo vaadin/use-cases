@@ -7,12 +7,47 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.GeolocationSimulator;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.dom.Element;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ViewPackages(classes = AutoFetchView.class)
 class AutoFetchViewTest extends BrowserlessTest {
+
+    @Test
+    void hint_followsPermissionChangesWhileTheViewIsOpen() {
+        GeolocationSimulator geolocation = GeolocationSimulator.current();
+        navigate(AutoFetchView.class);
+        assertTrue(find(Span.class)
+                .withText("Location permission has not been asked for yet.")
+                .exists());
+
+        geolocation.denyPermission();
+
+        assertTrue(find(Span.class)
+                .withText("Location permission was denied for this site.")
+                .exists());
+    }
+
+    @Test
+    void reattachingTheView_fetchesTheLocationAgain() {
+        GeolocationSimulator geolocation = GeolocationSimulator.current();
+        geolocation.grantPermission();
+        geolocation.setLocation(60.1699, 24.9384, 50.0);
+        AutoFetchView view = navigate(AutoFetchView.class);
+
+        Element parent = view.getElement().getParent();
+        view.getElement().removeFromParent();
+        geolocation.setLocation(59.4370, 24.7536, 50.0);
+        parent.appendChild(view.getElement());
+
+        Span localContent = find(Span.class).withTextContaining("Local content")
+                .single();
+        assertTrue(localContent.getText().contains("59.4370"),
+                "Re-attaching should fetch the new location, was: "
+                        + localContent.getText());
+    }
 
     @Test
     void attachWithLocationKnown_autoFetchesPosition() {

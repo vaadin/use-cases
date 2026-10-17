@@ -1,5 +1,6 @@
 package com.example.uc8;
 
+import com.example.uc1.OneShotOnClickView;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -15,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ViewPackages(classes = DbTrackingView.class)
+@ViewPackages(classes = { DbTrackingView.class, OneShotOnClickView.class })
 class DbTrackingViewTest extends SpringBrowserlessTest {
 
     @Test
@@ -33,15 +34,16 @@ class DbTrackingViewTest extends SpringBrowserlessTest {
         test(start).click();
 
         geolocation.setLocation(60.1699, 24.9384, 15.0);
-        Span status = find(Span.class).withText("Saved update #1 to DB")
-                .single();
-        assertEquals("Saved update #1 to DB", status.getText());
+        Span status = find(Span.class)
+                .withText("Saved position #1 to the database").single();
+        assertEquals("Saved position #1 to the database", status.getText());
         assertEquals(1, test(grid).size(),
                 "Grid should reflect one row from the database");
 
         geolocation.setLocation(60.1700, 24.9385, 12.0);
-        status = find(Span.class).withText("Saved update #2 to DB").single();
-        assertEquals("Saved update #2 to DB", status.getText());
+        status = find(Span.class).withText("Saved position #2 to the database")
+                .single();
+        assertEquals("Saved position #2 to the database", status.getText());
         assertEquals(2, test(grid).size(),
                 "Grid should reflect two rows from the database");
     }
@@ -78,15 +80,38 @@ class DbTrackingViewTest extends SpringBrowserlessTest {
 
         test(find(Button.class).withText("Stop tracking").single()).click();
 
-        Span status = find(Span.class).withTextContaining("Stopped after")
-                .single();
-        assertTrue(status.getText().contains("1"),
-                "Stopped status should reflect one update, was: "
-                        + status.getText());
+        assertTrue(find(Span.class)
+                .withText("Not tracking. Positions stored: 1.").exists());
+        assertTrue(geolocation.activeTrackers().isEmpty(),
+                "Stop should end the browser watch");
         assertTrue(
                 find(Button.class).withText("Resume tracking").single()
                         .isVisible(),
                 "Start button should be re-labelled to Resume after stop");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void leavingAndComingBack_showsTheStoredRoute() {
+        GeolocationSimulator geolocation = GeolocationSimulator.current();
+        geolocation.grantPermission();
+        navigate(DbTrackingView.class);
+        assertTrue(geolocation.activeTrackers().isEmpty(),
+                "No browser watch should run before the user clicks Start");
+
+        test(find(Button.class).withText("Start tracking").single()).click();
+        geolocation.setLocation(60.1699, 24.9384, 15.0);
+        geolocation.setLocation(60.1700, 24.9385, 12.0);
+
+        // Leave the view, then come back: a new view instance in the same
+        // session reads the same rows
+        navigate(OneShotOnClickView.class);
+        DbTrackingView second = navigate(DbTrackingView.class);
+        Grid<TrackedPosition> grid = find(Grid.class).from(second).single();
+        assertEquals(2, test(grid).size(),
+                "The route should be read back from the database");
+        assertTrue(find(Button.class).withText("Resume tracking").single()
+                .isVisible());
     }
 
     @Test
