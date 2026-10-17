@@ -1,108 +1,116 @@
 package com.example.uc4;
 
-import com.example.WakeLockTestSupport;
+import java.time.Duration;
+import java.util.List;
+
+import com.example.home.HomeView;
+import com.example.uc4.WorkoutTimerView.Countdown;
+import com.example.uc4.WorkoutTimerView.Phase;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.example.WakeLockTestSupport.RELEASE;
+import static com.example.WakeLockTestSupport.REQUEST;
+import static com.example.WakeLockTestSupport.answerWakeLockCalls;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-@ViewPackages(classes = WorkoutTimerView.class)
+@ViewPackages(classes = { WorkoutTimerView.class, HomeView.class })
 class WorkoutTimerViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersWithStartButton() {
+    void lockIsHeldWhileTheTimerRuns() {
         navigate(WorkoutTimerView.class);
+        answerWakeLockCalls();
         runPendingSignalsTasks();
+        assertBadge("Released");
 
-        assertTrue(
-                findInView(H1.class).all().stream()
-                        .anyMatch(h -> h.getText() != null && h.getText()
-                                .contains("Workout interval timer")),
-                "view should render heading");
-        assertTrue(findInView(Button.class).withText("Start").all().size() == 1,
-                "Start button should render initially");
-        assertTrue(findInView(Button.class).withText("Reset").all().size() == 1,
-                "Reset button should render initially");
+        test(button("Start")).click();
+        assertEquals(List.of(REQUEST), answerWakeLockCalls());
+        runPendingSignalsTasks();
+        assertBadge("Holding — the screen stays on between sets");
+
+        test(button("Pause")).click();
+        assertEquals(List.of(RELEASE), answerWakeLockCalls());
+        runPendingSignalsTasks();
+        assertBadge("Released");
     }
 
     @Test
-    void clickingStartFlipsButtonLabelToPause() {
+    void clockCountsDownWhileRunningAndStopsOnPause()
+            throws InterruptedException {
         navigate(WorkoutTimerView.class);
-        runPendingSignalsTasks();
+        test(button("Start")).click();
 
-        test(findInView(Button.class).withText("Start").single()).click();
-        runPendingSignalsTasks();
+        await().pollInSameThread().atMost(Duration.ofSeconds(5)).until(() -> {
+            runPendingSignalsTasks();
+            return !"00:30".equals(clock());
+        });
 
-        assertTrue(findInView(Button.class).withText("Pause").all().size() == 1,
-                "Start should become Pause once running");
+        test(button("Pause")).click();
+        // A tick that was already running may still land.
+        Thread.sleep(500);
+        runPendingSignalsTasks();
+        String paused = clock();
+        Thread.sleep(2000);
+        runPendingSignalsTasks();
+        assertEquals(paused, clock(), "no tick should arrive while paused");
     }
 
     @Test
-    void resetReturnsToInitialState() {
+    void resetReturnsToTheStartOfAWorkPhase() {
         navigate(WorkoutTimerView.class);
+        test(button("Start")).click();
+        answerWakeLockCalls();
+
+        test(button("Reset")).click();
         runPendingSignalsTasks();
 
-        test(findInView(Button.class).withText("Start").single()).click();
-        runPendingSignalsTasks();
-        test(findInView(Button.class).withText("Reset").single()).click();
-        runPendingSignalsTasks();
-
-        assertTrue(findInView(Button.class).withText("Start").all().size() == 1,
-                "Reset should put the button back to Start");
-        assertClockShows("00:30");
-        assertPhaseShows("WORK");
+        assertEquals(List.of(RELEASE), answerWakeLockCalls());
+        button("Start");
+        assertEquals("00:30", clock());
+        assertEquals("WORK", findInView(Span.class).withClassName("uc4-phase")
+                .single().getText());
     }
 
     @Test
-    void badgeReflectsLockStateWhileRunning() {
+    void leavingWhileRunningReleasesTheLock() {
         navigate(WorkoutTimerView.class);
-        runPendingSignalsTasks();
+        answerWakeLockCalls();
+        test(button("Start")).click();
+        assertEquals(List.of(REQUEST), answerWakeLockCalls());
 
-        assertBadgeContains("Released");
+        navigate(HomeView.class);
 
-        // Start the timer — the effect calls request() on the wake lock.
-        test(findInView(Button.class).withText("Start").single()).click();
-        runPendingSignalsTasks();
-
-        // The browser confirms.
-        WakeLockTestSupport.simulateAcquired();
-        runPendingSignalsTasks();
-        assertBadgeContains("Holding");
-
-        // Pause — the effect calls release(); the browser confirms.
-        test(findInView(Button.class).withText("Pause").single()).click();
-        runPendingSignalsTasks();
-        WakeLockTestSupport.simulateReleased();
-        runPendingSignalsTasks();
-        assertBadgeContains("Released");
+        assertEquals(List.of(RELEASE), answerWakeLockCalls());
     }
 
-    private void assertBadgeContains(String fragment) {
-        assertTrue(
-                findInView(Span.class).all().stream()
-                        .anyMatch(s -> s.getText() != null
-                                && s.getText().contains(fragment)),
-                "expected status badge to contain \"" + fragment + "\"");
+    @Test
+    void phasesAlternateWhenTheCountdownRunsOut() {
+        Countdown lastWorkSecond = new Countdown(Phase.WORK, 1);
+        assertEquals(new Countdown(Phase.WORK, 29), Countdown.START.tick());
+        assertEquals(new Countdown(Phase.REST, WorkoutTimerView.REST_SECONDS),
+                lastWorkSecond.tick());
+        assertEquals(Countdown.START, new Countdown(Phase.REST, 1).tick());
     }
 
-    private void assertClockShows(String text) {
-        assertTrue(
-                findInView(Span.class).all().stream()
-                        .anyMatch(s -> text.equals(s.getText())),
-                "expected clock to show \"" + text + "\"");
+    private Button button(String text) {
+        return findInView(Button.class).withText(text).single();
     }
 
-    private void assertPhaseShows(String text) {
-        assertTrue(
-                findInView(Span.class).all().stream()
-                        .anyMatch(s -> text.equals(s.getText())),
-                "expected phase label to show \"" + text + "\"");
+    private String clock() {
+        return findInView(Span.class).withClassName("uc4-clock").single()
+                .getText();
+    }
+
+    private void assertBadge(String text) {
+        assertEquals(text, findInView(Span.class).withClassName("status-badge")
+                .single().getText());
     }
 }
