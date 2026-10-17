@@ -1,5 +1,7 @@
 package com.example.uc2;
 
+import java.util.List;
+
 import com.example.ScreenOrientationTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -7,71 +9,60 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.screenorientation.ScreenOrientationType;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @ViewPackages(classes = OrientationViewerView.class)
 class OrientationViewerViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersHeadingAndReadouts() {
+    void readoutsArrowAndBadgeTrackTheOrientation() {
         navigate(OrientationViewerView.class);
         runPendingSignalsTasks();
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC2 — Orientation viewer".equals(h.getText())));
-        assertSpanText("UNKNOWN");
-        assertSpanText("Waiting for client bootstrap");
+        assertEquals(List.of("UNKNOWN", "0°", "false", "false"), values());
+        assertEquals("Waiting for the browser to report…", badge());
+
+        setOrientation(ScreenOrientationType.LANDSCAPE_PRIMARY, 90);
+        assertEquals(List.of("LANDSCAPE_PRIMARY", "90°", "true", "false"),
+                values());
+        assertEquals("Supported — current type: landscape-primary", badge());
+        assertEquals("rotate(90deg)", arrowTransform());
+
+        setOrientation(ScreenOrientationType.PORTRAIT_SECONDARY, 180);
+        assertEquals(List.of("PORTRAIT_SECONDARY", "180°", "false", "true"),
+                values());
+        assertEquals("rotate(180deg)", arrowTransform());
+
+        setOrientation(ScreenOrientationType.UNSUPPORTED, 0);
+        assertEquals("Screen Orientation API not supported", badge());
     }
 
-    @Test
-    void readoutsTrackOrientationSignal() {
-        navigate(OrientationViewerView.class);
-        runPendingSignalsTasks();
-
-        ScreenOrientationTestSupport.setScreenOrientation(
-                ScreenOrientationType.LANDSCAPE_PRIMARY, 90);
-        runPendingSignalsTasks();
-
-        assertSpanText("LANDSCAPE_PRIMARY");
-        assertSpanText("90°");
-        assertSpanText("Supported — current type: landscape-primary");
-        assertArrowRotation(90);
-
-        ScreenOrientationTestSupport.setScreenOrientation(
-                ScreenOrientationType.PORTRAIT_SECONDARY, 180);
-        runPendingSignalsTasks();
-
-        assertSpanText("PORTRAIT_SECONDARY");
-        assertSpanText("180°");
-        assertArrowRotation(180);
-
-        ScreenOrientationTestSupport
-                .setScreenOrientation(ScreenOrientationType.UNSUPPORTED, 0);
-        runPendingSignalsTasks();
-        assertSpanText("Screen Orientation API not supported");
+    private List<String> values() {
+        return findInView(Div.class).all().stream()
+                .filter(d -> d.hasClassName("uc2-table")).findFirst()
+                .orElseThrow().getChildren().map(c -> (Span) c)
+                .filter(s -> !s.hasClassName("uc2-label")).map(Span::getText)
+                .toList();
     }
 
-    private void assertSpanText(String fragment) {
-        assertTrue(
-                findInView(Span.class).all().stream()
-                        .anyMatch(s -> s.getText() != null
-                                && s.getText().contains(fragment)),
-                "expected a span containing \"" + fragment + "\"");
+    private String badge() {
+        return findInView(Span.class).all().stream()
+                .filter(s -> s.hasClassName("status-badge")).findFirst()
+                .orElseThrow().getText();
     }
 
-    private void assertArrowRotation(int degrees) {
-        assertTrue(findInView(Div.class).all().stream()
-                .filter(d -> d.getClassNames().contains("uc2-arrow"))
-                .anyMatch(d -> {
-                    String transform = d.getStyle().get("transform");
-                    return transform != null
-                            && transform.contains(degrees + "deg");
-                }),
-                "expected uc2-arrow transform to contain " + degrees + "deg");
+    private String arrowTransform() {
+        return findInView(Div.class).all().stream()
+                .filter(d -> d.hasClassName("uc2-arrow")).findFirst()
+                .orElseThrow().getStyle().get("transform");
+    }
+
+    private void setOrientation(ScreenOrientationType type, int angle) {
+        ScreenOrientationTestSupport.setScreenOrientation(type, angle);
+        runPendingSignalsTasks();
     }
 }

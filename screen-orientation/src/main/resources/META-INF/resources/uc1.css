@@ -9,22 +9,19 @@
     }
 
     .uc1-pane-title {
-        font-weight: 600;
+        font-weight: var(--aura-font-weight-semibold);
         margin-bottom: 0.25rem;
     }
 
     .uc1-container {
         display: flex;
+        flex-direction: column;
         gap: 0.75rem;
         width: 100%;
         max-width: 720px;
     }
 
-    .uc1-container.stacked {
-        flex-direction: column;
-    }
-
-    .uc1-container.side-by-side {
+    .uc1-container.uc1-side-by-side {
         flex-direction: row;
     }
 }
