@@ -1,0 +1,37 @@
+.uc2-view {
+    .uc2-columns {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+        gap: var(--vaadin-gap-l, 1.5rem);
+        width: 100%;
+    }
+
+    .uc2-columns h2 {
+        font-size: var(--aura-font-size-m);
+        margin: 0;
+    }
+
+    .uc2-samples {
+        flex-direction: column;
+        gap: var(--vaadin-gap-s, 0.5rem);
+        width: 100%;
+    }
+
+    .uc2-sample {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--vaadin-gap-s, 0.5rem);
+    }
+
+    .uc2-status {
+        margin: 0;
+        color: var(--vaadin-text-color-secondary);
+    }
+
+    @media (max-width: 800px) {
+        .uc2-columns {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+}

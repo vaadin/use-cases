@@ -12,6 +12,7 @@ public final class AppCatalog {
     }
 
     public static final List<App> APPS = List.of(
+            new App("ai", "AI in Business Apps", "https://ai-cases.fly.dev/"),
             new App("async-ui", "Async UI & Performance",
                     "https://async-ui-cases.fly.dev/"),
             new App("clipboard", "Clipboard API",
