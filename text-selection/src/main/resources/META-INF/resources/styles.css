@@ -1,20 +1,14 @@
-/* Text Selection API use cases — small visual polish */
+/* Text Selection API use cases — rules shared by several views */
 
-.app-title {
-    font-size: var(--aura-font-size-l);
-    margin: 0;
-}
-
+/* A row of fields and buttons that wraps on a narrow screen. */
 .uc-toolbar {
-    display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: center;
+    gap: var(--vaadin-gap-s);
 }
 
 .uc-status {
     color: var(--vaadin-text-color-secondary);
-    font-size: 0.9rem;
+    font-size: var(--aura-font-size-s);
 }
 
 .uc-status.error {
@@ -25,11 +19,11 @@
     color: var(--aura-green-text);
 }
 
-.uc-fixed-textarea {
+.uc-textarea {
     width: 100%;
     max-width: 640px;
 }
 
-.uc-fixed-textarea textarea {
+.uc-textarea textarea {
     font-family: monospace;
 }
