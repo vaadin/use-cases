@@ -92,6 +92,23 @@ class HomeViewTest extends SpringBrowserlessTest {
     private static final UseCase UC27 = new UseCase("UC27",
             "Router State Signal",
             "Reacting to navigation and route parameters through a router state signal");
+    private static final UseCase UC28 = new UseCase("UC28", "Server Log Viewer",
+            "Highlighting log lines that change on the server, but not the user's own edits");
+    private static final UseCase UC29 = new UseCase("UC29", "Profile Auto-Save",
+            "Auto-saving a profile and shipping audit entries without holding the session lock");
+    private static final UseCase UC30 = new UseCase("UC30", "Catalog Filter",
+            "Sharing one filter pass over a catalog between a grid, a count badge and an export");
+    private static final UseCase UC31 = new UseCase("UC31", "Seat Reservation",
+            "Letting exactly one user win a seat when several claim it at once");
+    private static final UseCase UC32 = new UseCase("UC32",
+            "Mutable vs Immutable",
+            "Binding the same form to a mutable entity and to an immutable record");
+    private static final UseCase UC33 = new UseCase("UC33", "Stable Selection",
+            "Keeping the selected order stable when the server pushes an update to it");
+    private static final UseCase UC34 = new UseCase("UC34", "Feature Flags",
+            "Exposing feature flags from a service as read-only signals");
+    private static final UseCase UC35 = new UseCase("UC35", "Kanban Column",
+            "Reordering and bulk-inserting cards in a Kanban column");
     private static final UseCase MUC1 = new UseCase("MUC1", "Shared Chat",
             "Chatting between users with a shared, append-only message list");
     private static final UseCase MUC2 = new UseCase("MUC2",
@@ -121,6 +138,8 @@ class HomeViewTest extends SpringBrowserlessTest {
             new Group("Async loading and AI", List.of(UC14, UC15, UC18, UC19)),
             new Group("Session, URL and app-wide state",
                     List.of(UC13, UC16, UC20, UC21, UC27)),
+            new Group("Advanced Signal API",
+                    List.of(UC28, UC29, UC30, UC31, UC32, UC33, UC34, UC35)),
             new Group("Multi-user collaboration",
                     List.of(MUC1, MUC2, MUC3, MUC4, MUC6, MUC7, MUC8)));
 

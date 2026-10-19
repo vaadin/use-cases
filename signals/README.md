@@ -4,7 +4,7 @@ This repository contains a collection of Vaadin views demonstrating the Signal A
 
 ## Overview
 
-The Vaadin Signal API provides reactive state management for Vaadin Flow applications. This project contains **30 implemented use cases** (23 single-user + 7 multi-user) showcasing various signal patterns and real-world UI scenarios.
+The Vaadin Signal API provides reactive state management for Vaadin Flow applications. This project contains **40 implemented use cases** (33 single-user + 7 multi-user) showcasing various signal patterns and real-world UI scenarios.
 
 ## Use Cases
 
@@ -31,6 +31,14 @@ The Vaadin Signal API provides reactive state management for Vaadin Flow applica
 22. **Two-Way Mapped Signals** - Bidirectional field-to-record binding
 23. **Real-time Dashboard** - Interactive dashboard with charts and live metrics
 24. **VirtualList Notifications** - Notification inbox with VirtualList bound to signal data source
+28. **Server Log Viewer** - Contextual effect that highlights server-side changes but not the user's own edits
+29. **Profile Auto-Save** - Untracked reads for audit attribution and an unbound effect that ships audit entries
+30. **Catalog Filter** - Cached computed signal shared by a grid, a count badge and an export button
+31. **Seat Reservation** - Compare-and-set claims and atomic counter updates under concurrent access
+32. **Mutable vs Immutable Form Models** - The same form bound with a modifier/setter and with an updater/withX
+33. **Stable Selection** - Custom equality that keeps a selection stable across server updates
+34. **Feature Flag Service** - Application-wide flags exposed from a service as read-only signals
+35. **Kanban Column** - List reordering that keeps entry signals, and bulk inserts with one notification
 
 ### Multi-User Collaboration (7 total)
 
@@ -152,4 +160,4 @@ All users see real-time updates via Vaadin's automatic UI synchronization.
 
 **Status**: Active development
 **Last Updated**: 2026-02-16
-**Total Use Cases**: 30 (23 single-user + 7 multi-user)
+**Total Use Cases**: 40 (33 single-user + 7 multi-user)
