@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
+import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
@@ -50,7 +51,7 @@ public class UseCase30View extends VerticalLayout {
             .generate(PRODUCT_COUNT);
 
     final ValueSignal<String> category = new ValueSignal<>(ANY_CATEGORY);
-    final ValueSignal<Double> maxPrice = new ValueSignal<>(5000.0);
+    final ValueSignal<@Nullable Double> maxPrice = new ValueSignal<>(5000.0);
     final ValueSignal<String> search = new ValueSignal<>("");
     final AtomicInteger filterComputations = new AtomicInteger();
     private final ValueSignal<Integer> filterComputationsSignal = new ValueSignal<>(
@@ -59,12 +60,14 @@ public class UseCase30View extends VerticalLayout {
     final Signal<List<Product>> visibleProducts = Signal
             .cached(Signal.computed(() -> {
                 String cat = category.get();
-                double max = maxPrice.get();
+                // An empty Max price field means no price cap.
+                Double max = maxPrice.get();
                 String q = search.get().trim().toLowerCase();
                 List<Product> result = allProducts.stream()
                         .filter(p -> ANY_CATEGORY.equals(cat)
                                 || cat.equals(p.category()))
-                        .filter(p -> p.price() <= max).filter(p -> q.isEmpty()
+                        .filter(p -> max == null || p.price() <= max)
+                        .filter(p -> q.isEmpty()
                                 || p.name().toLowerCase().contains(q))
                         .toList();
                 filterComputationsSignal
@@ -99,6 +102,7 @@ public class UseCase30View extends VerticalLayout {
         categorySelect.bindValue(category, category::set);
 
         NumberField maxPriceField = new NumberField("Max price");
+        maxPriceField.setPlaceholder("No limit");
         maxPriceField.bindValue(maxPrice, maxPrice::set);
 
         TextField searchField = new TextField("Search name");
@@ -116,9 +120,10 @@ public class UseCase30View extends VerticalLayout {
         Span badge = new Span();
         badge.bindText(visibleProducts.map(list -> list.size() + " results"));
         badge.getStyle()
-                .set("padding", "var(--lumo-space-xs) var(--lumo-space-m)")
-                .set("background-color", "var(--lumo-primary-color-10pct)")
-                .set("color", "var(--lumo-primary-text-color)")
+                .set("padding",
+                        "var(--vaadin-padding-xs) var(--vaadin-padding-m)")
+                .set("background-color", "var(--aura-accent-surface)")
+                .set("color", "var(--aura-accent-text-color)")
                 .set("border-radius", "999px").set("font-weight", "bold");
 
         // Consumer #2: export button
@@ -135,8 +140,8 @@ public class UseCase30View extends VerticalLayout {
         Span runs = new Span();
         runs.bindText(
                 filterComputationsSignal.map(n -> "Filter computations: " + n));
-        runs.getStyle().set("color", "var(--lumo-secondary-text-color)")
-                .set("font-size", "var(--lumo-font-size-s)");
+        runs.getStyle().set("color", "var(--vaadin-text-color-secondary)")
+                .set("font-size", "var(--aura-font-size-s)");
 
         HorizontalLayout row = new HorizontalLayout(badge, export, runs);
         row.setAlignItems(
@@ -161,8 +166,9 @@ public class UseCase30View extends VerticalLayout {
 
     private Div buildExplanation() {
         Div box = new Div();
-        box.getStyle().set("background-color", "var(--lumo-contrast-5pct)")
-                .set("padding", "var(--lumo-space-m)")
+        box.getStyle()
+                .set("background-color", "var(--vaadin-background-container)")
+                .set("padding", "var(--vaadin-padding-m)")
                 .set("border-radius", "8px");
 
         H3 title = new H3("Why Signal.cached?");

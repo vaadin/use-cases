@@ -53,7 +53,9 @@ public class UseCase34View extends VerticalLayout {
                         + " views and components receive only Signal references"
                         + " via asReadonly(). The admin panel below flips flags"
                         + " through service methods; the two preview sections"
-                        + " subscribe but can't mutate."));
+                        + " subscribe but can't mutate. The flags are"
+                        + " application-wide: flipping one here changes what"
+                        + " every other visitor sees too."));
 
         add(buildAdminPanel(), buildCheckoutPreview(), buildBetaBadgePreview(),
                 buildExplanation());
@@ -61,8 +63,8 @@ public class UseCase34View extends VerticalLayout {
 
     private Div buildAdminPanel() {
         Div panel = new Div();
-        panel.getStyle().set("padding", "var(--lumo-space-m)")
-                .set("background-color", "var(--lumo-contrast-5pct)")
+        panel.getStyle().set("padding", "var(--vaadin-padding-m)")
+                .set("background-color", "var(--vaadin-background-container)")
                 .set("border-radius", "8px");
 
         H3 header = new H3("Admin: flip flags");
@@ -80,10 +82,10 @@ public class UseCase34View extends VerticalLayout {
 
     private Div buildCheckoutPreview() {
         Div panel = new Div();
-        panel.getStyle().set("padding", "var(--lumo-space-m)")
-                .set("background-color", "var(--lumo-base-color)")
+        panel.getStyle().set("padding", "var(--vaadin-padding-m)")
+                .set("background-color", "var(--vaadin-background-color)")
                 .set("border-radius", "8px")
-                .set("border", "1px solid var(--lumo-contrast-20pct)");
+                .set("border", "1px solid var(--vaadin-border-color)");
 
         H3 header = new H3("Customer checkout preview");
         header.getStyle().set("margin-top", "0");
@@ -115,10 +117,10 @@ public class UseCase34View extends VerticalLayout {
 
     private Div buildBetaBadgePreview() {
         Div panel = new Div();
-        panel.getStyle().set("padding", "var(--lumo-space-m)")
-                .set("background-color", "var(--lumo-base-color)")
+        panel.getStyle().set("padding", "var(--vaadin-padding-m)")
+                .set("background-color", "var(--vaadin-background-color)")
                 .set("border-radius", "8px")
-                .set("border", "1px solid var(--lumo-contrast-20pct)");
+                .set("border", "1px solid var(--vaadin-border-color)");
 
         H3 header = new H3("Navbar preview");
         header.getStyle().set("margin-top", "0");
@@ -130,11 +132,10 @@ public class UseCase34View extends VerticalLayout {
 
         Span betaBadge = new Span("BETA");
         betaBadge.bindVisible(betaUiSignal);
-        betaBadge.getStyle()
-                .set("background-color", "var(--lumo-primary-color)")
+        betaBadge.getStyle().set("background-color", "var(--aura-accent-color)")
                 .set("color", "white").set("padding", "2px 8px")
                 .set("border-radius", "12px")
-                .set("font-size", "var(--lumo-font-size-s)")
+                .set("font-size", "var(--aura-font-size-s)")
                 .set("font-weight", "bold");
 
         navbar.add(betaBadge);
@@ -144,8 +145,9 @@ public class UseCase34View extends VerticalLayout {
 
     private Div buildExplanation() {
         Div box = new Div();
-        box.getStyle().set("background-color", "var(--lumo-contrast-5pct)")
-                .set("padding", "var(--lumo-space-m)")
+        box.getStyle()
+                .set("background-color", "var(--vaadin-background-container)")
+                .set("padding", "var(--vaadin-padding-m)")
                 .set("border-radius", "8px");
 
         H3 title = new H3("Why asReadonly()?");

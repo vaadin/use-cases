@@ -91,8 +91,9 @@ public class UseCase33View extends VerticalLayout {
 
     private Div buildOrderList() {
         Div panel = new Div();
-        panel.getStyle().set("flex", "1").set("padding", "var(--lumo-space-m)")
-                .set("background-color", "var(--lumo-contrast-5pct)")
+        panel.getStyle().set("flex", "1")
+                .set("padding", "var(--vaadin-padding-m)")
+                .set("background-color", "var(--vaadin-background-container)")
                 .set("border-radius", "8px");
 
         H3 header = new H3("Orders");
@@ -100,17 +101,17 @@ public class UseCase33View extends VerticalLayout {
 
         Div rows = new Div();
         rows.getStyle().set("display", "flex").set("flex-direction", "column")
-                .set("gap", "var(--lumo-space-xs)");
+                .set("gap", "var(--vaadin-gap-xs)");
         rows.bindChildren(orders, entry -> {
             Div row = new Div();
-            row.getStyle().set("padding", "var(--lumo-space-s)")
+            row.getStyle().set("padding", "var(--vaadin-padding-s)")
                     .set("border-radius", "4px").set("cursor", "pointer")
-                    .set("background-color", "var(--lumo-base-color)");
+                    .set("background-color", "var(--vaadin-background-color)");
             row.getStyle().bind("border-left", Signal.computed(() -> {
                 Order o = entry.get();
                 Order sel = selected.get();
                 boolean isSelected = sel != null && sel.id() == o.id();
-                return isSelected ? "4px solid var(--lumo-primary-color)"
+                return isSelected ? "4px solid var(--aura-accent-color)"
                         : "4px solid transparent";
             }));
 
@@ -128,8 +129,9 @@ public class UseCase33View extends VerticalLayout {
 
     private Div buildDetailsPane() {
         Div panel = new Div();
-        panel.getStyle().set("flex", "1").set("padding", "var(--lumo-space-m)")
-                .set("background-color", "var(--lumo-contrast-5pct)")
+        panel.getStyle().set("flex", "1")
+                .set("padding", "var(--vaadin-padding-m)")
+                .set("background-color", "var(--vaadin-background-container)")
                 .set("border-radius", "8px");
 
         H3 header = new H3("Details");
@@ -137,7 +139,7 @@ public class UseCase33View extends VerticalLayout {
 
         Span empty = new Span("(No order selected)");
         empty.bindVisible(Signal.computed(() -> selected.get() == null));
-        empty.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        empty.getStyle().set("color", "var(--vaadin-text-color-secondary)");
 
         // Pull live data from the orders list rather than the selection
         // signal — so status changes are visible even though the selection
@@ -173,9 +175,9 @@ public class UseCase33View extends VerticalLayout {
         animationCount.bindText(
                 animationsSignal.map(n -> "Open animations played: " + n));
         animationCount.getStyle().set("display", "block")
-                .set("margin-top", "var(--lumo-space-m)")
-                .set("color", "var(--lumo-secondary-text-color)")
-                .set("font-size", "var(--lumo-font-size-s)");
+                .set("margin-top", "var(--vaadin-gap-m)")
+                .set("color", "var(--vaadin-text-color-secondary)")
+                .set("font-size", "var(--aura-font-size-s)");
 
         panel.add(header, empty, customer, status, total, animationCount);
         return panel;
@@ -188,8 +190,9 @@ public class UseCase33View extends VerticalLayout {
 
     private Div buildServerPushSection() {
         Div section = new Div();
-        section.getStyle().set("background-color", "var(--lumo-contrast-5pct)")
-                .set("padding", "var(--lumo-space-m)")
+        section.getStyle()
+                .set("background-color", "var(--vaadin-background-container)")
+                .set("padding", "var(--vaadin-padding-m)")
                 .set("border-radius", "8px");
 
         H3 header = new H3(
@@ -232,8 +235,9 @@ public class UseCase33View extends VerticalLayout {
 
     private Div buildExplanation() {
         Div box = new Div();
-        box.getStyle().set("background-color", "var(--lumo-contrast-5pct)")
-                .set("padding", "var(--lumo-space-m)")
+        box.getStyle()
+                .set("background-color", "var(--vaadin-background-container)")
+                .set("padding", "var(--vaadin-padding-m)")
                 .set("border-radius", "8px");
 
         H3 title = new H3("Why a custom equality checker?");

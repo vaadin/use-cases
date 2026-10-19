@@ -88,8 +88,9 @@ public class UseCase32View extends VerticalLayout {
 
     private Div buildMutablePanel() {
         Div panel = new Div();
-        panel.getStyle().set("flex", "1").set("padding", "var(--lumo-space-m)")
-                .set("background-color", "var(--lumo-contrast-5pct)")
+        panel.getStyle().set("flex", "1")
+                .set("padding", "var(--vaadin-padding-m)")
+                .set("background-color", "var(--vaadin-background-container)")
                 .set("border-radius", "8px");
 
         H3 header = new H3("Mutable Customer (JPA) + modifier(setter)");
@@ -115,8 +116,8 @@ public class UseCase32View extends VerticalLayout {
         runs.bindText(entityNotificationsSignal
                 .map(n -> "Effect notifications: " + n));
         runs.getStyle().set("display", "block")
-                .set("color", "var(--lumo-secondary-text-color)")
-                .set("font-size", "var(--lumo-font-size-s)");
+                .set("color", "var(--vaadin-text-color-secondary)")
+                .set("font-size", "var(--aura-font-size-s)");
 
         Signal.effect(panel, () -> {
             entitySignal.get();
@@ -130,8 +131,9 @@ public class UseCase32View extends VerticalLayout {
 
     private Div buildImmutablePanel() {
         Div panel = new Div();
-        panel.getStyle().set("flex", "1").set("padding", "var(--lumo-space-m)")
-                .set("background-color", "var(--lumo-contrast-5pct)")
+        panel.getStyle().set("flex", "1")
+                .set("padding", "var(--vaadin-padding-m)")
+                .set("background-color", "var(--vaadin-background-container)")
                 .set("border-radius", "8px");
 
         H3 header = new H3("Immutable CustomerDto + updater(withX)");
@@ -157,8 +159,8 @@ public class UseCase32View extends VerticalLayout {
         runs.bindText(
                 dtoNotificationsSignal.map(n -> "Effect notifications: " + n));
         runs.getStyle().set("display", "block")
-                .set("color", "var(--lumo-secondary-text-color)")
-                .set("font-size", "var(--lumo-font-size-s)");
+                .set("color", "var(--vaadin-text-color-secondary)")
+                .set("font-size", "var(--aura-font-size-s)");
 
         Signal.effect(panel, () -> {
             dtoSignal.get();
@@ -171,8 +173,9 @@ public class UseCase32View extends VerticalLayout {
 
     private Div buildExplanation() {
         Div box = new Div();
-        box.getStyle().set("background-color", "var(--lumo-contrast-5pct)")
-                .set("padding", "var(--lumo-space-m)")
+        box.getStyle()
+                .set("background-color", "var(--vaadin-background-container)")
+                .set("padding", "var(--vaadin-padding-m)")
                 .set("border-radius", "8px");
 
         H3 title = new H3("When to pick which?");

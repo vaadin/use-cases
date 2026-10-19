@@ -131,19 +131,20 @@ public class UseCase35View extends VerticalLayout {
 
     private Div buildColumn() {
         Div column = new Div();
-        column.getStyle().set("background-color", "var(--lumo-contrast-5pct)")
-                .set("padding", "var(--lumo-space-m)")
+        column.getStyle()
+                .set("background-color", "var(--vaadin-background-container)")
+                .set("padding", "var(--vaadin-padding-m)")
                 .set("border-radius", "8px").set("min-height", "300px");
 
         Span count = new Span();
         count.bindText(Signal
                 .computed(() -> "To do (" + cards.get().size() + " cards):"));
         count.getStyle().set("font-weight", "bold").set("display", "block")
-                .set("margin-bottom", "var(--lumo-space-s)");
+                .set("margin-bottom", "var(--vaadin-gap-s)");
 
         Div stack = new Div();
         stack.getStyle().set("display", "flex").set("flex-direction", "column")
-                .set("gap", "var(--lumo-space-xs)");
+                .set("gap", "var(--vaadin-gap-xs)");
         stack.bindChildren(cards, this::buildCard);
 
         column.add(count, stack);
@@ -152,12 +153,12 @@ public class UseCase35View extends VerticalLayout {
 
     private Div buildCard(ValueSignal<Card> entry) {
         Div card = new Div();
-        card.getStyle().set("padding", "var(--lumo-space-s)")
-                .set("background-color", "var(--lumo-base-color)")
+        card.getStyle().set("padding", "var(--vaadin-padding-s)")
+                .set("background-color", "var(--vaadin-background-color)")
                 .set("border-radius", "4px")
-                .set("box-shadow", "var(--lumo-box-shadow-xs)")
+                .set("box-shadow", "var(--aura-shadow-xs)")
                 .set("display", "flex").set("align-items", "center")
-                .set("gap", "var(--lumo-space-s)");
+                .set("gap", "var(--vaadin-gap-s)");
 
         Button up = new Button("↑", e -> {
             int idx = cards.peek().indexOf(entry);
@@ -178,13 +179,14 @@ public class UseCase35View extends VerticalLayout {
 
         Span priority = new Span();
         priority.bindText(entry.map(c -> c.priority().name()));
-        priority.getStyle().set("font-size", "var(--lumo-font-size-s)")
+        priority.getStyle().set("font-size", "var(--aura-font-size-s)")
                 .set("padding", "2px 8px").set("border-radius", "12px");
         priority.getStyle().bind("background-color",
                 entry.map(c -> switch (c.priority()) {
-                case HIGH -> "var(--lumo-error-color-10pct)";
-                case MEDIUM -> "var(--lumo-primary-color-10pct)";
-                case LOW -> "var(--lumo-contrast-10pct)";
+                case HIGH ->
+                    "color-mix(in srgb, var(--aura-red) 10%, transparent)";
+                case MEDIUM -> "var(--aura-accent-surface)";
+                case LOW -> "var(--vaadin-border-color)";
                 }));
 
         Button remove = new Button("✕", e -> cards.remove(entry));
@@ -195,8 +197,9 @@ public class UseCase35View extends VerticalLayout {
 
     private Div buildExplanation() {
         Div box = new Div();
-        box.getStyle().set("background-color", "var(--lumo-contrast-5pct)")
-                .set("padding", "var(--lumo-space-m)")
+        box.getStyle()
+                .set("background-color", "var(--vaadin-background-container)")
+                .set("padding", "var(--vaadin-padding-m)")
                 .set("border-radius", "8px");
 
         H3 title = new H3("Why moveTo / insertAllAt / insertAllFirst?");

@@ -80,7 +80,7 @@ public class UseCase31View extends VerticalLayout {
         Div grid = new Div();
         grid.getStyle().set("display", "grid")
                 .set("grid-template-columns", "repeat(4, 1fr)")
-                .set("gap", "var(--lumo-space-s)");
+                .set("gap", "var(--vaadin-gap-s)");
 
         for (int i = 0; i < SEAT_COUNT; i++) {
             int seatNumber = i + 1;
@@ -93,21 +93,21 @@ public class UseCase31View extends VerticalLayout {
     private Div buildSeatTile(int seatNumber,
             ValueSignal<@Nullable String> seat, TextField nameField) {
         Div tile = new Div();
-        tile.getStyle().set("padding", "var(--lumo-space-m)")
+        tile.getStyle().set("padding", "var(--vaadin-padding-m)")
                 .set("border-radius", "8px").set("text-align", "center")
                 .set("cursor", "pointer")
-                .set("border", "1px solid var(--lumo-contrast-20pct)");
+                .set("border", "1px solid var(--vaadin-border-color)");
         tile.getStyle().bind("background-color",
                 seat.map(occupant -> occupant == null
-                        ? "var(--lumo-success-color-10pct)"
-                        : "var(--lumo-error-color-10pct)"));
+                        ? "color-mix(in srgb, var(--aura-green) 10%, transparent)"
+                        : "color-mix(in srgb, var(--aura-red) 10%, transparent)"));
 
         Span title = new Span("Seat " + seatNumber);
         title.getStyle().set("display", "block").set("font-weight", "bold");
         Span occupant = new Span();
         occupant.bindText(seat.map(o -> o == null ? "Available" : o));
         occupant.getStyle().set("display", "block").set("color",
-                "var(--lumo-secondary-text-color)");
+                "var(--vaadin-text-color-secondary)");
 
         tile.add(title, occupant);
         tile.addClickListener(e -> {
@@ -138,8 +138,9 @@ public class UseCase31View extends VerticalLayout {
 
     private Div buildContendedClaim() {
         Div section = new Div();
-        section.getStyle().set("background-color", "var(--lumo-contrast-5pct)")
-                .set("padding", "var(--lumo-space-m)")
+        section.getStyle()
+                .set("background-color", "var(--vaadin-background-container)")
+                .set("padding", "var(--vaadin-padding-m)")
                 .set("border-radius", "8px");
 
         H3 title = new H3("Simulate 4 devices racing to claim seat 1");
@@ -190,8 +191,9 @@ public class UseCase31View extends VerticalLayout {
 
     private Div buildReservationCounter() {
         Div section = new Div();
-        section.getStyle().set("background-color", "var(--lumo-contrast-5pct)")
-                .set("padding", "var(--lumo-space-m)")
+        section.getStyle()
+                .set("background-color", "var(--vaadin-background-container)")
+                .set("padding", "var(--vaadin-padding-m)")
                 .set("border-radius", "8px");
 
         H3 title = new H3("Reservations today");
@@ -199,9 +201,9 @@ public class UseCase31View extends VerticalLayout {
 
         Span value = new Span();
         value.bindText(reservationCount.map(n -> "Total: " + n));
-        value.getStyle().set("font-size", "var(--lumo-font-size-l)")
+        value.getStyle().set("font-size", "var(--aura-font-size-l)")
                 .set("font-weight", "bold")
-                .set("margin-right", "var(--lumo-space-m)");
+                .set("margin-right", "var(--vaadin-gap-m)");
 
         Button burst = new Button(
                 "Simulate 6 admin tools registering walk-ins at once", e -> {
@@ -237,8 +239,9 @@ public class UseCase31View extends VerticalLayout {
 
     private Div buildExplanation() {
         Div box = new Div();
-        box.getStyle().set("background-color", "var(--lumo-contrast-5pct)")
-                .set("padding", "var(--lumo-space-m)")
+        box.getStyle()
+                .set("background-color", "var(--vaadin-background-container)")
+                .set("padding", "var(--vaadin-padding-m)")
                 .set("border-radius", "8px");
 
         H3 title = new H3("Why CAS + update?");

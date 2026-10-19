@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.example.common.UseCaseDescription;
 import com.example.usecase23.SchedulerService;
@@ -27,8 +28,8 @@ import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * Server log viewer. Lines arrive from a simulated background feed every second
- * and pulse yellow when added. The viewer also lets a triage operator
+ * Server log viewer. Lines arrive from a simulated background feed every 1.5
+ * seconds and pulse blue when added. The viewer also lets a triage operator
  * re-classify a line's severity through a dropdown; user-driven severity edits
  * must NOT pulse, otherwise the operator can't distinguish "the server just
  * sent me something new" from "I just changed something".
@@ -55,6 +56,7 @@ public class UseCase28View extends VerticalLayout {
             "Payment captured for order #4821", "Worker heartbeat received" };
 
     final ListSignal<LogEntry> entries = new ListSignal<>();
+    final AtomicInteger backgroundFlashes = new AtomicInteger();
     private final Random random = new Random();
     private @Nullable String taskId;
 
@@ -64,7 +66,7 @@ public class UseCase28View extends VerticalLayout {
         setPadding(true);
 
         add(new H2("Use Case 28: Server log viewer"), new Paragraph(
-                "Log lines arrive every second from a simulated server feed."
+                "Log lines arrive every 1.5 seconds from a simulated server feed."
                         + " Each row pulses when it first appears AND when its"
                         + " severity is re-classified by the server — but"
                         + " never when the operator re-classifies it via the"
@@ -146,12 +148,13 @@ public class UseCase28View extends VerticalLayout {
         Div row = new Div();
         row.getStyle().set("display", "grid")
                 .set("grid-template-columns", "100px 130px 1fr 110px")
-                .set("gap", "var(--lumo-space-s)")
-                .set("padding", "var(--lumo-space-s) var(--lumo-space-m)")
-                .set("border-bottom", "2px solid var(--lumo-contrast-20pct)")
+                .set("gap", "var(--vaadin-gap-s)")
+                .set("padding",
+                        "var(--vaadin-padding-s) var(--vaadin-padding-m)")
+                .set("border-bottom", "2px solid var(--vaadin-border-color)")
                 .set("font-weight", "bold")
-                .set("font-size", "var(--lumo-font-size-s)")
-                .set("color", "var(--lumo-secondary-text-color)");
+                .set("font-size", "var(--aura-font-size-s)")
+                .set("color", "var(--vaadin-text-color-secondary)");
         row.add(new Span("Time"), new Span("Source"), new Span("Message"),
                 new Span("Severity"));
         return row;
@@ -161,15 +164,16 @@ public class UseCase28View extends VerticalLayout {
         Div row = new Div();
         row.getStyle().set("display", "grid")
                 .set("grid-template-columns", "100px 130px 1fr 110px")
-                .set("gap", "var(--lumo-space-s)").set("align-items", "center")
-                .set("padding", "var(--lumo-space-xs) var(--lumo-space-m)")
-                .set("border-bottom", "1px solid var(--lumo-contrast-10pct)");
+                .set("gap", "var(--vaadin-gap-s)").set("align-items", "center")
+                .set("padding",
+                        "var(--vaadin-padding-xs) var(--vaadin-padding-m)")
+                .set("border-bottom", "1px solid var(--vaadin-border-color)");
 
         Span time = new Span();
         time.bindText(
                 entrySignal.map(e -> e.timestamp().withNano(0).toString()));
         time.getStyle().set("font-family", "monospace").set("color",
-                "var(--lumo-secondary-text-color)");
+                "var(--vaadin-text-color-secondary)");
 
         Span source = new Span();
         source.bindText(entrySignal.map(LogEntry::source));
@@ -188,6 +192,7 @@ public class UseCase28View extends VerticalLayout {
         Signal.effect(row, ctx -> {
             entrySignal.get();
             if (ctx.isBackgroundChange()) {
+                backgroundFlashes.incrementAndGet();
                 row.getElement().flashClass("uc28-flash");
             }
         });

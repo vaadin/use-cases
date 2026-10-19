@@ -50,7 +50,6 @@ public class UseCase29View extends VerticalLayout {
     final ValueSignal<String> currentAdmin = new ValueSignal<>("alice");
     final ListSignal<AuditEntry> auditLog = new ListSignal<>();
     final ValueSignal<Integer> shippedToRemote = new ValueSignal<>(0);
-    final AtomicInteger shipperRuns = new AtomicInteger();
 
     private final AtomicInteger remoteShipped = new AtomicInteger();
     private boolean firstAutosaveCall = true;
@@ -119,7 +118,6 @@ public class UseCase29View extends VerticalLayout {
         // audit entries to a remote service (simulated by an in-memory
         // counter).
         Registration shipper = Signal.unboundEffect(() -> {
-            shipperRuns.incrementAndGet();
             int currentSize = auditLog.get().size();
             int alreadyShipped = remoteShipped.get();
             if (currentSize > alreadyShipped) {
@@ -132,8 +130,8 @@ public class UseCase29View extends VerticalLayout {
 
     private Div buildSidePanel() {
         Div panel = new Div();
-        panel.getStyle().set("padding", "var(--lumo-space-m)")
-                .set("background-color", "var(--lumo-contrast-5pct)")
+        panel.getStyle().set("padding", "var(--vaadin-padding-m)")
+                .set("background-color", "var(--vaadin-background-container)")
                 .set("border-radius", "8px");
 
         H3 saveStats = new H3("Audit");
@@ -148,16 +146,16 @@ public class UseCase29View extends VerticalLayout {
         shippedCount
                 .bindText(shippedToRemote.map(n -> "Shipped to remote: " + n));
         shippedCount.getStyle().set("display", "block").set("color",
-                "var(--lumo-secondary-text-color)");
+                "var(--vaadin-text-color-secondary)");
 
         H3 logHeader = new H3("Recent saves");
-        logHeader.getStyle().set("margin-top", "var(--lumo-space-m)");
+        logHeader.getStyle().set("margin-top", "var(--vaadin-gap-m)");
 
         Div logList = new Div();
         logList.getStyle().set("font-family", "monospace")
-                .set("font-size", "var(--lumo-font-size-s)")
-                .set("background-color", "var(--lumo-base-color)")
-                .set("padding", "var(--lumo-space-s)")
+                .set("font-size", "var(--aura-font-size-s)")
+                .set("background-color", "var(--vaadin-background-color)")
+                .set("padding", "var(--vaadin-padding-s)")
                 .set("border-radius", "4px").set("max-height", "240px")
                 .set("overflow-y", "auto");
         logList.bindChildren(auditLog, entry -> {
@@ -173,8 +171,9 @@ public class UseCase29View extends VerticalLayout {
 
     private Div buildExplanation() {
         Div box = new Div();
-        box.getStyle().set("background-color", "var(--lumo-contrast-5pct)")
-                .set("padding", "var(--lumo-space-m)")
+        box.getStyle()
+                .set("background-color", "var(--vaadin-background-container)")
+                .set("padding", "var(--vaadin-padding-m)")
                 .set("border-radius", "8px");
 
         H3 title = new H3("Why these signal APIs?");
