@@ -1,0 +1,18 @@
+.uc4-topics {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vaadin-gap-s, 0.5rem);
+}
+
+.uc4-topics h2 {
+    margin: 0;
+}
+
+.uc4-address {
+    font-family: monospace;
+    overflow-wrap: anywhere;
+}
+
+.uc4-viewer {
+    height: 75vh;
+}

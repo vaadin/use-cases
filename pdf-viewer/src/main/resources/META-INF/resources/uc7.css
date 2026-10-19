@@ -1,0 +1,23 @@
+.uc7-checklist {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.uc7-checklist h2 {
+    margin: 0 0 var(--vaadin-padding-s, 0.5rem);
+}
+
+.uc7-checklist vaadin-button {
+    white-space: normal;
+    height: auto;
+    text-align: start;
+}
+
+.uc7-result {
+    font-weight: 600;
+}
+
+.uc7-viewer {
+    height: 75vh;
+}
