@@ -90,17 +90,6 @@ API get no annotation. Once that change is merged, switch back to the mainline
 snapshot, remove the annotations and remove the workarounds the change makes
 unnecessary.
 
-Snapshot API is not in any released documentation. To see what a class
-offers, unpack the sources of the pinned Vaadin artifacts once and search them,
-instead of inspecting the binary jars class by class:
-
-```bash
-./mvnw -pl <module> -am dependency:unpack-dependencies \
-    -Dclassifier=sources -DincludeGroupIds=com.vaadin \
-    -Dmdep.unpack.includes='**/*.java'
-# The sources are in <module>/target/dependency/
-```
-
 After the parent pom moves to a newer snapshot, an app can start with a
 frontend bundle built against the old client. The browser then shows
 client-side errors from Vaadin internals, such as `e.Atmosphere is not a
