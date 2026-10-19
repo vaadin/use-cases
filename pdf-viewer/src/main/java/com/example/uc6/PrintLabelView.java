@@ -1,5 +1,6 @@
 package com.example.uc6;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.documents.SampleDocuments;
 import com.example.documents.SampleDocuments.Order;
@@ -33,6 +34,7 @@ import com.vaadin.flow.router.Route;
  * cancelled, the server is not told, so the list can not mark the order as
  * printed.
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Print a shipping label")
 @UseCaseDescription("Printing a document from a button in the app's own UI")

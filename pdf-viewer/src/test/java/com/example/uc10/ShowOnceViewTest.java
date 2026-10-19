@@ -1,5 +1,10 @@
 package com.example.uc10;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import com.example.documents.Pdf;
+import com.example.documents.SampleDocuments;
 import com.example.pdfviewer.PdfViewer;
 import com.example.pdfviewer.PdfViewerTester;
 import org.junit.jupiter.api.Test;
@@ -11,11 +16,20 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinResponse;
+import com.vaadin.flow.server.streams.DownloadEvent;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ViewPackages(classes = ShowOnceView.class)
@@ -25,16 +39,27 @@ class ShowOnceViewTest extends SpringBrowserlessTest {
     private ApplicationContext context;
 
     @Test
-    void theDocumentIsSentForTheFirstRequestOnly() {
+    void theDocumentIsSentForTheFirstRequestOnly() throws IOException {
         OneTimeDocument document = new OneTimeDocument();
+        Pdf briefing = SampleDocuments.boardBriefing();
+        DownloadHandler handler = document.handler(briefing);
         assertNull(document.openedAt());
 
-        assertTrue(document.take());
+        ByteArrayOutputStream first = new ByteArrayOutputStream();
+        handler.handleDownloadRequest(request(first));
+        assertArrayEquals(briefing.bytes(), first.toByteArray());
         assertNotNull(document.openedAt());
-        assertFalse(document.take(), "a reload or second tab gets nothing");
+
+        ByteArrayOutputStream second = new ByteArrayOutputStream();
+        DownloadEvent reload = request(second);
+        handler.handleDownloadRequest(reload);
+        verify(reload.getResponse()).setStatus(410);
+        assertEquals(0, second.size(), "a reload or second tab gets nothing");
 
         document.reset();
-        assertTrue(document.take());
+        ByteArrayOutputStream again = new ByteArrayOutputStream();
+        handler.handleDownloadRequest(request(again));
+        assertArrayEquals(briefing.bytes(), again.toByteArray());
     }
 
     @Test
@@ -74,6 +99,14 @@ class ShowOnceViewTest extends SpringBrowserlessTest {
 
         assertTrue(button("Open the briefing").isEnabled());
         assertTrue(status().startsWith("Not opened yet"), status());
+    }
+
+    private static DownloadEvent request(ByteArrayOutputStream body) {
+        DownloadEvent event = mock(DownloadEvent.class);
+        when(event.getRequest()).thenReturn(mock(VaadinRequest.class));
+        when(event.getResponse()).thenReturn(mock(VaadinResponse.class));
+        when(event.getOutputStream()).thenReturn(body);
+        return event;
     }
 
     private OneTimeDocument document() {

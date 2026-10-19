@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Set;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.daterangepicker.DateRangePicker;
 import com.example.views.ApiGap;
@@ -43,6 +44,7 @@ import com.vaadin.flow.router.Route;
  * picker can not limit the length of a range, so the calendar still offers end
  * dates past the days left.
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Request time off")
 @UseCaseDescription("Asking for days off in a validated form that counts working days")

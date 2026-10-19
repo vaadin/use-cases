@@ -2,6 +2,7 @@ package com.example.uc11;
 
 import java.util.Map;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.documents.SampleDocuments;
 import com.example.documents.SampleDocuments.Manual;
@@ -34,6 +35,7 @@ import com.vaadin.flow.router.Route;
  * {@code page-changed}, and offers its own "Back to contents" button, which
  * sets the page to 1.
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc11", layout = MainLayout.class)
 @PageTitle("UC11 — Follow the contents page")
 @UseCaseDescription("Moving through a document with the links on its contents page")

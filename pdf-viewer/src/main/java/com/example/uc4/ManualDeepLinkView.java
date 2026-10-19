@@ -3,6 +3,7 @@ package com.example.uc4;
 import java.util.List;
 import java.util.Map;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.documents.SampleDocuments;
 import com.example.documents.SampleDocuments.Manual;
@@ -42,6 +43,7 @@ import com.vaadin.flow.router.RouterLink;
  * A link past the last page is corrected to the last page once the guide has
  * loaded, because the viewer does not do that itself.
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Open the manual at a page")
 @UseCaseDescription("Linking into a long user guide at the page that answers a question")

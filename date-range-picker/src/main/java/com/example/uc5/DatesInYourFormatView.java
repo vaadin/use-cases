@@ -5,6 +5,7 @@ import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.Locale;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.daterangepicker.DateRangePicker;
 import com.example.views.ApiGap;
@@ -32,6 +33,7 @@ import com.vaadin.flow.router.Route;
  * the browser's ({@code WebBrowser#getLocale}). The UI's locale would not do:
  * without an {@code I18NProvider}, Vaadin leaves it at the server's default.
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Dates in your format")
 @UseCaseDescription("Typing and showing a range in the user's date format and language")

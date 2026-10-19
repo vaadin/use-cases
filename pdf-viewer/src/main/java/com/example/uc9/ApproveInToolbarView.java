@@ -3,6 +3,7 @@ package com.example.uc9;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.documents.SampleDocuments;
 import com.example.documents.SampleDocuments.PurchaseOrder;
@@ -37,6 +38,7 @@ import com.vaadin.flow.router.Route;
  * controls, so {@code PdfViewer#addToToolbar} puts them into the slot of the
  * viewer's own action buttons (API-GAPS.md #7).
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc9", layout = MainLayout.class)
 @PageTitle("UC9 — Approve in the toolbar")
 @UseCaseDescription("Adding the app's own actions, with tooltips, to the viewer's toolbar")

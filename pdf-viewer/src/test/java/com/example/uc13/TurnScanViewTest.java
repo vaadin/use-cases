@@ -42,6 +42,9 @@ class TurnScanViewTest extends SpringBrowserlessTest {
         test(button("Turn left")).click();
 
         assertNotEquals(src, viewer.getElement().getAttribute("src"));
+        // The new document opens at page 1, then the view goes back to 2.
+        tester.scrollTo(1);
+        tester.load(2, "Delivery Note DN-5521");
         assertEquals(2, viewer.getPage());
         assertEquals("Page 2 is now stored upright.", status());
 

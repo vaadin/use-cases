@@ -1,5 +1,6 @@
 package com.example.uc13;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.documents.Pdf;
 import com.example.documents.SampleDocuments;
@@ -32,6 +33,7 @@ import com.vaadin.flow.router.Route;
  * page upright. A real application would save the turned file in place of the
  * scan; this view keeps it for as long as it is open.
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc13", layout = MainLayout.class)
 @PageTitle("UC13 — Turn a sideways scan")
 @UseCaseDescription("Turning a page that was scanned sideways, and keeping it turned")

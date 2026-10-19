@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.daterangepicker.DateRangePicker;
 import com.example.views.ApiGap;
@@ -43,6 +44,7 @@ import com.vaadin.flow.router.Route;
  * calendar through the connector of Flow's {@code DatePicker}, which is not
  * public API.
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Book a stay")
 @UseCaseDescription("Picking check-in and check-out around fully booked nights")

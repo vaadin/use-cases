@@ -3,6 +3,7 @@ package com.example.uc5;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.documents.SampleDocuments;
 import com.example.documents.SampleDocuments.ExpenseClaim;
@@ -38,6 +39,7 @@ import com.vaadin.flow.router.Route;
  * The first claim asks for more than the receipt shows; the point of the view
  * is that the approver can see that without leaving the form.
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Check against the receipt")
 @UseCaseDescription("Comparing an expense claim with its receipt side by side")

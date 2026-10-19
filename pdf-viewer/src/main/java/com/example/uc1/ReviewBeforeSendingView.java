@@ -3,6 +3,7 @@ package com.example.uc1;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.documents.SampleDocuments;
 import com.example.documents.SampleDocuments.Invoice;
@@ -33,6 +34,7 @@ import com.vaadin.flow.router.Route;
  * failed to generate, or that the browser could not show, can not be sent
  * unseen.
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Check before sending")
 @UseCaseDescription("Showing a generated invoice inside the app before it is sent")

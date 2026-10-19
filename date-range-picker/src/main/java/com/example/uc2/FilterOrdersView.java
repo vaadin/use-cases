@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.data.Order;
 import com.example.daterangepicker.DateRangePicker;
@@ -42,6 +43,7 @@ import com.vaadin.flow.router.Route;
  * {@code getStart()} and {@code getEnd()} instead of the value, so an open end
  * still filters.
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Filter by period")
 @UseCaseDescription("Filtering a list to a period, with quick buttons for common periods")

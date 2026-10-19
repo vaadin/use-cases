@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.data.Order;
 import com.example.daterangepicker.DateRangePicker;
@@ -35,6 +36,7 @@ import com.vaadin.flow.router.Route;
  * dash, an em dash, a hyphen with spaces or the word "to" between the dates.
  * The calendar then always picks the whole range.
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — One field for the range")
 @UseCaseDescription("Fitting a range into one input in a narrow toolbar")

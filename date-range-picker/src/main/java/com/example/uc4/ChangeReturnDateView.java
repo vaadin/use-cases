@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.daterangepicker.DateRangePicker;
 import com.example.views.ApiGap;
@@ -37,6 +38,7 @@ import com.vaadin.flow.router.Route;
  * date back if a changed one arrives, because the browser can not be trusted to
  * enforce it.
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Change the return date")
 @UseCaseDescription("Moving the end of a range whose start can no longer change")

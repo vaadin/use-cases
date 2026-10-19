@@ -2,6 +2,7 @@ package com.example.uc3;
 
 import java.util.List;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.documents.Pdf;
 import com.example.documents.SampleDocuments;
@@ -43,6 +44,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * setting the file name to "Travel policy" would also change the name the file
  * is downloaded under (API-GAPS.md #17).
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Document library")
 @UseCaseDescription("Previewing the files of a list, and explaining the ones that do not open")

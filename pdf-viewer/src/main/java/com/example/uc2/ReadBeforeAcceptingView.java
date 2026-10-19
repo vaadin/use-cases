@@ -1,5 +1,6 @@
 package com.example.uc2;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.documents.SampleDocuments;
 import com.example.pdfviewer.PdfViewer;
@@ -30,6 +31,7 @@ import com.vaadin.flow.router.Route;
  * last page counts as reached when the user has scrolled it into view, not when
  * they have read it. That is what such a rule can promise in any app.
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Read before accepting")
 @UseCaseDescription("Letting the user accept terms only after scrolling through them")

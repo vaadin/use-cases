@@ -3,6 +3,7 @@ package com.example.uc8;
 import java.util.List;
 import java.util.Locale;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.documents.SampleDocuments;
 import com.example.pdfviewer.PdfViewer;
@@ -33,6 +34,7 @@ import com.vaadin.flow.router.Route;
  * The document itself stays in English: translating content is the document's
  * business, not the viewer's.
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc8", layout = MainLayout.class)
 @PageTitle("UC8 — Viewer in your language")
 @UseCaseDescription("Showing the viewer's controls and messages in the user's language")

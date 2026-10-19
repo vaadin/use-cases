@@ -3,6 +3,7 @@ package com.example.uc7;
 import java.util.List;
 import java.util.OptionalInt;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.documents.Pdf;
 import com.example.documents.SampleDocuments;
@@ -36,6 +37,7 @@ import com.vaadin.flow.router.Route;
  * matches, but no API to fill it in or to highlight text from code, so the
  * reviewer still has to find the sentence on the page.
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Jump to a clause")
 @UseCaseDescription("Opening a contract at the clause that answers a question")

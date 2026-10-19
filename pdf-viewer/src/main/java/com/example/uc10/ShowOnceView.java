@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.documents.Pdf;
 import com.example.documents.SampleDocuments;
@@ -39,6 +40,7 @@ import com.vaadin.flow.router.Route;
  * controlled: the reader can still select and copy the text, use the browser's
  * own print command or take a screenshot (API-GAPS.md #13).
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc10", layout = MainLayout.class)
 @PageTitle("UC10 — Show a document once")
 @UseCaseDescription("Showing a confidential document once, without download or print")

@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.documents.Pdf;
 import com.example.pdfviewer.PdfViewer;
@@ -44,6 +45,7 @@ import com.vaadin.flow.router.Route;
  * made. The form's signature line stays empty; the viewer can not sign
  * (API-GAPS.md #15).
  */
+@UnreleasedApi("https://github.com/vaadin/web-components/pull/13053")
 @Route(value = "uc12", layout = MainLayout.class)
 @PageTitle("UC12 — Fill in a PDF form")
 @UseCaseDescription("Filling in an official PDF form and showing the filled copy")
