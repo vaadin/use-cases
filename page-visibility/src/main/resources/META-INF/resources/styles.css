@@ -5,25 +5,11 @@
     margin: 0;
 }
 
-.home-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-    max-width: 960px;
-}
-
-.home-card .home-card-tag {
-    font-size: 0.8125rem;
-    text-transform: uppercase;
-    color: var(--vaadin-text-color-secondary);
-    letter-spacing: 0.05em;
-}
-
 .status-badge {
     display: inline-block;
     padding: 0.15rem 0.6rem;
     border-radius: 999px;
-    font-size: 0.85rem;
+    font-size: var(--aura-font-size-s);
     background: color-mix(in srgb, var(--aura-blue) 15%, transparent);
     color: var(--aura-blue-text);
     border: 1px solid color-mix(in srgb, var(--aura-blue) 35%, transparent);

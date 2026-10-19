@@ -1,0 +1,29 @@
+.uc4-view .settings {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.uc4-view .swatch {
+    --vaadin-button-background: var(--swatch-color);
+    --vaadin-button-border-color: transparent;
+    width: 2rem;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border-radius: 50%;
+}
+
+.uc4-view .swatch.selected {
+    outline: 3px solid var(--vaadin-text-color);
+    outline-offset: 2px;
+}
+
+.uc4-view input[type="color"] {
+    width: 2.5rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    background: none;
+}

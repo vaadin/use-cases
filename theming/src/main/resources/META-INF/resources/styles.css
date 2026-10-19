@@ -1,0 +1,61 @@
+/* Theming use cases — shared polish. Only theme tokens and logical
+   properties, so it looks right in Aura, Lumo, light and dark. */
+
+/* The part of a view that shows the styled application. */
+.sample {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--vaadin-gap-m, 0.75rem);
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 960px;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--vaadin-border-color-secondary, #ddd);
+    border-radius: var(--vaadin-radius-l, 12px);
+}
+
+.sample > vaadin-grid,
+.sample > vaadin-horizontal-layout,
+.sample > vaadin-form-layout {
+    align-self: stretch;
+}
+
+.sample > h2,
+.sample > p {
+    margin-block: 0;
+}
+
+.status {
+    font-family: monospace;
+    color: var(--vaadin-text-color-secondary);
+}
+
+.theme-picker-wrapper {
+    margin-inline-start: 1rem;
+}
+
+.theme-picker {
+    width: 7rem;
+}
+
+/* Long words wrap and code scrolls in its own box on narrow screens. */
+vaadin-vertical-layout h1 {
+    overflow-wrap: anywhere;
+}
+
+pre {
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+@media (max-width: 640px) {
+    .sample {
+        padding: 0.75rem;
+    }
+
+    .sample vaadin-horizontal-layout {
+        flex-wrap: wrap;
+    }
+}

@@ -1,5 +1,6 @@
 package com.example.uc17;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -30,6 +31,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc17", layout = MainLayout.class)
 @PageTitle("UC17 — Atomic reset")
+@UseCaseDescription("Resetting several fields at once in the browser")
 @Menu(order = 17, title = "UC17 — Atomic reset")
 @StyleSheet("uc17.css")
 public class AtomicResetView extends VerticalLayout {

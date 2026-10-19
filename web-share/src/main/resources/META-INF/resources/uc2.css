@@ -1,10 +1,9 @@
 .uc2-view {
-    .action-slot {
-        margin-top: 0.5rem;
+    .uc2-url {
+        width: min(100%, 32rem);
     }
 
-    .hint {
+    .uc2-hint {
         color: var(--vaadin-text-color-secondary);
-        margin-top: 0.5rem;
     }
 }

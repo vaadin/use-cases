@@ -1,5 +1,6 @@
 package com.example.uc6;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -26,6 +27,7 @@ import com.vaadin.flow.signals.Signal;
  * substring. All four labels are bound to {@code Signal}s computed from
  * {@code selectionSignal()} — no event listener boilerplate, no manual push.
  */
+@UnreleasedApi("https://github.com/vaadin/flow-components/pull/10356")
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Live selection info")
 @UseCaseDescription("Showing live details about the selected text")

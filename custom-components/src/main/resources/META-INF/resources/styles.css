@@ -1,0 +1,52 @@
+/* Custom components use cases — shared polish */
+
+/* The part of a view that shows the component in use. */
+.sample {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--vaadin-gap-m, 0.75rem);
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 960px;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--vaadin-border-color-secondary, #ddd);
+    border-radius: var(--vaadin-radius-l, 12px);
+}
+
+.sample > h2,
+.sample > p {
+    margin-block: 0;
+}
+
+.sample > vaadin-grid,
+.sample > vaadin-form-layout {
+    align-self: stretch;
+}
+
+.status {
+    font-family: monospace;
+    font-size: 0.875rem;
+    color: var(--vaadin-text-color-secondary);
+}
+
+/* Narrow screens: the examples stack and nothing scrolls sideways. */
+@media (max-width: 640px) {
+    .sample {
+        padding: 0.75rem;
+    }
+
+    .sample vaadin-horizontal-layout {
+        flex-wrap: wrap;
+    }
+}
+
+.sample pre {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+/* Long words wrap on narrow screens. */
+vaadin-vertical-layout h1 {
+    overflow-wrap: anywhere;
+}

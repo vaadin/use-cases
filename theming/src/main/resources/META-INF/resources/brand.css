@@ -1,0 +1,27 @@
+/*
+ * The application's own brand, applied on top of the base theme (UC1).
+ *
+ * A handful of design tokens is enough: everything else in the theme is
+ * derived from them. The tokens are theme-specific, so a brand that has to
+ * work with both themes sets Aura's and Lumo's. `:root` (specificity 0-1-0)
+ * wins over the themes' `:where(:root)` (0-0-0) whatever the loading order.
+ */
+:root {
+    /* Aura */
+    --aura-accent-color-light: #0f766e;
+    --aura-accent-color-dark: #2dd4bf;
+    --aura-background-color-light: #f6f1e9;
+    --aura-background-color-dark: #1c1917;
+    --aura-base-radius: 8;
+    --aura-font-family: ui-rounded, "SF Pro Rounded", "Nunito", system-ui,
+        sans-serif;
+
+    /* Lumo */
+    --lumo-primary-color: #0f766e;
+    --lumo-primary-text-color: #0f766e;
+    --lumo-primary-color-50pct: rgb(15 118 110 / 50%);
+    --lumo-primary-color-10pct: rgb(15 118 110 / 10%);
+    --lumo-border-radius-m: 0.5em;
+    --lumo-font-family: ui-rounded, "SF Pro Rounded", "Nunito", system-ui,
+        sans-serif;
+}

@@ -1,7 +1,7 @@
 .uc3-view {
-    .notification-log {
+    .uc3-log {
         font-family: monospace;
-        font-size: 0.85rem;
+        font-size: var(--aura-font-size-s);
         background: var(--vaadin-background-container);
         border: 1px solid var(--vaadin-border-color);
         border-radius: var(--vaadin-radius-m);

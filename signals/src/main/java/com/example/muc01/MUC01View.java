@@ -1,5 +1,6 @@
 package com.example.muc01;
 
+import com.example.common.UseCaseDescription;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
@@ -37,7 +38,8 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
  */
 @Route(value = "muc-01", layout = MainLayout.class)
 @PageTitle("MUC 1: Shared Chat")
-@Menu(order = 50, title = "MUC 1: Shared Chat")
+@UseCaseDescription("Chatting between users with a shared, append-only message list")
+@Menu(order = 50, title = "MUC1 — Shared Chat")
 @StyleSheet("muc01.css")
 @AnonymousAllowed
 public class MUC01View extends VerticalLayout {

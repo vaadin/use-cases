@@ -1,0 +1,25 @@
+.uc4-view {
+    .order-details {
+        width: 100%;
+        max-width: 480px;
+
+        .skeleton {
+            min-height: 8rem;
+        }
+    }
+
+    .order-fields > div {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.3rem 0;
+        border-bottom: 1px solid color-mix(in srgb, var(--vaadin-text-color) 10%, transparent);
+    }
+
+    .field-label {
+        color: var(--vaadin-text-color-secondary);
+    }
+
+    .not-found {
+        color: var(--aura-red-text);
+    }
+}

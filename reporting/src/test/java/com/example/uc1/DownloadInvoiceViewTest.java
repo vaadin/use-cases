@@ -1,8 +1,14 @@
 package com.example.uc1;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import com.example.data.Invoice;
 import com.example.data.Invoices;
 import com.example.pdf.InvoicePdf;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -15,7 +21,6 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -25,7 +30,7 @@ class DownloadInvoiceViewTest extends SpringBrowserlessTest {
     private static final int LINK_COLUMN = 4;
 
     @Test
-    void everyInvoiceIsListedWithADownloadLink() {
+    void everyInvoiceIsListedWithADownloadLink() throws IOException {
         navigate(DownloadInvoiceView.class);
 
         assertTrue(findInView(H1.class).all().stream().anyMatch(
@@ -37,8 +42,14 @@ class DownloadInvoiceViewTest extends SpringBrowserlessTest {
 
         Anchor link = (Anchor) test(grid).getCellComponent(0, LINK_COLUMN);
         assertEquals("download-2026-0001", link.getId().orElseThrow());
-        assertFalse(link.getHref().isEmpty(),
-                "The handler must resolve to a URL the browser can fetch");
+        ByteArrayOutputStream pdf = new ByteArrayOutputStream();
+        test(link).download(pdf);
+        try (PDDocument document = Loader.loadPDF(pdf.toByteArray())) {
+            assertTrue(
+                    new PDFTextStripper().getText(document)
+                            .contains("Invoice 2026-0001"),
+                    "The link delivers the invoice of its own row");
+        }
     }
 
     @Test

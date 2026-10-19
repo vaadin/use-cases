@@ -1,5 +1,6 @@
 package com.example.uc2;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
@@ -23,6 +24,7 @@ import com.vaadin.flow.router.RouterLink;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("Orders")
+@UseCaseDescription("Overriding the route parent when the URL does not nest")
 @Menu(order = 2, title = "UC2 — @RouteParent override")
 public class OrdersView extends VerticalLayout {
 

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.example.acme.AppWindow;
+import com.example.common.AppWindow;
 import com.example.home.HomeView;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

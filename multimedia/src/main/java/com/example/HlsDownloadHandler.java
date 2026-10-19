@@ -3,6 +3,8 @@ package com.example;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -20,7 +22,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * the browser request paths the registry does not know. This handler therefore
  * rewrites every URI in the playlists it serves to {@code ?file=<path>} on its
  * own URL and serves the requested file from the query parameter. See
- * {@code API-GAPS.md}.
+ * {@code API-GAPS.md #8}.
  */
 public class HlsDownloadHandler implements DownloadHandler {
 
@@ -58,19 +60,20 @@ public class HlsDownloadHandler implements DownloadHandler {
             event.getResponse().setStatus(404);
             return;
         }
-        byte[] data = MediaLibrary.bytes(directory + "/" + file);
+        Path path = MediaLibrary.file(directory + "/" + file).toPath();
         if (file.endsWith(".m3u8")) {
             event.setContentType("application/vnd.apple.mpegurl");
-            data = rewritePlaylist(file,
-                    new String(data, StandardCharsets.UTF_8))
+            byte[] data = rewritePlaylist(file, Files.readString(path))
                     .getBytes(StandardCharsets.UTF_8);
+            event.setContentLength(data.length);
+            event.getOutputStream().write(data);
         } else {
             // The init segment (.mp4) and the media segments (.m4s) are
-            // fragmented MP4.
+            // fragmented MP4, streamed from disk.
             event.setContentType("video/mp4");
+            event.setContentLength(Files.size(path));
+            Files.copy(path, event.getOutputStream());
         }
-        event.setContentLength(data.length);
-        event.getOutputStream().write(data);
     }
 
     /**

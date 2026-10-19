@@ -1,0 +1,107 @@
+/* Peer colour palette. The same index reaches three places — Avatar and
+   AvatarGroup read --vaadin-user-color-N themselves, the field highlighter
+   gets it as colorIndex over JS, and Peer.cssColor() uses it for the panel
+   accents — so a simulated user has one colour everywhere. */
+html {
+    --vaadin-user-color-0: #2196f3;
+    --vaadin-user-color-1: #e91e63;
+    --vaadin-user-color-2: #4caf50;
+    --vaadin-user-color-3: #ff9800;
+    --vaadin-user-color-4: #9c27b0;
+    --vaadin-user-color-5: #00bcd4;
+    --vaadin-user-color-6: #f44336;
+    --vaadin-user-color-7: #795548;
+    /* The field highlighter's name tag defaults to 0.75em, too small to read
+       at a glance next to the field it labels. */
+    --vaadin-user-tag-font-size: var(--aura-font-size-m, 0.875rem);
+    --vaadin-user-tag-padding: 0.3em 0.5em;
+}
+
+.use-case {
+    max-width: 1100px;
+}
+
+.use-case-intro {
+    max-width: 70ch;
+}
+
+/* What this view had to write by hand, or could not write at all. Set apart
+   from the demo, because it is a statement about the API and not about the
+   fictional users. */
+.use-case-note {
+    max-width: 70ch;
+    border-left: 3px solid var(--vaadin-border-color);
+    padding-left: var(--vaadin-padding-m, 1rem);
+    color: var(--vaadin-text-color-secondary);
+    font-size: var(--aura-font-size-s);
+}
+
+/* The sampler's harness: N simulated users side by side. */
+.peer-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    padding-bottom: var(--vaadin-padding-s, 0.5rem);
+}
+
+/* The rig takes the view's full width, so the windows wrap within the screen
+   instead of sizing it to their title bars. */
+.peer-rig {
+    align-self: stretch;
+}
+
+.peer-strip {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--vaadin-padding-m, 1rem);
+    align-items: stretch;
+}
+
+/* Each peer is an AppWindow; its top edge carries the peer's colour, the
+   same colour as the peer's avatar in every group. */
+.app-window.peer-panel {
+    flex: 1 1 320px;
+    min-width: 300px;
+    max-width: none;
+    border-top: 3px solid var(--peer-color, var(--vaadin-border-color));
+}
+
+/* Each use case returns one container of controls per peer; stacking them is
+   the layout every view wants and none should have to repeat. */
+.peer-body,
+.peer-body > div {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vaadin-padding-s, 0.5rem);
+    align-items: stretch;
+}
+
+/* Event and operation logs (UC6, UC10, UC13): oldest last, so the newest line
+   is always the one at the top. */
+.event-log {
+    min-height: 2rem;
+    font-family: monospace;
+    font-size: var(--aura-font-size-xs);
+    white-space: pre-wrap;
+    max-height: 12rem;
+    overflow: auto;
+    border: 1px solid var(--vaadin-border-color);
+    border-radius: var(--vaadin-radius-m, 8px);
+    padding: var(--vaadin-padding-s, 0.5rem);
+}
+
+/* UC8/UC9 row highlight: the peer looking at or editing a row. */
+vaadin-grid::part(peer-watched) {
+    background: color-mix(in srgb, var(--vaadin-user-color-0) 12%, transparent);
+}
+
+vaadin-grid-pro::part(peer-edited) {
+    background: color-mix(in srgb, var(--vaadin-user-color-3) 18%, transparent);
+}
+
+/* UC5: the field highlighter's name tag stays below a field for as long as
+   somebody is in it, so the rows leave room for it instead of letting it
+   cover the next field's label. */
+.peer-body vaadin-form-layout {
+    --vaadin-form-layout-row-spacing: 1.75rem;
+}

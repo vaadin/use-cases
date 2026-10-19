@@ -11,12 +11,13 @@ about what surrounds it. The invoice PDF itself is application code
 (`com.example.pdf.InvoicePdf`, plain Apache PDFBox), and
 [API-GAPS.md](API-GAPS.md) records the six places where Vaadin stopped
 helping — most usefully the one the community already filed,
-[vaadin/flow#21929](https://github.com/vaadin/flow/issues/21929).
+[vaadin/flow#21929](https://github.com/vaadin/flow/issues/21929)
+(API-GAPS.md #2).
 
 | # | View | What it shows |
 | - | ---- | ------------- |
 | UC1 | Download the invoice | A PDF generated per row and delivered through `DownloadHandler.fromInputStream`, with the invoice number as the file name. |
-| UC2 | Open it in a new tab | Inline delivery via `AttachmentType.INLINE`, and the hidden-anchor trick the server needs because a handler has no URL it can pass to `Page#open`. |
+| UC2 | Open it in a new tab | Inline delivery via `AttachmentType.INLINE` on a link, and `OpenInNewTab.onClick` for a button. |
 | UC3 | Check it before sending | The real generated document in an `IFrame`, beside the application's own rendering of the same invoice. |
 | UC4 | The monthly billing run | A multi-select billing run rendered as one document with continuous page numbers, plus transfer progress. |
 | UC5 | Know that it arrived | An invoice marked sent only when the transfer completed, in an application-scoped book every session sees. |
@@ -47,10 +48,12 @@ the letterhead, every line, the total the UI shows, and "Page 3 of 3" across a
 three-invoice batch. UC5 also covers the cross-session case — a delivery
 recorded in one session is visible in the next.
 
-A download cannot be driven from a browserless test (see API-GAPS.md), so the
-view tests assert the parts that stay on the server: that the handler resolves
-to a URL, that the preview regenerates when another invoice is chosen, and
-that the delivery book is what the badges read from.
+A browserless test cannot check the file name or content type of a download
+(API-GAPS.md #6), so the view tests download what each anchor links to and
+read the PDF back, and otherwise assert the parts that stay on the server:
+that UC2's button has a handler bound, that the preview regenerates when
+another invoice is chosen, and that the delivery book is what the badges read
+from.
 
 The four delivery paths were also checked against the running application in
 headless Chromium, by fetching what each link and the preview frame point at:

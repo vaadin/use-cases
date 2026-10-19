@@ -1,0 +1,55 @@
+package com.example.home;
+
+import java.util.List;
+
+import com.example.common.BaseHomeView;
+import com.example.common.UseCaseDescription;
+import com.example.uc1.BrandTokensView;
+import com.example.uc2.DarkModeView;
+import com.example.uc3.TenantThemeView;
+import com.example.uc4.UserPreferencesView;
+import com.example.uc5.DensityView;
+import com.example.uc6.VariantsView;
+import com.example.uc7.SingleInstanceView;
+import com.example.uc8.AccessibleThemingView;
+import com.example.uc9.ThemeSwitchView;
+import com.example.views.MainLayout;
+
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+
+@Route(value = "", layout = MainLayout.class)
+@PageTitle("Theming Use Cases")
+@UseCaseDescription("Making a Vaadin application look the way its users and owners need")
+@Menu(order = 0, title = "Home")
+public class HomeView extends BaseHomeView {
+
+    private static final String API_GAPS_URL = "https://github.com/vaadin/use-cases/blob/main/theming/API-GAPS.md";
+
+    public HomeView() {
+        super("Theming — use cases",
+                "Each card below changes how an application looks: a brand "
+                        + "from a few design tokens, dark mode, a look per "
+                        + "customer and per user, compact screens, component "
+                        + "variants and one-off styling, accessibility "
+                        + "settings, and the choice between Aura and Lumo. "
+                        + "Appearance changes apply to every view and tab.");
+        add(new Paragraph(new Anchor(API_GAPS_URL, "API-GAPS.md"),
+                new Text(" records where Flow made that harder than it "
+                        + "should be.")));
+        addGroup("The application's look", VaadinIcon.PALETTE, Accent.BLUE,
+                List.of(BrandTokensView.class, TenantThemeView.class,
+                        UserPreferencesView.class, ThemeSwitchView.class));
+        addGroup("Light, dark and accessibility", VaadinIcon.ADJUST,
+                Accent.PURPLE,
+                List.of(DarkModeView.class, AccessibleThemingView.class));
+        addGroup("Styling components", VaadinIcon.PAINTBRUSH, Accent.ORANGE,
+                List.of(DensityView.class, VariantsView.class,
+                        SingleInstanceView.class));
+    }
+}
