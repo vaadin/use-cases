@@ -11,6 +11,7 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -45,6 +46,9 @@ class UseCase35ViewTest extends SpringBrowserlessTest {
                 .filter(f -> "New card title".equals(f.getLabel())).findFirst()
                 .orElseThrow();
         test(title).setValue("Investigate flaky CI");
+        @SuppressWarnings("unchecked")
+        Select<Priority> priority = $view(Select.class).single();
+        test(priority).selectItem(Priority.HIGH.toString());
         Button add = $view(Button.class).all().stream()
                 .filter(b -> "Add to top".equals(b.getText())).findFirst()
                 .orElseThrow();
@@ -55,6 +59,7 @@ class UseCase35ViewTest extends SpringBrowserlessTest {
         assertEquals(4, view.cards.peek().size());
         assertEquals("Investigate flaky CI",
                 view.cards.peek().get(0).peek().title());
+        assertEquals(Priority.HIGH, view.cards.peek().get(0).peek().priority());
     }
 
     @Test
@@ -68,7 +73,9 @@ class UseCase35ViewTest extends SpringBrowserlessTest {
 
         // Move the top card down one slot — same ValueSignal must end up at
         // index 1, not be replaced.
-        view.cards.moveTo(firstEntry, 1);
+        Button down = $view(Button.class).all().stream()
+                .filter(b -> "↓".equals(b.getText())).findFirst().orElseThrow();
+        test(down).click();
         runPendingSignalsTasks();
 
         assertSame(firstEntry, view.cards.peek().get(1),
@@ -120,26 +127,5 @@ class UseCase35ViewTest extends SpringBrowserlessTest {
         // Index 0 is still the original first card
         assertEquals("Wire up the new dashboard",
                 view.cards.peek().get(0).peek().title());
-    }
-
-    @Test
-    void priorityIsSetFromForm() {
-        navigate(UseCase35View.class);
-        runPendingSignalsTasks();
-
-        UseCase35View view = (UseCase35View) getCurrentView();
-        // Default priority is MEDIUM
-        TextField title = $view(TextField.class).all().stream()
-                .filter(f -> "New card title".equals(f.getLabel())).findFirst()
-                .orElseThrow();
-        test(title).setValue("Test card");
-        Button add = $view(Button.class).all().stream()
-                .filter(b -> "Add to top".equals(b.getText())).findFirst()
-                .orElseThrow();
-        test(add).click();
-        runPendingSignalsTasks();
-
-        assertEquals(Priority.MEDIUM,
-                view.cards.peek().get(0).peek().priority());
     }
 }

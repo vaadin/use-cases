@@ -46,9 +46,8 @@ class UseCase30ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         int extraRuns = view.filterComputations.get() - initial;
-        assertTrue(extraRuns <= 2,
-                "Filter should run at most twice for two input mutations,"
-                        + " was: " + extraRuns);
+        assertEquals(2, extraRuns,
+                "Filter should run once per input mutation, not per subscriber");
     }
 
     @Test
@@ -87,6 +86,12 @@ class UseCase30ViewTest extends SpringBrowserlessTest {
                 view.visibleProducts.peek().stream()
                         .allMatch(p -> p.price() <= 100.0),
                 "Every remaining product must be within the price cap");
+
+        test(maxPriceField).clear();
+        runPendingSignalsTasks();
+
+        assertEquals(1000, view.visibleProducts.peek().size(),
+                "An empty Max price should remove the cap");
     }
 
     @Test

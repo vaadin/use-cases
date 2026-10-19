@@ -12,7 +12,6 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -30,18 +29,6 @@ class UseCase34ViewTest extends SpringBrowserlessTest {
         // don't depend on execution order.
         flags.setNewCheckoutFlow(false);
         flags.setBetaUi(false);
-    }
-
-    @Test
-    void readingConsumerSignalReturnsCurrentValue() {
-        navigate(UseCase34View.class);
-        runPendingSignalsTasks();
-
-        UseCase34View view = (UseCase34View) getCurrentView();
-        assertEquals(false, view.newCheckoutFlowSignal.peek(),
-                "Consumer can read the current flag value");
-        assertEquals(false, view.betaUiSignal.peek(),
-                "Consumer can read the current flag value");
     }
 
     @Test

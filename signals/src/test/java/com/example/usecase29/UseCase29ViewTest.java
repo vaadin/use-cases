@@ -10,7 +10,6 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ViewPackages(classes = UseCase29View.class)
@@ -98,14 +97,21 @@ class UseCase29ViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void unboundShipperIsInitializedOnAttach() {
+    void unboundShipperShipsEachNewAuditEntry() {
         navigate(UseCase29View.class);
         runPendingSignalsTasks();
 
         UseCase29View view = (UseCase29View) getCurrentView();
-        assertTrue(view.shipperRuns.get() >= 1,
-                "Unbound shipper should have done its initial run");
         assertEquals(0, view.shippedToRemote.peek(),
                 "Nothing shipped yet — audit log is empty");
+
+        TextField nameField = $view(TextField.class).all().stream()
+                .filter(f -> "Display name".equals(f.getLabel())).findFirst()
+                .orElseThrow();
+        test(nameField).setValue("Edit 1");
+        runPendingSignalsTasks();
+
+        assertEquals(1, view.shippedToRemote.peek(),
+                "The shipper should re-run when the audit log grows");
     }
 }

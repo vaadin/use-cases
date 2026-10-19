@@ -6,11 +6,14 @@ import org.springframework.security.test.context.support.WithMockUser;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextField;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -29,36 +32,28 @@ class UseCase31ViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void claimingAnEmptySeatSucceedsAndBumpsCounter() {
+    void firstClaimWinsTheSeatAndLaterClaimsAreRejected() {
         navigate(UseCase31View.class);
         runPendingSignalsTasks();
 
         UseCase31View view = (UseCase31View) getCurrentView();
-        int countBefore = view.reservationCount.peek();
+        TextField name = $view(TextField.class).single();
 
-        // Direct seat mutation models a successful first-come claim
-        assertTrue(view.seats.get(2).replace(null, "Attendee A"),
-                "Empty seat must accept a claim");
-        view.reservationCount.update(n -> n + 1);
+        test(name).setValue("Attendee A");
+        clickSeat(3);
         runPendingSignalsTasks();
 
-        assertEquals(countBefore + 1, view.reservationCount.peek(),
-                "Counter must bump after a successful claim");
-    }
+        assertEquals("Attendee A", view.seats.get(2).peek());
+        assertTrue(hasSpan("Total: 1"), "The tally counts the claim");
 
-    @Test
-    void secondClaimOnTakenSeatFails() {
-        navigate(UseCase31View.class);
+        test(name).setValue("Attendee B");
+        clickSeat(3);
         runPendingSignalsTasks();
 
-        UseCase31View view = (UseCase31View) getCurrentView();
-        view.seats.get(0).replace(null, "Attendee A");
-        runPendingSignalsTasks();
-
-        assertFalse(view.seats.get(0).replace(null, "Attendee B"),
-                "Second claim must fail because seat is already taken");
-        assertEquals("Attendee A", view.seats.get(0).peek(),
-                "Original holder retained");
+        assertEquals("Attendee A", view.seats.get(2).peek(),
+                "The first holder keeps the seat");
+        assertTrue(hasSpan("Total: 1"),
+                "A rejected claim does not count as a reservation");
     }
 
     @Test
@@ -96,5 +91,17 @@ class UseCase31ViewTest extends SpringBrowserlessTest {
 
         assertEquals(before + 6, view.reservationCount.peek(),
                 "Six concurrent update(old -> old + 1) calls must all stick");
+    }
+
+    private void clickSeat(int seatNumber) {
+        Div tile = (Div) $view(Span.class).all().stream()
+                .filter(s -> ("Seat " + seatNumber).equals(s.getText()))
+                .findFirst().orElseThrow().getParent().orElseThrow();
+        ComponentUtil.fireEvent(tile, new ClickEvent<>(tile));
+    }
+
+    private boolean hasSpan(String text) {
+        return $view(Span.class).all().stream()
+                .anyMatch(s -> text.equals(s.getText()));
     }
 }

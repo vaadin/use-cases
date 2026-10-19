@@ -8,6 +8,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,26 +29,24 @@ class UseCase28ViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void backgroundLineInsertionAddsRow() {
+    void serverReclassificationFlashesTheRow() throws InterruptedException {
         navigate(UseCase28View.class);
         runPendingSignalsTasks();
 
         UseCase28View view = (UseCase28View) getCurrentView();
-        int before = view.entries.peek().size();
+        ValueSignal<LogEntry> first = view.entries.peek().get(0);
+        LogEntry entry = first.peek();
+        Severity target = (entry.severity() == Severity.ERROR) ? Severity.INFO
+                : Severity.ERROR;
 
-        // Simulate one server-feed tick from a non-UI thread so the
-        // contextual effect would see this as a background change.
-        Thread t = new Thread(view::pushServerLine);
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        // Change the entry from a non-UI thread, like the server feed does.
+        Thread server = new Thread(() -> first.set(entry.withSeverity(target)));
+        server.start();
+        server.join();
         runPendingSignalsTasks();
 
-        assertTrue(view.entries.peek().size() >= before,
-                "A server tick should add a line or reclassify one");
+        assertEquals(1, view.backgroundFlashes.get(),
+                "A server-side change should flash the row");
     }
 
     @Test
@@ -68,6 +67,8 @@ class UseCase28ViewTest extends SpringBrowserlessTest {
 
         assertEquals(target, view.entries.peek().get(0).peek().severity(),
                 "Operator edit should propagate to the underlying entry");
+        assertEquals(0, view.backgroundFlashes.get(),
+                "The operator's own edit should not flash the row");
     }
 
     @Test
