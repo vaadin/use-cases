@@ -47,7 +47,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * ratio up front, so nothing below it moves.
  * <p>
  * Flow's {@code Image} has no load event and no placeholder of its own, so the
- * fade is wired up by hand (see API-GAPS.md).
+ * fade is wired up by hand (see API-GAPS.md #13).
  */
 @Route(value = "uc13", layout = MainLayout.class)
 @PageTitle("UC13 — Slow images with a preview")

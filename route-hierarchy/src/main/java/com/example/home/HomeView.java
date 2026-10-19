@@ -11,14 +11,17 @@ import com.example.uc4.ProjectsView;
 import com.example.uc5.SettingsView;
 import com.example.uc6.DashboardView;
 import com.example.uc7.SitemapView;
+import com.example.uc8.HierarchicalMenuView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
-@UseCaseDescription("Building breadcrumbs, up-navigation and sitemaps from the route hierarchy")
+@PageTitle("Home")
+@UseCaseDescription("Building breadcrumbs, up-navigation, sitemaps and menus from the route hierarchy")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 
@@ -32,7 +35,8 @@ public class HomeView extends BaseHomeView {
                         + "PageTitleGenerators. The view just does "
                         + "add(new Breadcrumbs()); there is no per-view plumbing. "
                         + "UC5 and UC7 build other consumers — an up-link and a "
-                        + "sitemap — directly on the same route-hierarchy API.");
+                        + "sitemap — directly on the same route-hierarchy API, "
+                        + "and UC8 builds the navigation menu as a tree.");
         addGroup("Finding a page's parents", VaadinIcon.SITEMAP, Accent.BLUE,
                 List.of(CatalogView.class, OrdersView.class));
         addGroup("Getting each crumb right", VaadinIcon.LINK, Accent.GREEN,
@@ -40,5 +44,7 @@ public class HomeView extends BaseHomeView {
         addGroup("Navigation beyond one view", VaadinIcon.COMPASS,
                 Accent.PURPLE, List.of(SettingsView.class, DashboardView.class,
                         SitemapView.class));
+        addGroup("Building the menu", VaadinIcon.MENU, Accent.ORANGE,
+                List.of(HierarchicalMenuView.class));
     }
 }

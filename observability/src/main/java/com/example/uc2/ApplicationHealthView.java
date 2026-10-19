@@ -31,9 +31,9 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.Table;
 import com.vaadin.flow.component.html.TableRow;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -43,6 +43,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.observability.micrometer.DatabaseActivity;
+import com.vaadin.observability.micrometer.DatabaseActivity.Work;
 
 /**
  * UC2 — the whole app hiccups whenever someone opens Acme's catalog page: is
@@ -52,31 +54,33 @@ import com.vaadin.flow.shared.Registration;
  * page, whose catalog refresh runs the classic N+1 join-table fetch (see
  * {@link Product}: an eager, unbatched many-to-many). The first load reveals
  * the {@link Investigation}, which is <em>live</em>: the UI polls every couple
- * of seconds and the readout recomputes on every tick, so other sessions
- * coming and going, memory moving and the browser-collected samples all show
- * up without a click.
+ * of seconds and the readout recomputes on every tick, so other sessions coming
+ * and going, memory moving and the browser-collected samples all show up
+ * without a click.
  * <p>
  * Its steps: <b>2)</b> the vital signs look fine — the application's own
  * signals read straight from its {@link MeterRegistry}, the same registry the
  * Observability Kit binders publish into: {@code vaadin.sessions.active} and
- * {@code vaadin.ui.active}, the JVM heap gauges, {@code vaadin.request.duration}
- * and {@code vaadin.rpc.duration}, the browser's own {@code vaadin.client.*}
- * load and paint signals (POSTed back by the in-browser collector),
- * {@code vaadin.errors} and {@code vaadin.client.errors}, plus a connection
- * badge; <b>3)</b> the database gives it away — the kit's
- * {@code vaadin.db.fetch.rows} summary ({@code vaadin.observability.database
- * =true}), scoped to this route and bracketed around the load, counts N+1
- * result-set fetches for N products; <b>4)</b> the fix, verified — the
- * {@link DemoRig}'s join-fetch switch brings the categories along in one
- * query, and the load history shows the fetch count drop to one.
+ * {@code vaadin.ui.active}, the JVM heap gauges,
+ * {@code vaadin.request.duration} and {@code vaadin.rpc.duration}, the
+ * browser's own {@code vaadin.client.*} load and paint signals (POSTed back by
+ * the in-browser collector), {@code vaadin.errors} and
+ * {@code vaadin.client.errors}, plus a connection badge; <b>3)</b> the database
+ * gives it away — the kit's {@link DatabaseActivity}
+ * ({@code vaadin.observability.database=true}), read around the load on the
+ * thread that runs it, counts N+1 queries for N products, however much other
+ * traffic the app has; <b>4)</b> the fix, verified — the {@link DemoRig}'s
+ * join-fetch switch brings the categories along in one query, and the load
+ * history shows the query count drop to one.
  * <p>
- * Connection status is the one signal with no meter behind it (see
- * {@code API-GAPS.md} #5): the browser's {@code online}/{@code reconnecting}
- * state is never recorded server-side. So instead of claiming to know it, the
- * badge reports the only related thing the server can observe: the cadence of
- * this UI's own poll requests — neutral before the first tick, green while
- * ticks arrive on schedule, red after a late one. The push mode and transport
- * come from the public {@link PushConfiguration}.
+ * The kit does record the browser's connection state, as
+ * {@code vaadin.client.connection} transitions, but tagged by state only — not
+ * by UI — and posted by the browser once it has the server back (see
+ * {@code API-GAPS.md} #5). That cannot say whether <em>this</em> tab is
+ * connected, so the badge reports what the server sees of this UI: the cadence
+ * of its own poll requests — neutral before the first tick, green while ticks
+ * arrive on schedule, red after a late one. The push mode and transport come
+ * from the public {@link PushConfiguration}.
  * <p>
  * The browser's per-interaction timers, {@code vaadin.client.request.duration}
  * and {@code vaadin.client.render.duration}, are UC1's subject; this view keeps
@@ -119,8 +123,9 @@ public class ApplicationHealthView extends VerticalLayout {
 
     /**
      * How current the readout is, derived from the observed refresh cadence —
-     * the closest thing to a connection state the server can see (there is no
-     * connection-state meter; see {@code API-GAPS.md} #5).
+     * the closest thing to this UI's connection state the server can see (the
+     * kit's {@code vaadin.client.connection} is not tagged by UI; see
+     * {@code API-GAPS.md} #5).
      */
     public enum Channel {
         /** No cadence observed yet, so liveness is genuinely unknown. */
@@ -132,21 +137,20 @@ public class ApplicationHealthView extends VerticalLayout {
     }
 
     /**
-     * One catalog load as seen through the kit's database meter: how many
-     * products came back and how many separate result-set fetches (and rows)
-     * the kit attributed to this route during the load. {@code monitored} is
-     * false when the running kit build has no database feature, so the meter
-     * never appeared.
+     * One catalog load as seen through the kit's {@link DatabaseActivity}: how
+     * many products came back and how many queries (and rows) the load itself
+     * ran. {@code monitored} is false when the kit's counting DataSource is not
+     * installed (the database feature is off), so nothing was counted.
      */
-    record Load(boolean joinFetch, int products, int categories,
-            long fetches, long rows, boolean monitored) {
+    record Load(boolean joinFetch, int products, int categories, long queries,
+            long rows, boolean monitored) {
 
         /**
-         * More fetches than products is the signature of an unbatched N+1: one
+         * More queries than products is the signature of an unbatched N+1: one
          * query for the products plus one per-product collection fetch.
          */
         boolean looksLikeNPlusOne() {
-            return monitored && products > 0 && fetches > products;
+            return monitored && products > 0 && queries > products;
         }
     }
 
@@ -215,10 +219,8 @@ public class ApplicationHealthView extends VerticalLayout {
         emptyRow.addClassName("order-empty");
         catalogTable.addRows(emptyRow);
 
-        return new AppWindow("Acme Supply — Inventory",
-                "acme.example/" + ROUTE,
-                new HorizontalLayout(Alignment.CENTER, refresh,
-                        catalogSummary),
+        return new AppWindow("Acme Supply — Inventory", "acme.example/" + ROUTE,
+                new HorizontalLayout(Alignment.CENTER, refresh, catalogSummary),
                 catalogTable);
     }
 
@@ -247,18 +249,20 @@ public class ApplicationHealthView extends VerticalLayout {
     }
 
     /**
-     * Loads the catalog and attributes the kit's recorded fetches to this click
-     * by reading this route's {@code vaadin.db.fetch.rows} summary immediately
-     * before and after the load. The first load reveals the investigation.
+     * Loads the catalog and attributes the database work to this click with the
+     * kit's {@link DatabaseActivity}, whose counts are per thread, so other
+     * requests running at the same time do not end up in them. The first load
+     * reveals the investigation.
      */
     private void loadCatalog() {
         boolean fix = Boolean.TRUE.equals(joinFetch.getValue());
-        FetchTotals before = fetchTotals();
+        Work before = DatabaseActivity.current();
         CatalogLoad load = catalog.loadCatalog(fix);
-        FetchTotals after = fetchTotals();
+        // since() is UNKNOWN for a load that ran no query at all.
+        Work work = DatabaseActivity.since(before);
         loads.add(new Load(fix, load.products(), load.categories(),
-                after.count() - before.count(),
-                Math.round(after.rows() - before.rows()), after.present()));
+                work.isKnown() ? work.queries() : 0,
+                work.isKnown() ? work.rows() : 0, before.isKnown()));
 
         List.copyOf(catalogTable.getBodyRows())
                 .forEach(TableRow::removeFromParent);
@@ -281,10 +285,9 @@ public class ApplicationHealthView extends VerticalLayout {
         status.getElement().getThemeList().add("badge");
         vitals.setId("vital-signs");
         investigation.step("2 — The vital signs look fine", true, status,
-                new Paragraph(
-                        "The application's own signals, read from its "
-                                + "MeterRegistry — the one the kit's binders "
-                                + "publish into. Nothing here says \"database\"."),
+                new Paragraph("The application's own signals, read from its "
+                        + "MeterRegistry — the one the kit's binders "
+                        + "publish into. Nothing here says \"database\"."),
                 vitals);
 
         catalogResult.setId("catalog-result");
@@ -294,14 +297,14 @@ public class ApplicationHealthView extends VerticalLayout {
         loadHistory.setId("load-history");
         loadHistory.addClassName("order-lines");
         loadHistory.setWidthFull();
-        loadHistory.addHeaderRow("Load", "Products", "Fetches", "Rows");
+        loadHistory.addHeaderRow("Load", "Products", "Queries", "Rows");
         Paragraph fixLead = new Paragraph();
         fixLead.add(new Span(
                 "Flip the demo rig's join-fetch switch and refresh the catalog "
                         + "again: one query brings the categories along with "
                         + "the products, and "),
-                Telemetry.chip(DB_FETCH_ROWS),
-                new Span(" counts a single fetch. Every load so far:"));
+                Telemetry.chip("DatabaseActivity"),
+                new Span(" counts a single query. Every load so far:"));
         investigation.step("4 — The fix, verified", false, fixLead,
                 loadHistory);
 
@@ -369,8 +372,8 @@ public class ApplicationHealthView extends VerticalLayout {
     private void refreshStatus(Channel channel, long gapMillis) {
         String state = switch (channel) {
         case UNKNOWN -> "Waiting for the first live update";
-        case LIVE -> "Live — updates arriving every " + (POLL_MILLIS / 1000)
-                + " s";
+        case LIVE ->
+            "Live — updates arriving every " + (POLL_MILLIS / 1000) + " s";
         case RESUMED -> String.format("Resumed after %.1f s without updates",
                 gapMillis / 1000d);
         };
@@ -401,11 +404,13 @@ public class ApplicationHealthView extends VerticalLayout {
         rows.add(new MeterTable.Row(HEAP_MAX, "area=heap", -1,
                 megabytes(gaugeSum(HEAP_MAX, "heap")), "Heap ceiling"));
         rows.add(timerRow(REQUEST, "Server-side request handling"));
-        rows.add(timerRow(RPC, "Server-side handling of clicks and keystrokes"));
+        rows.add(
+                timerRow(RPC, "Server-side handling of clicks and keystrokes"));
         // Client-perceived timings, POSTed back by the in-browser collector.
         // They appear once the browser emits and flushes them — never in a
         // browserless test, which does not run the JS collector.
-        rows.add(timerRow(CLIENT_BOOTSTRAP, "App start-up, as the browser saw it"));
+        rows.add(timerRow(CLIENT_BOOTSTRAP,
+                "App start-up, as the browser saw it"));
         rows.add(timerRow(CLIENT_NAVIGATION, "Client-side navigation"));
         rows.add(timerRow(CLIENT_LCP, "Largest Contentful Paint"));
         rows.add(timerRow(CLIENT_FCP, "First Contentful Paint"));
@@ -429,33 +434,31 @@ public class ApplicationHealthView extends VerticalLayout {
         catalogResult.removeAll();
         if (loads.isEmpty()) {
             catalogResult.add(new Span(
-                    "Refresh the catalog above. The kit records every JDBC "
-                            + "result set into "),
-                    Telemetry.chip(DB_FETCH_ROWS),
-                    new Span(", tagged with the route it was read for; this "
-                            + "view reads that summary right before and after "
-                            + "the load."));
+                    "Refresh the catalog above. The kit counts every query "
+                            + "and the rows it reads per thread, in "),
+                    Telemetry.chip("DatabaseActivity"),
+                    new Span("; this view reads those counts right before and "
+                            + "after the load, so only the load's own queries "
+                            + "are in them."));
             return;
         }
         Load last = loads.get(loads.size() - 1);
         if (!last.monitored()) {
             catalogResult.add(new Span("Loaded "),
                     Telemetry.timing(last.products() + " products"),
-                    new Span(", but "), Telemetry.chip(DB_FETCH_ROWS),
-                    new Span(" is not present: run a kit build with the "
-                            + "database feature and set "
+                    new Span(", but "), Telemetry.chip("DatabaseActivity"),
+                    new Span(" counted nothing: set "
                             + "vaadin.observability.database=true."));
             return;
         }
         catalogResult.add(new Span("Loading "),
                 Telemetry.timing(last.products() + " products"),
                 new Span(" cost "),
-                Telemetry.timing(last.fetches() + " result-set "
-                        + (last.fetches() == 1 ? "fetch" : "fetches")),
+                Telemetry.timing(last.queries() + " "
+                        + (last.queries() == 1 ? "query" : "queries")),
                 new Span(" ("), Telemetry.timing(last.rows() + " rows"),
-                new Span(") on "), Telemetry.chip(TAG_ROUTE + "=" + ROUTE),
-                new Span(", according to "), Telemetry.chip(DB_FETCH_ROWS),
-                new Span(". "));
+                new Span("), according to "),
+                Telemetry.chip("DatabaseActivity"), new Span(". "));
         if (last.looksLikeNPlusOne()) {
             catalogResult.add(new Span(
                     "That is the N+1: one query for the products, then one "
@@ -489,7 +492,7 @@ public class ApplicationHealthView extends VerticalLayout {
                     load.joinFetch() ? "join fetch" : "eager, unbatched"));
             row.addDataCell(Integer.toString(load.products()));
             row.addDataCell(Telemetry.timing(
-                    load.monitored() ? Long.toString(load.fetches()) : "—"));
+                    load.monitored() ? Long.toString(load.queries()) : "—"));
             row.addDataCell(
                     load.monitored() ? Long.toString(load.rows()) : "—");
         }
@@ -567,8 +570,8 @@ public class ApplicationHealthView extends VerticalLayout {
     /**
      * Reads the kit's per-result-set fetch summary for this route. {@code
      * present} is false when the meter has never been registered for it — the
-     * running kit build has no database feature, it is disabled, or nothing
-     * has been read yet.
+     * running kit build has no database feature, it is disabled, or nothing has
+     * been read yet.
      */
     private FetchTotals fetchTotals() {
         Collection<DistributionSummary> summaries = registry.find(DB_FETCH_ROWS)

@@ -3,8 +3,8 @@
 Rough edges hit while building the use cases on the route-hierarchy and
 page-title API.
 
-**No gaps are open in the Flow API itself.** Everything these use cases need is
-public, supported API, and no view in this module imports `internal`:
+**No gaps are open.** Everything these use cases need is public, supported API,
+and no view in this module imports `internal`:
 
 - `com.vaadin.flow.router` — the `@RouteParent` annotation (with a dynamic
   `resolver()`), `RouteParentResolver` / `RouteParentContext`, `RouteReference`
@@ -18,14 +18,8 @@ public, supported API, and no view in this module imports `internal`:
   ancestor's title without instantiating the view, honouring `@PageTitle`,
   `@DynamicPageTitle` and `PageTitleGenerator`. It returns an empty `Optional`
   when the target declares no title, so a caller picks its own fallback.
-
-## Resolved: the resolution entry points were internal API
-
-`UpLink` (UC5) and `SitemapView` (UC7) used to call
-`com.vaadin.flow.router.internal.RouteUtil#getRouteParent` /
-`#getRouteHierarchy` and `com.vaadin.flow.internal.menu.MenuRegistry#getTitle`
-directly. Those are now promoted to `RouteConfiguration`
-([flow#24550](https://github.com/vaadin/flow/pull/24550)) and
-`Router#resolvePageTitle`
-([flow#24647](https://github.com/vaadin/flow/pull/24647)), and both views use
-the public methods.
+- `MenuConfiguration#getMenuEntriesTree()` + `MenuEntry#children()` give the
+  menu as a tree (UC8), which is also how `MainLayout` keeps the flat main
+  navigation to top-level entries — depth comes from the tree rather than from
+  re-deriving it out of URL paths. `@Menu(parent = ...)` (also UC8) regroups an
+  entry in that tree without touching its route.

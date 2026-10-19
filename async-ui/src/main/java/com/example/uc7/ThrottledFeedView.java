@@ -42,7 +42,7 @@ import com.vaadin.flow.shared.Registration;
  * difference.
  * <p>
  * Flow pushes once per {@link UI#access} and has no built-in way to merge them,
- * so the batching is done by hand (see API-GAPS.md).
+ * so the batching is done by hand (see API-GAPS.md #8).
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Throttle a live feed")

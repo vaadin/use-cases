@@ -1,146 +1,133 @@
-# Trigger / Action API — gaps surfaced by the use-case module
+# Trigger / Action API — API gaps
 
-This module exercises the public-facing trigger API at
-`com.vaadin.flow.component.trigger.internal.*` in mainline
-`25.2-SNAPSHOT`. The classes there carry "For internal use only. May be
-renamed or removed in a future release." — using them is supported but
-the shapes are still evolving. This file records the points where the
-module hit a wall and what the workaround looks like, so the upstream
-PR has a feedback trail.
+Where the trigger API in `com.vaadin.flow.component.trigger.internal` made a
+use case in this module impossible or awkward. The classes there are marked
+"For internal use only. May be renamed or removed in a future release.", so
+the shapes are still changing.
 
-## Status
+## 1. No public `ShortcutTrigger`
 
-| Gap | State | See |
-|---|---|---|
-| No public `ShortcutTrigger` | **Open** — local shim | UC1, UC2 |
-| No public `ClickAction` | **Open** — local shim | UC2 |
-| No generic `PreventDefaultAction` | **Open** — local shim | UC11 |
-| `Action.Input#toJs` not reachable outside `internal` | **Resolved** in 25.2 ([flow#24590](https://github.com/vaadin/flow/pull/24590)) | UC13 |
-| `HandlerInput` not public | **Resolved** in 25.2 ([flow#24590](https://github.com/vaadin/flow/pull/24590)) | UC5, UC7 |
-| `PropertyInput` doesn't accept a raw `Element` | **Open** | — *(no current UC; see history note below)* |
-| Server-side feature detection | **Open** | — |
-| Public introspection of trigger wiring | **Open** | all tests |
-| Client-side test simulator | **Open** | all tests |
+**Where it bites:** UC1 / ShortcutSaveView.java, UC21 / ShortcutDownloadView.java, `ShortcutTrigger.java`
+**Symptom:** the trigger package has no keyboard-shortcut `Trigger`.
+`Shortcuts` and `ShortcutRegistration` handle keyboard shortcuts, but they
+are not a `Trigger`, so they can not be wired to actions through
+`Trigger#triggers(...)`.
+**Workaround used:** a local `com.example.ShortcutTrigger` that extends
+`Trigger`. It listens on `window` in the capture phase (the only reliable way
+to win against the browser's own shortcut, e.g. Ctrl+S "Save Page"), requires
+an exact modifier match, matches the key against both `event.key` and
+`event.code`, and calls `preventDefault()` and `stopPropagation()` before it
+runs the actions.
+**Suggested API:** a public
+`ShortcutTrigger(Component host, Key key, KeyModifier... modifiers)`, like the
+one built on `KeyboardEventTrigger` on the `feature/triggers-actions` branch
+of vaadin/flow.
 
-## No public `ShortcutTrigger`
+## 2. No public `ClickAction`
 
-**Where it bit us:** UC1 (Ctrl+S save), UC2 (Enter → submit + disable).
-**Symptom:** Mainline ships no keyboard-shortcut Trigger subclass. The
-existing `com.vaadin.flow.component.Shortcuts` framework (and
-`ShortcutRegistration`) handles keyboard shortcuts for component focus,
-but isn't a `Trigger` and so can't be wired to actions through
-`trigger.triggers(...)`.
-**Workaround used:** A small `com.example.ShortcutTrigger` subclassing
-the public `Trigger`. Listens on `window` in capture phase (the only
-reliable way to win against the browser's built-in shortcut handler,
-e.g. Ctrl+S Save Page), filters by exact modifier match, matches the
-key against both `event.key` and `event.code`, and calls
-`preventDefault()` + `stopPropagation()` before fanning out to the
-actions.
-**Suggested API:** The feature branch
-`vaadin/flow:feature/triggers-actions` already has a `ShortcutTrigger`
-built on a `KeyboardEventTrigger` parent. Once that lands in mainline,
-delete our local file and switch the imports.
+**Where it bites:** no current use case; `ClickAction.java` is kept from an
+earlier version of UC2, where an Enter shortcut clicked the Send button.
+**Symptom:** no built-in `Action` calls `target.click()`.
+`SetPropertyAction(target, "click", true)` does not work, because `click` is
+not a property. A `CallbackAction` that runs the button's logic on the server
+is a different thing: it does not fire the other button's own click handling.
+**Workaround used:** a local `com.example.ClickAction` that runs
+`$0.click()` on the target element.
+**Suggested API:** a public `ClickAction(Component target)` /
+`ClickAction(Element target)`.
 
-## No public `ClickAction`
+## 3. No generic `PreventDefaultAction`
 
-**Where it bit us:** UC2 (the Enter shortcut chains a synthetic click
-on the Send button followed by `SetPropertyAction(disabled)`).
-**Symptom:** No built-in action calls `target.click()`. Alternatives are
-all unattractive — `SetPropertyAction(target, "click", true)` doesn't
-work because `click` isn't an assignable property, and inlining the
-submit logic into a `CallbackAction` would change the demo's teaching
-point from "fire another button's logic" into "the shortcut handler
-does the work".
-**Workaround used:** A 30-line `com.example.ClickAction`. Delete + import
-once it lands in mainline.
+**Where it bites:** UC11 / RightClickCoordsView.java
+**Symptom:** a `MouseEventTrigger(panel, "contextmenu")` has to suppress the
+browser's context menu. `DomEventTrigger` and `MouseEventTrigger` have no way
+to call `event.preventDefault()`.
+**Workaround used:** a local `com.example.PreventDefaultAction` that runs
+`event.preventDefault()`, wired as the first action of the trigger.
+**Suggested API:** a public `PreventDefaultAction`, or a chainable
+`DomEventTrigger#preventDefault()` like `KeyboardEventTrigger#preventDefault()`
+on the `feature/triggers-actions` branch.
 
-## No generic `PreventDefaultAction`
+## 4. `PropertyInput` does not accept an `Element`
 
-**Where it bit us:** UC11. A right-click `MouseEventTrigger("contextmenu")`
-needs to suppress the browser's native context menu before the coordinate
-callback is useful.
-**Symptom:** The framework's only `preventDefault` story is the
-chainable `KeyboardEventTrigger.preventDefault()` on the feature branch
-(and that's keyboard-only). For other DOM events, applications have to
-write their own action.
-**Workaround used:** A 10-line `com.example.PreventDefaultAction` that
-emits `event.preventDefault()`. Wired as the first action in UC11's
-trigger.
-**Suggested API:** Either promote a generic `PreventDefaultAction` to
-the public surface or add a chainable builder method on `DomEventTrigger`
-mirroring `KeyboardEventTrigger.preventDefault()`.
+**Where it bites:** no current use case. A dropped use case wrapped a native
+`<select>` in a small `@Tag("select")` component only to get a target for
+`PropertyInput`.
+**Symptom:** the only constructor is
+`PropertyInput(Component target, String propertyName, Class<T> type)`, so a
+plain `new Element("select")` can not be read.
+**Workaround used:** wrap the element in a tiny `Component` subclass.
+**Suggested API:** a
+`PropertyInput(Element target, String propertyName, Class<T> type)` overload.
+`Trigger` already has a constructor for an `Element` host.
 
-## Resolved: `Action.Input#toJs` is public
+## 5. No server-side feature detection
 
-**Where it bit us:** UC13 wanted a `FilterListAction` that took an
-`Action.Input<String>` as the query source, mirroring
-`SetPropertyAction(target, name, source)`, but `Input#toJs(Trigger)` used
-to be `protected`, so the action was hard-wired to `event.target.value`.
-**Resolution:** `Input#toJs` is `public` since 25.2
-([flow#24590](https://github.com/vaadin/flow/pull/24590)). UC13's
-`FilterListAction` now takes an `Action.Input<String>` and the view feeds
-it a `PropertyInput` reading the search field's `value`.
+**Where it bites:** no current use case; it matters for share, file system,
+payment or clipboard-read actions.
+**Symptom:** a trigger always installs. If the browser lacks the API that an
+action calls (e.g. `ShareAction`, `ReadFromClipboardAction`), the call fails
+in the browser without a message. The server can not ask whether the API is
+supported, so it can not hide the control.
+**Workaround used:** none.
+**Suggested API:** e.g. `Feature.detect(host, "clipboard.write")` that returns
+a `Signal<Boolean>`, resolved per session.
 
-## Resolved: `HandlerInput` is public
+## 6. No introspection of trigger wiring
 
-**Where it bit us:** UC5 (`IdleTrigger`), UC7 (`BroadcastChannelTrigger`)
-declared an anonymous `Action.Input<T>` per event field, with an inline
-trigger type check, because `HandlerInput` was package-private.
-**Resolution:** `HandlerInput` is `public` since 25.2
-([flow#24590](https://github.com/vaadin/flow/pull/24590)); both triggers
-now declare their inputs as one-line `HandlerInput`s. `HandlerInput`
-reads a top-level `event[name]` only, so `IdleTrigger` now puts `idle`
-directly on its synthetic event instead of under `event.detail`. A dotted
-path (`"detail.idle"`) would avoid reshaping custom events.
+**Where it bites:** no current use case; it matters for add-ons that build on
+triggers.
+**Symptom:** triggers install their handlers with
+`Element#addJsInitializer`, which returns only a `Registration`. Code that
+wants to inspect or extend a trigger's bindings later has no API to read them.
+**Workaround used:** none.
+**Suggested API:** a read-only accessor such as `Element#getJsInitializers()`
+that returns the install expressions and their arguments.
 
-## `PropertyInput` doesn't accept a raw `Element`
+## 7. No browserless simulator for triggers and actions
 
-**Where it bit us:** *(historical — a now-dropped UC wrapped a native
-`<select>` in a 12-line `@Tag("select")` Component subclass just to get
-a target for `PropertyInput`; the UC was dropped because the
-click-and-copy pattern is covered by the high-level Clipboard API.)*
-**Symptom:** A raw `new Element("select")` cannot be passed to
-`PropertyInput`. The only constructor takes a `Component` target. The
-workaround is to wrap the element in a tiny `Component` subclass.
-**Suggested API:** Add a `PropertyInput(Element target, String name,
-Class<T> type)` overload. The body is identical to the current Component
-overload after the `.getElement()` call.
+**Where it bites:** every browserless test of the module
+**Symptom:** tests can check the rendered view and server-side state (e.g.
+that a button is disabled on the server), but not the JavaScript that a
+`Trigger` or `Action` installs. Whether the clipboard write happens, the
+shortcut fires, a double click copies or a resize changes the classes can
+only be checked in a real browser.
+**Workaround used:** the browserless tests only check what is rendered; the
+behaviour is checked in a browser.
+**Suggested API:** an accessor on `Element` for the installed expressions
+(to assert on the generated JS), or a browserless tester that fires a trigger
+so its actions run without a browser.
 
-## No server-side feature-detection signal
+## 8. Properties written by an action are invisible to the server
 
-**Where it bit us:** Not blocking any current UC, but relevant for any
-share / file-system / payment / clipboard-read variants an application
-might want to write.
-**Symptom:** A trigger always installs; if the browser lacks the API the
-action targets, the call fails silently in JS. There is no server-side
-way to ask "is this gesture-gated API supported here?" so the app could
-proactively hide the relevant control.
-**Suggested API:** A `Feature.detect(host, "clipboard.write")` returning
-a `Signal<Boolean>` resolved per session.
+**Where it bites:** UC24 / DisableButtonGroupView.java
+**Symptom:** `SetPropertyAction(sibling, "disabled", true)` disables the
+sibling buttons at once, but the property is not synced back, so
+`sibling.isEnabled()` stays `true`. When the slow work ends,
+`sibling.setEnabled(true)` is then no change and sends nothing, so the
+siblings would stay disabled in the browser. `Button#setDisableOnClick` does
+not have this problem, because it also updates the enabled state on the
+server, but it covers only the clicked button.
+**Workaround used:** the click listener sets a `processing` signal, and an
+effect mirrors it onto the enabled state of all three buttons. Clearing the
+signal later is a real change that reaches the browser through Push. The
+clicked button still uses `setDisableOnClick(true)`.
+**Suggested API:** a `SetEnabledAction(HasEnabled...)` that disables in the
+browser and marks the components disabled on the server when the event
+arrives, or a `Button#setDisableOnClick(HasEnabled... alsoDisable)` overload.
 
-## No public introspection of trigger wiring
+## 9. `bindEnabled` can not be combined with disable-on-click
 
-**Symptom:** An add-on that wants to inspect or augment a trigger's
-bindings after the fact has no API. The new architecture installs
-handlers via `Element#addJsInitializer`, which exposes no introspection
-surface.
-**Suggested API:** A read-only view on `Element#getJsInitializers()` (or
-similar accessor) that returns the install expressions and their
-captures.
-
-## No client-side test simulator / introspection
-
-**Where it bit us:** Every browserless test in this module.
-**Symptom:** Tests can verify view rendering and server-side state
-changes (e.g. "clicking Send disables the button server-side") but
-cannot inspect what JavaScript was actually emitted by a Trigger or
-Action. Functional verification of the trigger-action wire (clipboard
-write happens, shortcut fires, dblclick copies, resize updates classes)
-requires a real browser.
-**Workaround used:** Browserless tests are pure render assertions;
-Playwright is the source of truth for behaviour.
-**Suggested API:** Either a `JsInitializerSnapshot` accessor on
-`Element` exposing the installed expressions (for assertions on the
-generated JS), or a higher-level `TriggerTestKit` that mocks the
-gesture path so actions can be fired headlessly.
+**Where it bites:** UC24 / DisableButtonGroupView.java
+**Symptom:** each button is disabled on click, and it is also a sibling that
+the other buttons disable. `Button#bindEnabled(Signal)` throws
+`IllegalStateException` when disable-on-click is active, and
+`Button#setDisableOnClick` throws when the enabled state is bound to a
+signal. So the group can not use the signal binding that the rest of Flow
+offers.
+**Workaround used:** a `Signal.effect(view, ...)` that calls `setEnabled(...)`
+on every button of the group.
+**Suggested API:** let disable-on-click work on top of a bound enabled state,
+e.g. disable only until the next update of the bound signal, so that
+`bindEnabled(processing.map(p -> !p))` and `setDisableOnClick(true)` work
+together.

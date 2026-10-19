@@ -1,9 +1,42 @@
 /* The "Feedback" and "View source" overlay of BaseMainLayout: side by side,
-   with "View source" at the right edge, or stacked with "Feedback" below on
+   with "View source" at the end edge (the left one in right-to-left
+   languages, where the navbar is mirrored), or stacked with "Feedback" below on
    narrow screens, where a row would cover the navbar title. */
 .use-case-overlay {
+    position: fixed;
+    top: calc(var(--vaadin-app-layout-navbar-offset-top) + 0.5em);
+    inset-inline-end: calc(var(--aura-app-layout-inset, 0px) + 1em);
+    z-index: 100;
+    pointer-events: auto;
     display: flex;
     gap: 0.5em;
+}
+
+/* Theme colours, so the overlay follows the light or dark color scheme. */
+.use-case-overlay-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5em 0.75em;
+    border: none;
+    border-radius: var(--vaadin-radius-m);
+    background: var(--aura-surface-color-solid);
+    box-shadow: var(--aura-shadow-s);
+    color: var(--aura-accent-text-color);
+    font-size: var(--aura-font-size-s);
+    text-decoration: none;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+
+.use-case-overlay-item:hover {
+    box-shadow: var(--aura-shadow-m);
+}
+
+.use-case-overlay-icon {
+    width: 16px;
+    height: 16px;
+    margin-inline-end: 0.5em;
+    color: var(--vaadin-text-color-secondary);
 }
 
 @media (max-width: 40em) {
@@ -11,4 +44,20 @@
         flex-direction: column-reverse;
         align-items: flex-end;
     }
+}
+
+/* The module title in the navbar of BaseMainLayout. */
+.base-main-layout-title {
+    margin: 0;
+    font-size: var(--aura-font-size-l);
+}
+
+/* The banner BaseMainLayout shows above a view marked @UnreleasedApi. */
+.unreleased-api-banner {
+    padding: 0.5em 1em;
+    border-inline-start: 4px solid var(--aura-yellow);
+    background: color-mix(in srgb, var(--aura-yellow) 20%,
+            var(--vaadin-background-color));
+    color: var(--vaadin-text-color);
+    font-size: var(--aura-font-size-s);
 }

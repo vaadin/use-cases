@@ -3,6 +3,9 @@ package com.example.uc2;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.example.common.AppWindow;
 import com.example.home.HomeView;
@@ -26,9 +29,9 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.Table;
 import com.vaadin.flow.component.html.TableRow;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.RouteConfiguration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,9 +71,8 @@ class ApplicationHealthViewTest extends SpringBrowserlessTest {
     void theNumberedRouteIsAnAliasForTheStoryRoute() {
         navigate(ApplicationHealthView.class);
 
-        assertEquals(ApplicationHealthView.class,
-                RouteConfiguration.forSessionScope().getRoute("uc2")
-                        .orElseThrow());
+        assertEquals(ApplicationHealthView.class, RouteConfiguration
+                .forSessionScope().getRoute("uc2").orElseThrow());
         assertEquals(ApplicationHealthView.class,
                 RouteConfiguration.forSessionScope()
                         .getRoute(ApplicationHealthView.ROUTE).orElseThrow(),
@@ -121,26 +123,71 @@ class ApplicationHealthViewTest extends SpringBrowserlessTest {
         // vaadin.observability.database=true, so the meter must be there,
         // tagged with this route. Asserted rather than assumed: if the kit ever
         // stopped recording it, UC2's headline claim would be gone.
-        assertFalse(registry.find(ApplicationHealthView.DB_FETCH_ROWS)
-                .tag("route", ApplicationHealthView.ROUTE).summaries()
-                .isEmpty(),
+        assertFalse(
+                registry.find(ApplicationHealthView.DB_FETCH_ROWS)
+                        .tag("route", ApplicationHealthView.ROUTE).summaries()
+                        .isEmpty(),
                 "the kit should record vaadin.db.fetch.rows for route="
                         + ApplicationHealthView.ROUTE);
 
         String text = findInView(Paragraph.class).id("catalog-result")
                 .getElement().getTextRecursively();
-        assertTrue(text.contains("vaadin.db.fetch.rows"), text);
+        assertTrue(text.contains("DatabaseActivity"), text);
         assertTrue(text.contains("N+1"),
                 "the eager, unbatched join fetch must be flagged as N+1: "
                         + text);
 
-        List<TableRow> history = findInView(Table.class)
-                .id("load-history").getBodyRows();
+        List<TableRow> history = findInView(Table.class).id("load-history")
+                .getBodyRows();
         assertEquals(1, history.size());
         assertTrue(cell(history.get(0), 0).contains("eager, unbatched"));
-        assertTrue(Long.parseLong(cell(history.get(0), 2)) > Long
-                .parseLong(cell(history.get(0), 1)),
-                "more fetches than products is the N+1 signature");
+        assertTrue(
+                Long.parseLong(cell(history.get(0), 2)) > Long
+                        .parseLong(cell(history.get(0), 1)),
+                "more queries than products is the N+1 signature");
+    }
+
+    @Test
+    void otherTrafficDoesNotEndUpInTheLoadsQueryCount() throws Exception {
+        navigate(ApplicationHealthView.class);
+        loadCatalog();
+        String alone = cell(
+                findInView(Table.class).id("load-history").getBodyRows().get(0),
+                2);
+
+        // Another tab on the inventory page loading the catalog over and over
+        // while this one clicks. Making a UI on this route current on the
+        // other thread is what tags its queries with route=inventory, so they
+        // land in the same vaadin.db.fetch.rows summary, but not in this
+        // thread's DatabaseActivity counts.
+        UI ui = UI.getCurrent();
+        AtomicBoolean done = new AtomicBoolean();
+        CountDownLatch started = new CountDownLatch(1);
+        Thread other = new Thread(() -> {
+            UI.setCurrent(ui);
+            while (!done.get()) {
+                catalog.loadCatalog(false);
+                started.countDown();
+            }
+        });
+        other.start();
+        try {
+            assertTrue(started.await(10, TimeUnit.SECONDS));
+            for (int i = 0; i < 5; i++) {
+                loadCatalog();
+            }
+        } finally {
+            done.set(true);
+            other.join();
+        }
+
+        List<TableRow> history = findInView(Table.class).id("load-history")
+                .getBodyRows();
+        assertEquals(6, history.size());
+        for (TableRow row : history) {
+            assertEquals(alone, cell(row, 2),
+                    "each load counts its own queries only");
+        }
     }
 
     @Test
@@ -151,14 +198,15 @@ class ApplicationHealthViewTest extends SpringBrowserlessTest {
         loadCatalog();
         openAllSteps();
 
-        List<TableRow> history = findInView(Table.class)
-                .id("load-history").getBodyRows();
-        assertEquals(2, history.size(), "both loads are kept for the before/after");
+        List<TableRow> history = findInView(Table.class).id("load-history")
+                .getBodyRows();
+        assertEquals(2, history.size(),
+                "both loads are kept for the before/after");
         TableRow fixed = history.get(1);
         assertTrue(cell(fixed, 0).contains("join fetch"));
         assertTrue(Long.parseLong(cell(fixed, 2)) <= 2,
                 "with the join fetch the categories come along in the product "
-                        + "query, so the fetch count collapses");
+                        + "query, so the query count collapses");
         String text = findInView(Paragraph.class).id("catalog-result")
                 .getElement().getTextRecursively();
         assertTrue(text.contains("No N+1"), text);
@@ -180,17 +228,18 @@ class ApplicationHealthViewTest extends SpringBrowserlessTest {
         navigate(ApplicationHealthView.class);
         loadCatalog();
 
-        TableRow requests = findInView(Table.class)
-                .id("vital-signs").getBodyRows().stream()
-                .filter(row -> "vaadin.request.duration"
-                        .equals(cell(row, 0)))
+        TableRow requests = findInView(Table.class).id("vital-signs")
+                .getBodyRows().stream()
+                .filter(row -> "vaadin.request.duration".equals(cell(row, 0)))
                 .findFirst().orElseThrow();
         assertFalse("—".equals(cell(requests, 3)),
                 "an interaction recorded in the first session should be "
                         + "visible in the second");
-        assertTrue(findInView(Table.class).id("vital-signs").getBody()
-                .getRows().stream().anyMatch(row -> "vaadin.db.fetch.rows"
-                        .equals(cell(row, 0))),
+        assertTrue(
+                findInView(Table.class).id("vital-signs").getBody().getRows()
+                        .stream()
+                        .anyMatch(row -> "vaadin.db.fetch.rows"
+                                .equals(cell(row, 0))),
                 "the kit's database meter is one of the vital signs");
     }
 
@@ -278,13 +327,11 @@ class ApplicationHealthViewTest extends SpringBrowserlessTest {
     }
 
     private void openAllSteps() {
-        findInView(Details.class).all()
-                .forEach(step -> step.setOpened(true));
+        findInView(Details.class).all().forEach(step -> step.setOpened(true));
     }
 
     private static String cell(TableRow row, int index) {
-        return row.getDataCells().get(index).getElement()
-                .getTextRecursively();
+        return row.getDataCells().get(index).getElement().getTextRecursively();
     }
 
     private static Component investigationOf(Component root) {

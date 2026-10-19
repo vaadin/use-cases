@@ -12,6 +12,11 @@ with it. List them in plain English ("Export the filtered and sorted grid to
 Excel", not "call `GridExporter.export(...)`"), make sure each one is distinct
 rather than a cosmetic variant of another, and that each fits in one view.
 
+When adding to an existing module, also compare with the use cases it already
+has: read their views and the rows of the module README. If a new use case
+shows nothing an existing one does not, extend the existing one or drop the new
+one.
+
 Then check what the current API supports. A use case that is fully supported
 shows how to do it. One that is partly supported shows the workaround and
 records the rest as a gap. One that is not supported at all is still worth an
@@ -34,7 +39,8 @@ source". Each view therefore explains itself:
   section on the page: the technique in one line, the few points that make it
   work, and the relevant source collapsed below it. Read the source shown on
   the page from the files packaged with the app, so it can not drift from the
-  code that runs.
+  code that runs. `BuiltWith` in `common` does this; its Javadoc says what the
+  module has to package.
 
 Keep it from becoming overwhelming: collapse code and detail by default, and
 show one idea per view.
@@ -55,6 +61,11 @@ it against the feature's source, not against your expectation of it.
   the result also appears in the default setup (e.g. without a license key in
   development), or tell the reader why it does not.
 - If a value shown is application-wide rather than about this view, say so.
+- If a view uses API that is not released yet (it builds against a branch
+  snapshot), it must show the unreleased-API banner: annotate the view class
+  with `@UnreleasedApi("<pull request URL>")`, and `BaseMainLayout` shows a
+  banner that links to the pull request, so a reader does not look for the API in
+  the current Vaadin release. See [Dependencies](repository.md#dependencies).
 - When the feature changes, update every place that repeats the claim.
 
 Remove code the reader can never reach: a styling branch that can not

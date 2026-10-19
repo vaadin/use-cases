@@ -6,7 +6,6 @@ import java.time.format.DateTimeFormatter;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -20,86 +19,96 @@ import com.vaadin.flow.component.webshare.ShareContent;
 import com.vaadin.flow.component.webshare.WebShare;
 import com.vaadin.flow.component.webshare.WebShareSupport;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.signals.Signal;
 
 /**
- * UC5 — Share with completion feedback.
+ * UC5 — Completion feedback.
  * <p>
- * The native share sheet has three possible outcomes: the user picks a target
- * (success), the user dismisses the sheet ({@code AbortError}), or the share
- * fails for some other reason. The observed form of {@link WebShare#onClick}'s
- * share binding takes an {@code onShared} runnable and an {@code onError}
- * consumer, both invoked on the UI thread once the client-side share resolves.
- * This view wires those callbacks into a small outcome log.
+ * The native share sheet has three outcomes: the user picks a target (success),
+ * the user closes the sheet (the browser reports an {@code AbortError}), or the
+ * share fails for another reason. The observed form
+ * {@code WebShare.onClick(button).share(content, onShared, onError)} runs
+ * {@code onShared} or {@code onError} on the server once the browser's share
+ * finishes. This view writes each outcome to a log.
+ * <p>
+ * The "Simulate" buttons in the separate box call the same handlers as the real
+ * callbacks. They exist because nothing else can produce an outcome without a
+ * real share sheet: a browser without {@code navigator.share} never opens one,
+ * and browserless tests can not fire {@code onShared} or {@code onError}
+ * (API-GAPS.md #3). The test drives the log through these buttons. Remove them
+ * once a Web Share simulator exists.
  */
 @Route(value = "uc5", layout = MainLayout.class)
+@PageTitle(ShareFeedbackView.TITLE)
 @UseCaseDescription("Telling users whether a share completed, was cancelled or failed")
-@Menu(order = 5, title = "UC5 — Completion feedback")
+@Menu(order = 5, title = ShareFeedbackView.TITLE)
 @StyleSheet("uc5.css")
 public class ShareFeedbackView extends VerticalLayout {
+
+    static final String TITLE = "UC5 — Completion feedback";
 
     private static final DateTimeFormatter TIME = DateTimeFormatter
             .ofPattern("HH:mm:ss");
 
-    private final Button shareButton = new Button("Share with feedback",
-            VaadinIcon.SHARE.create());
     private final Div log = new Div();
+    private final Div emptyLog = new Div("No share yet.");
 
     public ShareFeedbackView() {
         addClassName("uc5-view");
-        add(new H1("UC5 — Share with completion feedback"));
-        add(new Paragraph("Wires the onShared / onError callbacks of "
-                + "WebShare.onClick(button).share(...). The browser resolves "
-                + "on success and rejects with an AbortError when the user "
-                + "dismisses the sheet — we surface both in the log below. "
-                + "On desktop you can fake either branch with the buttons in "
-                + "the next section."));
+        add(new H1(TITLE));
+        add(new Paragraph("The Share button reports the outcome of the "
+                + "share back to the server. The log below shows whether "
+                + "you picked a target, closed the share sheet "
+                + "(AbortError), or the share failed."));
 
+        Button shareButton = new Button("Share with feedback",
+                VaadinIcon.SHARE.create());
         shareButton.addThemeVariants(ButtonVariant.PRIMARY);
+        shareButton.bindEnabled(WebShare.supportSignal()
+                .map(s -> s == WebShareSupport.SUPPORTED));
 
-        add(shareButton, new H2("Outcome log"));
-
-        log.addClassName("share-feedback-log");
-        add(log);
-        appendLog("(no share invoked yet)");
-
-        add(new H2("Simulate without a browser"));
-        Button fakeOk = new Button("Simulate success", e -> handleSuccess());
-        Button fakeCancel = new Button("Simulate cancel",
-                e -> handleError("AbortError: Share canceled"));
-        Button fakeFail = new Button("Simulate failure",
-                e -> handleError("NotAllowedError: Permission denied"));
-        add(new Div(fakeOk, fakeCancel, fakeFail));
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        Signal<WebShareSupport> support = WebShare.supportSignal();
-
-        Signal.effect(this, () -> shareButton
-                .setEnabled(support.get() == WebShareSupport.SUPPORTED));
-
-        // Bind the share once; the observed callbacks run on the UI thread
-        // when the client-side share resolves or rejects.
+        // Bound once; the callbacks run on the server when the browser's
+        // share resolves or rejects.
         WebShare.onClick(shareButton).share(
                 ShareContent.create()
                         .title("Web Share completion feedback demo")
-                        .text("Try cancelling the share sheet to see the "
-                                + "AbortError path.")
+                        .text("Close the share sheet to see the AbortError "
+                                + "outcome.")
                         .url("https://vaadin.com/"),
                 this::handleSuccess,
                 err -> handleError(err.name() + ": " + err.message()));
+
+        log.addClassName("uc5-log");
+        emptyLog.addClassName("uc5-empty");
+        log.add(emptyLog);
+
+        add(shareButton, new H2("Outcome log"), log, simulateBox());
     }
 
-    // Package-private outcome handlers so a browserless test can drive the
-    // log without an actual share dialog.
-    void handleSuccess() {
+    private Div simulateBox() {
+        Div box = new Div();
+        box.addClassName("uc5-simulate");
+        box.add(new H2("Simulate an outcome"));
+        box.add(new Paragraph("Not part of the feature. In a browser without "
+                + "navigator.share there is no share sheet, and the "
+                + "browserless tests can not produce an outcome either "
+                + "(API-GAPS.md #3). These buttons call the same handlers "
+                + "as the real callbacks."));
+        Button ok = new Button("Simulate success", e -> handleSuccess());
+        Button cancel = new Button("Simulate cancel",
+                e -> handleError("AbortError: Share canceled"));
+        Button fail = new Button("Simulate failure",
+                e -> handleError("NotAllowedError: Permission denied"));
+        box.add(new Div(ok, cancel, fail));
+        return box;
+    }
+
+    private void handleSuccess() {
         appendLog(now() + "  ✓ shared");
     }
 
-    void handleError(String error) {
+    private void handleError(String error) {
         appendLog(now() + "  ✗ " + error);
     }
 
@@ -108,8 +117,7 @@ public class ShareFeedbackView extends VerticalLayout {
     }
 
     private void appendLog(String line) {
-        Div entry = new Div();
-        entry.setText(line);
-        log.addComponentAsFirst(entry);
+        emptyLog.removeFromParent();
+        log.addComponentAsFirst(new Div(line));
     }
 }

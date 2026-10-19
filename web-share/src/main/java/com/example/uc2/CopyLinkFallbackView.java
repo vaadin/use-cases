@@ -3,10 +3,9 @@ package com.example.uc2;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -14,104 +13,101 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.webshare.ShareContent;
 import com.vaadin.flow.component.webshare.WebShare;
 import com.vaadin.flow.component.webshare.WebShareSupport;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
 /**
- * UC2 — Share with copy-link fallback.
+ * UC2 — Copy-link fallback.
  * <p>
- * Showcases the reactive feature-detection pattern: a single slot in the page
- * holds either a "Share" button (when {@link WebShare#supportSignal()} is
- * {@link WebShareSupport#SUPPORTED}) or a "Copy link" button (when
- * {@link WebShareSupport#UNSUPPORTED}), driven by a {@link Signal#effect signal
- * effect}. The swap happens automatically — no page reload, no manual
- * feature-detection callback.
+ * One place on the page holds either a "Share" button (while
+ * {@link WebShare#supportSignal()} is {@link WebShareSupport#SUPPORTED}) or a
+ * "Copy link" button (while it is {@link WebShareSupport#UNSUPPORTED}). Both
+ * buttons are created once and their visibility is bound to the signal, so the
+ * swap needs no feature-detection callback. Both hand over the same link: the
+ * address of this page, read from the browser into a read-only field. The copy
+ * uses {@link Clipboard#onClick}, which writes to the clipboard in the
+ * browser's click handler, so it also works in browsers that require a user
+ * gesture for clipboard writes.
  */
 @Route(value = "uc2", layout = MainLayout.class)
+@PageTitle(CopyLinkFallbackView.TITLE)
 @UseCaseDescription("Offering a copy-link button where native sharing is unsupported")
-@Menu(order = 2, title = "UC2 — Copy-link fallback")
+@Menu(order = 2, title = CopyLinkFallbackView.TITLE)
 @StyleSheet("uc2.css")
 public class CopyLinkFallbackView extends VerticalLayout {
 
-    private static final String DOC_TITLE = "Web Share API use cases";
-    private static final String DOC_URL = "https://vaadin.com/";
-
-    private final Div actionSlot = new Div();
-    private final Paragraph hint = new Paragraph();
+    static final String TITLE = "UC2 — Copy-link fallback";
 
     public CopyLinkFallbackView() {
         addClassName("uc2-view");
-        add(new H1("UC2 — Share with copy-link fallback"));
-        add(new Paragraph("Mobile and modern Safari/Edge users get the "
-                + "native share sheet. Desktop Firefox and older browsers "
-                + "fall back to a clipboard-copy button — same shareable "
-                + "URL either way. The swap is driven entirely by the "
-                + "WebShare.supportSignal()."));
+        add(new H1(TITLE));
+        add(new Paragraph("Browsers with navigator.share (mobile browsers, "
+                + "Safari, Edge) get a Share button that opens the native "
+                + "share sheet. Other browsers, such as desktop Firefox, get "
+                + "a Copy link button instead. Both hand over the same link: "
+                + "the address of this page."));
 
-        actionSlot.addClassName("action-slot");
-        hint.addClassName("hint");
+        TextField pageUrl = new TextField("Link");
+        pageUrl.setReadOnly(true);
+        pageUrl.addClassName("uc2-url");
 
-        add(actionSlot, hint);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        UI ui = attachEvent.getUI();
         Signal<WebShareSupport> support = WebShare.supportSignal();
 
-        Signal.effect(this, () -> renderFor(support.get(), ui));
+        Button share = new Button("Share", VaadinIcon.SHARE.create());
+        share.addThemeVariants(ButtonVariant.PRIMARY);
+        share.bindVisible(support.map(s -> s == WebShareSupport.SUPPORTED));
+        WebShare.onClick(share).share(
+                ShareContent.create().title(TITLE).url(pageUrl),
+                () -> Notification.show("Shared", 2000,
+                        Notification.Position.BOTTOM_START),
+                err -> Notification.show("Share failed: " + err.message(), 2000,
+                        Notification.Position.BOTTOM_START));
+
+        Button copy = new Button("Copy link", VaadinIcon.LINK.create());
+        copy.addThemeVariants(ButtonVariant.PRIMARY);
+        copy.bindVisible(support.map(s -> s == WebShareSupport.UNSUPPORTED));
+        Clipboard.onClick(copy).writeText(pageUrl,
+                copied -> Notification.show("Link copied: " + copied, 2500,
+                        Notification.Position.BOTTOM_START),
+                err -> Notification.show("Copy failed: " + err.message(), 2500,
+                        Notification.Position.BOTTOM_START));
+
+        Button detecting = new Button("Detecting…");
+        detecting.setEnabled(false);
+        detecting.bindVisible(support.map(s -> s == WebShareSupport.UNKNOWN));
+
+        Div actionSlot = new Div(share, copy, detecting);
+        actionSlot.addClassName("uc2-action");
+
+        Paragraph hint = new Paragraph();
+        hint.addClassName("uc2-hint");
+        hint.bindText(support.map(CopyLinkFallbackView::hintText));
+
+        // Only the browser knows the address it shows, so ask it on each
+        // attach. Nothing keeps running, so there is nothing to clean up.
+        whenAttached(ui -> {
+            ui.getPage()
+                    .fetchCurrentURL(url -> pageUrl.setValue(url.toString()));
+            return null;
+        });
+
+        add(pageUrl, actionSlot, hint);
     }
 
-    private void renderFor(WebShareSupport state, UI ui) {
-        actionSlot.removeAll();
-        switch (state) {
-        case SUPPORTED -> {
-            Button share = new Button("Share", VaadinIcon.SHARE.create());
-            share.addThemeVariants(ButtonVariant.PRIMARY);
-            // A fresh button is created on each SUPPORTED render, so binding
-            // here binds exactly once per button instance.
-            WebShare.onClick(share).share(
-                    ShareContent.create().title(DOC_TITLE).url(DOC_URL),
-                    () -> Notification.show("Shared", 2000,
-                            Notification.Position.BOTTOM_START),
-                    err -> Notification.show("Share failed: " + err.message(),
-                            2000, Notification.Position.BOTTOM_START));
-            actionSlot.add(share);
-            hint.setText("Browser supports navigator.share — tap to open "
-                    + "the native sheet.");
-        }
-        case UNSUPPORTED -> {
-            Button copy = new Button("Copy link", VaadinIcon.LINK.create());
-            copy.addThemeVariants(ButtonVariant.PRIMARY);
-            copy.addClickListener(e -> copyLinkToClipboard(ui));
-            actionSlot.add(copy);
-            hint.setText("Browser does not expose navigator.share — "
-                    + "falling back to clipboard.");
-        }
-        case UNKNOWN -> {
-            Button detecting = new Button("Detecting…");
-            detecting.setEnabled(false);
-            actionSlot.add(detecting);
-            hint.setText("Waiting for the first bootstrap report from the "
-                    + "browser.");
-        }
-        }
-    }
-
-    private void copyLinkToClipboard(UI ui) {
-        // Quick clipboard fallback. Wrapped in a try/catch on the JS side
-        // so older browsers without navigator.clipboard still see the
-        // notification.
-        ui.getPage().executeJs(
-                "try { await navigator.clipboard.writeText($0); return true; }"
-                        + " catch (e) { return false; }",
-                DOC_URL);
-        Notification.show("Link copied: " + DOC_URL, 2500,
-                Notification.Position.BOTTOM_START);
+    private static String hintText(WebShareSupport state) {
+        return switch (state) {
+        case SUPPORTED -> "This browser has navigator.share: Share opens the "
+                + "native share sheet.";
+        case UNSUPPORTED -> "This browser has no navigator.share: Copy link "
+                + "puts the link on the clipboard instead.";
+        case UNKNOWN ->
+            "Waiting for the browser to report whether it can " + "share.";
+        };
     }
 }

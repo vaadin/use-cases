@@ -22,7 +22,7 @@ import com.vaadin.flow.dom.JsFunction;
  * either.
  * <p>
  * Calls Lit's {@code performUpdate()}, which is not part of the components'
- * documented API; see {@code API-GAPS.md}.
+ * documented API; see {@code API-GAPS.md} #5.
  */
 public class RenderNowAction extends Action {
 

@@ -1,13 +1,13 @@
 package com.example.common;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.example.common.SlackFeedback.UseCase;
 import org.jspecify.annotations.Nullable;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
@@ -35,8 +35,10 @@ import com.vaadin.flow.server.menu.MenuEntry;
  * and the auto-generated side navigation, and a fixed-position "View source"
  * overlay that links the current route's view class to its source on GitHub
  * next to a "Feedback" button that opens a {@link FeedbackDialog} for it. The
- * button is only shown when {@link SlackFeedback} is enabled. Subclasses only
- * need to pass their module id and display title.
+ * button is only shown when {@link SlackFeedback} is enabled. Above a view
+ * marked {@link UnreleasedApi} it shows a banner that links to the pull request
+ * the API comes from. Subclasses only need to pass their module id and display
+ * title.
  */
 @StyleSheet("base-main-layout.css")
 public abstract class BaseMainLayout extends AppLayout
@@ -44,6 +46,9 @@ public abstract class BaseMainLayout extends AppLayout
 
     private static final SlackFeedback SLACK_FEEDBACK = SlackFeedback
             .fromEnvironment();
+
+    private static final Pattern PULL_REQUEST_URL = Pattern
+            .compile("https://github\\.com/([^/]+/[^/]+)/pull/(\\d+)/?");
 
     /**
      * The environment variable naming the Git commit or branch "View source"
@@ -60,6 +65,8 @@ public abstract class BaseMainLayout extends AppLayout
     private final SlackFeedback slackFeedback;
     private final Anchor sourceCodeLink;
     private final Button feedbackButton;
+    private final Anchor unreleasedApiLink;
+    private final Div unreleasedApiBanner;
     private @Nullable UseCase useCase;
 
     protected BaseMainLayout(String moduleId, String title) {
@@ -80,8 +87,7 @@ public abstract class BaseMainLayout extends AppLayout
         DrawerToggle toggle = new DrawerToggle();
 
         H1 h1 = new H1(title);
-        h1.getStyle().set("font-size", "var(--aura-font-size-l)").set("margin",
-                "0");
+        h1.addClassName("base-main-layout-title");
 
         addToNavbar(toggle, h1);
 
@@ -96,10 +102,22 @@ public abstract class BaseMainLayout extends AppLayout
         getElement().appendChild(
                 buildSourceCodeOverlay(sourceCodeLink, feedbackButton));
 
+        unreleasedApiLink = new Anchor();
+        unreleasedApiLink.setTarget("_blank");
+        unreleasedApiBanner = new Div(
+                new Span("This use case uses API that is not released yet. It"
+                        + " comes from "),
+                unreleasedApiLink, new Span("."));
+        unreleasedApiBanner.addClassName("unreleased-api-banner");
+        unreleasedApiBanner.setVisible(false);
+        // Without a slot name the banner shares the content slot with the
+        // view, so being the first child puts it above the view.
+        getElement().insertChild(0, unreleasedApiBanner.getElement());
+
         addToDrawer(AppCatalog.createSelector(moduleId));
 
         SideNav nav = new SideNav();
-        MenuConfiguration.getMenuEntries().forEach(entry -> {
+        mainNavEntries().forEach(entry -> {
             SideNavItem item = new SideNavItem(entry.title(), entry.path());
             UseCaseDescription description = descriptionOf(entry);
             if (description != null) {
@@ -108,6 +126,16 @@ public abstract class BaseMainLayout extends AppLayout
             nav.addItem(item);
         });
         addToDrawer(nav);
+    }
+
+    /**
+     * The menu entries listed in the main side navigation, in order. The
+     * default is the flat {@link MenuConfiguration#getMenuEntries()}; a module
+     * whose menu nests routes can override this to keep the deeper entries out
+     * of the flat nav.
+     */
+    protected List<MenuEntry> mainNavEntries() {
+        return MenuConfiguration.getMenuEntries();
     }
 
     /**
@@ -122,25 +150,17 @@ public abstract class BaseMainLayout extends AppLayout
     private static Element buildSourceCodeOverlay(Anchor link,
             Button feedbackButton) {
         Div container = new Div();
-        container.getStyle().set("position", "fixed").set("top",
-                "calc(var(--vaadin-app-layout-navbar-offset-top) + 0.5em)")
-                .set("right", "1em").set("z-index", "100")
-                .set("pointer-events", "auto");
         container.addClassName("use-case-overlay");
 
-        Icon codeIcon = overlayIcon(VaadinIcon.CODE);
-
         link.setTarget("_blank");
-        styleOverlayItem(link);
+        link.addClassName("use-case-overlay-item");
 
-        Span content = new Span(codeIcon);
+        Span content = new Span(overlayIcon(VaadinIcon.CODE));
         content.add("View source");
         link.removeAll();
         link.add(content);
 
-        styleOverlayItem(feedbackButton);
-        feedbackButton.getStyle().set("border", "none").set("cursor",
-                "pointer");
+        feedbackButton.addClassName("use-case-overlay-item");
 
         container.add(feedbackButton, link);
         return container.getElement();
@@ -148,34 +168,8 @@ public abstract class BaseMainLayout extends AppLayout
 
     private static Icon overlayIcon(VaadinIcon vaadinIcon) {
         Icon icon = vaadinIcon.create();
-        icon.setSize("16px");
-        icon.getStyle().set("color", "var(--vaadin-text-color-secondary)")
-                .set("margin-right", "0.5em");
+        icon.addClassName("use-case-overlay-icon");
         return icon;
-    }
-
-    private static <T extends Component & HasStyle> void styleOverlayItem(
-            T item) {
-        item.getStyle().set("display", "inline-flex")
-                .set("align-items", "center")
-                .set("background-color", "rgba(255, 255, 255, 0.95)")
-                .set("padding", "0.5em 0.75em").set("border-radius", "4px")
-                .set("box-shadow", "0 2px 4px rgba(0, 0, 0, 0.1)")
-                .set("color", "var(--aura-accent-text-color)")
-                .set("text-decoration", "none")
-                .set("font-size", "var(--aura-font-size-s)")
-                .set("transition", "box-shadow 0.2s");
-
-        item.getElement()
-                .addEventListener("mouseenter",
-                        e -> item.getStyle().set("box-shadow",
-                                "0 4px 8px rgba(0, 0, 0, 0.15)"))
-                .addEventData("event.preventDefault");
-        item.getElement()
-                .addEventListener("mouseleave",
-                        e -> item.getStyle().set("box-shadow",
-                                "0 2px 4px rgba(0, 0, 0, 0.1)"))
-                .addEventData("event.preventDefault");
     }
 
     @Override
@@ -196,6 +190,24 @@ public abstract class BaseMainLayout extends AppLayout
                                 .getPathWithQueryParameters())
                 : null;
         feedbackButton.setVisible(useCase != null && slackFeedback.isEnabled());
+
+        UnreleasedApi unreleasedApi = viewClass
+                .getAnnotation(UnreleasedApi.class);
+        if (unreleasedApi != null) {
+            unreleasedApiLink.setHref(unreleasedApi.value());
+            unreleasedApiLink.setText(pullRequestLabel(unreleasedApi.value()));
+        }
+        unreleasedApiBanner.setVisible(unreleasedApi != null);
+    }
+
+    /**
+     * A short label for a GitHub pull request URL, such as
+     * {@code vaadin/flow#26495}, or the URL itself when it is not one.
+     */
+    static String pullRequestLabel(String url) {
+        Matcher matcher = PULL_REQUEST_URL.matcher(url);
+        return matcher.matches() ? matcher.group(1) + "#" + matcher.group(2)
+                : url;
     }
 
     /**
@@ -206,10 +218,24 @@ public abstract class BaseMainLayout extends AppLayout
      */
     static String sourceUrl(@Nullable String ref, String moduleId,
             Class<?> viewClass) {
+        return gitHubUrl("tree", ref, moduleId, "src/main/java/"
+                + viewClass.getName().replace('.', '/') + ".java");
+    }
+
+    /**
+     * The GitHub URL of a file of this app, such as
+     * {@code src/main/resources/META-INF/resources/styles.css}, at the same Git
+     * commit or branch as "View source".
+     */
+    String fileUrl(String path) {
+        return gitHubUrl("blob", SOURCE_REF, moduleId, path);
+    }
+
+    private static String gitHubUrl(String kind, @Nullable String ref,
+            String moduleId, String path) {
         String sourceRef = ref == null || ref.isBlank() ? "main" : ref;
-        return "https://github.com/vaadin/use-cases/tree/" + sourceRef + "/"
-                + moduleId + "/src/main/java/"
-                + viewClass.getName().replace('.', '/') + ".java";
+        return "https://github.com/vaadin/use-cases/" + kind + "/" + sourceRef
+                + "/" + moduleId + "/" + path;
     }
 
     private static String useCaseTitle(Class<?> viewClass) {

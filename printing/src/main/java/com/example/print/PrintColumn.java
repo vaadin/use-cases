@@ -8,7 +8,7 @@ import com.vaadin.flow.function.SerializableFunction;
  * screen, and into the plain HTML table that actually reaches the paper.
  * <p>
  * Keeping the two in sync by hand is the tax a virtualised Grid charges for
- * being printable at all — see {@code API-GAPS.md}.
+ * being printable at all — see {@code API-GAPS.md} #8.
  *
  * @param <T>
  *            the row type

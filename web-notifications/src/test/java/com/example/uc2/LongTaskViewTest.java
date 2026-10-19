@@ -1,0 +1,130 @@
+package com.example.uc2;
+
+import java.time.Instant;
+import java.util.concurrent.ScheduledFuture;
+
+import com.example.WebNotificationSimulator;
+import com.example.home.HomeView;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
+import com.vaadin.browserless.SpringBrowserlessTest;
+import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.webnotification.WebNotificationError;
+import com.vaadin.flow.component.webnotification.WebNotificationPermission;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+@SpringBootTest
+@ViewPackages(classes = { LongTaskView.class, HomeView.class })
+class LongTaskViewTest extends SpringBrowserlessTest {
+
+    // The tests finish the report by hand instead of waiting ten seconds.
+    @MockitoBean
+    private TaskScheduler taskScheduler;
+
+    @Test
+    void viewRendersHeadingAndStartButton() {
+        navigate(LongTaskView.class);
+
+        assertTrue(findInView(H1.class).all().stream()
+                .anyMatch(h -> h.getText().equals("UC2 — Task finished")));
+        assertTrue(startButton().isEnabled());
+        // findInView only returns visible components.
+        assertTrue(findInView(ProgressBar.class).all().isEmpty());
+    }
+
+    @Test
+    void startingDisablesButtonAndFinishingSendsOsNotification() {
+        LongTaskView view = navigate(LongTaskView.class);
+        WebNotificationSimulator
+                .setPermission(WebNotificationPermission.GRANTED);
+        runPendingSignalsTasks();
+
+        test(startButton()).click();
+        runPendingSignalsTasks();
+        assertFalse(startButton().isEnabled());
+        assertTrue(findInView(ProgressBar.class).single().isVisible());
+
+        view.finish(UI.getCurrent());
+        runPendingSignalsTasks();
+        assertTrue(startButton().isEnabled());
+        assertSpan("Report ready.");
+        assertLogContains("→ OS notification");
+        assertEquals("Your report is ready",
+                WebNotificationSimulator.shown().get(0).title());
+    }
+
+    @Test
+    void leavingTheViewCancelsTheRunningReport() {
+        ScheduledFuture<?> report = mock(ScheduledFuture.class);
+        doReturn(report).when(taskScheduler).schedule(any(Runnable.class),
+                any(Instant.class));
+        navigate(LongTaskView.class);
+
+        test(startButton()).click();
+        navigate(HomeView.class);
+
+        verify(report).cancel(false);
+    }
+
+    @Test
+    void finishingWithoutPermissionFallsBackToInApp() {
+        LongTaskView view = navigate(LongTaskView.class);
+        WebNotificationSimulator
+                .setPermission(WebNotificationPermission.DENIED);
+        runPendingSignalsTasks();
+
+        view.finish(UI.getCurrent());
+        runPendingSignalsTasks();
+        assertLogContains("→ in-app notification");
+        assertTrue(WebNotificationSimulator.shown().isEmpty());
+    }
+
+    @Test
+    void browserRefusalFallsBackToInApp() {
+        LongTaskView view = navigate(LongTaskView.class);
+        WebNotificationSimulator
+                .setPermission(WebNotificationPermission.GRANTED);
+        view.finish(UI.getCurrent());
+
+        // e.g. Chrome on Android, which only shows notifications through a
+        // service worker
+        WebNotificationSimulator.fail(WebNotificationSimulator.shown().get(0),
+                WebNotificationError.Reason.UNKNOWN, "Illegal constructor");
+        assertLogContains("OS notification refused (UNKNOWN) → in-app");
+    }
+
+    private Button startButton() {
+        return findInView(Button.class).all().stream()
+                .filter(b -> "Generate report".equals(b.getText())).findFirst()
+                .orElseThrow();
+    }
+
+    private void assertSpan(String text) {
+        assertTrue(findInView(Span.class).all().stream()
+                .anyMatch(s -> text.equals(s.getText())));
+    }
+
+    private void assertLogContains(String fragment) {
+        assertTrue(
+                findInView(Div.class).all().stream()
+                        .anyMatch(d -> d.getText() != null
+                                && d.getText().contains(fragment)),
+                "expected log to contain \"" + fragment + "\"");
+    }
+}

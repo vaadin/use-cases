@@ -15,8 +15,19 @@ import com.vaadin.flow.shared.Registration;
  * Temporary helpers for things the {@code Media} / {@code Video} /
  * {@code Audio} API from vaadin/flow#25900 does not cover yet. Each method is a
  * thin wrapper over the element API or a small piece of JavaScript; replace the
- * call with the real API once it lands. {@code API-GAPS.md} lists the gaps one
- * by one.
+ * call with the real API once it lands. The {@code API-GAPS.md} entries they
+ * stand in for:
+ * <ul>
+ * <li>#2: {@link #setMutedNow}</li>
+ * <li>#3: {@link #play}, {@link #pause}, {@link #seek}, {@link #seekBy},
+ * {@link #startAt}</li>
+ * <li>#4: {@link #addPlayingListener}, {@link #addPauseListener},
+ * {@link #addEndedListener}, {@link #addTimeUpdateListener},
+ * {@link #addDurationListener}, {@link #addSourceChosenListener}</li>
+ * <li>#5: {@link #load}</li>
+ * <li>#6: {@link #addTextTrack}, {@link #showTextTrack}</li>
+ * <li>#7: {@link #setPlaysInline}</li>
+ * </ul>
  */
 public final class MissingAPI {
 
@@ -245,9 +256,8 @@ public final class MissingAPI {
     }
 
     /**
-     * Adds a {@code <track>} with subtitles, captions or chapters.
-     * {@code Media} only accepts {@code Source} children, so the element is
-     * appended directly.
+     * Adds a {@code <track>} with subtitles, captions or chapters. There is no
+     * {@code Track} component, so the element is appended directly.
      *
      * @param media
      *            the player

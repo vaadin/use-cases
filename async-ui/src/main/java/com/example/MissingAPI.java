@@ -41,8 +41,8 @@ public final class MissingAPI {
      * <p>
      * Gap: Flow has no asynchronous signal, no component-scoped {@code access}
      * that follows the component's lifecycle, and no cancellation tied to
-     * detach (vaadin/flow#16697). Migrate to a built-in async signal once one
-     * exists.
+     * detach (API-GAPS.md #1, #2 and #3, vaadin/flow#16697). Migrate to a
+     * built-in async signal once one exists.
      *
      * @param owner
      *            the component whose lifecycle bounds the load; must be
@@ -111,7 +111,8 @@ public final class MissingAPI {
      * <p>
      * Gap: Flow has no server-side visibility (IntersectionObserver) event, so
      * deferring work until something is actually on screen needs this
-     * {@code executeJs}. Migrate to a built-in event once one exists.
+     * {@code executeJs} (API-GAPS.md #7). Migrate to a built-in event once one
+     * exists.
      */
     public static Registration onFirstVisible(Component component,
             Runnable action) {

@@ -1,14 +1,13 @@
 package com.example.uc2;
 
 import com.example.PageVisibilityTestSupport;
-import com.example.views.ColoredAvatar;
+import com.example.home.HomeView;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.page.PageVisibility;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,23 +15,53 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ViewPackages(classes = PresenceAvatarsView.class)
+@ViewPackages(classes = { PresenceAvatarsView.class, HomeView.class })
 class PresenceAvatarsViewTest extends SpringBrowserlessTest {
 
     @Autowired
     private PresenceRegistry registry;
 
     @Test
-    void viewRendersAndJoinsRegistry() {
+    void openingTheViewJoinsAndLeavingItLeaves() {
+        long before = registry.size();
+
+        navigate(PresenceAvatarsView.class);
+        runPendingSignalsTasks();
+        assertEquals(before + 1, registry.size(),
+                "the visiting user should join the room");
+
+        navigate(HomeView.class);
+        assertEquals(before, registry.size(),
+                "the visiting user should leave the room with the view");
+    }
+
+    @Test
+    void avatarReflectsVisibilityStateClasses() {
         navigate(PresenceAvatarsView.class);
         runPendingSignalsTasks();
 
-        assertEquals(1, registry.size(),
-                "the visiting user should be the sole presence");
+        PageVisibilityTestSupport.setPageVisibility(PageVisibility.VISIBLE);
+        runPendingSignalsTasks();
+
+        ColoredAvatar avatar = findInView(ColoredAvatar.class).all().stream()
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("no avatar rendered"));
         assertTrue(
-                findInView(H2.class).all().stream()
-                        .anyMatch(h -> "In the room".equals(h.getText())),
-                "view should render the 'In the room' heading");
+                avatar.getElement().getClassList()
+                        .contains("uc2-avatar-visible"),
+                "avatar should carry the uc2-avatar-visible class while VISIBLE");
+
+        PageVisibilityTestSupport.setPageVisibility(PageVisibility.HIDDEN);
+        runPendingSignalsTasks();
+
+        assertTrue(
+                avatar.getElement().getClassList()
+                        .contains("uc2-avatar-hidden"),
+                "avatar should carry the uc2-avatar-hidden class while HIDDEN");
+        assertFalse(
+                avatar.getElement().getClassList()
+                        .contains("uc2-avatar-visible"),
+                "uc2-avatar-visible should be cleared when state flips to HIDDEN");
     }
 
     /**
@@ -47,40 +76,15 @@ class PresenceAvatarsViewTest extends SpringBrowserlessTest {
      * one VaadinSession but is being accessed from another}.
      */
     @Test
-    void avatarReflectsVisibilityStateClasses() {
-        navigate(PresenceAvatarsView.class);
-        runPendingSignalsTasks();
-
-        PageVisibilityTestSupport.setPageVisibility(PageVisibility.VISIBLE);
-        runPendingSignalsTasks();
-
-        ColoredAvatar avatar = findInView(ColoredAvatar.class).all().stream()
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("no avatar rendered"));
-        assertTrue(
-                avatar.getElement().getClassList().contains("presence-visible"),
-                "avatar should carry the presence-visible class while VISIBLE");
-
-        PageVisibilityTestSupport.setPageVisibility(PageVisibility.HIDDEN);
-        runPendingSignalsTasks();
-
-        assertTrue(
-                avatar.getElement().getClassList().contains("presence-hidden"),
-                "avatar should carry the presence-hidden class while HIDDEN");
-        assertFalse(
-                avatar.getElement().getClassList().contains("presence-visible"),
-                "presence-visible should be cleared when state flips to HIDDEN");
-    }
-
-    @Test
     void secondSessionCanNavigateWithoutCrossSessionException() {
+        long before = registry.size();
         navigate(PresenceAvatarsView.class);
         runPendingSignalsTasks();
-        assertEquals(1, registry.size());
+        assertEquals(before + 1, registry.size());
 
         // Discard the current mock VaadinSession and start a fresh one to
         // simulate a second browser tab in another session. The first
-        // session's onDetach removes its presence, so only the new visitor
+        // session's detach removes its presence, so only the new visitor
         // is left.
         cleanVaadinEnvironment();
         initVaadinEnvironment();
@@ -88,7 +92,7 @@ class PresenceAvatarsViewTest extends SpringBrowserlessTest {
         navigate(PresenceAvatarsView.class);
         runPendingSignalsTasks();
 
-        assertEquals(1, registry.size(),
+        assertEquals(before + 1, registry.size(),
                 "second session should have replaced the first presence");
     }
 }
