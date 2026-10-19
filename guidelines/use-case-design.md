@@ -12,6 +12,11 @@ with it. List them in plain English ("Export the filtered and sorted grid to
 Excel", not "call `GridExporter.export(...)`"), make sure each one is distinct
 rather than a cosmetic variant of another, and that each fits in one view.
 
+When adding to an existing module, also compare with the use cases it already
+has: read their views and the rows of the module README. If a new use case
+shows nothing an existing one does not, extend the existing one or drop the new
+one.
+
 Then check what the current API supports. A use case that is fully supported
 shows how to do it. One that is partly supported shows the workaround and
 records the rest as a gap. One that is not supported at all is still worth an
