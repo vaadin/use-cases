@@ -1,23 +1,23 @@
 /* The value and its copy button share the cell; the button stays out of the
    way until the row is worth acting on. */
-.copy-cell {
+.uc8-copy-cell {
     display: flex;
     align-items: center;
-    gap: var(--vaadin-gap-s, 0.5rem);
+    gap: var(--vaadin-gap-s);
     width: 100%;
 }
 
 /* Keeps the buttons in a column of their own instead of trailing behind each
    address. */
-.copy-cell > span {
+.uc8-copy-cell > span {
     flex-grow: 1;
 }
 
-.copy-cell vaadin-button {
+.uc8-copy-cell vaadin-button {
     opacity: 0.55;
 }
 
-vaadin-grid-cell-content:hover .copy-cell vaadin-button,
-.copy-cell vaadin-button:focus-visible {
+vaadin-grid-cell-content:hover .uc8-copy-cell vaadin-button,
+.uc8-copy-cell vaadin-button:focus-visible {
     opacity: 1;
 }

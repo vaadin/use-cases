@@ -94,17 +94,27 @@ Clipboard.onClick(copyEmail).writeText(email); // does not compile
 in `vaadin-grid-flow`, as `MenuItem` does. Or let `Clipboard.onClick` accept
 any `Component` and listen to the DOM `click` event directly.
 
-## 4. No browserless simulator for clipboard writes
+## 4. No browserless simulator for copies and pastes
 
-**Where it bites:** every test under `src/test/java/com/example/uc*/`
+**Where it bites:** every test under `src/test/java/com/example/uc*/` /
+`ClipboardTestSupport.java`
 **Symptom:** a write is a client-side action, bound to a click
 (`Clipboard.onClick(button).writeText(...)`) or called from a template
 (`Clipboard.writeText()` in UC8). A browserless test can not fire it, inspect
 what it would write, or assert against a fake clipboard. `CopyFromGridViewTest`
 checks that every row renders its own email, but not that the button copies
-it: a template that called `copy` with the wrong property would pass.
-**Workaround used:** the tests assert the rendered cells; the copy itself is
-checked by hand in a real browser.
+it: a template that called `copy` with the wrong property would pass. Pastes are no
+easier: `Clipboard.onPaste` listens to a DOM `paste` event whose data keys are
+private JavaScript expressions in `Clipboard`, and `Clipboard.onFilePaste`
+uploads each file over its own HTTP request, which browserless-test can not
+send.
+**Workaround used:** `ClipboardTestSupport` reaches into Flow internals. It
+reports a copy outcome by invoking the return channel that `PromiseAction`
+registers on the button's `StateNode`, fires a `paste` `DomEvent` with the
+event-data keys copied from `Clipboard`, and feeds the `UploadHandler` that
+`onFilePaste` stores on the element a synthetic `UploadEvent` with the
+`X-Paste-Id` and `X-Paste-File-Count` headers. The copy itself is checked by
+hand in a real browser.
 **Suggested API:** a simulator in browserless-test, following
 `GeolocationSimulator`:
 
@@ -112,6 +122,9 @@ checked by hand in a real browser.
 ClipboardSimulator clipboard = ClipboardSimulator.install();
 test(copyButton).click();
 assertEquals("ada.lovelace1@northwind.example", clipboard.lastWrittenText());
+
+clipboard.pasteInto(dropZone).html("<table>…</table>").text("a\tb").simulate();
+clipboard.pasteInto(dropZone).file("shot.png", "image/png", bytes).simulate();
 ```
 
 Upstream: https://github.com/vaadin/browserless-test/issues/64
@@ -132,3 +145,18 @@ reported through `onError`.
 ```java
 Signal<ClipboardAvailability> Clipboard.availabilitySignal();
 ```
+
+## 6. The error type of `onError` lives in an internal package
+
+**Where it bites:** every copy with an `onError` callback (UC1–UC4, UC6)
+**Symptom:** the `onError` consumer of `ClipboardBinding.writeText`,
+`writeHtml`, `writeImage`, `write` and `read*` takes a
+`com.vaadin.flow.component.trigger.internal.PromiseAction.Error`. The views
+get away with a lambda, but code that names the type — a shared error
+handler, a method reference to a helper, a field — has to import a package
+marked internal, which may change without notice.
+**Workaround used:** none; the views only use lambdas, so the type never
+appears in the source.
+**Suggested API:** a public type in the clipboard package, e.g.
+`record ClipboardError(String name, String message)`, or a public
+`PromiseError` next to the other trigger types.

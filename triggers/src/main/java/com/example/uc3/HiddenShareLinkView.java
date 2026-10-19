@@ -23,39 +23,38 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * UC3 — Copy a share link that the UI never renders.
+ * UC3 — Hidden share link.
  * <p>
- * The server keeps the full URL in a {@link ValueSignal} that is bound to
- * <em>nothing</em>: no Span, no hidden TextField, no DOM element. Typing in the
- * slug field updates the signal server-side via a normal value-change listener.
- * On click, {@link WriteToClipboardAction} reads the signal at fire-time via
- * {@link SignalInput} and writes {@code text/plain} inside the original user
- * gesture — pure client-side, the value never crosses the DOM.
+ * The server keeps the full share URL in a {@link ValueSignal} that no
+ * component shows: no text, no hidden field. Typing in the slug field updates
+ * the signal. The Copy button's {@link WriteToClipboardAction} reads the URL
+ * through a {@link SignalInput}, which keeps a copy of the signal's value in a
+ * JavaScript property of the button and updates it whenever the signal changes.
+ * The click reads that property and writes it to the clipboard inside the
+ * click, then reports the copied text back so the view can confirm it.
  * <p>
- * The framework analogue would have to either render the URL into a hidden
- * field just to read it back, or round-trip from the click to a server-side
- * method that calls {@code executeJs} for the clipboard — and that follow-up no
- * longer counts as a user gesture, so the browser rejects the clipboard write.
- * {@code SignalInput} skips both problems.
+ * Without {@link SignalInput}, the URL would have to be rendered into a hidden
+ * field just to be read back, or the click would go to the server first, and a
+ * clipboard write after that round-trip is no longer part of the click, which
+ * Safari and Firefox reject.
  */
 @Route(value = "uc3", layout = MainLayout.class)
-@PageTitle("UC3 — Copy a hidden share link")
+@PageTitle("UC3 — Hidden share link")
 @UseCaseDescription("Copying a server-side value that is never rendered in the UI")
 @Menu(order = 3, title = "UC3 — Hidden share link")
 @StyleSheet("uc3.css")
-public class LiveSignalCounterView extends VerticalLayout {
+public class HiddenShareLinkView extends VerticalLayout {
 
-    public LiveSignalCounterView() {
+    public HiddenShareLinkView() {
         addClassName("uc3-view");
-        add(new H1("UC3 — Copy a share link that's never rendered"));
-        add(new Paragraph(
-                "Type a slug. A server-side ValueSignal<String> keeps the "
-                        + "full URL but isn't bound to any UI element — open "
-                        + "the page's DOM and you won't find it. Click Copy "
-                        + "and SignalInput reads the signal's current value "
-                        + "at the moment of the gesture. The confirmation "
-                        + "line below is updated by the onCopied callback "
-                        + "for evidence."));
+        add(new H1("UC3 — Hidden share link"));
+        add(new Paragraph("Type a slug, then click Copy and paste the link "
+                + "anywhere. The server builds the full URL in a "
+                + "ValueSignal that no component shows, so you will not find "
+                + "it on the page. SignalInput keeps a copy of it in a "
+                + "JavaScript property of the Copy button, and the click "
+                + "writes that to the clipboard. The line next to the button "
+                + "shows what the browser reported as copied."));
 
         ValueSignal<String> shareLink = new ValueSignal<>(buildUrl(""));
 
@@ -66,7 +65,7 @@ public class LiveSignalCounterView extends VerticalLayout {
 
         Span confirmation = new Span("(no copy yet)");
         confirmation.setId("confirmation");
-        confirmation.addClassName("confirmation");
+        confirmation.addClassName("uc3-confirmation");
 
         Button copy = new Button("Copy share link");
         copy.setId("copy");
@@ -77,7 +76,9 @@ public class LiveSignalCounterView extends VerticalLayout {
                         + LocalTime.now().withNano(0) + ": " + copied),
                 err -> confirmation.setText("Copy failed: " + err.message())));
 
-        add(slug, new HorizontalLayout(copy, confirmation));
+        HorizontalLayout copyRow = new HorizontalLayout(copy, confirmation);
+        copyRow.addClassName("uc3-copy-row");
+        add(slug, copyRow);
     }
 
     private static String buildUrl(String slug) {

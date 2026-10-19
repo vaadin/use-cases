@@ -19,9 +19,10 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC8 — A copy button in every grid row, next to the value it copies.
+ * UC8 — Copy from a grid.
  * <p>
- * This is the use case from the
+ * A copy button in every grid row, next to the value it copies. This is the use
+ * case from the
  * <a href="https://vaadin.com/forum/t/clipboard-copy/164697/11">forum
  * thread</a>: "a button next to the value (for example addresses) inside a
  * table to copy the value", and the question of how to do that "without
@@ -44,7 +45,7 @@ import com.vaadin.flow.router.Route;
  * {@code clipboard/API-GAPS.md} #1.
  */
 @Route(value = "uc8", layout = MainLayout.class)
-@PageTitle("UC8 — Copy button in every grid row")
+@PageTitle("UC8 — Copy from a grid")
 @UseCaseDescription("Putting a copy button next to every value in a grid")
 @Menu(order = 8, title = "UC8 — Copy from a grid")
 @StyleSheet("uc8.css")
@@ -61,7 +62,7 @@ public class CopyFromGridView extends VerticalLayout {
 
     public CopyFromGridView() {
         setSizeFull();
-        add(new H1("UC8 — A copy button in every grid row"));
+        add(new H1("UC8 — Copy from a grid"));
         add(new Paragraph("Each row has a copy button next to the email "
                 + "address it copies. The grid has " + ROW_COUNT
                 + " rows, and the cells, buttons included, are rendered in "
@@ -87,7 +88,7 @@ public class CopyFromGridView extends VerticalLayout {
      */
     private static LitRenderer<Customer> emailCell() {
         return LitRenderer.<Customer> of("""
-                <div class="copy-cell">
+                <div class="uc8-copy-cell">
                   <span>${item.email}</span>
                   <vaadin-button theme="tertiary small"
                       aria-label="Copy ${item.email}"

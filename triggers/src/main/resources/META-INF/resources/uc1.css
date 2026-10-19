@@ -1,22 +1,22 @@
 .uc1-view {
-    .notes-field {
+    .uc1-notes {
         font-family: var(--aura-font-family);
     }
 
-    .status-badge {
+    .uc1-status {
         display: inline-block;
         padding: 0.3rem 0.9rem;
         border-radius: 999px;
         font-family: monospace;
-        font-size: 0.9rem;
+        font-size: var(--aura-font-size-s);
         background: var(--vaadin-background-container);
         border: 1px solid var(--vaadin-border-color);
         transition: background-color 200ms, color 200ms, border-color 200ms;
     }
 
-    .status-badge.copied {
-        background: var(--vaadin-color-success-container);
-        color: var(--vaadin-color-success);
-        border-color: var(--vaadin-color-success);
+    .uc1-status.uc1-copied {
+        background: color-mix(in srgb, var(--aura-green) 18%, transparent);
+        color: var(--aura-green-text);
+        border-color: color-mix(in srgb, var(--aura-green) 35%, transparent);
     }
 }

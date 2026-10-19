@@ -20,20 +20,20 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC6 — Tuning precision, freshness and battery.
+ * UC6 — Precision versus battery.
  * <p>
  * Shows four common {@link GeolocationOptions} profiles and runs each against
  * the same button-click entry point. The response time and the reported
  * accuracy will differ between profiles.
  */
 @Route(value = "uc6", layout = MainLayout.class)
-@PageTitle("UC6 — Tuning precision, freshness and battery")
+@PageTitle("UC6 — Precision versus battery")
 @UseCaseDescription("Trading precision and freshness against battery")
-@Menu(order = 6, title = "UC6 — Tuning options")
+@Menu(order = 6, title = "UC6 — Precision versus battery")
 public class OptionsView extends VerticalLayout {
 
     public OptionsView() {
-        add(new H1("UC6 — Tuning precision, freshness and battery"));
+        add(new H1("UC6 — Precision versus battery"));
         add(new Paragraph(
                 "Each button runs the same request with different options. "
                         + "Compare the response time and reported accuracy."));

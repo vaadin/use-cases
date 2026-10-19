@@ -38,24 +38,23 @@ public class PointerTrackerView extends VerticalLayout {
     public PointerTrackerView() {
         addClassName("uc16-view");
         add(new H1("UC16 — Pointer tracker"));
-        add(new Paragraph(
-                "Move your mouse inside the box. The X and Y coordinates "
-                        + "below update on every pointermove event. The trigger "
-                        + "fires tens of times per second; SetPropertyAction "
-                        + "writes the values straight from the trigger's typed "
-                        + "EventData inputs — no server round-trip."));
+        add(new Paragraph("Move the mouse, or a finger, inside the box. The "
+                + "coordinates below update on every pointermove event, tens "
+                + "of times per second, without a server round-trip: "
+                + "SetPropertyAction writes the trigger's clientX and clientY "
+                + "inputs into the page."));
 
-        Div panel = new Div("Move your mouse here");
+        Div panel = new Div("Move the pointer here");
         panel.setId("panel");
-        panel.addClassName("panel");
+        panel.addClassName("uc16-panel");
 
         Span xValue = new Span("?");
         xValue.setId("x");
-        xValue.addClassName("readout");
+        xValue.addClassName("uc16-readout");
 
         Span yValue = new Span("?");
         yValue.setId("y");
-        yValue.addClassName("readout");
+        yValue.addClassName("uc16-readout");
 
         new MouseEventTrigger(panel, "pointermove").triggers(
                 new SetPropertyAction<>(xValue, "textContent",
@@ -65,7 +64,7 @@ public class PointerTrackerView extends VerticalLayout {
 
         Span line = new Span(new Span("clientX:"), xValue, new Span("clientY:"),
                 yValue);
-        line.addClassName("readout-line");
+        line.addClassName("uc16-readout-line");
 
         add(panel, line);
     }

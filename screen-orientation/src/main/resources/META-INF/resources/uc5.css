@@ -1,7 +1,7 @@
 .uc5-view {
-    .uc5-error-log {
+    .uc5-log {
         font-family: monospace;
-        font-size: 0.85rem;
+        font-size: var(--aura-font-size-s);
         background: var(--vaadin-background-container);
         border: 1px solid var(--vaadin-border-color);
         border-radius: var(--vaadin-radius-m);
@@ -12,20 +12,20 @@
         max-width: 720px;
     }
 
-    .uc5-error-log > div {
+    .uc5-log > div {
         padding: 0.15rem 0;
         border-bottom: 1px dashed var(--vaadin-border-color);
     }
 
-    .uc5-error-log > div:last-child {
+    .uc5-log > div:last-child {
         border-bottom: none;
     }
 
-    .uc5-error-log .ok {
-        color: var(--aura-blue-text);
+    .uc5-log .uc5-ok {
+        color: var(--aura-green-text);
     }
 
-    .uc5-error-log .err {
+    .uc5-log .uc5-err {
         color: var(--aura-red-text);
     }
 

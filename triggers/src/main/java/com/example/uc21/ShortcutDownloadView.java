@@ -25,19 +25,17 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 
 /**
- * UC21 — Keyboard shortcut triggers a server-handler download.
+ * UC21 — Shortcut download.
  * <p>
- * Press Ctrl+Shift+D anywhere in the view. A {@link ShortcutTrigger} fires
- * a {@link DownloadAction} whose {@link DownloadHandler} produces a CSV on the
- * fly. The gesture context is preserved through the trigger fire, so the
- * browser permits the download — calling
- * {@code element.executeJs("location.href=…")} from a server push would be
- * blocked in many browsers.
+ * Press Ctrl+Shift+D (Cmd+Shift+D on a Mac) anywhere on the page. A
+ * {@link ShortcutTrigger} runs a {@link DownloadAction} whose
+ * {@link DownloadHandler} produces a CSV file on the server. The download
+ * starts inside the key press, without a round-trip first, and the trigger
+ * stops the browser's own shortcut for the same keys.
  * <p>
- * Vaadin's high-level {@code Anchor} (and the {@code Download} component in the
- * {@code download} module) wire downloads to click only. The trigger API lets
- * the same handler bind to any user-gesture trigger — keyboard shortcut here,
- * long-press or double-click elsewhere.
+ * {@code Anchor} with a download handler starts a download on a click only.
+ * With triggers, the same handler can follow any gesture: the same
+ * {@link DownloadAction} is also wired to a button here.
  */
 @Route(value = "uc21", layout = MainLayout.class)
 @PageTitle("UC21 — Shortcut download")
@@ -56,17 +54,14 @@ public class ShortcutDownloadView extends VerticalLayout {
     public ShortcutDownloadView() {
         addClassName("uc21-view");
         add(new H1("UC21 — Shortcut download"));
-        add(new Paragraph(
-                "Press Ctrl+Shift+D anywhere in this view, or click the "
-                        + "Download CSV button. Either gesture fires a "
-                        + "DownloadAction whose handler generates the CSV "
-                        + "preview below on the fly; the browser permits the "
-                        + "download because the keystroke or click is the user "
-                        + "gesture."));
+        add(new Paragraph("Press Ctrl+Shift+D (Cmd+Shift+D on a Mac) "
+                + "anywhere on this page, or click Download CSV. Either one "
+                + "downloads people.csv, which the server generates with the "
+                + "content shown below."));
 
         add(new H2("Preview"));
         Pre preview = new Pre(CSV);
-        preview.addClassName("preview");
+        preview.addClassName("uc21-preview");
         add(preview);
 
         DownloadHandler handler = DownloadHandler.fromInputStream(event -> {
@@ -75,12 +70,15 @@ public class ShortcutDownloadView extends VerticalLayout {
                     "people.csv", "text/csv", bytes.length);
         }, "people.csv");
 
+        // The modifiers must match exactly, so Ctrl and Cmd each need their
+        // own trigger.
         new ShortcutTrigger(this, Key.KEY_D, KeyModifier.CONTROL,
                 KeyModifier.SHIFT).triggers(new DownloadAction(handler));
+        new ShortcutTrigger(this, Key.KEY_D, KeyModifier.META,
+                KeyModifier.SHIFT).triggers(new DownloadAction(handler));
 
-        // The same handler bound to a click gesture — the trigger API lets one
-        // handler back any user-gesture trigger, keyboard shortcut or button.
         Button download = new Button("Download CSV");
+        download.setId("download");
         new ClickTrigger(download).triggers(new DownloadAction(handler));
         add(download);
     }

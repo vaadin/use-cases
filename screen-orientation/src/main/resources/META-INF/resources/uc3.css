@@ -20,12 +20,12 @@
         background: color-mix(in srgb, var(--aura-orange) 25%, transparent);
         color: var(--aura-orange-text);
         border-radius: var(--vaadin-radius-m);
-        font-weight: 600;
+        font-weight: var(--aura-font-weight-semibold);
         text-align: center;
         padding: 1rem;
     }
 
-    .uc3-overlay.hidden {
+    .uc3-overlay.uc3-hidden {
         display: none;
     }
 

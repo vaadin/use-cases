@@ -7,8 +7,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.trigger.internal.ClickTrigger;
@@ -18,7 +18,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC9 — Scroll a target into view on click.
+ * UC9 — Scroll into view.
  * <p>
  * Two parallel rows of buttons let you compare two ways to do the same thing:
  * <ul>
@@ -44,32 +44,33 @@ public class ScrollIntoViewView extends VerticalLayout {
     public ScrollIntoViewView() {
         addClassName("uc9-view");
         add(new H1("UC9 — Scroll into view"));
-        add(new Paragraph(
-                "Compare the same scroll done two ways. The Client row uses "
-                        + "the trigger API — synchronous, in-handler. The Server "
-                        + "row uses a regular click listener that asks the "
-                        + "server to scroll via executeJs — extra round-trip. "
-                        + "Throttle the network in DevTools to see the gap."));
+        add(new Paragraph("Each button scrolls to a section further down. "
+                + "The Client row scrolls in the browser, inside the click. "
+                + "The Server row sends the click to the server, which then "
+                + "tells the browser to scroll. Slow down the network in the "
+                + "browser's developer tools to see the difference."));
 
         Div sectionA = new Div("Section A");
         sectionA.setId("section-a");
-        sectionA.addClassName("section");
+        sectionA.addClassName("uc9-section");
 
         Div sectionB = new Div("Section B");
         sectionB.setId("section-b");
-        sectionB.addClassName("section");
+        sectionB.addClassName("uc9-section");
 
         Div sectionC = new Div("Section C");
         sectionC.setId("section-c");
-        sectionC.addClassName("section");
+        sectionC.addClassName("uc9-section");
 
         HorizontalLayout clientRow = new HorizontalLayout();
+        clientRow.addClassName("uc9-row");
         clientRow.add(rowLabel("Client (trigger)"));
         clientRow.add(clientButton("client-a", "→ A", sectionA));
         clientRow.add(clientButton("client-b", "→ B", sectionB));
         clientRow.add(clientButton("client-c", "→ C", sectionC));
 
         HorizontalLayout serverRow = new HorizontalLayout();
+        serverRow.addClassName("uc9-row");
         serverRow.add(rowLabel("Server (round-trip)"));
         serverRow.add(serverButton("server-a", "→ A", sectionA));
         serverRow.add(serverButton("server-b", "→ B", sectionB));
@@ -79,10 +80,10 @@ public class ScrollIntoViewView extends VerticalLayout {
         add(new Div(sectionA, sectionB, sectionC));
     }
 
-    private static H2 rowLabel(String text) {
-        H2 h2 = new H2(text);
-        h2.addClassName("row-label");
-        return h2;
+    private static Span rowLabel(String text) {
+        Span label = new Span(text);
+        label.addClassName("uc9-row-label");
+        return label;
     }
 
     private static Button clientButton(String id, String label, Div target) {

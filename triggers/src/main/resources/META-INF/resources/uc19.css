@@ -1,23 +1,24 @@
 .uc19-view {
-    .pickers {
+    .uc19-pickers {
         gap: 1.5rem;
         margin-top: 0.5rem;
+        flex-wrap: wrap;
     }
 
-    .picker-label {
+    .uc19-picker-label {
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
         align-items: flex-start;
     }
 
-    .picker-label .label {
+    .uc19-label {
         font-family: monospace;
-        font-size: 0.85rem;
+        font-size: var(--aura-font-size-s);
         color: var(--vaadin-text-color-secondary);
     }
 
-    .color-picker {
+    .uc19-picker {
         width: 48px;
         height: 36px;
         padding: 0;
@@ -26,12 +27,11 @@
         cursor: pointer;
     }
 
-    .target {
+    .uc19-target {
         margin-top: 1.5rem;
-        /* Stretch to the parent flex container; otherwise the target
-           collapses to its content's intrinsic width and the picker-event
-           fallback (getBoundingClientRect on the target) would always
-           land in the "narrow" breakpoint. */
+        /* Stretch to the width of the flex parent. Otherwise the target
+           shrinks to its content, and the picker events, which measure the
+           target, would always pick the narrow color. */
         width: 100%;
         height: 240px;
         border-radius: var(--vaadin-radius-l);
@@ -39,9 +39,17 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: rgba(0, 0, 0, 0.5);
         transition: background-color 200ms;
+    }
+
+    /* The background is any color the user picks, so the label gets its own
+       background to stay readable. */
+    .uc19-target-label {
+        padding: 0.3rem 0.9rem;
+        border-radius: var(--vaadin-radius-m);
+        background: var(--vaadin-background-color);
+        color: var(--vaadin-text-color);
+        font-size: var(--aura-font-size-l);
+        font-weight: var(--aura-font-weight-semibold);
     }
 }

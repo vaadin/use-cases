@@ -100,12 +100,12 @@ public class DisableButtonGroupView extends VerticalLayout {
 
         Span statusText = new Span();
         statusText.setId("status");
-        statusText.addClassName("status");
+        statusText.addClassName("uc24-status");
         statusText.bindText(status);
 
         HorizontalLayout buttons = new HorizontalLayout(approve, reject,
                 escalate);
-        buttons.addClassName("decisions");
+        buttons.addClassName("uc24-decisions");
         buttons.setWrap(true);
         add(buttons, statusText);
     }

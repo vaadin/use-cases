@@ -1,83 +1,99 @@
 package com.example.uc1;
 
-import com.example.WakeLockTestSupport;
+import java.util.List;
+
+import com.example.home.HomeView;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.wakelock.WakeLockAvailability;
+import com.vaadin.flow.dom.Element;
 
+import static com.example.WakeLockTestSupport.RELEASE;
+import static com.example.WakeLockTestSupport.REQUEST;
+import static com.example.WakeLockTestSupport.answerWakeLockCalls;
+import static com.example.WakeLockTestSupport.simulateAvailability;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ViewPackages(classes = ManualToggleView.class)
+@ViewPackages(classes = { ManualToggleView.class, HomeView.class })
 class ManualToggleViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersHeadingAndToggleButton() {
+    void clickingRequestsTheLockAndClickingAgainReleasesIt() {
         navigate(ManualToggleView.class);
+        assertEquals(List.of(), answerWakeLockCalls(),
+                "opening the view does not touch the lock");
+        assertBadge("Released — the screen may sleep");
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h -> "UC1 — Manual keep-awake toggle".equals(h.getText())),
-                "Heading should render");
-        // The toggle button starts as "Keep screen awake".
-        assertEquals(1,
-                findInView(Button.class).withText("Keep screen awake").all()
-                        .size(),
-                "Toggle button should render with initial label");
+        test(button("Keep screen awake")).click();
+        runPendingSignalsTasks();
+        assertBadge("Requested — waiting for the browser");
+
+        assertEquals(List.of(REQUEST), answerWakeLockCalls());
+        runPendingSignalsTasks();
+        assertBadge("Holding the lock — the screen stays on");
+
+        test(button("Allow screen to sleep")).click();
+        assertEquals(List.of(RELEASE), answerWakeLockCalls());
+        runPendingSignalsTasks();
+        assertBadge("Released — the screen may sleep");
+        button("Keep screen awake");
     }
 
     @Test
-    void badgeAndButtonReflectSimulatedState() {
-        navigate(ManualToggleView.class);
-        runPendingSignalsTasks();
+    void oneClickAfterReattachSendsOneRequest() {
+        ManualToggleView view = navigate(ManualToggleView.class);
+        Element parent = view.getElement().getParent();
+        int index = parent.indexOfChild(view.getElement());
+        view.getElement().removeFromParent();
+        parent.insertChild(index, view.getElement());
+        answerWakeLockCalls();
 
-        assertBadgeContains("Released");
+        test(button("Keep screen awake")).click();
 
-        WakeLockTestSupport.simulateAcquired();
-        runPendingSignalsTasks();
-        assertBadgeContains("Holding lock");
-        assertTrue(
-                findInView(Button.class).withText("Allow screen to sleep").all()
-                        .size() == 1,
-                "Button label should switch when the lock is held");
-
-        WakeLockTestSupport.simulateReleased();
-        runPendingSignalsTasks();
-        assertBadgeContains("Released");
+        assertEquals(List.of(REQUEST), answerWakeLockCalls());
     }
 
     @Test
-    void clickingButtonInvokesWakeLock() {
+    void leavingTheViewReleasesTheLock() {
         navigate(ManualToggleView.class);
-        runPendingSignalsTasks();
+        test(button("Keep screen awake")).click();
+        assertEquals(List.of(REQUEST), answerWakeLockCalls());
 
-        Button toggle = findInView(Button.class).withText("Keep screen awake")
-                .single();
-        test(toggle).click();
-        // Click triggers request() (executeJs to the client); confirm via the
-        // signal once the client reports ACTIVE.
-        WakeLockTestSupport.simulateAcquired();
-        runPendingSignalsTasks();
-        assertBadgeContains("Holding lock");
+        navigate(HomeView.class);
 
-        Button release = findInView(Button.class)
-                .withText("Allow screen to sleep").single();
-        test(release).click();
-        WakeLockTestSupport.simulateReleased();
-        runPendingSignalsTasks();
-        assertBadgeContains("Released");
+        assertEquals(List.of(RELEASE), answerWakeLockCalls(),
+                "the lock must not stay on in the other views");
     }
 
-    private void assertBadgeContains(String fragment) {
-        assertTrue(
-                findInView(Span.class).all().stream()
-                        .anyMatch(s -> s.getText() != null
-                                && s.getText().contains(fragment)),
-                "expected status badge to contain \"" + fragment + "\"");
+    @Test
+    void unsupportedBrowserDisablesTheButton() {
+        navigate(ManualToggleView.class);
+
+        simulateAvailability(WakeLockAvailability.UNSUPPORTED);
+        runPendingSignalsTasks();
+
+        assertFalse(button("Keep screen awake").isEnabled());
+        assertBadge("Not available — needs a supporting browser and HTTPS");
+
+        simulateAvailability(WakeLockAvailability.SUPPORTED);
+        runPendingSignalsTasks();
+        assertTrue(button("Keep screen awake").isEnabled());
+    }
+
+    private Button button(String text) {
+        return findInView(Button.class).withText(text).single();
+    }
+
+    private void assertBadge(String text) {
+        assertEquals(text, findInView(Span.class).withClassName("status-badge")
+                .single().getText());
     }
 }

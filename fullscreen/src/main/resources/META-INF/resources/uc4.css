@@ -1,38 +1,39 @@
 .uc4-view {
-    .dashboard {
+    .uc4-dashboard {
         display: grid;
         grid-template-columns: 1fr;
         gap: 1rem;
+        width: 100%;
         max-width: 960px;
     }
 
-    .dashboard.compact {
+    .uc4-dashboard.uc4-compact {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .dashboard.spacious {
+    .uc4-dashboard.uc4-spacious {
         grid-template-columns: repeat(3, 1fr);
     }
 
-    .metric-card {
+    .uc4-card {
         padding: 1rem 1.25rem;
         border: 1px solid var(--vaadin-border-color);
         border-radius: var(--vaadin-radius-m);
         background: var(--vaadin-background-container);
     }
 
-    .metric-value {
-        font-size: 2rem;
+    .uc4-value {
+        font-size: var(--aura-font-size-xl);
         font-weight: 600;
     }
 
-    .metric-label {
+    .uc4-label {
         color: var(--vaadin-text-color-secondary);
-        font-size: 0.85rem;
+        font-size: var(--aura-font-size-s);
     }
 
-    .density-aside {
+    .uc4-density {
         color: var(--vaadin-text-color-secondary);
-        font-size: 0.85rem;
+        font-size: var(--aura-font-size-s);
     }
 }
