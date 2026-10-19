@@ -1,7 +1,7 @@
-/* Component#requestFullscreen() moves the panel out of the view into the UI's
-   fullscreen wrapper, so rules for the panel must not be scoped under
+/* Fullscreen.onClick(enter).enter(panel) moves the panel out of the view into
+   the UI's fullscreen wrapper, so rules for the panel must not be scoped under
    .uc8-view — they would stop matching while fullscreen. */
-.overlay-panel {
+.uc8-panel {
     border: 1px solid var(--vaadin-border-color);
     border-radius: var(--vaadin-radius-m);
     background: var(--vaadin-background-container);
@@ -12,19 +12,19 @@
     max-width: 640px;
 }
 
-.overlay-panel.fullscreen {
+.uc8-panel.uc8-panel-fullscreen {
     width: 100%;
     height: 100vh;
     max-width: none;
     box-sizing: border-box;
-    background: var(--vaadin-background-base);
+    background: var(--vaadin-background-color);
 }
 
-.overlay-toolbar {
+.uc8-toolbar {
     align-items: baseline;
     flex-wrap: wrap;
 }
 
-.last-action {
+.uc8-last-action {
     font-weight: 600;
 }

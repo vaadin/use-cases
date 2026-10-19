@@ -5,7 +5,6 @@ import java.util.List;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.fullscreen.Fullscreen;
@@ -17,20 +16,22 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
 /**
- * UC4 — Reactive layout via {@code Fullscreen.stateSignal()}.
+ * UC4 — Reactive layout.
  * <p>
  * Demonstrates that the fullscreen state is just a signal: no callback, no
  * imperative wiring. The dashboard below changes its column count and the
- * density-aside text purely through {@code bindClassName} / {@code bindText}
- * subscriptions to {@link Fullscreen#stateSignal()}, with no observers in user
- * code. The user clicks Present once; the layout reformats automatically and
- * reverts on exit.
+ * density text purely through {@code bindClassName} / {@code bindText} bindings
+ * to {@link Fullscreen#stateSignal()}, with no observers in user code. The user
+ * clicks Present once; the whole page goes fullscreen, the layout reformats
+ * automatically and reverts on exit.
  */
 @Route(value = "uc4", layout = MainLayout.class)
+@PageTitle("UC4 — Reactive layout")
 @UseCaseDescription("Reformatting a layout automatically when fullscreen starts and ends")
 @Menu(order = 4, title = "UC4 — Reactive layout")
 @StyleSheet("uc4.css")
@@ -55,16 +56,18 @@ public class ReactiveLayoutView extends VerticalLayout {
         addClassName("uc4-view");
         add(new H1("UC4 — Reactive layout"));
         add(new Paragraph(
-                "Click “Present” once. The 6 metric cards rearrange from "
-                        + "stacked → two columns → three columns as the page "
-                        + "moves through NOT_FULLSCREEN → FULLSCREEN states. "
-                        + "There is no observer in this view's code — the "
-                        + "layout is bound directly to fullscreenSignal()."));
+                "Click “Present”. The whole page goes fullscreen and the "
+                        + "six metric cards change from two columns to three. "
+                        + "Leave fullscreen with Exit or Escape and they go "
+                        + "back to two. There is no observer in this view's "
+                        + "code: the layout is bound to "
+                        + "Fullscreen.stateSignal(). If the browser can not "
+                        + "go fullscreen, the cards stay in one column."));
 
         stateBadge.addClassName("status-badge");
-        densityNote.addClassName("density-aside");
+        densityNote.addClassName("uc4-density");
 
-        dashboard.addClassName("dashboard");
+        dashboard.addClassName("uc4-dashboard");
         for (Metric metric : METRICS) {
             dashboard.add(metricCard(metric));
         }
@@ -77,33 +80,28 @@ public class ReactiveLayoutView extends VerticalLayout {
 
         add(new HorizontalLayout(present, exit, stateBadge, densityNote));
         add(dashboard);
-    }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
         Signal<FullscreenState> fs = Fullscreen.stateSignal();
-
         stateBadge.bindText(fs.map(ReactiveLayoutView::badgeText));
         stateBadge.bindClassName("fullscreen",
                 fs.map(s -> s == FullscreenState.FULLSCREEN));
         stateBadge.bindClassName("unsupported",
                 fs.map(s -> s == FullscreenState.UNSUPPORTED));
 
-        dashboard.bindClassName("compact",
+        dashboard.bindClassName("uc4-compact",
                 fs.map(s -> s == FullscreenState.NOT_FULLSCREEN));
-        dashboard.bindClassName("spacious",
+        dashboard.bindClassName("uc4-spacious",
                 fs.map(s -> s == FullscreenState.FULLSCREEN));
         densityNote.bindText(fs.map(ReactiveLayoutView::densityText));
     }
 
     private static Div metricCard(Metric metric) {
         Div card = new Div();
-        card.addClassName("metric-card");
+        card.addClassName("uc4-card");
         Span value = new Span(metric.value());
-        value.addClassName("metric-value");
+        value.addClassName("uc4-value");
         Div label = new Div();
-        label.addClassName("metric-label");
+        label.addClassName("uc4-label");
         label.setText(metric.label());
         card.add(value, label);
         return card;

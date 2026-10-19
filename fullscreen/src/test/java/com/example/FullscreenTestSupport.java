@@ -5,11 +5,12 @@ import com.vaadin.flow.component.fullscreen.Fullscreen;
 import com.vaadin.flow.component.fullscreen.FullscreenState;
 
 /**
- * Thin shim over {@link Fullscreen#setStateFromClient(UI, String)} — kept as a
- * separate type so test classes stay decoupled from the bootstrap-seeding entry
- * point should the API move again, and so a single import matches the
- * {@code PageVisibilityTestSupport} idiom used in the {@code page-visibility/}
- * module.
+ * Moves the fullscreen state of the current UI, as the browser would.
+ * <p>
+ * Browserless tests have no fullscreen simulator (API-GAPS.md #3), so this
+ * calls {@link Fullscreen#setStateFromClient(UI, String)}, the bootstrap entry
+ * point that is not meant for application code. Replace it with the simulator
+ * once browserless-test has one.
  */
 public final class FullscreenTestSupport {
 
