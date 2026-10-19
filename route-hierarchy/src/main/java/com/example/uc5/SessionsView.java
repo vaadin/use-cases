@@ -1,11 +1,13 @@
 package com.example.uc5;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
@@ -17,6 +19,8 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc5/security/sessions", layout = MainLayout.class)
 @PageTitle("Active sessions")
+@UseCaseDescription("An up button that goes one level up, not to the top")
+@Menu(order = 13, title = "Active sessions")
 public class SessionsView extends VerticalLayout {
 
     public SessionsView() {

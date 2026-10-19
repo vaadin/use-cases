@@ -3,6 +3,7 @@ package com.example.uc2;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -38,6 +39,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Click an image to dim its siblings")
+@UseCaseDescription("Highlighting a clicked image and dimming the others in one client-side step")
 @Menu(order = 2, title = "UC2 — Image gallery select")
 @StyleSheet("uc2.css")
 public class SubmitAndDisableView extends VerticalLayout {

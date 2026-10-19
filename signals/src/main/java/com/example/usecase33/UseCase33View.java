@@ -3,6 +3,7 @@ package com.example.usecase33;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -39,7 +40,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @PageTitle("Use Case 33: Order list with stable selection")
 @Route(value = "use-case-33", layout = MainLayout.class)
-@Menu(order = 33, title = "UC 33: Stable selection")
+@UseCaseDescription("Keeping the selected order stable when the server pushes an update to it")
+@Menu(order = 33, title = "UC33 — Stable Selection")
 @AnonymousAllowed
 public class UseCase33View extends VerticalLayout {
 

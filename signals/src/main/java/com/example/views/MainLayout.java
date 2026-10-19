@@ -3,7 +3,8 @@ package com.example.views;
 import java.util.Locale;
 import java.util.Map;
 
-import com.example.common.AppCatalog;
+import com.example.common.BaseMainLayout;
+import com.example.common.SlackFeedback;
 import com.example.preferences.UserPreferences;
 import com.example.security.CurrentUserSignal;
 import com.example.security.SecurityConfiguration;
@@ -16,35 +17,24 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.applayout.AppLayout;
-import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.component.sidenav.SideNav;
-import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Location;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.signals.Signal;
 
 @PageTitle("Signal API Use Cases")
 @AnonymousAllowed
-public class MainLayout extends AppLayout implements BeforeEnterObserver {
+public class MainLayout extends BaseMainLayout {
 
     private final CurrentUserSignal currentUserSignal;
     private final UserSessionRegistry userSessionRegistry;
@@ -52,11 +42,11 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
     private @Nullable String currentUser;
     private @Nullable String sessionId;
     private TextField nicknameField;
-    private Anchor sourceCodeLink;
 
     public MainLayout(CurrentUserSignal currentUserSignal,
             UserSessionRegistry userSessionRegistry,
-            UserPreferences userPreferences) {
+            UserPreferences userPreferences, SlackFeedback slackFeedback) {
+        super("signals", "Signal API Use Cases", slackFeedback);
         this.currentUserSignal = currentUserSignal;
         this.userSessionRegistry = userSessionRegistry;
         this.userPreferences = userPreferences;
@@ -66,12 +56,6 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         currentUserSignal.refresh();
         this.currentUser = currentUserSignal.getUserSignal().peek()
                 .getUsername();
-
-        DrawerToggle toggle = new DrawerToggle();
-
-        H1 title = new H1("Signal API Use Cases");
-        title.getStyle().set("font-size", "var(--aura-font-size-l)")
-                .set("margin", "0");
 
         // Active users display with avatars
         HorizontalLayout activeUsersDisplay = new HorizontalLayout();
@@ -187,58 +171,8 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         loginButton.bindVisible(currentUserSignal.getUserSignal()
                 .map(user -> !user.isAuthenticated()));
 
-        addToNavbar(toggle, title, activeUsersDisplay, nicknameField,
-                localeSelector, userDisplay, logoutButton, loginButton);
-
-        // Fixed-position source code link overlay
-        Div sourceCodeContainer = new Div();
-        sourceCodeContainer.getStyle().set("position", "fixed").set("top",
-                "calc(var(--vaadin-app-layout-navbar-offset-top) + 0.5em)")
-                .set("right", "1em").set("z-index", "100")
-                .set("pointer-events", "auto");
-
-        Icon codeIcon = VaadinIcon.CODE.create();
-        codeIcon.setSize("16px");
-        codeIcon.getStyle().set("color", "var(--vaadin-text-color-secondary)")
-                .set("margin-right", "0.5em");
-
-        sourceCodeLink = new Anchor("", "View source");
-        sourceCodeLink.setTarget("_blank");
-        sourceCodeLink.getStyle().set("display", "inline-flex")
-                .set("align-items", "center")
-                .set("background-color", "rgba(255, 255, 255, 0.95)")
-                .set("padding", "0.5em 0.75em").set("border-radius", "4px")
-                .set("box-shadow", "0 2px 4px rgba(0, 0, 0, 0.1)")
-                .set("color", "var(--aura-accent-text-color)")
-                .set("text-decoration", "none")
-                .set("font-size", "var(--aura-font-size-s)")
-                .set("transition", "box-shadow 0.2s");
-
-        sourceCodeLink.getElement().addEventListener("mouseenter", e -> {
-            sourceCodeLink.getStyle().set("box-shadow",
-                    "0 4px 8px rgba(0, 0, 0, 0.15)");
-        }).addEventData("event.preventDefault");
-
-        sourceCodeLink.getElement().addEventListener("mouseleave", e -> {
-            sourceCodeLink.getStyle().set("box-shadow",
-                    "0 2px 4px rgba(0, 0, 0, 0.1)");
-        }).addEventData("event.preventDefault");
-
-        Span linkContent = new Span(codeIcon);
-        linkContent.add("View source");
-        sourceCodeLink.removeAll();
-        sourceCodeLink.add(linkContent);
-
-        sourceCodeContainer.add(sourceCodeLink);
-        getElement().appendChild(sourceCodeContainer.getElement());
-
-        addToDrawer(AppCatalog.createSelector("signals"));
-
-        // Add auto-menu from @Menu annotations
-        SideNav nav = new SideNav();
-        MenuConfiguration.getMenuEntries().forEach(entry -> nav
-                .addItem(new SideNavItem(entry.title(), entry.path())));
-        addToDrawer(nav);
+        addToNavbar(activeUsersDisplay, nicknameField, localeSelector,
+                userDisplay, logoutButton, loginButton);
 
         // Apply session-scoped background color reactively to the whole layout
         getStyle().bind("background-color",
@@ -246,16 +180,11 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
         Signal.effect(this, () -> {
             var state = UI.getCurrent().routerStateSignal().get();
-            Class<? extends com.vaadin.flow.component.Component> target = state
-                    .navigationTarget();
-            if (target == null) {
-                return;
-            }
-            if (currentUser != null && sessionId != null) {
+            if (state.navigationTarget() != null && currentUser != null
+                    && sessionId != null) {
                 userSessionRegistry.registerUser(currentUser, sessionId,
                         state.location().getPath());
             }
-            updateSourceCodeLink(target);
         });
     }
 
@@ -274,6 +203,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        super.beforeEnter(event);
         // Drop the login parameters from the URL once the user is back
         QueryParameters parameters = event.getLocation().getQueryParameters();
         if (parameters.getParameters()
@@ -327,25 +257,6 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
             userSessionRegistry.updateTabActivity(currentUser, sessionId,
                     isVisible);
         }
-    }
-
-    private void updateSourceCodeLink(Class<?> viewClass) {
-        if (sourceCodeLink == null || viewClass == null) {
-            return;
-        }
-
-        String className = viewClass.getSimpleName();
-        String packageName = viewClass.getPackageName();
-
-        // Construct the correct path based on package structure
-        String packagePath = packageName.replace(".", "/");
-        String githubUrl = "https://github.com/vaadin/use-cases/tree/main/signals/src/main/java/"
-                + packagePath + "/" + className + ".java";
-        sourceCodeLink.setHref(githubUrl);
-
-        // Hide link for views that don't have source in the views package
-        boolean isViewClass = className.endsWith("View");
-        sourceCodeLink.setVisible(isViewClass);
     }
 
     /**

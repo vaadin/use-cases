@@ -1,116 +1,89 @@
-# Web Share API — API gaps discovered while building the demos
+# Web Share API — API gaps
 
-Places where the `com.vaadin.flow.component.webshare` API either doesn't
-cover a genuine Web Share use case or makes one awkward enough to work
-around. Each entry is keyed to the use case that surfaced it. The API:
-sharing is bound to a click trigger via
-`WebShare.onClick(button).share(ShareContent)` (with an observed
-`share(content, onShared, onError)` form), the payload is built with
-`ShareContent.create().title(...).text(...).url(...)` (each accepting a String
-literal or a `HasValue` source for live binding), and support is read from the
-static `WebShare.supportSignal()` returning `Signal<WebShareSupport>`.
+Where the `com.vaadin.flow.component.webshare` API made a use case in this
+module impossible or awkward. A share is bound to a click with
+`WebShare.onClick(button).share(ShareContent)` (or the observed
+`share(content, onShared, onError)` form). The payload is built with
+`ShareContent.create().title(...).text(...).url(...)`. Support is read from
+`WebShare.supportSignal()`.
 
-## File sharing (Web Share Level 2)
+## 1. No file sharing (Web Share Level 2)
 
-**Where it bit us:** dropped from the UC list — no view written
-**Symptom:** The Web Share API spec defines a `files: File[]` member on
-`ShareData` (the "Web Share Level 2" addition). Modern Chrome/Safari on
-Android and iOS surface this when sharing photos, generated PDFs, or any
-arbitrary blob produced server-side (e.g. a generated invoice). The
-`ShareContent` builder (`title`/`text`/`url`) exposes no way to pass a file
-or a `StreamResource`, so there is no path from a Flow `InputStream` to the
-native share sheet.
-**Workaround used:** None — we dropped the file-share use case rather than
-faking it with an `executeJs` blob. The shim could be added later (see
-suggested API below) but isn't yet justified by the rest of the demo.
-**Suggested API:**
-
-```java
-// Builder method that accepts StreamResource attachments. The bound share
-// would reject (and notify the observed onError) when navigator.canShare
-// reports the files cannot be shared.
-ShareContent files(StreamResource... files);
-// e.g. WebShare.onClick(button).share(
-//          ShareContent.create().title("Invoice").files(pdfResource));
-```
-
-References: [Web Share Level 2 draft](https://wicg.github.io/web-share/level-2/),
+**Where it bites:** a file-share use case — dropped, no view written
+**Symptom:** the Web Share spec has a `files` member in `ShareData`. Mobile
+Chrome and Safari use it to share photos, PDFs or a file made on the server
+(e.g. an invoice). `ShareContent` has only `title`, `text` and `url`, so there
+is no way to pass a file or a `StreamResource` to the native share sheet.
+**Workaround used:** none. The use case was dropped instead of faking it with
+an `executeJs` blob.
+**Suggested API:** `ShareContent files(StreamResource... files)`. The bound
+share calls the observed `onError` when `navigator.canShare` says the files
+can not be shared. See the
+[Web Share Level 2 draft](https://wicg.github.io/web-share/level-2/) and
 [MDN: ShareData.files](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/share#files).
 
-## No `navigator.canShare(data)` pre-check
+## 2. No `navigator.canShare(data)` check for one payload
 
-**Where it bit us:** uc3 / CustomMessageView.java, uc4 / ShareListItemsView.java
-**Symptom:** The browser's `navigator.canShare(data)` predicate lets a page
-verify a payload before showing the share button, returning `false` when
-e.g. files are too large, the URL scheme is blocked, or the data shape is
-otherwise unshareable. You can only check whether *any* share is supported
-(`WebShare.supportSignal()`), not whether *this specific payload* is. As a
-result UC3 and UC4 enable the Share button even for payloads the browser
-would reject.
-**Workaround used:** Trust `WebShare.supportSignal()` to gate the button.
-Per-payload validation falls back to the bound share rejecting at
-invocation time (the observed `onError` form), which is too late for good UX.
-**Suggested API:**
+**Where it bites:** UC3 / `CustomMessageView.java`
+**Symptom:** `WebShare.supportSignal()` only says whether the browser can
+share at all, not whether it can share this payload. The browser's
+`navigator.canShare(data)` returns `false` when, for example, the URL scheme
+is blocked or the files are too large. UC3 enables the Share button even for
+a URL the reader typed that the browser will reject.
+**Workaround used:** the button is gated on `WebShare.supportSignal()` only.
+A bad payload is found only when the share fails (the observed `onError`
+form), which is too late for good UX.
+**Suggested API:** `Signal<Boolean> canShare()` on `ShareContent`, backed by
+`navigator.canShare(data)`, so the UI can update before the user clicks.
 
-```java
-// Per-payload predicate as a method on the ShareContent builder. Returns a
-// signal/promise the caller can observe to update the UI before the user
-// clicks. Backed by navigator.canShare(data).
-Signal<Boolean> canShare(); // on ShareContent
-// e.g. ShareContent.create().title(...).text(...).url(...).canShare()
-```
+## 3. No browserless simulator for Web Share
 
-## No test simulator / no browserless helper
+**Where it bites:** every test of the module / `WebShareTestSupport.java`,
+UC5 / `ShareFeedbackView.java`, `ShareFeedbackViewTest.java`
+**Symptom:** browserless-test has no tester for Web Share. The tests set the
+support state through `UIInternals#setWebShareSupport(WebShareSupport)`, a
+public but framework-internal setter. The share itself is a client-side
+action bound to the click (`WebShare.onClick(button).share(...)`), so a test
+can not check which `ShareContent` was shared, and can not fire the
+`onShared` or `onError` callback.
+**Workaround used:** `WebShareTestSupport.setSupport` wraps the internal
+setter. UC5 has "Simulate success / cancel / failure" buttons, in a box
+apart from the feature, that call the same handlers as `onShared` and
+`onError`. The test clicks them. They also let a reader whose browser has no
+`navigator.share` see the log. Remove them once a simulator exists.
+**Suggested API:** a browserless helper, e.g. `WebShareSimulator` with
+`setSupport(WebShareSupport)`, `lastShareInvocation()` returning the
+`ShareContent`, `completeLastShare()` and `failLastShare(String error)`.
+Upstream: https://github.com/vaadin/browserless-test/issues/166
 
-**Where it bit us:** every UC test under `src/test/java/com/example/uc*/`
-**Symptom:** there is no browserless test simulator. `WebShareTestSupport`
-drives the support signal through
-`UI.getCurrent().getInternals().setWebShareSupport(state)` — a public but
-framework-internal setter that a third-party developer would have to read
-flow-server source to find. The actual share invocation cannot be verified
-browserless at all: it is a client-side trigger action bound to a button
-click (`WebShare.onClick(button).share(...)`), so tests can only assert the
-surrounding signal-driven UI state.
-**Workaround used:** `web-share/src/test/java/com/example/WebShareTestSupport.java`
-wraps the support setter.
-**Suggested API:**
+## 4. Share content can not come from a signal
 
-```java
-// In browserless-test or a future flow-server test-fixtures jar.
-public final class WebShareSimulator {
-    /** Drives the support signal in the current UI. */
-    public static void setSupport(WebShareSupport support);
-    /** Records the last share bound/invoked so tests can assert on it. */
-    public static ShareContent lastShareInvocation();
-    /** Fires the observed onShared callback of the most recent bound share. */
-    public static void completeLastShare();
-    /** Fires the observed onError callback of the most recent bound share. */
-    public static void failLastShare(String error);
-}
-```
+**Where it bites:** UC1 / `ShareThisPageView.java`, UC2 /
+`CopyLinkFallbackView.java`, UC6 / `ShareInviteLinkView.java`
+**Symptom:** `ShareContent.title/text/url` take either a fixed `String` or a
+`Component & HasValue<?, String>` whose `value` property is read in the
+browser at click time. A value the server learns or changes after the share is
+bound — the page address from `Page#fetchCurrentURL`, a newly generated
+invite link — can not be passed directly, and the share can not be bound a
+second time without adding a second click handler (`WebShareBinding#share`
+returns `void`, so there is nothing to remove).
+**Workaround used:** the value is put into a read-only `TextField` that the
+reader can see, and the share is bound to that field.
+**Suggested API:** `ShareContent url(Signal<String>)` (and the same for
+`title` and `text`), backed by the internal
+`com.vaadin.flow.component.trigger.internal.SignalInput` that already mirrors
+a signal to the client for other trigger actions.
 
-Without the last three pieces, UC5's success/cancel/error branches can only
-be exercised by reaching into package-private `handleSuccess` /
-`handleError` methods on the view itself.
+## 5. An empty field is shared as an empty string
 
-## No way to feature-detect from the server before bootstrap
-
-**Where it bit us:** uc1 / ShareThisPageView.java, uc2 / CopyLinkFallbackView.java
-**Symptom:** `WebShare.supportSignal()` is seeded from the client during the
-bootstrap handshake — before that point it reads `UNKNOWN`. For
-server-side rendering of an initial view (e.g. a Server-Side Rendered
-landing page) you can't know whether to render the native-share button or
-the copy-link button until the client has reported back, which causes a
-visible swap on first paint (a tiny flash of the "Detecting…" state). The
-signal's Javadoc says the value "is replaced with a real value before any
-user code observes the signal" — but the `UNKNOWN` value is visible in
-our `Signal.effect` and we have to render for it.
-**Workaround used:** We render a disabled "Detecting…" placeholder during
-the `UNKNOWN` window. This is fine for an SPA but would be a flicker for
-SSR-first rendering.
-**Suggested API:** Surface support state as part of the initial HTML
-response (analogous to how `vaadin-script-tag` already inlines other
-bootstrap params) so SSR renders can read it synchronously. Alternatively,
-expose `WebShare.isSupported()` as a `Boolean` (nullable) that returns the
-seeded value if it has already arrived, so server-side renderers can
-short-circuit the `UNKNOWN` branch.
+**Where it bites:** UC3 / `CustomMessageView.java`
+**Symptom:** a slot bound to a field is always sent:
+`ShareAction#toPromiseJs` builds `navigator.share({title: …, text: …,
+url: …})` with every slot that was set when binding, whatever its value at
+click time. An empty title or text is shared as `""`, and the browser resolves
+an empty URL against the page address, so it shares the current page instead
+of no URL.
+**Workaround used:** none. UC3's preview shows the empty strings and the view
+text explains what an empty URL does.
+**Suggested API:** leave out a slot whose value is empty at click time, or a
+`ShareContent` option to do so (e.g. `omitEmpty()`).

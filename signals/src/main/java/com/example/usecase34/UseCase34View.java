@@ -1,5 +1,6 @@
 package com.example.usecase34;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -30,7 +31,8 @@ import com.vaadin.flow.signals.Signal;
  */
 @PageTitle("Use Case 34: Feature flag service")
 @Route(value = "use-case-34", layout = MainLayout.class)
-@Menu(order = 34, title = "UC 34: Feature flags")
+@UseCaseDescription("Exposing feature flags from a service as read-only signals")
+@Menu(order = 34, title = "UC34 — Feature Flags")
 @AnonymousAllowed
 public class UseCase34View extends VerticalLayout {
 

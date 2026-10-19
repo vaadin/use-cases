@@ -180,9 +180,17 @@ if [[ -n $TRAILER_SOURCE ]]; then
         -c:a aac -b:a 64k -ac 1 -movflags +faststart "$PUBLIC/trailer.mp4"
 fi
 
-# --- Silent background loop (UC5) ---
-$FF -f lavfi -i "gradients=s=960x540:r=25:d=8:speed=0.01:c0=0x1d4ed8:c1=0x7c3aed:c2=0x0f766e:nb_colors=3" \
-    $X264 -crf 32 -an -t 8 -movflags +faststart "$PUBLIC/background.mp4"
+# --- Silent background loops, one per palette (UC5) ---
+BACKGROUNDS=(
+    "aurora|0x1d4ed8|0x7c3aed|0x0f766e"
+    "sunset|0xea580c|0xdb2777|0x6d28d9"
+    "forest|0x166534|0x0f766e|0x4d7c0f"
+)
+for background in "${BACKGROUNDS[@]}"; do
+    IFS='|' read -r id c0 c1 c2 <<< "$background"
+    $FF -f lavfi -i "gradients=s=960x540:r=25:d=8:speed=0.01:c0=$c0:c1=$c1:c2=$c2:nb_colors=3" \
+        $X264 -crf 32 -an -t 8 -movflags +faststart "$PUBLIC/background-$id.mp4"
+done
 
 # --- Podcast episodes (UC6) ---
 EPISODES=(

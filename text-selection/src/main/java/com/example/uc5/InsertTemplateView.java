@@ -1,5 +1,6 @@
 package com.example.uc5;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -24,6 +25,7 @@ import com.vaadin.flow.signals.Signal;
  * overwrite it. Demonstrates reading both {@code start()} and {@code end()} off
  * the signal in one peek.
  */
+@UnreleasedApi("https://github.com/vaadin/flow-components/pull/10356")
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Insert template at cursor")
 @UseCaseDescription("Inserting a snippet at the cursor or over a selection")

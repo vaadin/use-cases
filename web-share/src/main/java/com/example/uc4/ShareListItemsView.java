@@ -2,9 +2,9 @@ package com.example.uc4;
 
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -19,84 +19,77 @@ import com.vaadin.flow.component.webshare.ShareContent;
 import com.vaadin.flow.component.webshare.WebShare;
 import com.vaadin.flow.component.webshare.WebShareSupport;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
 /**
- * UC4 — Per-item share in a list.
+ * UC4 — Per-item share.
  * <p>
- * Models the common mobile pattern of a feed/list with a Share icon on every
- * row: tapping a row's icon hands that row's specific {@code title}/
- * {@code url} payload to the native sheet, so the receiving app sees a coherent
- * per-item preview. All buttons stay in sync with
- * {@link WebShare#supportSignal()} — they disable together when the API is
- * unavailable.
+ * A feed with a Share button on every row, a common pattern on phones. Each
+ * row's button is bound once to that row's {@code title} and {@code url}, so
+ * the share sheet gets the article of the row that was tapped. All buttons are
+ * bound to the same {@link WebShare#supportSignal()} condition, so they are
+ * disabled together in a browser without {@code navigator.share}.
  */
 @Route(value = "uc4", layout = MainLayout.class)
-@Menu(order = 4, title = "UC4 — Per-item share")
+@PageTitle(ShareListItemsView.TITLE)
+@UseCaseDescription("Sharing a specific list item from its own button")
+@Menu(order = 4, title = ShareListItemsView.TITLE)
 @StyleSheet("uc4.css")
 public class ShareListItemsView extends VerticalLayout {
+
+    static final String TITLE = "UC4 — Per-item share";
 
     private record Article(String title, String summary, String url) {
     }
 
+    // Real pages, so a shared link opens something.
     private static final List<Article> ARTICLES = List.of(
-            new Article("Reactive UIs with Vaadin Signals",
-                    "The signal API gives Flow a fine-grained reactivity "
-                            + "story that pairs naturally with Web APIs.",
-                    "https://vaadin.com/blog/signals"),
-            new Article("Geolocation in plain Java",
-                    "Acquiring a position, asking for permission, and "
-                            + "feeding the value back into the UI.",
-                    "https://vaadin.com/blog/geolocation"),
-            new Article("Page Visibility for free",
-                    "How a tiny browser signal can halve your server traffic.",
-                    "https://vaadin.com/blog/page-visibility"));
-
-    private final Div list = new Div();
+            new Article("Server push",
+                    "Updating the UI from a background thread, without a "
+                            + "request from the browser.",
+                    "https://vaadin.com/docs/latest/flow/advanced/server-push"),
+            new Article("Routing and navigation",
+                    "Mapping URLs to views, with parameters and layouts.",
+                    "https://vaadin.com/docs/latest/flow/routing"),
+            new Article("Browserless testing",
+                    "Testing views in plain Java, without a browser.",
+                    "https://vaadin.com/docs/latest/flow/testing/browserless"));
 
     public ShareListItemsView() {
         addClassName("uc4-view");
-        add(new H1("UC4 — Share each item in a list"));
-        add(new Paragraph("Each row has its own Share button bound to its "
-                + "own payload. On a phone, tapping a row's icon opens the "
-                + "share sheet with that article's title and URL — perfect "
-                + "for blog feeds, recipe lists, product catalogs."));
+        add(new H1(TITLE));
+        add(new Paragraph("Each row has its own Share button, bound to that "
+                + "row's title and URL. On a phone, tap a row's button: the "
+                + "share sheet opens with that article. The same pattern "
+                + "fits blog feeds, recipe lists and product catalogs."));
 
-        list.addClassName("share-list");
-        ARTICLES.forEach(a -> list.add(row(a)));
+        Signal<Boolean> supported = WebShare.supportSignal()
+                .map(s -> s == WebShareSupport.SUPPORTED);
+
+        Div list = new Div();
+        list.addClassName("uc4-list");
+        ARTICLES.forEach(a -> list.add(row(a, supported)));
         add(list);
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        Signal<WebShareSupport> support = WebShare.supportSignal();
-
-        Signal.effect(this, () -> {
-            boolean enabled = support.get() == WebShareSupport.SUPPORTED;
-            list.getChildren().flatMap(r -> r.getChildren())
-                    .filter(Button.class::isInstance).map(Button.class::cast)
-                    .forEach(b -> b.setEnabled(enabled));
-        });
-    }
-
-    private Div row(Article article) {
+    private static Div row(Article article, Signal<Boolean> supported) {
         Div row = new Div();
-        row.addClassName("share-list-item");
+        row.addClassName("uc4-item");
 
         Div text = new Div();
         Span title = new Span(article.title());
-        title.addClassName("share-list-item-title");
+        title.addClassName("uc4-item-title");
         Div summary = new Div(article.summary());
-        summary.addClassName("share-list-item-summary");
+        summary.addClassName("uc4-item-summary");
         text.add(title, summary);
 
         Button share = new Button(VaadinIcon.SHARE.create());
         share.addThemeVariants(ButtonVariant.TERTIARY);
         share.getElement().setAttribute("aria-label",
                 "Share \"" + article.title() + "\"");
-        share.setEnabled(false);
+        share.bindEnabled(supported);
         // Each row's button binds its own per-item payload once.
         WebShare.onClick(share).share(
                 ShareContent.create().title(article.title()).url(article.url()),

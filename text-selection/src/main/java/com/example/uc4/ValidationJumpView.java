@@ -3,6 +3,7 @@ package com.example.uc4;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -25,6 +26,7 @@ import com.vaadin.flow.router.Route;
  * it. This is one of the most user-respecting things selection control unlocks:
  * the user does not have to re-locate their mistake.
  */
+@UnreleasedApi("https://github.com/vaadin/flow-components/pull/10356")
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Jump to validation error")
 @UseCaseDescription("Pointing the user to the exact invalid part of a value")

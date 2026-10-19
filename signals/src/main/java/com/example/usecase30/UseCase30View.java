@@ -3,6 +3,7 @@ package com.example.usecase30;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -37,7 +38,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @PageTitle("Use Case 30: Catalog filter")
 @Route(value = "use-case-30", layout = MainLayout.class)
-@Menu(order = 30, title = "UC 30: Catalog filter")
+@UseCaseDescription("Sharing one filter pass over a catalog between a grid, a count badge and an export")
+@Menu(order = 30, title = "UC30 — Catalog Filter")
 @AnonymousAllowed
 public class UseCase30View extends VerticalLayout {
 

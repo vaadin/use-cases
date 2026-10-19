@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -38,7 +39,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @PageTitle("Use Case 31: Seat reservation")
 @Route(value = "use-case-31", layout = MainLayout.class)
-@Menu(order = 31, title = "UC 31: Seat reservation")
+@UseCaseDescription("Letting exactly one user win a seat when several claim it at once")
+@Menu(order = 31, title = "UC31 — Seat Reservation")
 @AnonymousAllowed
 public class UseCase31View extends VerticalLayout {
 

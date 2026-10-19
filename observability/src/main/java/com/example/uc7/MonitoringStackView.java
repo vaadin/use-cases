@@ -585,7 +585,7 @@ public class MonitoringStackView extends VerticalLayout {
                 "A dashboard can group by RPC type, route or exception, but not "
                         + "by component or view: the kit keeps that attribution "
                         + "on spans and insights rather than meter tags, to "
-                        + "bound cardinality (gap #8). So 'which button is "
+                        + "bound cardinality (gap #10). So 'which button is "
                         + "slow' is answerable in-app but not in Grafana."),
                 new ListItem("Percentiles exist only where histogram buckets "
                         + "are enabled per timer; a panel silently renders "

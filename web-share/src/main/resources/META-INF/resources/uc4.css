@@ -1,12 +1,12 @@
 .uc4-view {
-    .share-list {
+    .uc4-list {
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
         max-width: 640px;
     }
 
-    .share-list-item {
+    .uc4-item {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -17,12 +17,12 @@
         background: var(--vaadin-background-container);
     }
 
-    .share-list-item-title {
+    .uc4-item-title {
         font-weight: 600;
     }
 
-    .share-list-item-summary {
-        font-size: 0.85rem;
+    .uc4-item-summary {
+        font-size: var(--aura-font-size-s);
         color: var(--vaadin-text-color-secondary);
     }
 }

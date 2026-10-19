@@ -2,7 +2,7 @@ package com.example.uc2;
 
 import java.io.ByteArrayInputStream;
 
-import com.example.MissingAPI;
+import com.example.common.UseCaseDescription;
 import com.example.data.Invoice;
 import com.example.data.Invoices;
 import com.example.pdf.InvoicePdf;
@@ -14,10 +14,9 @@ import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.html.AttachmentType;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.newtab.OpenInNewTab;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
@@ -34,26 +33,24 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  * {@code Content-Disposition: attachment} and {@code inline}, and
  * {@link AttachmentType#INLINE} on the anchor is all it takes.
  * <p>
- * The awkward half is doing the same thing from server code — after saving a
- * draft, say, or from a context menu item. {@code Page#open} needs a URL, and a
- * {@code DownloadHandler} has no URL until it has been bound to an element;
- * nothing exposes it afterwards either, except {@code Anchor#getHref()}. So the
- * second button here works the way applications have to: a hidden anchor that
- * the server clicks through JavaScript
- * ({@link MissingAPI#openInNewTab(Anchor)}).
+ * A button does the same with {@link OpenInNewTab#onClick} and the handler: the
+ * tab opens in the browser's own click handler, so popup blockers let it
+ * through, and the handler is switched to inline delivery.
+ * <p>
+ * What is still missing is opening the document when the server decides to —
+ * after saving a draft, say, or after a confirm dialog. {@code Page#open} needs
+ * a URL, and a {@code DownloadHandler} has none the server can read back
+ * ({@code API-GAPS.md} #2).
  *
  * @see <a href="https://github.com/vaadin/flow/issues/21929">vaadin/flow#21929
  *      — Improve the DownloadHandler API for opening a file in a new tab</a>
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Open it in a new tab")
+@UseCaseDescription("Opening a generated document in a new tab instead of downloading it")
 @Menu(order = 2, title = "UC2 — Open it in a new tab")
 @StyleSheet("invoicing.css")
 public class OpenInNewTabView extends VerticalLayout {
-
-    private final Anchor hiddenLink;
-    private final Span href = new Span(
-            "(the URL exists only once the " + "anchor is attached)");
 
     public OpenInNewTabView() {
         Invoice invoice = Invoices.sampleInvoice();
@@ -62,40 +59,23 @@ public class OpenInNewTabView extends VerticalLayout {
         add(new Paragraph(
                 "The same generated PDF, delivered inline instead of as an "
                         + "attachment. The link opens it in a new tab by "
-                        + "itself; the button has to go the long way round, "
-                        + "because the server cannot ask a DownloadHandler "
-                        + "for its URL."));
+                        + "itself; OpenInNewTab gives the button the same "
+                        + "behaviour."));
 
         Anchor view = new Anchor(handler(invoice), AttachmentType.INLINE,
                 "View invoice " + invoice.number());
         view.setTarget(AnchorTarget.BLANK);
         view.setId("view-link");
 
-        hiddenLink = new Anchor(handler(invoice), AttachmentType.INLINE, "");
-        hiddenLink.setTarget(AnchorTarget.BLANK);
-        hiddenLink.setId("hidden-link");
-        hiddenLink.getStyle().set("display", "none");
-
-        Button open = new Button("Open from the server",
-                event -> openFromServer());
+        Button open = new Button("Open in a new tab");
+        OpenInNewTab.onClick(open, handler(invoice));
         open.addThemeVariants(ButtonVariant.PRIMARY);
         open.setId("open-button");
 
         HorizontalLayout actions = new HorizontalLayout(view, open);
         actions.setAlignItems(Alignment.CENTER);
 
-        Div url = new Div(new Span("Resolved URL: "), href);
-        url.addClassName("resolved-url");
-        href.setId("resolved-url");
-
-        add(actions, url, hiddenLink);
-    }
-
-    private void openFromServer() {
-        // Anchor#getHref() is the only place the handler's URL surfaces, and
-        // only after the anchor has been attached.
-        href.setText(hiddenLink.getHref());
-        MissingAPI.openInNewTab(hiddenLink);
+        add(actions);
     }
 
     private static DownloadHandler handler(Invoice invoice) {

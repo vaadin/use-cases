@@ -10,37 +10,39 @@ import com.vaadin.flow.dom.JsFunction;
 
 /**
  * Custom {@link Action} that hides children of a list container whose
- * {@code textContent} doesn't contain the search value read from
- * {@code event.target.value}. Filtering is entirely client-side — no server
+ * {@code textContent} doesn't contain the query produced by an
+ * {@link Action.Input}. Filtering is entirely client-side — no server
  * round-trip per keystroke.
  * <p>
- * The action is intentionally specialised: it relies on the surrounding trigger
- * being a DOM event trigger on the search field, so {@code event.target} is the
- * field. A more general version would accept an {@code Action.Input<String>}
- * for the query, but {@code Action.Input#toJs} is currently package-private —
- * application code can't call it. See API-GAPS.md.
+ * The query source is any {@code Action.Input<String>} — typically a
+ * {@code PropertyInput} reading the search field's {@code value} — so the
+ * action composes with any trigger, mirroring
+ * {@code SetPropertyAction(target, name, source)}.
  */
 public class FilterListAction extends Action {
 
     private final Element listContainer;
+    private final Action.Input<String> query;
 
-    public FilterListAction(Component listContainer) {
-        this(Objects.requireNonNull(listContainer).getElement());
+    public FilterListAction(Component listContainer,
+            Action.Input<String> query) {
+        this(Objects.requireNonNull(listContainer).getElement(), query);
     }
 
-    public FilterListAction(Element listContainer) {
+    public FilterListAction(Element listContainer, Action.Input<String> query) {
         this.listContainer = Objects.requireNonNull(listContainer);
+        this.query = Objects.requireNonNull(query);
     }
 
     @Override
     protected JsFunction toJs(Trigger trigger) {
         return JsFunction
                 .of("""
-                        const q = ((event.target && event.target.value) || '').toLowerCase();
+                        const q = ($1(event) || '').toLowerCase();
                         for (const row of $0.children) {
                             row.hidden = q && !row.textContent.toLowerCase().includes(q);
                         }""",
-                        listContainer)
+                        listContainer, query.toJs(trigger))
                 .withArguments("event");
     }
 }

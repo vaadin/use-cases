@@ -2,6 +2,7 @@ package com.example.usecase32;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -32,7 +33,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @PageTitle("Use Case 32: Mutable vs immutable form models")
 @Route(value = "use-case-32", layout = MainLayout.class)
-@Menu(order = 32, title = "UC 32: Mutable vs immutable")
+@UseCaseDescription("Binding the same form to a mutable entity and to an immutable record")
+@Menu(order = 32, title = "UC32 — Mutable vs Immutable")
 @AnonymousAllowed
 public class UseCase32View extends VerticalLayout {
 

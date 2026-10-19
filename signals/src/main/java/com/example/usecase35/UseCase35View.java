@@ -2,6 +2,7 @@ package com.example.usecase35;
 
 import java.util.List;
 
+import com.example.common.UseCaseDescription;
 import com.example.usecase35.Card.Priority;
 import com.example.views.MainLayout;
 
@@ -38,7 +39,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @PageTitle("Use Case 35: Kanban column")
 @Route(value = "use-case-35", layout = MainLayout.class)
-@Menu(order = 35, title = "UC 35: Kanban column")
+@UseCaseDescription("Reordering and bulk-inserting cards in a Kanban column")
+@Menu(order = 35, title = "UC35 — Kanban Column")
 @AnonymousAllowed
 public class UseCase35View extends VerticalLayout {
 

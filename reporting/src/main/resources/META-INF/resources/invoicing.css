@@ -47,9 +47,3 @@ iframe.preview-pane {
     border-radius: 4px;
     background: var(--vaadin-background-container);
 }
-
-.resolved-url {
-    font-size: var(--aura-font-size-s);
-    color: var(--vaadin-text-color-secondary);
-    word-break: break-all;
-}

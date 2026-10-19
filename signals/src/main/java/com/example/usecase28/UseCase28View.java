@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import com.example.common.UseCaseDescription;
 import com.example.usecase23.SchedulerService;
 import com.example.usecase28.LogEntry.Severity;
 import com.example.views.MainLayout;
@@ -38,7 +39,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @PageTitle("Use Case 28: Server log viewer")
 @Route(value = "use-case-28", layout = MainLayout.class)
-@Menu(order = 28, title = "UC 28: Server log viewer")
+@UseCaseDescription("Highlighting log lines that change on the server, but not the user's own edits")
+@Menu(order = 28, title = "UC28 — Server Log Viewer")
 @AnonymousAllowed
 @StyleSheet("usecase28.css")
 public class UseCase28View extends VerticalLayout {

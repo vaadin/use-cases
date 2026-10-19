@@ -3,6 +3,7 @@ package com.example.usecase29;
 import java.time.LocalTime;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.html.Div;
@@ -39,7 +40,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @PageTitle("Use Case 29: Profile auto-save")
 @Route(value = "use-case-29", layout = MainLayout.class)
-@Menu(order = 29, title = "UC 29: Profile auto-save")
+@UseCaseDescription("Auto-saving a profile and shipping audit entries without holding the session lock")
+@Menu(order = 29, title = "UC29 — Profile Auto-Save")
 @AnonymousAllowed
 public class UseCase29View extends VerticalLayout {
 

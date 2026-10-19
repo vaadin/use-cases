@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 import com.example.MediaLibrary;
 import com.example.MissingAPI;
-import com.example.RangeDownloadHandler;
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -28,8 +28,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.streams.DownloadHandler;
-import com.vaadin.flow.server.streams.DownloadResponse;
 
 /**
  * UC9 — Subtitles in several languages.
@@ -42,13 +40,13 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  * in the URL, such as {@code uc9?subtitles=de} or {@code uc9?subtitles=off}, so
  * a shared link opens with the same subtitles.
  * <p>
- * {@code Media} only accepts {@code Source} children, so there is no way to add
- * a {@code <track>} through the component API, and nothing to select the
- * showing track from the server. {@link MissingAPI#addTextTrack} and
- * {@link MissingAPI#showTextTrack} fill in.
+ * There is no {@code Track} component to add a {@code <track>} with, and
+ * nothing to select the showing track from the server ({@code API-GAPS.md #6}).
+ * {@link MissingAPI#addTextTrack} and {@link MissingAPI#showTextTrack} fill in.
  */
 @Route(value = "uc9", layout = MainLayout.class)
 @PageTitle("UC9 — Subtitles")
+@UseCaseDescription("Offering subtitles in several languages and keeping the choice in the URL")
 @Menu(order = 9, title = "UC9 — Subtitles")
 public class SubtitlesView extends VerticalLayout
         implements BeforeEnterObserver {
@@ -85,13 +83,13 @@ public class SubtitlesView extends VerticalLayout
                 + "subtitles menu in the player. The subtitles start in "
                 + "your browser's language when one of the tracks matches."));
 
-        video.setControls(true);
+        video.setControlsVisible(true);
         video.setPreload(Media.Preload.METADATA);
         video.setWidth("640px");
         video.setMaxWidth("100%");
         video.setAriaLabel("Quarterly product review");
-        video.addSource(RangeDownloadHandler.forMedia("quarterly-review.mp4",
-                "video/mp4"), "video/mp4");
+        video.addSource(MediaLibrary.serve("quarterly-review.mp4"),
+                "video/mp4");
 
         VaadinRequest request = VaadinRequest.getCurrent();
         browserLanguage = initialLanguage(
@@ -100,11 +98,7 @@ public class SubtitlesView extends VerticalLayout
             String file = "subtitles/" + subtitles.language() + ".vtt";
             Element track = MissingAPI.addTextTrack(video, "subtitles",
                     subtitles.language(), subtitles.label(),
-                    DownloadHandler
-                            .fromInputStream(event -> new DownloadResponse(
-                                    MediaLibrary.open(file),
-                                    subtitles.language() + ".vtt", "text/vtt",
-                                    MediaLibrary.bytes(file).length)));
+                    MediaLibrary.serve(file).withContentType("text/vtt"));
             tracks.put(subtitles.language(), track);
         }
         add(video);

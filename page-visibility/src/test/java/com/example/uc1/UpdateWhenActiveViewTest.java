@@ -1,31 +1,26 @@
 package com.example.uc1;
 
+import java.time.Duration;
+
 import com.example.PageVisibilityTestSupport;
+import com.example.home.HomeView;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.page.PageVisibility;
 
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ViewPackages(classes = UpdateWhenActiveView.class)
+@ViewPackages(classes = { UpdateWhenActiveView.class, HomeView.class })
 class UpdateWhenActiveViewTest extends SpringBrowserlessTest {
 
-    @Test
-    void viewRendersWithExpectedHeadings() {
-        navigate(UpdateWhenActiveView.class);
-
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC1 — Update when active".equals(h.getText())));
-        assertTrue(findInView(H2.class).all().stream()
-                .anyMatch(h -> "Status".equals(h.getText())));
-    }
+    private static final Duration TICK = Duration.ofSeconds(1);
 
     @Test
     void statusBadgeReflectsPageVisibilityChanges() {
@@ -43,6 +38,42 @@ class UpdateWhenActiveViewTest extends SpringBrowserlessTest {
 
         setPageVisibility(PageVisibility.VISIBLE_NOT_FOCUSED);
         assertBadgeContains("not focused");
+    }
+
+    @Test
+    void clockTicksWhileVisibleAndPausesWhileHidden() throws Exception {
+        UpdateWhenActiveView view = navigate(UpdateWhenActiveView.class);
+        setPageVisibility(PageVisibility.VISIBLE);
+
+        await().atMost(TICK.multipliedBy(5)).until(() -> view.updates() > 0);
+        runPendingSignalsTasks();
+        assertTrue(
+                findInView(Span.class).all().stream()
+                        .anyMatch(s -> String.valueOf(view.updates())
+                                .equals(s.getText())),
+                "the counter label should show the ticks received");
+
+        setPageVisibility(PageVisibility.HIDDEN);
+        assertNoMoreTicks(view);
+    }
+
+    @Test
+    void leavingTheViewStopsTheClock() throws Exception {
+        UpdateWhenActiveView view = navigate(UpdateWhenActiveView.class);
+        setPageVisibility(PageVisibility.VISIBLE);
+        await().atMost(TICK.multipliedBy(5)).until(() -> view.updates() > 0);
+
+        navigate(HomeView.class);
+        assertNoMoreTicks(view);
+    }
+
+    private static void assertNoMoreTicks(UpdateWhenActiveView view)
+            throws InterruptedException {
+        // A tick that was already running may still land.
+        Thread.sleep(TICK.toMillis() / 2);
+        int updates = view.updates();
+        Thread.sleep(TICK.multipliedBy(2).toMillis());
+        assertEquals(updates, view.updates(), "no tick should arrive");
     }
 
     private void assertBadgeContains(String fragment) {

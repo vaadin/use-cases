@@ -14,7 +14,7 @@ import com.vaadin.flow.theme.aura.Aura;
 // The download progress and delivery callbacks update the UI from the thread
 // that writes the response, i.e. outside a client round trip. They are
 // delivered with the UI lock held, but nothing reaches the browser without
-// push (see API-GAPS.md).
+// push (see API-GAPS.md #5).
 @Push
 public class Application implements AppShellConfigurator {
 

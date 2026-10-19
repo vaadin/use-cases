@@ -5,12 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.example.acme.AppWindow;
 import com.example.acme.DemoRig;
 import com.example.acme.InsightCard;
 import com.example.acme.Insights;
 import com.example.acme.Investigation;
 import com.example.acme.Telemetry;
+import com.example.common.AppWindow;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 import io.micrometer.core.instrument.Counter;
@@ -245,7 +245,8 @@ public class FailureInsightsView extends VerticalLayout {
         returnsLog.addHeaderRow("Order", "Reason", "Refund");
         returnsLog.addRows(noReturns);
 
-        return new AppWindow("Acme Supply — Returns Desk", ROUTE,
+        return new AppWindow("Acme Supply — Returns Desk",
+                "acme.example/" + ROUTE,
                 new HorizontalLayout(Alignment.END, orderNumber, reason,
                         refund, process),
                 returnsLog);

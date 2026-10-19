@@ -1,13 +1,12 @@
 package com.example.uc3;
 
+import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
-import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -23,23 +22,30 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.webshare.ShareContent;
 import com.vaadin.flow.component.webshare.WebShare;
 import com.vaadin.flow.component.webshare.WebShareSupport;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.signals.Signal;
 
 /**
  * UC3 — Share a custom message.
  * <p>
- * A small form lets the user fill in any of the three payload fields
- * ({@code title}, {@code text}, {@code url}) and shows a live JSON preview of
- * the data that will be handed to the native share sheet. The share is bound
- * once via {@link WebShare#onClick} to the live values of the three fields, so
- * each click shares whatever the form currently holds.
+ * A small form lets the user fill in the three payload fields ({@code title},
+ * {@code text}, {@code url}) and shows a live JSON preview of the data that
+ * will be handed to the native share sheet. The share is bound once with
+ * {@link WebShare#onClick} to the three fields, so each click shares whatever
+ * the form holds at that moment. An empty field is still sent, as an empty
+ * string; the browser resolves an empty URL against the page address, so it
+ * shares this page (API-GAPS.md #5).
  */
 @Route(value = "uc3", layout = MainLayout.class)
-@Menu(order = 3, title = "UC3 — Share a custom message")
+@PageTitle(CustomMessageView.TITLE)
+@UseCaseDescription("Sharing a custom title, text and URL with a live preview")
+@Menu(order = 3, title = CustomMessageView.TITLE)
 @StyleSheet("uc3.css")
 public class CustomMessageView extends VerticalLayout {
+
+    static final String TITLE = "UC3 — Share a custom message";
 
     private static final ObjectMapper JSON = JsonMapper.builder()
             .enable(SerializationFeature.INDENT_OUTPUT).build();
@@ -53,11 +59,12 @@ public class CustomMessageView extends VerticalLayout {
 
     public CustomMessageView() {
         addClassName("uc3-view");
-        add(new H1("UC3 — Share a custom message"));
-        add(new Paragraph("Fill any combination of the three fields. The "
-                + "preview shows exactly what gets shared; the Share button "
-                + "is bound to the live field values and empty fields are "
-                + "treated as omitted by the browser."));
+        add(new H1(TITLE));
+        add(new Paragraph("Fill in the three fields and click Share. The "
+                + "preview shows what the button hands to the share sheet: "
+                + "the values of the fields at the moment of the click. An "
+                + "empty field is sent as an empty string. The browser "
+                + "reads an empty URL as the address of this page."));
 
         titleField.setPlaceholder("e.g. Look at this!");
         titleField.setValue("Look at this!");
@@ -69,15 +76,12 @@ public class CustomMessageView extends VerticalLayout {
         textField.setWidthFull();
         urlField.setWidthFull();
 
-        preview.addClassName("share-preview");
+        preview.addClassName("uc3-preview");
         shareButton.addThemeVariants(ButtonVariant.PRIMARY);
 
-        titleField.setValueChangeMode(
-                com.vaadin.flow.data.value.ValueChangeMode.EAGER);
-        textField.setValueChangeMode(
-                com.vaadin.flow.data.value.ValueChangeMode.EAGER);
-        urlField.setValueChangeMode(
-                com.vaadin.flow.data.value.ValueChangeMode.EAGER);
+        titleField.setValueChangeMode(ValueChangeMode.EAGER);
+        textField.setValueChangeMode(ValueChangeMode.EAGER);
+        urlField.setValueChangeMode(ValueChangeMode.EAGER);
         titleField.addValueChangeListener(e -> updatePreview());
         textField.addValueChangeListener(e -> updatePreview());
         urlField.addValueChangeListener(e -> updatePreview());
@@ -85,18 +89,12 @@ public class CustomMessageView extends VerticalLayout {
         add(titleField, textField, urlField, new H2("Payload preview"), preview,
                 shareButton);
         updatePreview();
-    }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        Signal<WebShareSupport> support = WebShare.supportSignal();
+        shareButton.bindEnabled(WebShare.supportSignal()
+                .map(s -> s == WebShareSupport.SUPPORTED));
 
-        Signal.effect(this, () -> shareButton
-                .setEnabled(support.get() == WebShareSupport.SUPPORTED));
-
-        // Bind the share once to the live field values: each click shares
-        // whatever the form currently holds.
+        // Bound once: each click reads the field values in the browser and
+        // shares whatever the form holds at that moment.
         WebShare.onClick(shareButton).share(
                 ShareContent.create().title(titleField).text(textField)
                         .url(urlField),
@@ -109,16 +107,12 @@ public class CustomMessageView extends VerticalLayout {
     private void updatePreview() {
         try {
             ObjectNode node = JSON.createObjectNode();
-            node.put("title", nullIfBlank(titleField.getValue()));
-            node.put("text", nullIfBlank(textField.getValue()));
-            node.put("url", nullIfBlank(urlField.getValue()));
+            node.put("title", titleField.getValue());
+            node.put("text", textField.getValue());
+            node.put("url", urlField.getValue());
             preview.setText(JSON.writeValueAsString(node));
         } catch (Exception ex) {
             preview.setText("(preview error: " + ex.getMessage() + ")");
         }
-    }
-
-    private static @Nullable String nullIfBlank(@Nullable String s) {
-        return s == null || s.isBlank() ? null : s;
     }
 }
