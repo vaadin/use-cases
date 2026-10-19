@@ -26,17 +26,19 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * UC7 — Capturing a location as part of a form.
+ * UC7 — Location in a form.
  * <p>
  * Vertical pothole-reporting form. The description and the pinned location live
  * as signals; the submit button's enabled state and the pin label's text are
- * bound to those signals so there is no manual refresh logic. Submitted reports
- * appear in the grid below.
+ * bound to those signals so there is no manual refresh logic. A reading less
+ * accurate than 50 m is rejected. Submitted reports appear in the grid below.
+ * The one-shot request has no signal of its own, so the view copies the answer
+ * into one (see API-GAPS.md #2).
  */
 @Route(value = "uc7", layout = MainLayout.class)
-@PageTitle("UC7 — Capturing a location as part of a form")
+@PageTitle("UC7 — Location in a form")
 @UseCaseDescription("Capturing a location as part of a form")
-@Menu(order = 7, title = "UC7 — Form field")
+@Menu(order = 7, title = "UC7 — Location in a form")
 public class FormFieldView extends VerticalLayout {
 
     private static final double MAX_ACCURACY_METRES = 50;
@@ -55,9 +57,10 @@ public class FormFieldView extends VerticalLayout {
             false);
 
     public FormFieldView() {
-        add(new H1("UC7 — Location as part of a form"));
+        add(new H1("UC7 — Location in a form"));
         add(new Paragraph(
                 "Fill in a description and pin your current location. "
+                        + "A pin needs an accuracy of 50 m or better. "
                         + "Submit is disabled until both are ready. "
                         + "Submitted reports appear in the grid below."));
 

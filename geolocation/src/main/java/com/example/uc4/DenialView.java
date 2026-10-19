@@ -8,11 +8,10 @@ import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.card.CardVariant;
 import com.vaadin.flow.component.geolocation.Geolocation;
 import com.vaadin.flow.component.geolocation.GeolocationAvailability;
+import com.vaadin.flow.component.geolocation.GeolocationCoordinates;
 import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationErrorCode;
-import com.vaadin.flow.component.geolocation.GeolocationPending;
 import com.vaadin.flow.component.geolocation.GeolocationPosition;
-import com.vaadin.flow.component.geolocation.GeolocationResult;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
@@ -25,26 +24,29 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC4 — Handling denial, failure and unavailability.
+ * UC4 — When location fails.
  * <p>
  * Each scenario is in its own card so you can tell what you are testing. The
- * two simulated scenarios bypass the browser entirely so you can exercise every
- * branch without fiddling with site permissions; the "real browser" card calls
- * the actual API.
+ * first two cards simulate what the browser reports, so you can try every
+ * branch without changing site permissions: they pass the chosen value to the
+ * same handlers a real request would use. The "Real browser request" card calls
+ * the actual API and shows the live
+ * {@link Geolocation#availabilityHintSignal()}.
  */
 @Route(value = "uc4", layout = MainLayout.class)
-@PageTitle("UC4 — Denial, failure and unavailability")
+@PageTitle("UC4 — When location fails")
 @UseCaseDescription("Handling a denied, failed or unavailable location")
-@Menu(order = 4, title = "UC4 — Denial & unavailability")
+@Menu(order = 4, title = "UC4 — When location fails")
 public class DenialView extends VerticalLayout {
 
     public DenialView() {
-        add(new H1("UC4 — Denial, failure and unavailability"));
-        add(new Paragraph(
-                "The app adapts to two different kinds of failure: an "
-                        + "availability that says the feature is not "
-                        + "usable at all (or usable but denied), and an "
-                        + "error returned from a single location request."));
+        add(new H1("UC4 — When location fails"));
+        add(new Paragraph("The app adapts to two kinds of failure: an "
+                + "availability that says location can not be used at "
+                + "all or is blocked, and an error returned by a single "
+                + "location request. The first two cards simulate what "
+                + "the browser reports; the last one asks the real "
+                + "browser."));
 
         add(new AvailabilityCard());
         add(new RequestOutcomeCard());
@@ -163,51 +165,52 @@ public class DenialView extends VerticalLayout {
             add(choose);
 
             Button run = new Button("Run request",
-                    e -> handle(synthesize(choose.getValue())));
+                    e -> simulate(choose.getValue()));
             add(run);
 
             add(new H3("Message shown to the user"));
             add(output);
         }
 
-        private GeolocationResult synthesize(Outcome outcome) {
-            return switch (outcome) {
-            case SUCCESS -> new GeolocationPosition(
-                    new com.vaadin.flow.component.geolocation.GeolocationCoordinates(
-                            59.437, 24.7535, 10.0, null, null, null, null),
-                    System.currentTimeMillis());
-            case PERMISSION_DENIED -> new GeolocationError(
+        /**
+         * Passes the chosen outcome to the same two handlers that
+         * {@code Geolocation.getPosition(onSuccess, onError)} would call.
+         */
+        private void simulate(Outcome outcome) {
+            switch (outcome) {
+            case SUCCESS -> onSuccess(
+                    new GeolocationPosition(
+                            new GeolocationCoordinates(59.437, 24.7535, 10.0,
+                                    null, null, null, null),
+                            System.currentTimeMillis()));
+            case PERMISSION_DENIED -> onError(new GeolocationError(
                     GeolocationErrorCode.PERMISSION_DENIED.code(),
-                    "Simulated: user denied geolocation");
-            case POSITION_UNAVAILABLE -> new GeolocationError(
+                    "Simulated: user denied geolocation"));
+            case POSITION_UNAVAILABLE -> onError(new GeolocationError(
                     GeolocationErrorCode.POSITION_UNAVAILABLE.code(),
-                    "Simulated: position unavailable");
-            case TIMEOUT ->
-                new GeolocationError(GeolocationErrorCode.TIMEOUT.code(),
-                        "Simulated: request timed out");
-            case UNKNOWN_CODE ->
-                new GeolocationError(99, "Simulated: unknown future code");
-            };
+                    "Simulated: position unavailable"));
+            case TIMEOUT -> onError(
+                    new GeolocationError(GeolocationErrorCode.TIMEOUT.code(),
+                            "Simulated: request timed out"));
+            case UNKNOWN_CODE -> onError(
+                    new GeolocationError(99, "Simulated: unknown future code"));
+            }
         }
 
-        private void handle(GeolocationResult value) {
-            switch (value) {
-            case GeolocationPending p -> {
-                // get() never delivers Pending; required for exhaustiveness
-            }
-            case GeolocationPosition pos ->
-                output.setText("Stores near lat=%.4f, lon=%.4f".formatted(
-                        pos.coords().latitude(), pos.coords().longitude()));
-            case GeolocationError err ->
-                output.setText(switch (err.errorCode()) {
-                case PERMISSION_DENIED ->
-                    "Location not shared. Please enter a postcode.";
-                case POSITION_UNAVAILABLE ->
-                    "We couldn't determine your location.";
-                case TIMEOUT -> "Location request timed out. Please try again.";
-                case UNKNOWN -> "Could not get your location.";
-                });
-            }
+        private void onSuccess(GeolocationPosition pos) {
+            output.setText("Stores near lat=%.4f, lon=%.4f".formatted(
+                    pos.coords().latitude(), pos.coords().longitude()));
+        }
+
+        private void onError(GeolocationError err) {
+            // An unknown code maps to GeolocationErrorCode.UNKNOWN.
+            output.setText(switch (err.errorCode()) {
+            case PERMISSION_DENIED ->
+                "Location not shared. Please enter a postcode.";
+            case POSITION_UNAVAILABLE -> "We couldn't determine your location.";
+            case TIMEOUT -> "Location request timed out. Please try again.";
+            case UNKNOWN -> "Could not get your location.";
+            });
         }
 
     }
@@ -222,7 +225,6 @@ public class DenialView extends VerticalLayout {
      */
     private static class RealBrowserCard extends Card {
 
-        private final Span availabilityLabel = new Span();
         private final Span output = new Span("(no request run yet)");
 
         RealBrowserCard() {
@@ -232,6 +234,12 @@ public class DenialView extends VerticalLayout {
             add(new Paragraph("Calls the real API. The outcome depends on your "
                     + "browser's current permission state."));
 
+            // Bound to the availability signal, so the label follows
+            // permission changes (granted → denied, prompt → granted) instead
+            // of showing the value from when the view opened.
+            Span availabilityLabel = new Span();
+            availabilityLabel.bindText(Geolocation.availabilityHintSignal()
+                    .map(a -> "Current availability: " + a));
             add(availabilityLabel);
 
             Button locate = new Button("Use my location", e -> runReal());
@@ -239,17 +247,6 @@ public class DenialView extends VerticalLayout {
 
             add(new H3("Response"));
             add(output);
-        }
-
-        @Override
-        protected void onAttach(com.vaadin.flow.component.AttachEvent e) {
-            super.onAttach(e);
-            // Bind to the availability signal so the label tracks browser
-            // permission flips (granted → denied, prompt → granted) instead
-            // of showing a snapshot taken on attach.
-            availabilityLabel
-                    .bindText(Geolocation.availabilityHintSignal(e.getUI())
-                            .map(a -> "Current availability: " + a));
         }
 
         private void runReal() {
