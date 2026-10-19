@@ -17,36 +17,42 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC6 — Copy via a context-menu item.
+ * UC6 — Copy from a context menu.
  * <p>
  * Any {@link com.vaadin.flow.component.Component} that implements
  * {@link com.vaadin.flow.component.ClickNotifier} can be the source of a
- * {@link Clipboard#onClick} binding, including a {@link MenuItem}, so the same
- * client-side gesture-safe path applies to context-menu triggers.
+ * {@link Clipboard#onClick} binding. A {@link MenuItem} of a
+ * {@link ContextMenu} is one, so {@code Clipboard.onClick(menuItem)} copies
+ * inside the browser's click handler, as a button does. The menu item of a
+ * grid's context menu is not; see {@code API-GAPS.md} #3.
  */
 @Route(value = "uc6", layout = MainLayout.class)
-@PageTitle("UC6 — Copy via context menu")
+@PageTitle("UC6 — Copy from a context menu")
 @UseCaseDescription("Offering copy as a context-menu item")
-@Menu(order = 6, title = "UC6 — Context menu")
+@Menu(order = 6, title = "UC6 — Copy from a context menu")
 @StyleSheet("uc6.css")
 public class CopyFromContextMenuView extends VerticalLayout {
 
+    private static final String TOKEN = "secret-token-9f8e7a6b";
+
+    // A closed context menu is not part of the UI tree, so the test reaches
+    // it through the view.
+    final ContextMenu menu;
+
     public CopyFromContextMenuView() {
         addClassName("uc6-view");
-        add(new H1("UC6 — Copy via a context-menu item"));
+        add(new H1("UC6 — Copy from a context menu"));
         add(new Paragraph(
                 "Right-click (or long-press) the box below and pick \"Copy "
-                        + "value\". The same Clipboard.onClick API works on a "
-                        + "menu item — no JavaScript needed."));
+                        + "value\". Clipboard.onClick works on a menu item "
+                        + "as it does on a button, with no JavaScript."));
 
-        String value = "secret-token-9f8e7a6b";
+        Pre target = new Pre(TOKEN);
+        target.addClassName("uc6-copy-target");
 
-        Pre target = new Pre(value);
-        target.addClassName("copy-target");
-
-        ContextMenu menu = new ContextMenu(target);
+        menu = new ContextMenu(target);
         MenuItem copyItem = menu.addItem("Copy value");
-        Clipboard.onClick(copyItem).writeText(value,
+        Clipboard.onClick(copyItem).writeText(TOKEN,
                 written -> Notification.show("Token copied"),
                 error -> Notification.show("Copy failed: " + error.message()));
 
