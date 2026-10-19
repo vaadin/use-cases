@@ -24,12 +24,15 @@ Clipboard.onClick(button).writeText("hello",
         error -> Notification.show("Copy failed: " + error.message()));
 
 // Copy from a client-rendered template, e.g. a grid row: the action is bound
-// once and copies the first argument the template calls it with.
+// once and copies the first argument the template calls it with. The
+// callbacks are shared too; onCopied tells the rows apart by the copied text.
 // Not released yet (vaadin/flow#25366, vaadin/flow-components#10470).
 LitRenderer.<Customer> of(
         "<button @click=${() => copy(item.email)}>Copy</button>")
         .withProperty("email", Customer::email)
-        .withClientAction("copy", Clipboard.writeText());
+        .withClientAction("copy", Clipboard.writeText(
+                copied -> Notification.show("Copied " + copied),
+                error -> Notification.show("Copy failed: " + error.message())));
 
 // Paste: text/plain and text/html of a paste on a focused element.
 Clipboard.onPaste(div, event -> {
@@ -63,7 +66,7 @@ with its `name()` and `message()`.
 | UC5 | Paste a table | `Clipboard.onPaste(div, …)` reads cells copied from the embedded Spreadsheet, Excel or Google Sheets into a grid. It uses the HTML `<table>` when there is one and falls back to tab-separated text. |
 | UC6 | Copy from a context menu | `Clipboard.onClick(menuItem).writeText(…)` on a `ContextMenu` item: a `MenuItem` is a `ClickNotifier`, so it works as a button does. |
 | UC7 | Paste files | `Clipboard.onFilePaste(div, PasteFileHandler.batch()…)` uploads each pasted file. `onStart`, `onFile` and `onComplete` drive a progress bar, a file log and image previews. |
-| UC8 | Copy from a grid | The use case from the [forum thread](https://vaadin.com/forum/t/clipboard-copy/164697/11): a copy button next to the email in every row of a 500-row `Grid`. A `LitRenderer` renders the cell in the browser, and its template calls `copy(item.email)`, a client action bound once for the whole column with `withClientAction("copy", Clipboard.writeText())`. No row has a server-side component or binding of its own. The API is not released yet (vaadin/flow#25366, vaadin/flow-components#10470), and the action reports no success or failure ([API-GAPS.md #1](API-GAPS.md)). |
+| UC8 | Copy from a grid | The use case from the [forum thread](https://vaadin.com/forum/t/clipboard-copy/164697/11): a copy button next to the email in every row of a 500-row `Grid`. A `LitRenderer` renders the cell in the browser, and its template calls `copy(item.email)`, a client action bound once for the whole column with `withClientAction("copy", Clipboard.writeText(onCopied, onError))`, which also shows a "Copied …" notification. No row has a server-side component or binding of its own. The API is not released yet (vaadin/flow#25366, vaadin/flow-components#10470). |
 
 A use case that checks whether the clipboard can be used at all is missing,
 because the API does not expose that yet ([API-GAPS.md #5](API-GAPS.md)).

@@ -12,6 +12,7 @@ import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.Menu;
@@ -30,19 +31,19 @@ import com.vaadin.flow.router.Route;
  * <p>
  * The email column is a {@link LitRenderer}: the cell, button included, is
  * rendered in the browser from the row's data, so no row has a server-side
- * component. The copy is a client action, {@link Clipboard#writeText()}, bound
- * once for the whole column with {@code withClientAction("copy", ...)}. The
- * template decides what to copy by calling it with the row's value,
- * {@code copy(item.email)}, and the write runs inside the browser's click
- * handler, where the user gesture is still valid. Scrolling builds no
- * components and no bindings: there is one binding for {@value #ROW_COUNT}
- * rows.
+ * component. The copy is a client action,
+ * {@code Clipboard.writeText(onCopied, onError)}, bound once for the whole
+ * column with {@code withClientAction("copy", ...)}. The template decides what
+ * to copy by calling it with the row's value, {@code copy(item.email)}, and the
+ * write runs inside the browser's click handler, where the user gesture is
+ * still valid. Scrolling builds no components and no bindings: there is one
+ * binding for {@value #ROW_COUNT} rows.
  * <p>
- * {@code Clipboard.writeText()} and {@code LitRenderer.withClientAction} come
- * from vaadin/flow#25366 and vaadin/flow-components#10470, which this module
- * builds against as snapshots. A client action reports neither success nor
- * failure to the server, so the view can not confirm the copy; see
- * {@code clipboard/API-GAPS.md} #1.
+ * {@code Clipboard.writeText(...)} and {@code LitRenderer.withClientAction}
+ * come from vaadin/flow#25366 and vaadin/flow-components#10470, which this
+ * module builds against as snapshots. The callbacks are shared by the whole
+ * column too: {@code onCopied} receives the copied string, which is what tells
+ * the rows apart in the "Copied …" notification.
  */
 @Route(value = "uc8", layout = MainLayout.class)
 @PageTitle("UC8 — Copy from a grid")
@@ -98,7 +99,10 @@ public class CopyFromGridView extends VerticalLayout {
                         text="Copy ${item.email}"></vaadin-tooltip>
                   </vaadin-button>
                 </div>""").withProperty("email", Customer::email)
-                .withClientAction("copy", Clipboard.writeText());
+                .withClientAction("copy", Clipboard.writeText(
+                        copied -> Notification.show("Copied " + copied),
+                        error -> Notification
+                                .show("Copy failed: " + error.message())));
     }
 
     private static List<Customer> generateCustomers(int count) {

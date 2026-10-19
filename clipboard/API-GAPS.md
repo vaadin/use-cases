@@ -10,37 +10,18 @@ write runs inside the browser's click handler while the user gesture is still
 valid. The value is either a `String` fixed at binding time or, for
 `writeText` and `ClipboardContent.text` only, the `value` of a
 `Component & HasValue<?, String>`, read on the client at click time.
-`Clipboard.writeText()` returns an unbound `ClientAction` instead: whatever
-renders the affordance binds it, such as `LitRenderer.withClientAction`, and the
-action copies the first argument the template calls it with. That entry point
-is not released yet (vaadin/flow#25366, vaadin/flow-components#10470).
+`Clipboard.writeText()` and `Clipboard.writeText(onCopied, onError)` return an
+unbound `ClientAction` instead: whatever renders the affordance binds it, such
+as `LitRenderer.withClientAction`, and the action copies the first argument the
+template calls it with. That entry point is not released yet (vaadin/flow#25366, vaadin/flow-components#10470).
 `Clipboard.onPaste` and `Clipboard.onFilePaste` observe paste events.
 
 Most entries come from UC8, the copy button in every grid row from the
 [forum thread](https://vaadin.com/forum/t/clipboard-copy/164697/11). The use
 case works, and simply: a `LitRenderer` column whose template calls
-`copy(item.email)`, with `withClientAction("copy", Clipboard.writeText())`
-binding the write once for the whole column. The gaps are about what that
-client action can not do yet.
-
-## 1. No copy feedback from a client action
-
-**Where it bites:** UC8 / CopyFromGridView.java
-**Symptom:** `Clipboard.writeText()` returns a `ClientAction` with no
-`onCopied` / `onError` callbacks, unlike
-`ClipboardBinding.writeText(value, onCopied, onError)`. The copy buttons in the
-grid give no confirmation that anything was copied, and a rejected write (a
-non-secure context, a denied permission) fails silently. The template can call
-a `withFunction(...)` callback next to `copy(...)`, but that runs whether the
-write succeeds or not.
-**Workaround used:** none. UC8 shows no notification after a copy.
-**Suggested API:** the callbacks `ClipboardBinding` already has, on the unbound
-action:
-
-```java
-ClientAction Clipboard.writeText(SerializableConsumer<String> onCopied,
-        SerializableConsumer<PromiseAction.Error> onError);
-```
+`copy(item.email)`, with `withClientAction("copy", Clipboard.writeText(onCopied,
+onError))` binding the write and its callbacks once for the whole column. The
+remaining gaps are about affordances outside the grid and about testing.
 
 ## 2. No signal value source — the value must be known before the click
 
@@ -100,7 +81,7 @@ any `Component` and listen to the DOM `click` event directly.
 `ClipboardTestSupport.java`
 **Symptom:** a write is a client-side action, bound to a click
 (`Clipboard.onClick(button).writeText(...)`) or called from a template
-(`Clipboard.writeText()` in UC8). A browserless test can not fire it, inspect
+(`Clipboard.writeText(...)` in UC8). A browserless test can not fire it, inspect
 what it would write, or assert against a fake clipboard. `CopyFromGridViewTest`
 checks that every row renders its own email, but not that the button copies
 it: a template that called `copy` with the wrong property would pass. Pastes are no
