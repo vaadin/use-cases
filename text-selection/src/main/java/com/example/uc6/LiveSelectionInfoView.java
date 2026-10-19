@@ -1,6 +1,7 @@
 package com.example.uc6;
 
-import com.example.common.UnreleasedApi;
+import com.example.MissingAPI;
+import com.example.MissingAPI.TextSelection;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -12,7 +13,6 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.shared.SelectionRange;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -20,14 +20,15 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
 /**
- * UC6 — Live selection info (reactive).
+ * UC6 — Live selection info.
  * <p>
- * As the user selects text in the textarea, a side panel reactively shows the
- * selection range, length, word count, and a clipped preview of the selected
- * substring. All four labels are bound to {@code Signal}s computed from
- * {@code selectionSignal()} — no event listener boilerplate, no manual push.
+ * As the user selects text in the text area, a side panel shows the range,
+ * length, word count and a preview of the selected text. Each label is bound
+ * with {@code bindText} to a signal mapped from the selection, so there is no
+ * listener code in the view. {@code HasTextSelection} has no way to read the
+ * selection yet ({@code API-GAPS.md} #1); the signal comes from
+ * {@link MissingAPI#selectionSignal}.
  */
-@UnreleasedApi("https://github.com/vaadin/flow-components/pull/10356")
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Live selection info")
 @UseCaseDescription("Showing live details about the selected text")
@@ -45,26 +46,27 @@ public class LiveSelectionInfoView extends VerticalLayout {
         addClassName("uc6-view");
         add(new H1("UC6 — Live selection info"));
         add(new Paragraph(
-                "Drag to select text in the textarea below. The right panel "
-                        + "is bound to the selection signal — it updates "
-                        + "reactively without any explicit event handler."));
+                "Select text in the text area below. The panel next to it "
+                        + "is bound to a signal of the selection, so it "
+                        + "updates as the selection changes, without any "
+                        + "event handler in the view."));
 
         TextArea text = new TextArea();
         text.setValue(SAMPLE);
         text.setWidthFull();
         text.setHeight("260px");
-        text.addClassName("uc-fixed-textarea");
+        text.addClassName("uc-textarea");
 
-        Signal<SelectionRange> selection = text.selectionSignal();
+        Signal<TextSelection> selection = MissingAPI.selectionSignal(text);
 
         Span rangeLabel = new Span();
         Span lengthLabel = new Span();
         Span wordsLabel = new Span();
-        rangeLabel.addClassName("value");
-        lengthLabel.addClassName("value");
-        wordsLabel.addClassName("value");
+        rangeLabel.addClassName("uc6-value");
+        lengthLabel.addClassName("uc6-value");
+        wordsLabel.addClassName("uc6-value");
         Div preview = new Div();
-        preview.addClassName("uc-mono");
+        preview.addClassName("uc6-preview");
 
         rangeLabel.bindText(selection
                 .map(s -> s.isEmpty() ? "—" : s.start() + " – " + s.end()));
@@ -73,7 +75,7 @@ public class LiveSelectionInfoView extends VerticalLayout {
         preview.bindText(selection.map(LiveSelectionInfoView::previewText));
 
         Div info = new Div();
-        info.addClassName("uc-info-grid");
+        info.addClassName("uc6-info-grid");
         info.add(label("Range"), rangeLabel);
         info.add(label("Length"), lengthLabel);
         info.add(label("Words"), wordsLabel);
@@ -82,28 +84,27 @@ public class LiveSelectionInfoView extends VerticalLayout {
                 new Span("Preview:"), preview);
         panel.setPadding(false);
         panel.setSpacing(false);
-        panel.setWidth("280px");
+        panel.addClassName("uc6-panel");
 
         HorizontalLayout row = new HorizontalLayout(text, panel);
-        row.setWidthFull();
-        row.setFlexGrow(1, text);
+        row.addClassName("uc6-row");
         add(row);
     }
 
     private static Span label(String text) {
         Span s = new Span(text);
-        s.addClassName("label");
+        s.addClassName("uc6-label");
         return s;
     }
 
-    private static int wordCount(SelectionRange sel) {
+    private static int wordCount(TextSelection sel) {
         if (sel.isEmpty() || sel.content().isBlank()) {
             return 0;
         }
         return sel.content().trim().split("\\s+").length;
     }
 
-    private static String previewText(SelectionRange sel) {
+    private static String previewText(TextSelection sel) {
         if (sel.isEmpty()) {
             return "(no selection)";
         }

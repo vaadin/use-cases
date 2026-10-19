@@ -40,9 +40,9 @@ class HomeViewTest extends SpringBrowserlessTest {
     private static final UseCase UC1 = new UseCase("UC1", "Select all on focus",
             "Selecting a field's value when it gets focus", "uc1");
     private static final UseCase UC2 = new UseCase("UC2",
-            "Post-transform select-all",
+            "Select after formatting",
             "Selecting a value after the server reformats it", "uc2");
-    private static final UseCase UC3 = new UseCase("UC3", "Find & highlight",
+    private static final UseCase UC3 = new UseCase("UC3", "Find and highlight",
             "Stepping through search matches in a text area", "uc3");
     private static final UseCase UC4 = new UseCase("UC4",
             "Jump to validation error",

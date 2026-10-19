@@ -20,16 +20,17 @@ import com.vaadin.flow.router.Route;
 
 @Route(value = "", layout = MainLayout.class)
 @PageTitle("Text Selection API Use Cases")
-@UseCaseDescription("Controlling selection, cursor position and clipboard in text fields")
+@UseCaseDescription("Selecting text and moving the cursor in text fields from the server")
 @Menu(order = 0, title = "Home")
 public class HomeView extends BaseHomeView {
 
     public HomeView() {
         super("Text Selection API — use cases",
-                "Each card below uses the Text Selection API on TextField and "
-                        + "TextArea: the server controls the selection, the cursor "
-                        + "and the clipboard, and reads the current selection as a Signal "
-                        + "that can drive reactive UI.");
+                "HasTextSelection lets the server select text and move the "
+                        + "cursor in a TextField, TextArea, PasswordField or "
+                        + "BigDecimalField. The cards below show what that is "
+                        + "for, including cases that also need to read the "
+                        + "user's selection, which has no API yet.");
         addGroup("Selecting the whole value", VaadinIcon.INPUT, Accent.BLUE,
                 List.of(SelectAllOnFocusView.class, FormatAndSelectView.class));
         addGroup("Pointing at part of the text", VaadinIcon.SEARCH,
