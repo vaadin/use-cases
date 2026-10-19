@@ -10,39 +10,18 @@ write runs inside the browser's click handler while the user gesture is still
 valid. The value is either a `String` fixed at binding time or, for
 `writeText` and `ClipboardContent.text` only, the `value` of a
 `Component & HasValue<?, String>`, read on the client at click time.
+`Clipboard.writeText()` and `Clipboard.writeText(onCopied, onError)` return an
+unbound `ClientAction` instead: whatever renders the affordance binds it, such
+as `LitRenderer.withClientAction`, and the action copies the first argument the
+template calls it with. That entry point is not released yet (vaadin/flow#25366, vaadin/flow-components#10470).
 `Clipboard.onPaste` and `Clipboard.onFilePaste` observe paste events.
 
 Most entries come from UC8, the copy button in every grid row from the
 [forum thread](https://vaadin.com/forum/t/clipboard-copy/164697/11). The use
-case works, and simply: a `ComponentRenderer` column with
-`Clipboard.onClick(button).writeText(customer.email())` per row. The grid only
-builds the rows it renders, so the 500-row demo holds about ten copy buttons,
-also after scrolling. The gaps are about the cost of the binding that comes
-with each of those buttons.
-
-## 1. No column-level binding — one trigger per rendered row
-
-**Where it bites:** UC8 / CopyFromGridView.java
-**Symptom:** the binding from `Clipboard.onClick` is per component instance.
-A copy button in every row means, per rendered row, a `Button`, a
-`ClickTrigger`, an `addJsInitializer` registration and a client-side
-listener. All of them are torn down and rebuilt each time a row scrolls out of
-the buffer and back, although the value has the same shape in every row. A
-`LitRenderer` cannot help: its `withFunction(...)` callbacks run on the
-server, and by then the browser's user gesture is gone, so
-`navigator.clipboard.write*` rejects.
-**Workaround used:** none needed for correctness. UC8 accepts the per-row
-binding and documents the cost.
-**Suggested API:** a client-side trigger action in a `LitRenderer` template,
-so one binding serves the whole column and the value comes from the row's
-client-side data:
-
-```java
-LitRenderer.<Customer> of("<span>${item.email}</span>"
-                + "<button @click=${copy}>Copy</button>")
-        .withProperty("email", Customer::email)
-        .withClientAction("copy", Clipboard.write().text("email"));
-```
+case works, and simply: a `LitRenderer` column whose template calls
+`copy(item.email)`, with `withClientAction("copy", Clipboard.writeText(onCopied,
+onError))` binding the write and its callbacks once for the whole column. The
+remaining gaps are about affordances outside the grid and about testing.
 
 ## 2. No signal value source — the value must be known before the click
 
@@ -60,7 +39,8 @@ trigger fires, but the public clipboard API does not use it. The
 [forum thread](https://vaadin.com/forum/t/clipboard-copy/164697/8) had these
 ergonomics, but its `executeJs` runs after a server round trip, when the
 gesture is gone.
-**Workaround used:** UC8 binds a literal per row. A shared affordance would
+**Workaround used:** none in UC8, whose template passes the row's value to
+the client action. A shared affordance outside the grid would
 need a hidden component with a `value` property, filled on the server before
 the click. The obvious choice, `com.vaadin.flow.component.html.Input`,
 silently strips CR/LF from its value, which breaks multi-line copies.
@@ -99,12 +79,12 @@ any `Component` and listen to the DOM `click` event directly.
 
 **Where it bites:** every test under `src/test/java/com/example/uc*/` /
 `ClipboardTestSupport.java`
-**Symptom:** a write is a client-side trigger action bound to a click
-(`Clipboard.onClick(button).writeText(...)`). A browserless test can not fire
-the trigger, inspect what a component's binding would write, or assert against
-a fake clipboard. `CopyFromGridViewTest` checks that every row renders its own
-value and copy button, but not that the button is bound to that value: a bug
-that bound every row to the first row's email would pass. Pastes are no
+**Symptom:** a write is a client-side action, bound to a click
+(`Clipboard.onClick(button).writeText(...)`) or called from a template
+(`Clipboard.writeText(...)` in UC8). A browserless test can not fire it, inspect
+what it would write, or assert against a fake clipboard. `CopyFromGridViewTest`
+checks that every row renders its own email, but not that the button copies
+it: a template that called `copy` with the wrong property would pass. Pastes are no
 easier: `Clipboard.onPaste` listens to a DOM `paste` event whose data keys are
 private JavaScript expressions in `Clipboard`, and `Clipboard.onFilePaste`
 uploads each file over its own HTTP request, which browserless-test can not
