@@ -1,4 +1,4 @@
-package com.example.acme;
+package com.example.uc5;
 
 import com.atlassian.sourcemap.WritableSourceMap;
 import org.junit.jupiter.api.BeforeAll;
@@ -58,8 +58,10 @@ class SourceMapsTest {
                 .isEmpty(), "a development-mode module is already the source");
         assertTrue(SourceMaps.resolve(chunk + ":1").isEmpty(),
                 "a source without a column is not a frame");
-        assertTrue(SourceMaps
-                .resolve("/VAADIN/build/../../../application.properties:1:1")
+        // A real map, reached through the parent folder: only the chunk
+        // name's ban on slashes keeps this from resolving.
+        assertTrue(SourceMaps.resolve(chunk.replace("/VAADIN/build/",
+                "/VAADIN/build/../build/") + ":1:" + TestSourceMaps.CHART_FROM)
                 .isEmpty(), "a chunk name cannot leave the build folder");
     }
 

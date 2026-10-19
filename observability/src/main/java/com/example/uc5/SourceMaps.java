@@ -1,4 +1,4 @@
-package com.example.acme;
+package com.example.uc5;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,6 +37,13 @@ import org.jspecify.annotations.Nullable;
  * module served by Vite, an executeJs frame, a third-party script — resolves to
  * nothing, and so does one whose map is not on the classpath, which is the case
  * whenever the frontend was not built with maps.
+ * <p>
+ * This is UC5's workaround for {@code API-GAPS.md} #16: the kit retains the
+ * minified frame and reads no maps. Once a {@code client-error} insight carries
+ * the resolved location itself, read it from the evidence in
+ * {@code ConnectionInsightsView} and delete this class, its tests and the
+ * Atlassian reader in {@code pom.xml}; keep {@code sourcemap: 'hidden'} in
+ * {@code vite.config.ts}, which the kit needs to find the maps.
  */
 public final class SourceMaps {
 

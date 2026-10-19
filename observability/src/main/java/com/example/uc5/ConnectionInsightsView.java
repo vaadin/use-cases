@@ -11,7 +11,6 @@ import com.example.acme.InsightCard;
 import com.example.acme.Insights;
 import com.example.acme.Investigation;
 import com.example.acme.MeterTable;
-import com.example.acme.SourceMaps;
 import com.example.acme.Telemetry;
 import com.example.common.AppWindow;
 import com.example.common.UseCaseDescription;

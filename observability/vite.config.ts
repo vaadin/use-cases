@@ -9,7 +9,7 @@ const customConfig: UserConfigFn = (env) => ({
     // chunk but leaves out the sourceMappingURL comment, so browsers do not
     // fetch them and the page is as minified as without; the maps travel in
     // the jar, where the server reads them to turn the minified frame of a
-    // client-error insight back into a file, line and function (SourceMaps).
+    // client-error insight back into a file and line (SourceMaps).
     // They are still served under /VAADIN/build/ like any other file there.
     sourcemap: 'hidden'
   }
