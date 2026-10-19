@@ -1,8 +1,13 @@
 .uc3-view {
-    .confirmation {
+    .uc3-copy-row {
+        flex-wrap: wrap;
+    }
+
+    .uc3-confirmation {
         font-family: monospace;
-        font-size: 0.9rem;
+        font-size: var(--aura-font-size-s);
         color: var(--vaadin-text-color-secondary);
         align-self: center;
+        overflow-wrap: anywhere;
     }
 }

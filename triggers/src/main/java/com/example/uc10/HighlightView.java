@@ -16,12 +16,13 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC10 — Parameterised highlight action.
+ * UC10 — Highlight.
  * <p>
- * Three buttons each fire a {@link HighlightAction} configured with a different
- * colour and duration. Demonstrates how an action's constructor arguments
- * thread through to the rendered JS via captures. The same target is reused by
- * all three; the configuration is per-instance, not per-target.
+ * Three buttons flash the same box, each with its own color and duration. All
+ * three use one custom {@link HighlightAction} class, configured through its
+ * constructor. The action passes the target, the color and the duration to its
+ * JavaScript as parameters, which Flow encodes as JSON, so no value is pasted
+ * into the script text. The flash runs in the browser, inside the click.
  */
 @Route(value = "uc10", layout = MainLayout.class)
 @PageTitle("UC10 — Highlight")
@@ -32,33 +33,39 @@ public class HighlightView extends VerticalLayout {
 
     public HighlightView() {
         addClassName("uc10-view");
-        add(new H1("UC10 — Parameterised highlight"));
-        add(new Paragraph(
-                "Each button flashes the same target box with its configured "
-                        + "colour and duration. The action's constructor "
-                        + "arguments end up as JS captures — no string "
-                        + "concatenation, all values are Jackson-encoded."));
+        add(new H1("UC10 — Highlight"));
+        add(new Paragraph("Each button flashes the box below with its own "
+                + "color and duration. All three buttons use the same action "
+                + "class with different settings, and the flash runs in the "
+                + "browser without a server round-trip."));
 
         Div target = new Div("Target");
         target.setId("target");
-        target.addClassName("highlight-target");
+        target.addClassName("uc10-target");
 
-        Button yellow = new Button("Brief gold (300ms)");
-        yellow.setId("gold");
-        new ClickTrigger(yellow)
-                .triggers(new HighlightAction(target, "gold", 300));
+        Button yellow = new Button("Short yellow (300 ms)");
+        yellow.setId("yellow");
+        new ClickTrigger(yellow).triggers(
+                new HighlightAction(target, tint("--aura-yellow"), 300));
 
-        Button red = new Button("Long red (1.2s)");
+        Button red = new Button("Long red (1.2 s)");
         red.setId("red");
-        new ClickTrigger(red)
-                .triggers(new HighlightAction(target, "tomato", 1200));
+        new ClickTrigger(red).triggers(
+                new HighlightAction(target, tint("--aura-red"), 1200));
 
-        Button blue = new Button("Cyan tap (500ms)");
-        blue.setId("cyan");
-        new ClickTrigger(blue)
-                .triggers(new HighlightAction(target, "cyan", 500));
+        Button blue = new Button("Blue (500 ms)");
+        blue.setId("blue");
+        new ClickTrigger(blue).triggers(
+                new HighlightAction(target, tint("--aura-blue"), 500));
 
-        add(target);
-        add(new HorizontalLayout(yellow, red, blue));
+        HorizontalLayout buttons = new HorizontalLayout(yellow, red, blue);
+        buttons.addClassName("uc10-buttons");
+        add(target, buttons);
+    }
+
+    // A see-through tint of an Aura color keeps the text readable in light
+    // and dark mode.
+    private static String tint(String auraColor) {
+        return "color-mix(in srgb, var(" + auraColor + ") 40%, transparent)";
     }
 }

@@ -11,19 +11,19 @@ import com.vaadin.flow.component.html.Image;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ViewPackages(classes = SubmitAndDisableView.class)
-class SubmitAndDisableViewTest extends SpringBrowserlessTest {
+@ViewPackages(classes = ImageGalleryView.class)
+class ImageGalleryViewTest extends SpringBrowserlessTest {
 
+    // The selection happens in the browser only (API-GAPS.md #7), so the
+    // test can check what is rendered, not the click.
     @Test
     void viewRendersThreeTilesAndResetButton() {
-        navigate(SubmitAndDisableView.class);
+        navigate(ImageGalleryView.class);
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC2 — Click an image to dim its siblings"
-                        .equals(h.getText())));
+        assertEquals("UC2 — Image gallery select",
+                findInView(H1.class).single().getText());
         assertNotNull(findInView(Image.class).id("a"));
         assertNotNull(findInView(Image.class).id("b"));
         assertNotNull(findInView(Image.class).id("c"));

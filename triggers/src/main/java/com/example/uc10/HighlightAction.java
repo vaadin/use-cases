@@ -10,9 +10,9 @@ import com.vaadin.flow.dom.JsFunction;
 
 /**
  * Custom {@link Action} that briefly tints the target's background with a
- * configurable colour for a configurable duration. The colour and duration are
- * captured as JS arguments — they materialise on the client without any string
- * concatenation in the body.
+ * configurable color for a configurable duration. The color and the duration
+ * are passed to the JavaScript as parameters, not pasted into the script text.
+ * The color is any CSS color value, including {@code var(...)}.
  * <p>
  * Demonstrates how an action takes <em>server-side configuration</em> at
  * construction and threads it through captures. Same pattern any reusable

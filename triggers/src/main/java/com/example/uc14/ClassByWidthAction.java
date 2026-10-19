@@ -16,9 +16,8 @@ import com.vaadin.flow.dom.JsFunction;
  * time the host resizes; this action reads {@code event.width} and applies the
  * breakpoint that includes it.
  * <p>
- * Demonstrates the headline "container queries for Flow" pattern from the
- * Responsive UI Helpers RFC implemented entirely in terms of triggers and
- * actions — no special API needed.
+ * This is a container query built from a trigger and an action: the breakpoint
+ * follows the width of a component, not of the window.
  */
 public class ClassByWidthAction extends Action {
 

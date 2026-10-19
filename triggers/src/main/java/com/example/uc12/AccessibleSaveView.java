@@ -17,12 +17,12 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC12 — Accessibility announcement on save.
+ * UC12 — Accessibility announce.
  * <p>
  * Clicking "Save" updates the visible badge and also fires an
  * {@link AnnounceAction} that writes into an aria-live region. Screen-reader
  * users hear "Saved" without focus moving from the button. The aria-live region
- * is visually hidden via the {@code sr-only} class.
+ * is visually hidden with the {@code uc12-sr-only} class.
  */
 @Route(value = "uc12", layout = MainLayout.class)
 @PageTitle("UC12 — Accessibility announce")
@@ -34,21 +34,21 @@ public class AccessibleSaveView extends VerticalLayout {
     public AccessibleSaveView() {
         addClassName("uc12-view");
         add(new H1("UC12 — Accessibility announce"));
-        add(new Paragraph(
-                "Click Save. Sighted users see the badge update; screen-reader "
-                        + "users hear \"Saved at …\" from a visually hidden "
-                        + "aria-live region — the AnnounceAction writes the "
-                        + "message into the region's textContent."));
+        add(new Paragraph("Click Save. The badge next to the button shows "
+                + "the time of the save. A screen reader also says \"Saved\", "
+                + "and the focus stays on the button: in the same click, an "
+                + "AnnounceAction writes the message into a visually hidden "
+                + "aria-live region."));
 
         Div liveRegion = new Div();
         liveRegion.setId("live");
-        liveRegion.addClassName("sr-only");
+        liveRegion.addClassName("uc12-sr-only");
         liveRegion.getElement().setAttribute("aria-live", "polite");
         liveRegion.getElement().setAttribute("aria-atomic", "true");
 
         Span visibleBadge = new Span("(not saved yet)");
         visibleBadge.setId("badge");
-        visibleBadge.addClassName("badge");
+        visibleBadge.addClassName("uc12-badge");
 
         Button save = new Button("Save");
         save.setId("save");

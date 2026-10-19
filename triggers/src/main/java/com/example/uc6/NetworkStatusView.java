@@ -13,16 +13,16 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC6 — Network status badge.
+ * UC6 — Network status.
  * <p>
- * The status flips between "Online" and "Offline" purely client-side because a
- * server callback wouldn't be reachable when the network drops. A custom
+ * The badge changes between "Online" and "Offline" in the browser alone,
+ * because the server can not be reached once the network is gone. A custom
  * {@link NetworkStatusTrigger} fires on the browser's {@code online} and
  * {@code offline} window events; a custom {@link ApplyNetworkStatusAction}
  * reads {@code navigator.onLine} at fire time and updates the badge's text and
  * class.
  * <p>
- * To test: open DevTools' Network panel and toggle "Offline".
+ * To try it, switch the browser's developer tools to "Offline".
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Network status")
@@ -34,14 +34,15 @@ public class NetworkStatusView extends VerticalLayout {
     public NetworkStatusView() {
         addClassName("uc6-view");
         add(new H1("UC6 — Network status"));
-        add(new Paragraph(
-                "The badge below tracks the browser's online/offline state. "
-                        + "Toggle \"Offline\" in DevTools' Network panel; the badge "
-                        + "flips with no server round-trip."));
+        add(new Paragraph("The badge shows whether the browser is online. "
+                + "Turn on \"Offline\" in the Network panel of the browser's "
+                + "developer tools, or turn off the network: the badge "
+                + "changes at once, without the server, which can not be "
+                + "reached any more."));
 
         Span badge = new Span("…");
         badge.setId("status");
-        badge.addClassName("status-badge");
+        badge.addClassName("uc6-status");
 
         new NetworkStatusTrigger(this)
                 .triggers(new ApplyNetworkStatusAction(badge));

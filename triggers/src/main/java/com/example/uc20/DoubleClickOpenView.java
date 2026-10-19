@@ -18,7 +18,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC20 — Double-click a row to open it in a new tab.
+ * UC20 — Double-click → new tab.
  * <p>
  * Each row in the list below is wired to a {@link DoubleClickTrigger} paired
  * with an {@link OpenInNewTabAction} carrying that row's URL. The gesture
@@ -50,21 +50,18 @@ public class DoubleClickOpenView extends VerticalLayout {
     public DoubleClickOpenView() {
         addClassName("uc20-view");
         add(new H1("UC20 — Double-click → new tab"));
-        add(new Paragraph(
-                "Double-click any row to open its URL in a new tab. The "
-                        + "DoubleClickTrigger keeps the gesture context, so the "
-                        + "browser's popup blocker permits window.open. A "
-                        + "regular Anchor with target=\"_blank\" would do the "
-                        + "same on click; the trigger API lets us hook the "
-                        + "same effect to a non-click gesture."));
+        add(new Paragraph("Double-click a row to open its page in a new "
+                + "tab. The tab opens inside the double click, so the "
+                + "browser's popup blocker allows it. A link with "
+                + "target=\"_blank\" does the same on a single click; the "
+                + "trigger lets the same effect follow another gesture."));
 
         Div list = new Div();
         list.setId("list");
-        list.addClassName("link-list");
+        list.addClassName("uc20-list");
         for (Map.Entry<String, String> link : LINKS) {
             Div row = new Div(link.getKey());
-            row.addClassName("row");
-            row.getElement().setAttribute("data-url", link.getValue());
+            row.addClassName("uc20-row");
             new DoubleClickTrigger(row)
                     .triggers(new OpenInNewTabAction(link.getValue()));
             list.add(row);
