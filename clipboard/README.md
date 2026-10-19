@@ -86,13 +86,13 @@ component, which can be any `Component` that implements `ClickNotifier`
 8. **UC8 — A copy button in every grid row** — the use case from the
    [forum thread](https://vaadin.com/forum/t/clipboard-copy/164697/11):
    a copy button next to the value it copies, in every row of a 500-row
-   `Grid`. A `ComponentRenderer` builds the cell and each row's button
-   binds its own value as a literal —
-   `Clipboard.onClick(button).writeText(customer.email())`. The grid
-   only materialises the rows it renders, so the buttons follow the
-   viewport rather than the row count; what does scale with scrolling is
-   one clipboard binding per rendered row, which is the cost written up
-   in [API-GAPS.md #1](API-GAPS.md).
+   `Grid`. A `LitRenderer` renders the cell in the browser, and its
+   template calls `copy(item.email)`, a client action bound once for the
+   column with `withClientAction("copy", Clipboard.writeText())`. No row
+   has a server-side component or a binding of its own. The API is not
+   released yet (vaadin/flow#25366, vaadin/flow-components#10470), so the
+   module builds against both feature snapshots. A client action reports
+   no success or failure, see [API-GAPS.md #1](API-GAPS.md).
 
 The remaining PRD item (availability signal) is omitted because the
 underlying API is still not part of this Flow branch — see
