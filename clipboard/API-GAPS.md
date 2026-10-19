@@ -129,7 +129,7 @@ Signal<ClipboardAvailability> Clipboard.availabilitySignal();
 
 ## 6. The error type of `onError` lives in an internal package
 
-**Where it bites:** every copy with an `onError` callback (UC1–UC4, UC6)
+**Where it bites:** every copy with an `onError` callback (UC1–UC4, UC6, UC8)
 **Symptom:** the `onError` consumer of `ClipboardBinding.writeText`,
 `writeHtml`, `writeImage`, `write` and `read*` takes a
 `com.vaadin.flow.component.trigger.internal.PromiseAction.Error`. The views
