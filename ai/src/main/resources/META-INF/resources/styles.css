@@ -1,0 +1,78 @@
+/* AI in business apps use cases — shared styles */
+
+.app-title {
+    font-size: var(--aura-font-size-l);
+    margin: 0;
+}
+
+/* Shown when the app was started without the API key a use case needs. */
+.provider-notice {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0 var(--vaadin-padding-m);
+    border-radius: var(--vaadin-radius-m);
+    background: color-mix(in srgb, var(--aura-orange) 18%, transparent);
+    color: var(--aura-orange-text);
+    border: 1px solid color-mix(in srgb, var(--aura-orange) 35%, transparent);
+}
+
+/* The assistant use cases: the conversation beside the tool-call log. */
+.assistant-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: var(--vaadin-gap-l, 1.5rem);
+    width: 100%;
+}
+
+.assistant-messages {
+    min-height: 16rem;
+    max-height: 32rem;
+    border-radius: var(--vaadin-radius-m);
+    background: var(--vaadin-background-container);
+}
+
+.assistant-suggestions {
+    flex-wrap: wrap;
+    gap: var(--vaadin-gap-s, 0.5rem);
+}
+
+.tool-call-log h2 {
+    font-size: var(--aura-font-size-m);
+    margin-top: 0;
+}
+
+.tool-call-entries {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vaadin-gap-s, 0.5rem);
+    width: 100%;
+    color: var(--vaadin-text-color-secondary);
+}
+
+.tool-call {
+    padding: var(--vaadin-padding-s);
+    border-radius: var(--vaadin-radius-m);
+    background: var(--vaadin-background-container);
+}
+
+.tool-call-name {
+    font-family: monospace;
+    font-weight: 600;
+    color: var(--vaadin-text-color);
+    overflow-wrap: anywhere;
+}
+
+.tool-call-output {
+    margin: var(--vaadin-padding-xs, 0.25rem) 0 0;
+    max-height: 8rem;
+    overflow: auto;
+    font-size: var(--aura-font-size-s);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 800px) {
+    .assistant-panel {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
