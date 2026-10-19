@@ -3,7 +3,6 @@ package com.example.uc1;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -19,15 +18,15 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
 /**
- * UC1 — Adaptive layout: portrait vs landscape.
+ * UC1 — Adaptive layout.
  * <p>
  * Two information panes are arranged side-by-side when the device is in
  * landscape orientation and stacked vertically when the device is in portrait.
- * The reactive switch is driven entirely by
- * {@link com.vaadin.flow.component.screenorientation.ScreenOrientation#orientationSignal()
- * ScreenOrientation.orientationSignal()}; rotating the device (or, in a
- * browser, using the devtools "responsive" rotate button) flips the arrangement
- * immediately.
+ * The switch is driven entirely by
+ * {@link ScreenOrientation#orientationSignal()}; rotating the device (or using
+ * the rotate button of the browser's device emulation) flips the arrangement
+ * immediately. Resizing a desktop window does not change the screen
+ * orientation, so it does not flip the layout.
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Adaptive layout")
@@ -36,42 +35,36 @@ import com.vaadin.flow.signals.Signal;
 @StyleSheet("uc1.css")
 public class AdaptiveLayoutView extends VerticalLayout {
 
-    private final Div container = new Div();
-    private final Span modeBadge = new Span();
-
     public AdaptiveLayoutView() {
         addClassName("uc1-view");
         add(new H1("UC1 — Adaptive layout"));
         add(new Paragraph("The two panes below render side by side when the "
                 + "device is in landscape orientation and stack vertically "
-                + "in portrait. Resize or rotate to see the layout react."));
+                + "in portrait. Rotate your phone or tablet, or use the "
+                + "rotate button of the browser's device emulation. Resizing "
+                + "a desktop window does not change the screen orientation."));
 
+        Signal<ScreenOrientationData> orientation = ScreenOrientation
+                .orientationSignal();
+
+        Span modeBadge = new Span();
         modeBadge.addClassName("status-badge");
+        modeBadge.bindText(orientation.map(AdaptiveLayoutView::label));
+        modeBadge.bindClassName("warn",
+                orientation.map(d -> d.type() == ScreenOrientationType.UNKNOWN
+                        || d.type() == ScreenOrientationType.UNSUPPORTED));
         add(modeBadge);
 
+        Signal<Boolean> landscape = orientation
+                .map(d -> d.type().isLandscape());
+        Div container = new Div();
         container.addClassName("uc1-container");
+        container.bindClassName("uc1-side-by-side", landscape);
         container.add(pane("Primary", "Main content goes here. In landscape "
                 + "it occupies the left half; in portrait it sits on top."));
         container.add(pane("Secondary", "Companion content. In landscape it "
                 + "sits to the right; in portrait it stacks below."));
         add(container);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        Signal<ScreenOrientationData> orientation = ScreenOrientation
-                .orientationSignal(attachEvent.getUI());
-
-        Signal<Boolean> landscape = orientation
-                .map(d -> d.type().isLandscape());
-        container.bindClassName("side-by-side", landscape);
-        container.bindClassName("stacked", landscape.map(b -> !b));
-
-        modeBadge.bindText(orientation.map(AdaptiveLayoutView::label));
-        modeBadge.bindClassName("warn",
-                orientation.map(d -> d.type() == ScreenOrientationType.UNKNOWN
-                        || d.type() == ScreenOrientationType.UNSUPPORTED));
     }
 
     private static Div pane(String title, String body) {

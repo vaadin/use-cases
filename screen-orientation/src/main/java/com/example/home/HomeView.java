@@ -21,11 +21,12 @@ public class HomeView extends BaseHomeView {
 
     public HomeView() {
         super("Screen Orientation API — use cases",
-                "Page#screenOrientationSignal() carries the current orientation "
-                        + "type (portrait-primary, landscape-primary, ...) and rotation "
-                        + "angle, and notifies the server whenever the browser reports a "
-                        + "change. Page#lockOrientation(...) is subject to platform "
-                        + "support and usually requires fullscreen — see UC4 and UC5.");
+                "ScreenOrientation.orientationSignal() carries the current "
+                        + "orientation type (portrait-primary, landscape-primary, "
+                        + "...) and rotation angle, and updates whenever the "
+                        + "device rotates. ScreenOrientation.lock(...) depends on "
+                        + "the device and usually requires fullscreen — see UC4 "
+                        + "and UC5.");
         addMenuCards(List.of(AdaptiveLayoutView.class,
                 OrientationViewerView.class, RotatePromptView.class,
                 LockForVideoView.class, LockErrorView.class));

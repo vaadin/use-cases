@@ -1,8 +1,12 @@
 .uc4-view {
     .uc4-stage {
-        background: #000;
-        color: #fff;
+        /* A video player stays dark in both colour schemes: Aura's
+           "neutral light" is its dark text colour, "neutral dark" the
+           light one. */
+        background: var(--aura-neutral-light);
+        color: var(--aura-neutral-dark);
         border-radius: var(--vaadin-radius-m);
+        box-sizing: border-box;
         padding: 1.5rem;
         width: 100%;
         max-width: 720px;
@@ -15,7 +19,7 @@
         gap: 0.5rem;
     }
 
-    .uc4-stage .big-icon {
+    .uc4-icon {
         font-size: 64px;
         line-height: 1;
     }
