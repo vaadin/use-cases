@@ -20,8 +20,8 @@ import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
  * Test-side stand-in for the browser half of {@link WebNotification}.
  * Browserless tests never run the client JavaScript, so this helper plays the
  * browser: it reports a permission, picks up the notifications the server asked
- * the browser to show, and reports clicks, closes and failures back through
- * each notification's return channel.
+ * the browser to show, and reports clicks, closes and failures back through the
+ * return channel the notifications share.
  * <p>
  * Flow has no simulator for web notifications (compare
  * {@code GeolocationSimulator}), so this reaches into framework internals; see
@@ -92,7 +92,7 @@ public final class WebNotificationSimulator {
      * and then, because it closes the notification, the close.
      */
     public static void click(ShownNotification notification) {
-        report(notification.channel(), "click");
+        report(notification, "click");
         close(state(UI.getCurrent()), notification);
     }
 
@@ -100,14 +100,14 @@ public final class WebNotificationSimulator {
     public static void fail(ShownNotification notification,
             WebNotificationError.Reason reason, String message) {
         state(UI.getCurrent()).shown.remove(notification);
-        report(notification.channel(), "error", reason.name(), message);
+        report(notification, "error", reason.name(), message);
     }
 
     private static void show(UI ui, State state,
             ShownNotification notification) {
         if (WebNotification.permissionSignal(ui)
                 .peek() != WebNotificationPermission.GRANTED) {
-            report(notification.channel(), "error",
+            report(notification, "error",
                     WebNotificationError.Reason.NOT_ALLOWED.name(),
                     "Notification permission has not been granted");
             return;
@@ -123,17 +123,20 @@ public final class WebNotificationSimulator {
 
     private static void close(State state, ShownNotification notification) {
         if (state.shown.remove(notification)) {
-            report(notification.channel(), "close");
+            report(notification, "close");
         }
     }
 
-    private static void report(ReturnChannelRegistration channel,
+    // All notifications of a UI share one channel, so the browser reports the
+    // notification's key first: (key, type, reason, message).
+    private static void report(ShownNotification notification,
             String... arguments) {
         ArrayNode args = MAPPER.createArrayNode();
+        args.add(notification.key());
         for (String argument : arguments) {
             args.add(argument);
         }
-        channel.invoke(args);
+        notification.channel().invoke(args);
     }
 
     private static State state(UI ui) {
