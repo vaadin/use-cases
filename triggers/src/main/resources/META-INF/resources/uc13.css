@@ -1,10 +1,12 @@
 .uc13-view {
-    .search-field {
+    .uc13-search {
         width: 18rem;
+        max-width: 100%;
     }
 
-    .filter-list {
-        max-width: 22rem;
+    .uc13-list {
+        width: 22rem;
+        max-width: 100%;
         margin-top: 0.75rem;
         border: 1px solid var(--vaadin-border-color);
         border-radius: var(--vaadin-radius-m);
@@ -13,12 +15,12 @@
         overflow-y: auto;
     }
 
-    .filter-list .row {
+    .uc13-row {
         padding: 0.4rem 0.9rem;
         border-bottom: 1px solid var(--vaadin-border-color);
     }
 
-    .filter-list .row:last-child {
+    .uc13-row:last-child {
         border-bottom: none;
     }
 }

@@ -42,7 +42,7 @@ class HomeViewTest extends SpringBrowserlessTest {
     private static final UseCase UC1 = new UseCase("UC1", "Copy static text",
             "Copying a fixed text with one click and confirming it", "uc1");
     private static final UseCase UC2 = new UseCase("UC2",
-            "Copy component value",
+            "Copy a field's value",
             "Copying whatever a field holds at the moment of the click", "uc2");
     private static final UseCase UC3 = new UseCase("UC3", "Copy rich content",
             "Copying formatted HTML with a plain-text fallback", "uc3");
@@ -50,8 +50,9 @@ class HomeViewTest extends SpringBrowserlessTest {
             "Copying an image so it can be pasted elsewhere", "uc4");
     private static final UseCase UC5 = new UseCase("UC5", "Paste a table",
             "Pasting cells from a spreadsheet into a grid", "uc5");
-    private static final UseCase UC6 = new UseCase("UC6", "Context menu",
-            "Offering copy as a context-menu item", "uc6");
+    private static final UseCase UC6 = new UseCase("UC6",
+            "Copy from a context menu", "Offering copy as a context-menu item",
+            "uc6");
     private static final UseCase UC7 = new UseCase("UC7", "Paste files",
             "Receiving pasted images and files on the server", "uc7");
     private static final UseCase UC8 = new UseCase("UC8", "Copy from a grid",

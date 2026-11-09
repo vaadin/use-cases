@@ -1,6 +1,5 @@
 package com.example.uc22;
 
-import com.example.KeyboardEventTrigger;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -18,15 +17,15 @@ import com.vaadin.flow.router.Route;
 /**
  * UC22 — Live key event log.
  * <p>
- * A {@link KeyboardEventTrigger} fires on every {@code keydown} anywhere inside
- * the view. The trigger's typed inputs
+ * A {@link KeyboardEventTrigger} fires on every {@code keydown} anywhere on the
+ * page while the view is open. The trigger's typed inputs
  * ({@link KeyboardEventTrigger.EventData#key},
  * {@link KeyboardEventTrigger.EventData#code} and the four modifier flags) feed
  * {@link SetPropertyAction SetPropertyActions} that update the labels in real
  * time. No callback, no server round-trip per key.
  * <p>
- * Demonstrates {@code KeyboardEventTrigger} (a local port of the
- * feature/triggers-actions class) and its EventData inputs.
+ * Flow has no keyboard trigger, so {@code KeyboardEventTrigger} is a local
+ * class (API-GAPS.md #10).
  */
 @Route(value = "uc22", layout = MainLayout.class)
 @PageTitle("UC22 — Key event log")
@@ -38,11 +37,10 @@ public class KeyEventLogView extends VerticalLayout {
     public KeyEventLogView() {
         addClassName("uc22-view");
         add(new H1("UC22 — Key event log"));
-        add(new Paragraph(
-                "Type anything inside the view. The labels below mirror "
-                        + "event.key, event.code, and the four modifier flags "
-                        + "from the trigger's EventData inputs — no Java "
-                        + "handler runs per keystroke."));
+        add(new Paragraph("Press any key. The values below show the "
+                + "event's key, code and modifier flags as the browser "
+                + "reports them. They are written in the browser, so no key "
+                + "press goes to the server."));
 
         Span keySpan = readout("key");
         Span codeSpan = readout("code");
@@ -73,15 +71,15 @@ public class KeyEventLogView extends VerticalLayout {
     private static Span readout(String id) {
         Span span = new Span("—");
         span.setId(id);
-        span.addClassName("value");
+        span.addClassName("uc22-value");
         return span;
     }
 
     private static HorizontalLayout row(String label, Span value) {
         HorizontalLayout row = new HorizontalLayout();
-        row.addClassName("row");
+        row.addClassName("uc22-row");
         Span lbl = new Span(label);
-        lbl.addClassName("label");
+        lbl.addClassName("uc22-label");
         row.add(lbl, value);
         return row;
     }

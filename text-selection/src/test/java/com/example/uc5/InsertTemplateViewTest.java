@@ -1,81 +1,65 @@
 package com.example.uc5;
 
-import com.example.TextSelectionTestSupport;
+import java.util.Optional;
+
+import com.example.TextSelectionTestSupport.Requested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.textfield.TextArea;
 
+import static com.example.TextSelectionTestSupport.clickAndReadSelection;
+import static com.example.TextSelectionTestSupport.selectInBrowser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ViewPackages(classes = InsertTemplateView.class)
 class InsertTemplateViewTest extends SpringBrowserlessTest {
 
-    @Test
-    void viewRenders() {
-        navigate(InsertTemplateView.class);
+    // The editor starts with "Hi,\n\n\n\nThanks,\n".
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h -> "UC5 — Insert template at cursor".equals(h.getText())));
+    @Test
+    void greetingIsInsertedAtTheCursorWithItsPlaceholderSelected() {
+        navigate(InsertTemplateView.class);
+        TextArea editor = find(TextArea.class).single();
+        selectInBrowser(editor, 4, 4);
+
+        Optional<Requested> selection = clickAndReadSelection(
+                find(Button.class).withText("Greeting").single(), editor);
+
+        assertEquals("Hi,\nHello {name}!\n\n\nThanks,\n", editor.getValue());
+        assertEquals(Optional.of(new Requested(10, 16)), selection,
+                "{name} should be selected");
     }
 
     @Test
-    void greetingInsertsAtCurrentCursor() {
+    void snippetReplacesTheSelectedText() {
         navigate(InsertTemplateView.class);
         TextArea editor = find(TextArea.class).single();
-        // Position the cursor at offset 4 ("Hi,\n" + here)
-        TextSelectionTestSupport.setSelection(editor, 4, 4);
-        runPendingSignalsTasks();
+        selectInBrowser(editor, 0, 3);
 
-        String original = editor.getValue();
-        Button greeting = find(Button.class).withText("Greeting").single();
-        test(greeting).click();
-        runPendingSignalsTasks();
+        clickAndReadSelection(
+                find(Button.class).withText("Placeholder").single(), editor);
 
-        String expected = original.substring(0, 4) + "Hello {name}!"
-                + original.substring(4);
-        assertEquals(expected, editor.getValue());
+        assertEquals("{TODO}\n\n\n\nThanks,\n", editor.getValue());
     }
 
     @Test
-    void snippetReplacesNonEmptySelection() {
+    void signatureLeavesTheCursorAfterIt() {
         navigate(InsertTemplateView.class);
         TextArea editor = find(TextArea.class).single();
-        // Default value is "Hi,\n\n\n\nThanks,\n". Select "Hi," (offsets 0..3).
-        TextSelectionTestSupport.setSelection(editor, 0, 3);
-        runPendingSignalsTasks();
+        int end = editor.getValue().length();
+        selectInBrowser(editor, end, end);
 
-        String original = editor.getValue();
-        Button greeting = find(Button.class).withText("Greeting").single();
-        test(greeting).click();
-        runPendingSignalsTasks();
+        Optional<Requested> selection = clickAndReadSelection(
+                find(Button.class).withText("Signature").single(), editor);
 
-        assertEquals("Hello {name}!" + original.substring(3), editor.getValue(),
-                "selected run should have been replaced by the snippet");
-    }
-
-    @Test
-    void signatureInsertsAtStart() {
-        navigate(InsertTemplateView.class);
-        TextArea editor = find(TextArea.class).single();
-        TextSelectionTestSupport.setSelection(editor, 0, 0);
-        runPendingSignalsTasks();
-
-        String original = editor.getValue();
-        Button signature = find(Button.class).withText("Signature").single();
-        test(signature).click();
-        runPendingSignalsTasks();
-
-        assertTrue(editor.getValue().startsWith("Best regards,\nJamie"),
-                "value should start with the inserted signature, was: "
-                        + editor.getValue());
-        assertEquals("Best regards,\nJamie".length() + original.length(),
-                editor.getValue().length());
+        assertEquals("Hi,\n\n\n\nThanks,\nBest regards,\nJamie",
+                editor.getValue());
+        int cursor = editor.getValue().length();
+        assertEquals(Optional.of(new Requested(cursor, cursor)), selection);
     }
 }

@@ -15,8 +15,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.Geolocation;
 import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationOptions;
-import com.vaadin.flow.component.geolocation.GeolocationPending;
 import com.vaadin.flow.component.geolocation.GeolocationPosition;
+import com.vaadin.flow.component.geolocation.GeolocationResult;
 import com.vaadin.flow.component.geolocation.GeolocationWatcher;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
@@ -37,51 +37,80 @@ import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * UC2 — Continuous tracking with reactive signal.
+ * UC2 — Live tracking.
  * <p>
- * A Start/Stop toggle drives a single {@link GeolocationWatcher}. The watcher
- * is created lazily on the first click so a fresh page load does not start —
- * and immediately stop — a browser watch. Once created, the status text and the
- * toggle's label are both bound via {@code bindText} to computed signals over
- * the watcher's active and position signals plus an update counter. A single
- * effect handles the imperative side that bindings can't express: appending
- * each new reading to the grid and extending the path on the map. Resuming does
- * not clear the history — the grid and the map line keep growing.
+ * A Start/Stop toggle drives one {@link GeolocationWatcher}. The watcher is
+ * created in the constructor and stopped at once, so opening the view does not
+ * start a browser watch before the user asks for it. The status text and the
+ * toggle's label are bound to computed signals over the watcher's
+ * {@link GeolocationWatcher#activeSignal() active} and
+ * {@link GeolocationWatcher#positionSignal() position} signals. An effect adds
+ * each new reading to the history grid and extends the path on the map.
+ * Resuming does not clear the history: the grid and the map line keep growing.
+ * <p>
+ * After a denied permission the watcher still reports itself as active (see
+ * API-GAPS.md #1).
  */
 @Route(value = "uc2", layout = MainLayout.class)
-@PageTitle("UC2 — Continuous tracking with reactive signal")
+@PageTitle("UC2 — Live tracking")
 @UseCaseDescription("Following the user's position as it changes")
-@Menu(order = 2, title = "UC2 — Tracking")
+@Menu(order = 2, title = "UC2 — Live tracking")
 public class TrackingView extends VerticalLayout {
 
     private static final DateTimeFormatter TIME = DateTimeFormatter
             .ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
 
-    private final Span status = new Span("Idle");
-    private final Button toggle = new Button("Start tracking");
     private final Grid<TrackPoint> history = new Grid<>(TrackPoint.class,
             false);
     private final List<TrackPoint> points = new ArrayList<>();
+    private final ValueSignal<Integer> updateCount = new ValueSignal<>(0);
 
     private final Map map = new Map();
     private final List<Coordinate> pathCoords = new ArrayList<>();
     private @Nullable LineStringFeature pathLine;
-    private @Nullable MarkerFeature startMarker;
-
-    private @Nullable GeolocationWatcher watcher;
-    private final ValueSignal<Boolean> hasUpdates = new ValueSignal<>(
-            Boolean.FALSE);
-    private final ValueSignal<Integer> updateCount = new ValueSignal<>(0);
 
     public TrackingView() {
-        add(new H1("UC2 — Continuous tracking with reactive signal"));
-        add(new Paragraph("Start the tracker to receive live updates "
-                + "whenever the browser reports a new position. Each "
-                + "reading is appended to the history and extends the "
-                + "path on the map. Resuming after Stop keeps the "
-                + "accumulated history."));
+        add(new H1("UC2 — Live tracking"));
+        add(new Paragraph("Start tracking to get a new reading each time "
+                + "the browser reports a new position. Each reading is "
+                + "added to the history and extends the path on the map. "
+                + "Stopping and resuming keeps the history. If you block "
+                + "location while tracking, the error shows but the button "
+                + "still says Stop tracking: click Stop, then Start again."));
 
-        toggle.addClickListener(e -> toggleTracking());
+        GeolocationOptions options = GeolocationOptions.builder()
+                .highAccuracy(true).maximumAge(Duration.ZERO).build();
+        GeolocationWatcher watcher = Geolocation.watchPosition(this, options);
+        // A new watcher starts on the first attach. Stop it here, so the
+        // browser does not ask for the location before the user clicks Start.
+        watcher.stop();
+
+        Button toggle = new Button("", e -> {
+            if (watcher.activeSignal().peek()) {
+                watcher.stop();
+            } else {
+                watcher.resume();
+            }
+        });
+        toggle.bindText(Signal.computed(() -> {
+            if (watcher.activeSignal().get()) {
+                return "Stop tracking";
+            }
+            return updateCount.get() > 0 ? "Resume tracking" : "Start tracking";
+        }));
+
+        Span status = new Span();
+        status.bindText(
+                Signal.computed(() -> statusText(watcher.activeSignal().get(),
+                        watcher.positionSignal().get(), updateCount.get())));
+
+        Signal.effect(this, () -> {
+            if (watcher.positionSignal()
+                    .get() instanceof GeolocationPosition pos) {
+                appendPosition(pos);
+            }
+        });
+
         add(toggle, status);
 
         map.setHeight("400px");
@@ -91,6 +120,27 @@ public class TrackingView extends VerticalLayout {
         add(new H2("Position history"));
         configureGrid();
         add(history);
+    }
+
+    private static String statusText(boolean active, GeolocationResult result,
+            int updates) {
+        if (result instanceof GeolocationError err) {
+            return switch (err.errorCode()) {
+            case PERMISSION_DENIED -> "Location permission was denied.";
+            case POSITION_UNAVAILABLE -> "Could not determine your location.";
+            case TIMEOUT -> "Location request timed out.";
+            case UNKNOWN -> "Could not get your location.";
+            };
+        }
+        if (!active) {
+            if (updates == 0) {
+                return "Idle";
+            }
+            return updates == 1 ? "Stopped after 1 update"
+                    : "Stopped after " + updates + " updates";
+        }
+        return result instanceof GeolocationPosition ? "Update #" + updates
+                : "Waiting for first reading…";
     }
 
     private void configureGrid() {
@@ -107,59 +157,9 @@ public class TrackingView extends VerticalLayout {
         history.setAllRowsVisible(true);
     }
 
-    private void toggleTracking() {
-        if (watcher == null) {
-            ensureWatcher();
-            return;
-        }
-        if (watcher.activeSignal().peek()) {
-            watcher.stop();
-        } else {
-            watcher.resume();
-        }
-    }
-
-    private void ensureWatcher() {
-        GeolocationOptions options = GeolocationOptions.builder()
-                .highAccuracy(true).maximumAge(Duration.ZERO).build();
-        GeolocationWatcher w = Geolocation.watchPosition(this, options);
-        watcher = w;
-
-        status.bindText(Signal.computed(() -> {
-            if (!w.activeSignal().get() && hasUpdates.get()) {
-                return "Stopped after " + updateCount.get() + " updates";
-            }
-            return switch (w.positionSignal().get()) {
-            case GeolocationPending p -> "Waiting for first reading…";
-            case GeolocationPosition pos -> "Update #" + updateCount.get();
-            case GeolocationError err -> switch (err.errorCode()) {
-            case PERMISSION_DENIED -> "Location permission was denied.";
-            case POSITION_UNAVAILABLE -> "Could not determine your location.";
-            case TIMEOUT -> "Location request timed out.";
-            case UNKNOWN -> "Could not get your location.";
-            };
-            };
-        }));
-
-        Signal.effect(this, () -> {
-            if (w.positionSignal().get() instanceof GeolocationPosition pos) {
-                appendPosition(pos);
-            }
-        });
-
-        toggle.bindText(Signal.computed(() -> {
-            boolean active = w.activeSignal().get();
-            if (active) {
-                return "Stop tracking";
-            }
-            return hasUpdates.get() ? "Resume tracking" : "Start tracking";
-        }));
-    }
-
     private void appendPosition(GeolocationPosition pos) {
         int next = updateCount.peek() + 1;
         updateCount.set(next);
-        hasUpdates.set(Boolean.TRUE);
         points.add(
                 new TrackPoint(next, pos.timestamp(), pos.coords().latitude(),
                         pos.coords().longitude(), pos.coords().accuracy()));
@@ -171,12 +171,13 @@ public class TrackingView extends VerticalLayout {
         map.setCenter(c);
         if (pathCoords.size() == 1) {
             map.setZoom(15);
-            startMarker = new MarkerFeature(c);
-            map.getFeatureLayer().addFeature(startMarker);
+            map.getFeatureLayer().addFeature(new MarkerFeature(c));
         } else if (pathLine == null) {
             pathLine = new LineStringFeature(
                     pathCoords.toArray(Coordinate[]::new));
             Style lineStyle = new Style();
+            // The map draws on a canvas, which can not read CSS custom
+            // properties such as --aura-accent-color.
             lineStyle.setStroke(new Stroke("#1976d2", 4));
             pathLine.setStyle(lineStyle);
             map.getFeatureLayer().addFeature(pathLine);

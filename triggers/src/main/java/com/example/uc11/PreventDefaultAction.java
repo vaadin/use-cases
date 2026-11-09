@@ -1,4 +1,4 @@
-package com.example;
+package com.example.uc11;
 
 import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
@@ -7,14 +7,14 @@ import com.vaadin.flow.dom.JsFunction;
 /**
  * Calls {@code event.preventDefault()} on the trigger's event. Wire it as the
  * first action in a {@link Trigger#triggers(Action...)} call to suppress the
- * browser's built-in handler — context menu, save dialog, navigation
- * back/forward — for an event the application wants to handle itself.
+ * browser's own handling, such as the context menu, for an event the
+ * application handles itself.
  * <p>
- * Has no equivalent in mainline; the feature/triggers-actions branch's
- * {@code KeyboardEventTrigger#preventDefault()} chainable method covers the
- * same ground for keyboard events, but no generic action exists. Delete this
- * file once an upstream {@code PreventDefaultAction} (or a chainable builder on
- * the base Trigger) lands.
+ * Flow's {@code DomEventTrigger} and {@code MouseEventTrigger} have no way to
+ * call {@code preventDefault()}, so this class is a local stand-in until they
+ * do (API-GAPS.md #3). Once Flow has a {@code PreventDefaultAction} or a
+ * {@code preventDefault()} option on its triggers, delete this class and use
+ * Flow's.
  */
 public final class PreventDefaultAction extends Action {
 

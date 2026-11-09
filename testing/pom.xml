@@ -12,8 +12,7 @@
     </parent>
 
     <properties>
-        <playwright.version>1.63.0</playwright.version>
-        <axe-core.version>4.13.0</axe-core.version>
+        <axe-core.version>4.14.0</axe-core.version>
         <!-- Port of the application the browser and load tests run against. -->
         <app.port>8090</app.port>
         <management.port>8091</management.port>

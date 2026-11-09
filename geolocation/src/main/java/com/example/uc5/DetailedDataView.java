@@ -20,22 +20,24 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC5 — Reading detailed position data.
+ * UC5 — Detailed position data.
  * <p>
  * Dumps every field reported by the browser. Fields that the device cannot
  * measure (altitude, heading, speed on a laptop without GPS) arrive as
  * {@code null} and are shown as "—".
  */
 @Route(value = "uc5", layout = MainLayout.class)
-@PageTitle("UC5 — Reading detailed position data")
+@PageTitle("UC5 — Detailed position data")
 @UseCaseDescription("Reading altitude, heading, speed and accuracy")
-@Menu(order = 5, title = "UC5 — Detailed data")
+@Menu(order = 5, title = "UC5 — Detailed position data")
 public class DetailedDataView extends VerticalLayout {
 
     public DetailedDataView() {
         add(new H1("UC5 — Detailed position data"));
         add(new Paragraph(
-                "Request a high-accuracy reading and display all fields."));
+                "Request a high-accuracy reading and show every field the "
+                        + "browser reports. Fields the device can not measure "
+                        + "show as —."));
 
         Div output = new Div();
         Button fetch = new Button("Read full position", e -> {

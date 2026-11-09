@@ -16,41 +16,37 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC2 — Post-transform select-all.
+ * UC2 — Select after formatting.
  * <p>
- * A one-shot, server-driven {@code selectAll()} after a server-side value
- * transform. The Format button steals focus, the server rewrites the value, and
- * {@code selectAll()} atomically returns focus and selects the new value. The
- * user can Tab to accept, type to replace, or click into the field to position
- * the cursor for a single-character fix — a UX that {@code setAutoselect(true)}
- * cannot deliver because it would re-select on every subsequent focus.
+ * The Format button rewrites the value on the server, then calls
+ * {@code selectAll()}, which returns focus to the field and selects the new
+ * value. The user can Tab to accept it, type to replace it, or click into it to
+ * place the cursor for a small fix. {@code setAutoselect(true)} can not do
+ * this: it selects on every focus, so the click would select everything again.
  */
 @Route(value = "uc2", layout = MainLayout.class)
-@PageTitle("UC2 — Post-transform select-all")
+@PageTitle("UC2 — Select after formatting")
 @UseCaseDescription("Selecting a value after the server reformats it")
-@Menu(order = 2, title = "UC2 — Post-transform select-all")
+@Menu(order = 2, title = "UC2 — Select after formatting")
 public class FormatAndSelectView extends VerticalLayout {
 
     private static final Pattern NON_SLUG = Pattern.compile("[^a-z0-9]+");
 
     public FormatAndSelectView() {
-        add(new H1("UC2 — Post-transform select-all"));
+        add(new H1("UC2 — Select after formatting"));
         add(new Paragraph(
-                "Type a title and press \"Format\". The server slugifies the "
-                        + "value and calls selectAll() so you can Tab to "
-                        + "accept or start typing to replace. Click anywhere "
-                        + "inside the formatted value to position the cursor "
-                        + "— your click is preserved because the field does "
-                        + "not have autoselect enabled. This UX cannot be "
-                        + "achieved with setAutoselect(true): the Format "
-                        + "button steals focus, the server rewrites the "
-                        + "value, and selectAll() atomically returns focus + "
-                        + "selects. Compare with UC1, where every click "
-                        + "re-selects."));
+                "Type a title and press \"Format\". The server turns the "
+                        + "value into a slug and calls selectAll(), which "
+                        + "focuses the field and selects the new value. Press "
+                        + "Tab to accept it or type to replace it. Or click "
+                        + "inside it to place the cursor: the field has no "
+                        + "autoselect, so the click is not undone. Compare "
+                        + "with UC1, where every focus selects the value."));
 
         TextField title = new TextField("Title");
         title.setValue("Hello, Awesome World!");
         title.setWidth("360px");
+        title.setMaxWidth("100%");
 
         Button format = new Button("Format", e -> {
             String value = title.getValue() == null ? "" : title.getValue();
@@ -62,6 +58,7 @@ public class FormatAndSelectView extends VerticalLayout {
 
         HorizontalLayout row = new HorizontalLayout(title, format);
         row.setAlignItems(Alignment.END);
+        row.addClassName("uc-toolbar");
         add(row);
     }
 }

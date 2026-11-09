@@ -8,6 +8,7 @@ import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.fullscreen.Fullscreen;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -15,6 +16,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.screenorientation.ScreenOrientation;
 import com.vaadin.flow.component.screenorientation.ScreenOrientationLockError;
+import com.vaadin.flow.component.screenorientation.ScreenOrientationLockErrorCode;
 import com.vaadin.flow.component.screenorientation.ScreenOrientationType;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -23,17 +25,21 @@ import com.vaadin.flow.router.Route;
 /**
  * UC5 — Lock error UX.
  * <p>
- * Demonstrates the three common error paths surfaced through
+ * Shows how a view can react to each way
  * {@link ScreenOrientation#lock(ScreenOrientationType, com.vaadin.flow.function.SerializableRunnable, com.vaadin.flow.function.SerializableConsumer)
- * ScreenOrientation.lock(...)}:
+ * ScreenOrientation.lock(...)} can fail. The error callback receives a
+ * {@link ScreenOrientationLockError}; the view switches over its
+ * {@link ScreenOrientationLockErrorCode} to pick a message for the user, and
+ * logs the browser's own {@link ScreenOrientationLockError#debugInfo()} only as
+ * a detail, because its wording differs between browsers.
  * <ul>
- * <li>{@code SecurityError} — locking without fullscreen on most desktops,
- * <li>{@code NotSupportedError} — browsers that don't implement the API,
- * <li>{@code AbortError} — a newer lock supersedes the previous one.
+ * <li>{@code NOT_SUPPORTED} — a lock outside fullscreen, or on a device that
+ * cannot rotate (any desktop);
+ * <li>{@code ABORT} — a second lock replaced the first before the browser
+ * answered it, on desktops too;
+ * <li>{@code SECURITY} — the page is hidden or not allowed to lock (a sandboxed
+ * iframe); no button here can cause it.
  * </ul>
- * Each click is logged with the resolved {@link ScreenOrientationLockError} (or
- * a "success" line), giving a quick visual reference for what the new
- * callback-based API surfaces.
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Lock error UX")
@@ -50,38 +56,65 @@ public class LockErrorView extends VerticalLayout {
     public LockErrorView() {
         addClassName("uc5-view");
         add(new H1("UC5 — Lock error UX"));
-        add(new Paragraph("Each button triggers a typical lock failure path. "
-                + "Clicks log the resolved success/error directly under the "
-                + "controls — handy for verifying how your UI should react "
-                + "to each DOMException name."));
+        add(new Paragraph("Each button asks the browser to lock the screen "
+                + "orientation. The log shows the error code the server "
+                + "received and the message the view picks for it. On a "
+                + "desktop a lock fails with NOT_SUPPORTED. \"Two locks in "
+                + "a row\" fails the first one with ABORT, because the "
+                + "second replaces it before the browser answers. On a "
+                + "phone, a lock in fullscreen succeeds."));
 
-        Button lockWithoutFullscreen = new Button(
-                "Lock without fullscreen (expect SecurityError)",
+        Button lockWithoutFullscreen = new Button("Lock without fullscreen",
                 e -> attempt(ScreenOrientationType.LANDSCAPE_PRIMARY));
-        Button rapidLocks = new Button(
-                "Two locks in a row (expect AbortError on the first)", e -> {
-                    attempt(ScreenOrientationType.LANDSCAPE_PRIMARY);
-                    attempt(ScreenOrientationType.PORTRAIT_PRIMARY);
-                });
-        Button portraitLock = new Button("Lock to portrait",
-                e -> attempt(ScreenOrientationType.PORTRAIT_PRIMARY));
+        Button fullscreenLock = new Button("Enter fullscreen and lock",
+                e -> attempt(ScreenOrientationType.LANDSCAPE_PRIMARY));
+        // Fullscreen needs the click's user gesture, so it is requested on the
+        // client before the click reaches the server and locks.
+        Fullscreen.onClick(fullscreenLock).enter();
+        Button rapidLocks = new Button("Two locks in a row", e -> {
+            attempt(ScreenOrientationType.LANDSCAPE_PRIMARY);
+            attempt(ScreenOrientationType.PORTRAIT_PRIMARY);
+        });
+        Button unlock = new Button("Unlock and leave fullscreen", e -> {
+            ScreenOrientation.unlock(() -> addLog("uc5-info", "Unlocked"));
+            Fullscreen.exit();
+        });
 
         HorizontalLayout actions = new HorizontalLayout(lockWithoutFullscreen,
-                rapidLocks, portraitLock);
-        actions.setSpacing(true);
+                fullscreenLock, rapidLocks, unlock);
         actions.addClassName("uc5-actions");
         add(actions);
 
-        log.addClassName("uc5-error-log");
-        addLog("info", "Click a button above to attempt a lock.");
+        log.addClassName("uc5-log");
+        addLog("uc5-info", "Click a button above to attempt a lock.");
         add(log);
     }
 
     private void attempt(ScreenOrientationType target) {
         ScreenOrientation.lock(target,
-                () -> addLog("ok", "✓ Locked to " + target.getClientValue()),
-                error -> addLog("err", "✗ " + target.getClientValue() + " — "
-                        + error.errorCode().name() + ": " + error.debugInfo()));
+                () -> addLog("uc5-ok",
+                        "✓ Locked to " + target.getClientValue()),
+                error -> addLog("uc5-err",
+                        "✗ " + target.getClientValue() + " — "
+                                + error.errorCode().name() + ": "
+                                + userMessage(error.errorCode()) + " (browser: "
+                                + error.debugInfo() + ")"));
+    }
+
+    /**
+     * The message a user would see for each failure. The switch is exhaustive,
+     * so a new error code fails the build until it gets a message.
+     */
+    static String userMessage(ScreenOrientationLockErrorCode code) {
+        return switch (code) {
+        // Covers both "not in fullscreen" and "can never lock", which the
+        // code does not tell apart (API-GAPS.md #4).
+        case NOT_SUPPORTED ->
+            "this device can not lock the screen here. Try fullscreen on a phone.";
+        case ABORT -> "a newer lock replaced this one.";
+        case SECURITY -> "this page is not allowed to lock the screen.";
+        case UNKNOWN -> "the screen could not be locked.";
+        };
     }
 
     private void addLog(String cls, String text) {

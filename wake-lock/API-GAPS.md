@@ -11,12 +11,13 @@ page-level APIs in Flow.
 
 **Where it bites:** every test of the module / `WakeLockTestSupport.java`
 **Symptom:** browserless-test has no `WakeLockSimulator`. A test can not make
-the browser "grant" or "release" the lock, and can not check that `request()`
-reached the client. UC1's test can only check that a simulated `ACTIVE` state
-shows on screen, not that the click sent a request.
-**Workaround used:** `WakeLockTestSupport.simulateAcquired()` /
-`simulateReleased()` call the public but framework-internal
-`UIInternals#setWakeLockActive(boolean)` (and `setWakeLockAvailability`).
+the browser "grant" or "release" the lock, and has no API to check that a
+click sent `WakeLock#request()` or `release()` to the client.
+**Workaround used:** `WakeLockTestSupport.answerWakeLockCalls()` reads the
+pending JavaScript queue (`UIInternals#dumpPendingJavaScriptInvocations()`)
+for the `WakeLockJs` `request`/`release` calls, and answers them through the
+public but framework-internal `UIInternals#setWakeLockActive(boolean)`
+(`setWakeLockAvailability` for the availability).
 **Suggested API:** a `WakeLockSimulator` like `GeolocationSimulator`, with
 `simulateAcquired()`, `simulateReleased()` and an `isLockRequested()` check.
 Upstream: https://github.com/vaadin/browserless-test/issues/166
@@ -30,8 +31,10 @@ only a failure (`WakeLockErrorCode` `UNSUPPORTED`, `NOT_ALLOWED`, `UNKNOWN`).
 There is no success result, and `WakeLock#release()` has no callback or future
 at all. To show "acquired" vs. "denied", a view has to combine
 `activeSignal()` with the error callback instead of waiting for one result.
-**Workaround used:** the views show only `activeSignal()`. "Released" also
-covers "we asked, but the lock never came".
+**Workaround used:** the views do not pass an error callback; they show
+`activeSignal()` (UC1 and UC2 also `availabilitySignal()`). In UC1 and UC2,
+"Requested — waiting for the browser" also covers "we asked, but the browser
+refused"; in UC3 and UC4, "Released" does.
 **Suggested API:** a `request()` overload that returns
 `CompletableFuture<Boolean>` (true = acquired, false = denied), and a callback
 or future on `release()`.
@@ -73,3 +76,28 @@ awake), and a timer would use one if browsers add it.
 **Workaround used:** none; UC4 holds the screen lock.
 **Suggested API:** a `WakeLock#request(WakeLockType)` overload with an enum
 (today only `SCREEN`).
+
+## 6. The lock belongs to the tab, not to a view
+
+**Where it bites:** UC1 / `ManualToggleView.java`, UC2 / `RecipeView.java`,
+UC3 / `SlideshowView.java`, UC4 / `WorkoutTimerView.java`
+**Symptom:** `WakeLock#request()` takes a `UI`, not a component, and the lock
+stays requested until someone calls `WakeLock#release()`. A view that forgets
+to release when the user navigates away keeps the screen on in every other
+view of the tab. There is no owner-scoped form like `Signal.effect(owner, …)`.
+**Workaround used:** every view releases the lock in a `whenAttached` cleanup.
+**Suggested API:** `WakeLock.request(Component owner)` that holds the lock
+while the owner is attached and releases it on detach.
+
+## 7. The server can not see whether the lock is requested
+
+**Where it bites:** UC1 / `ManualToggleView.java`
+**Symptom:** the "lock wanted" flag lives only in the browser (`wanted` in
+`flow-client`'s `WakeLock.ts`). `activeSignal()` is `false` both before a
+request and while a request waits for the browser (or for the tab to be
+visible again), so a toggle bound to it offers "Keep screen awake" again
+while the request is still pending.
+**Workaround used:** UC1 keeps its own `wanted` `ValueSignal`, sets it on
+every `request()`/`release()`, and binds the button to it.
+**Suggested API:** a read-only `WakeLock#requestedSignal()` next to
+`activeSignal()`.

@@ -1,19 +1,19 @@
 .uc22-view {
-    .row {
+    .uc22-row {
         gap: 1rem;
         align-items: baseline;
         padding: 0.15rem 0;
     }
 
-    .row .label {
+    .uc22-label {
         font-family: monospace;
         color: var(--vaadin-text-color-secondary);
         min-width: 8rem;
     }
 
-    .row .value {
+    .uc22-value {
         font-family: monospace;
-        font-weight: 600;
+        font-weight: var(--aura-font-weight-semibold);
         min-width: 6rem;
     }
 }

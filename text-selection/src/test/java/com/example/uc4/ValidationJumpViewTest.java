@@ -1,89 +1,64 @@
 package com.example.uc4;
 
+import java.util.Optional;
+
+import com.example.TextSelectionTestSupport.Requested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.example.TextSelectionTestSupport.clickAndReadSelection;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @ViewPackages(classes = ValidationJumpView.class)
 class ValidationJumpViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersHeading() {
+    void submitSelectsTheFirstInvalidPartAndThenTheNextOne() {
         navigate(ValidationJumpView.class);
-
-        assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h -> "UC4 — Jump to validation error".equals(h.getText())));
-    }
-
-    @Test
-    void invalidCharactersStatusReportsTheBadRange() {
-        navigate(ValidationJumpView.class);
-        runPendingSignalsTasks();
-
         TextField username = find(TextField.class).single();
         Button submit = find(Button.class).withText("Submit").single();
 
-        // Default value "My Cool User" — first invalid run is "M".
-        test(submit).click();
-        runPendingSignalsTasks();
+        // "My Cool User": the capital M is the first invalid part.
+        assertEquals(Optional.of(new Requested(0, 1)),
+                clickAndReadSelection(submit, username));
+        assertEquals("Invalid characters at 0–1. Retype to fix.", status());
 
-        // Status text reports the offending range; that range, applied to the
-        // current value, must contain at least one non-[a-z0-9_] character.
-        String status = findInView(Span.class).all().stream().map(Span::getText)
-                .filter(t -> t != null
-                        && t.startsWith("Invalid characters at "))
-                .findFirst().orElseThrow(() -> new AssertionError(
-                        "Expected status to start with 'Invalid characters at '"));
-        int dash = status.indexOf('–');
-        int start = Integer.parseInt(
-                status.substring("Invalid characters at ".length(), dash));
-        int end = Integer
-                .parseInt(status.substring(dash + 1, status.indexOf('.')));
-        String run = username.getValue().substring(start, end);
-        assertTrue(
-                run.chars()
-                        .anyMatch(c -> !Character.isDigit(c)
-                                && (c < 'a' || c > 'z') && c != '_'),
-                "offending run should contain a non-[a-z0-9_] char, was: \""
-                        + run + "\"");
+        // After fixing it, the space is next.
+        test(username).setValue("my Cool User");
+        assertEquals(Optional.of(new Requested(2, 4)),
+                clickAndReadSelection(submit, username));
     }
 
     @Test
-    void shortValueShowsTheLengthError() {
+    void tooShortValueIsSelectedWhole() {
         navigate(ValidationJumpView.class);
         TextField username = find(TextField.class).single();
-        username.setValue("ab");
+        test(username).setValue("ab");
 
-        Button submit = find(Button.class).withText("Submit").single();
-        test(submit).click();
-        runPendingSignalsTasks();
-
-        assertTrue(findInView(Span.class).all().stream()
-                .anyMatch(s -> s.getText() != null
-                        && s.getText().contains("at least 3 characters")));
+        assertEquals(Optional.of(new Requested(0, 2)), clickAndReadSelection(
+                find(Button.class).withText("Submit").single(), username));
+        assertEquals("Username must be at least 3 characters.", status());
     }
 
     @Test
-    void validValueShowsSuccess() {
+    void validValueSelectsNothing() {
         navigate(ValidationJumpView.class);
         TextField username = find(TextField.class).single();
-        username.setValue("good_name_42");
-        runPendingSignalsTasks();
+        test(username).setValue("good_name_42");
 
-        Button submit = find(Button.class).withText("Submit").single();
-        test(submit).click();
-        runPendingSignalsTasks();
+        assertEquals(Optional.empty(), clickAndReadSelection(
+                find(Button.class).withText("Submit").single(), username));
+        assertEquals("\"good_name_42\" is valid.", status());
+    }
 
-        assertTrue(findInView(Span.class).all().stream().anyMatch(
-                s -> s.getText() != null && s.getText().contains("is valid")));
+    private String status() {
+        return find(Span.class).withClassName("uc-status").single().getText();
     }
 }

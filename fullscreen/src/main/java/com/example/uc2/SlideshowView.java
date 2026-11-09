@@ -5,7 +5,6 @@ import java.util.List;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -19,11 +18,12 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
 /**
- * UC2 — Slideshow / presentation mode.
+ * UC2 — Slideshow.
  * <p>
  * A small carousel of slides projected with
  * {@link Fullscreen#onClick(com.vaadin.flow.component.Component)
@@ -40,6 +40,7 @@ import com.vaadin.flow.signals.Signal;
  * {@link com.example.uc7.AppFullscreenView UC7}.
  */
 @Route(value = "uc2", layout = MainLayout.class)
+@PageTitle("UC2 — Slideshow")
 @UseCaseDescription("Presenting slides fullscreen with keyboard navigation")
 @Menu(order = 2, title = "UC2 — Slideshow")
 @StyleSheet("uc2.css")
@@ -50,7 +51,7 @@ public class SlideshowView extends VerticalLayout {
             "The slide enters fullscreen via Fullscreen.onClick(present).enter(stage)",
             "Keyboard shortcuts still reach the server",
             "Fullscreen.stateSignal() reactively reports the current state",
-            "Press Escape to return to the editor");
+            "Press Escape to return to the view");
 
     private final Span slideContent = new Span(SLIDES.get(0));
     private final Span counter = new Span();
@@ -61,12 +62,12 @@ public class SlideshowView extends VerticalLayout {
 
     public SlideshowView() {
         addClassName("uc2-view");
-        add(new H1("UC2 — Slideshow / presentation mode"));
+        add(new H1("UC2 — Slideshow"));
         add(new Paragraph(
                 "Click “Present” to fullscreen the slide. Only the slide is "
                         + "visible — Fullscreen.onClick(present).enter(stage) "
-                        + "wraps the stage and the browser hides everything "
-                        + "outside it. "
+                        + "moves the stage into a fullscreen wrapper and hides "
+                        + "the rest of the app. "
                         + "Left/Right arrows navigate, Escape exits; no on-"
                         + "screen exit button is needed because the audience "
                         + "would not see one anyway."));
@@ -74,12 +75,12 @@ public class SlideshowView extends VerticalLayout {
         stateBadge.addClassName("status-badge");
         add(stateBadge);
 
-        stage.addClassName("slideshow");
+        stage.addClassName("uc2-stage");
         stage.add(slideContent);
         add(stage);
 
         Div footer = new Div();
-        footer.addClassName("slideshow-footer");
+        footer.addClassName("uc2-footer");
         footer.add(counter);
         add(footer);
 
@@ -95,17 +96,12 @@ public class SlideshowView extends VerticalLayout {
         add(new HorizontalLayout(prev, next, present));
 
         show(0);
-    }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
         Signal<FullscreenState> fs = Fullscreen.stateSignal();
-
         stateBadge.bindText(fs.map(SlideshowView::badgeText));
         stateBadge.bindClassName("unsupported",
                 fs.map(s -> s == FullscreenState.UNSUPPORTED));
-        stage.bindClassName("live",
+        stage.bindClassName("uc2-stage-live",
                 fs.map(s -> s == FullscreenState.FULLSCREEN));
     }
 

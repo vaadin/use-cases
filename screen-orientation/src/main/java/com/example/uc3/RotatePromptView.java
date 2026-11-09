@@ -3,7 +3,6 @@ package com.example.uc3;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -22,20 +21,21 @@ import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * UC3 — "Rotate your device" overlay.
+ * UC3 — Rotate prompt.
  * <p>
  * Some content is best viewed in a specific orientation — landscape for game
  * boards, portrait for vertical video feeds, etc. This view shows a stage with
- * content that is reactively covered by an overlay whenever the user is holding
- * the device the "wrong" way for the selected required orientation. The overlay
- * hides itself as soon as the orientation signal reports the desired side, with
- * no explicit refresh.
+ * content that is covered by an overlay whenever the user is holding the device
+ * the "wrong" way for the selected required orientation. The overlay hides
+ * itself as soon as {@link ScreenOrientation#orientationSignal()} reports the
+ * desired side, with no explicit refresh.
  * <p>
- * On the UNSUPPORTED platform (no Screen Orientation API), the overlay is
- * always hidden — there is no reliable way to enforce a target orientation.
+ * When the browser does not support the Screen Orientation API, the overlay is
+ * always hidden: the user could not satisfy it, so it must not block the
+ * content.
  */
 @Route(value = "uc3", layout = MainLayout.class)
-@PageTitle("UC3 — Rotate-your-device overlay")
+@PageTitle("UC3 — Rotate prompt")
 @UseCaseDescription("Asking users to rotate the device for content that needs it")
 @Menu(order = 3, title = "UC3 — Rotate prompt")
 @StyleSheet("uc3.css")
@@ -59,15 +59,11 @@ public class RotatePromptView extends VerticalLayout {
     private final ValueSignal<Required> required = new ValueSignal<>(
             Required.LANDSCAPE);
 
-    private final Div overlay = new Div();
-    private final Span message = new Span();
-    private final Span statusBadge = new Span();
-
     public RotatePromptView() {
         addClassName("uc3-view");
-        add(new H1("UC3 — Rotate-your-device overlay"));
+        add(new H1("UC3 — Rotate prompt"));
         add(new Paragraph("Pick a required orientation, then rotate the "
-                + "device (or use the devtools rotate button in mobile "
+                + "device (or use the rotate button of the browser's device "
                 + "emulation). The overlay covers the content until the "
                 + "device matches; it disappears as soon as it does."));
 
@@ -78,49 +74,40 @@ public class RotatePromptView extends VerticalLayout {
         picker.addValueChangeListener(e -> required.set(e.getValue()));
         add(picker);
 
-        Div stage = new Div();
-        stage.addClassName("uc3-stage");
-
-        Div content = new Div();
-        content.add(new Span(
-                "This is the page content. It is fully interactive only "
-                        + "when the device is held in the required "
-                        + "orientation."));
-        stage.add(content);
-
-        overlay.addClassName("uc3-overlay");
-        Span icon = new Span("⟳");
-        icon.addClassName("uc3-overlay-icon");
-        overlay.add(icon, message);
-        stage.add(overlay);
-
-        add(stage);
-
-        HorizontalLayout statusRow = new HorizontalLayout();
-        statusBadge.addClassName("status-badge");
-        statusRow.add(new Span("Status:"), statusBadge);
-        statusRow.setSpacing(true);
-        statusRow.setAlignItems(Alignment.BASELINE);
-        add(statusRow);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
         Signal<ScreenOrientationData> orientation = ScreenOrientation
-                .orientationSignal(attachEvent.getUI());
-
+                .orientationSignal();
         Signal<Boolean> mismatch = Signal.computed(
                 () -> isMismatch(required.get(), orientation.get().type()));
 
-        overlay.bindClassName("hidden", mismatch.map(b -> !b));
-        message.bindText(Signal.computed(
-                () -> "Please rotate to " + required.get() + " mode."));
+        Div stage = new Div();
+        stage.addClassName("uc3-stage");
+        stage.add(new Div(new Span(
+                "This is the page content. It is fully interactive only "
+                        + "when the device is held in the required "
+                        + "orientation.")));
+
+        Div overlay = new Div();
+        overlay.addClassName("uc3-overlay");
+        overlay.bindClassName("uc3-hidden", mismatch.map(b -> !b));
+        Span icon = new Span("⟳");
+        icon.addClassName("uc3-overlay-icon");
+        Span message = new Span();
+        message.bindText(required.map(r -> "Please rotate to " + r + " mode."));
+        overlay.add(icon, message);
+        stage.add(overlay);
+        add(stage);
+
+        Span statusBadge = new Span();
+        statusBadge.addClassName("status-badge");
         statusBadge.bindText(Signal.computed(
                 () -> describe(required.get(), orientation.get().type())));
         statusBadge.bindClassName("warn", mismatch);
         statusBadge.bindClassName("error", orientation
                 .map(d -> d.type() == ScreenOrientationType.UNSUPPORTED));
+        HorizontalLayout statusRow = new HorizontalLayout(new Span("Status:"),
+                statusBadge);
+        statusRow.setAlignItems(Alignment.BASELINE);
+        add(statusRow);
     }
 
     /**

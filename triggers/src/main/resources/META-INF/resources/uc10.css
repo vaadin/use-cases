@@ -1,10 +1,14 @@
 .uc10-view {
-    .highlight-target {
+    .uc10-target {
         padding: 1.5rem 2rem;
         border: 1px solid var(--vaadin-border-color);
         border-radius: var(--vaadin-radius-m);
         width: fit-content;
-        font-size: 1.1rem;
-        font-weight: 600;
+        font-size: var(--aura-font-size-l);
+        font-weight: var(--aura-font-weight-semibold);
+    }
+
+    .uc10-buttons {
+        flex-wrap: wrap;
     }
 }

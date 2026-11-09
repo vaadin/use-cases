@@ -17,24 +17,11 @@ are not a `Trigger`, so they can not be wired to actions through
 to win against the browser's own shortcut, e.g. Ctrl+S "Save Page"), requires
 an exact modifier match, matches the key against both `event.key` and
 `event.code`, and calls `preventDefault()` and `stopPropagation()` before it
-runs the actions.
+runs the actions. Because the match is exact, UC1 and UC21 create a second
+trigger for the Cmd key on a Mac.
 **Suggested API:** a public
-`ShortcutTrigger(Component host, Key key, KeyModifier... modifiers)`, like the
-one built on `KeyboardEventTrigger` on the `feature/triggers-actions` branch
-of vaadin/flow.
-
-## 2. No public `ClickAction`
-
-**Where it bites:** no current use case; `ClickAction.java` is kept from an
-earlier version of UC2, where an Enter shortcut clicked the Send button.
-**Symptom:** no built-in `Action` calls `target.click()`.
-`SetPropertyAction(target, "click", true)` does not work, because `click` is
-not a property. A `CallbackAction` that runs the button's logic on the server
-is a different thing: it does not fire the other button's own click handling.
-**Workaround used:** a local `com.example.ClickAction` that runs
-`$0.click()` on the target element.
-**Suggested API:** a public `ClickAction(Component target)` /
-`ClickAction(Element target)`.
+`ShortcutTrigger(Component host, Key key, KeyModifier... modifiers)`, with a
+way to accept Ctrl on Windows and Linux and Cmd on a Mac in one trigger.
 
 ## 3. No generic `PreventDefaultAction`
 
@@ -42,11 +29,10 @@ is a different thing: it does not fire the other button's own click handling.
 **Symptom:** a `MouseEventTrigger(panel, "contextmenu")` has to suppress the
 browser's context menu. `DomEventTrigger` and `MouseEventTrigger` have no way
 to call `event.preventDefault()`.
-**Workaround used:** a local `com.example.PreventDefaultAction` that runs
+**Workaround used:** a local `com.example.uc11.PreventDefaultAction` that runs
 `event.preventDefault()`, wired as the first action of the trigger.
 **Suggested API:** a public `PreventDefaultAction`, or a chainable
-`DomEventTrigger#preventDefault()` like `KeyboardEventTrigger#preventDefault()`
-on the `feature/triggers-actions` branch.
+`DomEventTrigger#preventDefault()`.
 
 ## 4. `PropertyInput` does not accept an `Element`
 
@@ -92,15 +78,19 @@ that a button is disabled on the server), but not the JavaScript that a
 `Trigger` or `Action` installs. Whether the clipboard write happens, the
 shortcut fires, a double click copies or a resize changes the classes can
 only be checked in a real browser.
-**Workaround used:** the browserless tests only check what is rendered; the
-behaviour is checked in a browser.
+**Workaround used:** the tests' `com.example.TriggerCallbacks` invokes the
+return channel that `CallbackAction`, `SetSignalAction` and the outcome of
+`WriteToClipboardAction` register on the trigger's host, as the browser would.
+That covers the server half of UC3, UC4, UC5, UC7, UC8, UC11, UC18 and UC23.
+It relies on Flow internals (`ReturnChannelMap`). Views whose actions run only
+in the browser are tested for what they render, and checked in a browser.
 **Suggested API:** an accessor on `Element` for the installed expressions
 (to assert on the generated JS), or a browserless tester that fires a trigger
 so its actions run without a browser.
 
 ## 8. Properties written by an action are invisible to the server
 
-**Where it bites:** UC24 / DisableButtonGroupView.java
+**Where it bites:** UC24 / DisableButtonGroupView.java, UC17 / AtomicResetView.java
 **Symptom:** `SetPropertyAction(sibling, "disabled", true)` disables the
 sibling buttons at once, but the property is not synced back, so
 `sibling.isEnabled()` stays `true`. When the slow work ends,
@@ -108,10 +98,15 @@ sibling buttons at once, but the property is not synced back, so
 siblings would stay disabled in the browser. `Button#setDisableOnClick` does
 not have this problem, because it also updates the enabled state on the
 server, but it covers only the clicked button.
-**Workaround used:** the click listener sets a `processing` signal, and an
-effect mirrors it onto the enabled state of all three buttons. Clearing the
-signal later is a real change that reaches the browser through Push. The
-clicked button still uses `setDisableOnClick(true)`.
+The same happens to `SetPropertyAction(textField, "value", "")` in UC17: a
+`TextField` synchronizes `value` on the `change` event by default, and a
+script write does not fire it, so the server keeps the old value.
+**Workaround used:** in UC24, the click listener sets a `processing` signal,
+and an effect mirrors it onto the enabled state of all three buttons.
+Clearing the signal later is a real change that reaches the browser through
+Push. The clicked button still uses `setDisableOnClick(true)`. In UC17, a local
+`com.example.uc17.FireChangeAction` fires `change` on each text field after
+the writes, so the fields send their new value.
 **Suggested API:** a `SetEnabledAction(HasEnabled...)` that disables in the
 browser and marks the components disabled on the server when the event
 arrives, or a `Button#setDisableOnClick(HasEnabled... alsoDisable)` overload.
@@ -131,3 +126,31 @@ on every button of the group.
 e.g. disable only until the next update of the bound signal, so that
 `bindEnabled(processing.map(p -> !p))` and `setDisableOnClick(true)` work
 together.
+
+## 10. No keyboard `Trigger`
+
+**Where it bites:** UC22 / KeyEventLogView.java, `uc22/KeyboardEventTrigger.java`
+**Symptom:** `DomEventTrigger(host, "keydown")` listens on the host element,
+so it sees a key press only while the focus is inside the host. A view with
+nothing focused never receives it. `DomEventTrigger` also has no `EventData`
+inputs for `key`, `code` or the modifier flags.
+**Workaround used:** a local `com.example.uc22.KeyboardEventTrigger` that
+listens for `keydown` on `window` in the capture phase while the host is
+attached, with `HandlerInput`s for `key`, `code`, `shiftKey`, `ctrlKey`,
+`altKey` and `metaKey`.
+**Suggested API:** a public `KeyboardEventTrigger(Component host)` with an
+option to listen on the whole page, and `EventData` inputs like those of
+`MouseEventTrigger`.
+
+## 11. No trigger for a key sequence
+
+**Where it bites:** UC23 / KonamiCodeView.java, `uc23/SequenceTrigger.java`
+**Symptom:** reacting to an ordered sequence of keys (an Easter egg, a
+"g then i" navigation shortcut) needs the keys pressed so far to be kept in
+the browser. No trigger in `com.vaadin.flow.component.trigger.internal` keeps
+state across events, and a server-side keydown listener would send every key
+to the server.
+**Workaround used:** a local `com.example.uc23.SequenceTrigger` that keeps the
+last keys pressed in the browser and fires when they match the sequence.
+**Suggested API:** a public `SequenceTrigger(Component host, Key... keys)`,
+with an optional timeout between keys.

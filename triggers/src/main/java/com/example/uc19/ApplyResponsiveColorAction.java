@@ -9,13 +9,13 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
 
 /**
- * Custom action that picks one of three colour pickers' current values based on
- * the host's current width and applies it as the target's background colour.
+ * Custom action that picks one of three color pickers' current values based on
+ * the host's current width and applies it as the target's background color.
  * Works for any trigger: if the event carries a {@code width} property (the
  * {@link com.vaadin.flow.component.trigger.internal.SizeTrigger} case) it uses
  * that; otherwise it reads the target's {@code getBoundingClientRect().width},
  * so the same action can be wired to a non-size trigger (e.g. an input event on
- * a colour picker) and still apply the right colour.
+ * a color picker) and still apply the right color.
  * <p>
  * Demonstrates the pattern that a single Action instance can be wired to
  * multiple Triggers — the action stays a value-less reference; each

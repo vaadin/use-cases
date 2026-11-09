@@ -16,18 +16,18 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC3 — Find and highlight in a textarea.
+ * UC3 — Find and highlight.
  * <p>
- * Server-driven {@code setSelectionRange(start, end)} drives the user's view
- * through matches one at a time. The textarea is focused on each step so the
- * selection is rendered visibly (browsers paint inactive selections with a
- * faded color, so focusing matters). Wraps to the start of the document when
- * past the last match.
+ * "Find next" walks the user through the matches in a text area, one at a time,
+ * with a server-side {@code setSelectionRange(start, end)}. The call also
+ * focuses the text area, because browsers paint the selection of a field that
+ * has no focus faintly or not at all. Past the last match the search wraps to
+ * the start.
  */
 @Route(value = "uc3", layout = MainLayout.class)
-@PageTitle("UC3 — Find and highlight in textarea")
+@PageTitle("UC3 — Find and highlight")
 @UseCaseDescription("Stepping through search matches in a text area")
-@Menu(order = 3, title = "UC3 — Find & highlight")
+@Menu(order = 3, title = "UC3 — Find and highlight")
 public class FindAndHighlightView extends VerticalLayout {
 
     private static final String SAMPLE = """
@@ -40,7 +40,7 @@ public class FindAndHighlightView extends VerticalLayout {
             sunt in culpa qui officia deserunt mollit anim id est laborum.""";
 
     public FindAndHighlightView() {
-        add(new H1("UC3 — Find and highlight in textarea"));
+        add(new H1("UC3 — Find and highlight"));
         add(new Paragraph(
                 "Type a search term and press \"Find next\" repeatedly. The "
                         + "next occurrence is selected in place. Past the "
@@ -49,12 +49,13 @@ public class FindAndHighlightView extends VerticalLayout {
         TextField search = new TextField();
         search.setPlaceholder("Search term, e.g. \"dolor\"");
         search.setWidth("280px");
+        search.setMaxWidth("100%");
 
         TextArea content = new TextArea();
         content.setValue(SAMPLE);
         content.setWidthFull();
         content.setHeight("260px");
-        content.addClassName("uc-fixed-textarea");
+        content.addClassName("uc-textarea");
 
         Span status = new Span();
         status.addClassName("uc-status");
@@ -92,6 +93,7 @@ public class FindAndHighlightView extends VerticalLayout {
         HorizontalLayout searchRow = new HorizontalLayout(search, findNext,
                 status);
         searchRow.setAlignItems(Alignment.CENTER);
+        searchRow.addClassName("uc-toolbar");
 
         add(searchRow, content);
     }

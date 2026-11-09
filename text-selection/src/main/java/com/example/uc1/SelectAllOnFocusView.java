@@ -15,11 +15,9 @@ import com.vaadin.flow.router.Route;
  * UC1 — Select all on focus.
  * <p>
  * Each time the user focuses the field, the current value is selected so that
- * typing immediately overwrites it. This is the canonical select-all-on-focus
- * pattern — it doesn't need the new {@code HasTextSelection} API at all, the
- * existing {@code setAutoselect(true)} attribute on {@code TextField} handles
- * it. Included here as the baseline before the use cases that actually need
- * server-driven selection control.
+ * typing overwrites it at once. This needs no {@code HasTextSelection} call:
+ * {@code setAutoselect(true)} on the field does it in the browser. It is the
+ * baseline for the use cases that need the server to control the selection.
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Select all on focus")

@@ -1,16 +1,18 @@
 .uc3-view {
-    .slide {
+    .uc3-slide {
+        box-sizing: border-box;
+        width: 100%;
         padding: 2rem;
         border: 1px solid var(--vaadin-border-color);
         border-radius: var(--vaadin-radius-l);
         background: var(--vaadin-background-container);
         min-height: 160px;
-        font-size: 1.1rem;
+        font-size: var(--aura-font-size-l);
     }
 
-    .slide-title {
-        font-size: 1.6rem;
-        font-weight: 600;
+    .uc3-slide-title {
+        font-size: var(--aura-font-size-xl);
+        font-weight: var(--aura-font-weight-semibold);
         margin: 0 0 0.5rem 0;
     }
 }

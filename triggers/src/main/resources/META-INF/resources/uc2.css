@@ -1,12 +1,14 @@
 .uc2-view {
-    .gallery {
+    .uc2-gallery {
         gap: 1.5rem;
         margin-top: 0.5rem;
     }
 
-    .gallery img {
+    .uc2-gallery img {
         width: 180px;
         height: 180px;
+        max-width: 26vw;
+        max-height: 26vw;
         object-fit: cover;
         border-radius: var(--vaadin-radius-l);
         border: 3px solid transparent;
@@ -14,16 +16,16 @@
         transition: opacity 200ms, filter 200ms, border-color 200ms;
     }
 
-    .gallery img.selected {
-        border-color: var(--vaadin-color-primary);
+    .uc2-gallery img.uc2-selected {
+        border-color: var(--aura-accent-color);
     }
 
-    .gallery img.dimmed {
+    .uc2-gallery img.uc2-dimmed {
         opacity: 0.25;
         filter: grayscale(100%);
     }
 
-    #reset {
+    .uc2-reset {
         align-self: flex-start;
         margin-top: 1.5rem;
     }

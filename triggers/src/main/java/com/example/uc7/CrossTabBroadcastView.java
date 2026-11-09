@@ -10,6 +10,9 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.trigger.internal.ClickTrigger;
+import com.vaadin.flow.component.trigger.internal.PropertyInput;
 import com.vaadin.flow.component.trigger.internal.SetSignalAction;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -19,17 +22,14 @@ import com.vaadin.flow.signals.local.ValueSignal;
 /**
  * UC7 — Cross-tab broadcast.
  * <p>
- * Open this view in two browser tabs. Clicking "Broadcast hello" in tab A posts
- * a message on a {@code BroadcastChannel}; tab B's
- * {@link BroadcastChannelTrigger} fires, {@link SetSignalAction} pushes the
- * payload into a server-side signal, and tab B's "Last received" badge updates.
- * The sender does NOT receive its own broadcast — that's BroadcastChannel
- * semantics.
- * <p>
- * The send button uses {@code Element.executeJs} to post on the same channel
- * the trigger listens on. A production view would wrap that as a custom
- * {@code Action} (e.g. {@code BroadcastSendAction}) so the send is also part of
- * the trigger system.
+ * Open this view in two browser tabs. Clicking "Send to all tabs" in one tab
+ * runs a {@link BroadcastSendAction} that posts the message on a
+ * {@code BroadcastChannel}, without going through the server. In the other tab,
+ * a {@link BroadcastChannelTrigger} fires, a {@link SetSignalAction} passes the
+ * message to a {@link ValueSignal} on the server, and the "Last received"
+ * badge, bound to that signal, updates. The sending tab shows the message too:
+ * a {@code BroadcastChannel} skips only the channel object that posted, and the
+ * action posts on its own object, not on the trigger's.
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Cross-tab broadcast")
@@ -43,30 +43,34 @@ public class CrossTabBroadcastView extends VerticalLayout {
     public CrossTabBroadcastView() {
         addClassName("uc7-view");
         add(new H1("UC7 — Cross-tab broadcast"));
-        add(new Paragraph(
-                "Open this view in two browser tabs. Click \"Broadcast hello\" "
-                        + "in one tab; the other tab's badge updates. The "
-                        + "BroadcastChannel API doesn't echo to the sender, so the "
-                        + "tab that clicks won't see its own message."));
+        add(new Paragraph("Open this view in two browser tabs. Type a message "
+                + "in one tab and click \"Send to all tabs\": the badge in "
+                + "the other tab shows it, and so does the tab that sent it. "
+                + "The message goes from tab to tab in the browser, not "
+                + "through the server."));
 
         ValueSignal<String> lastMessage = new ValueSignal<>("(none yet)");
 
+        TextField message = new TextField("Message");
+        message.setId("message");
+        message.setValue("Hello from the other tab");
+
+        Button send = new Button("Send to all tabs");
+        send.setId("send");
+        new ClickTrigger(send).triggers(new BroadcastSendAction(CHANNEL,
+                new PropertyInput<>(message, "value", String.class)));
+
         Span badge = new Span();
         badge.setId("last");
-        badge.addClassName("last-message");
-        badge.bindText(lastMessage);
-
-        Button send = new Button("Broadcast hello");
-        send.setId("send");
-        send.getElement().executeJs(
-                "this.addEventListener('click', () => new BroadcastChannel($0)"
-                        + ".postMessage('hello from ' + Math.floor(Math.random()*1000)));",
-                CHANNEL);
+        badge.addClassName("uc7-last-message");
+        badge.bindText(lastMessage.map(text -> "Last received: " + text));
 
         new BroadcastChannelTrigger(this, CHANNEL)
                 .triggers(new SetSignalAction<>(lastMessage, String.class,
                         BroadcastChannelTrigger.EventData.data));
 
-        add(new HorizontalLayout(send, badge));
+        HorizontalLayout row = new HorizontalLayout(send, badge);
+        row.addClassName("uc7-row");
+        add(message, row);
     }
 }

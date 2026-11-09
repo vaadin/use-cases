@@ -10,6 +10,7 @@ import com.vaadin.flow.component.geolocation.GeolocationPosition;
 import com.vaadin.flow.component.geolocation.GeolocationSimulator;
 import com.vaadin.flow.component.html.Span;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ViewPackages(classes = DetailedDataView.class)
@@ -61,9 +62,8 @@ class DetailedDataViewTest extends BrowserlessTest {
         assertTrue(find(Span.class).withTextContaining("48.856600°").exists(),
                 "Latitude field should be rendered");
 
-        int dashCount = find(Span.class).withText("—").all().size();
-        assertTrue(dashCount >= 4,
-                "At least 4 fields should be shown as '—' for null coordinates, found: "
-                        + dashCount);
+        // altitude, altitude accuracy, heading and speed
+        assertEquals(4, find(Span.class).withText("—").all().size(),
+                "Each missing field should be shown as '—'");
     }
 }

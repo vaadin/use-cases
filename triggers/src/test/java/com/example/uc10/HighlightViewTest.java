@@ -20,11 +20,11 @@ class HighlightViewTest extends SpringBrowserlessTest {
     void viewRendersWithTargetAndButtons() {
         navigate(HighlightView.class);
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h -> "UC10 — Parameterised highlight".equals(h.getText())));
+        assertTrue(findInView(H1.class).all().stream()
+                .anyMatch(h -> "UC10 — Highlight".equals(h.getText())));
         assertNotNull(findInView(Div.class).id("target"));
-        assertNotNull(findInView(Button.class).id("gold"));
+        assertNotNull(findInView(Button.class).id("yellow"));
         assertNotNull(findInView(Button.class).id("red"));
-        assertNotNull(findInView(Button.class).id("cyan"));
+        assertNotNull(findInView(Button.class).id("blue"));
     }
 }

@@ -38,23 +38,24 @@ class HomeViewTest extends SpringBrowserlessTest {
     private record Group(String heading, List<UseCase> useCases) {
     }
 
-    private static final UseCase UC1 = new UseCase("UC1", "One-shot request",
+    private static final UseCase UC1 = new UseCase("UC1", "Locate on click",
             "Asking for the user's location with a button", "uc1");
-    private static final UseCase UC2 = new UseCase("UC2", "Tracking",
+    private static final UseCase UC2 = new UseCase("UC2", "Live tracking",
             "Following the user's position as it changes", "uc2");
     private static final UseCase UC3 = new UseCase("UC3",
-            "Auto-fetch on attach",
+            "Locate returning visitors",
             "Locating returning visitors without a surprise prompt", "uc3");
-    private static final UseCase UC4 = new UseCase("UC4",
-            "Denial & unavailability",
+    private static final UseCase UC4 = new UseCase("UC4", "When location fails",
             "Handling a denied, failed or unavailable location", "uc4");
-    private static final UseCase UC5 = new UseCase("UC5", "Detailed data",
+    private static final UseCase UC5 = new UseCase("UC5",
+            "Detailed position data",
             "Reading altitude, heading, speed and accuracy", "uc5");
-    private static final UseCase UC6 = new UseCase("UC6", "Tuning options",
+    private static final UseCase UC6 = new UseCase("UC6",
+            "Precision versus battery",
             "Trading precision and freshness against battery", "uc6");
-    private static final UseCase UC7 = new UseCase("UC7", "Form field",
+    private static final UseCase UC7 = new UseCase("UC7", "Location in a form",
             "Capturing a location as part of a form", "uc7");
-    private static final UseCase UC8 = new UseCase("UC8", "DB-backed tracking",
+    private static final UseCase UC8 = new UseCase("UC8", "Route in a database",
             "Storing a tracked route in a database", "uc8");
 
     @Test

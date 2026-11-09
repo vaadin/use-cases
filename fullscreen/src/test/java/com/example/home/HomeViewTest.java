@@ -49,7 +49,8 @@ class HomeViewTest extends SpringBrowserlessTest {
             "Giving writers a fullscreen editor with no distractions");
     private static final UseCase UC4 = new UseCase("UC4", "Reactive layout",
             "Reformatting a layout automatically when fullscreen starts and ends");
-    private static final UseCase UC5 = new UseCase("UC5", "Kiosk",
+    private static final UseCase UC5 = new UseCase("UC5",
+            "Kiosk with staff exit",
             "Running a fullscreen kiosk that only staff can exit with a PIN");
     private static final UseCase UC6 = new UseCase("UC6", "Chart expand",
             "Expanding a single dashboard chart card to fullscreen");

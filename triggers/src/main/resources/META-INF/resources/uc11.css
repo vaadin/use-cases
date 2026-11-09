@@ -1,5 +1,5 @@
 .uc11-view {
-    .panel {
+    .uc11-panel {
         height: 240px;
         background: var(--vaadin-background-container);
         border: 1px dashed var(--vaadin-border-color);
@@ -10,9 +10,10 @@
         color: var(--vaadin-text-color-secondary);
         font-style: italic;
         user-select: none;
+        -webkit-user-select: none;
     }
 
-    .coords {
+    .uc11-coords {
         font-family: monospace;
         color: var(--vaadin-text-color-secondary);
     }

@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.0</version>
+        <version>4.1.2</version>
         <relativePath/>
     </parent>
 
@@ -51,11 +51,12 @@
         <browserless-test.version>25.4-SNAPSHOT</browserless-test.version>
         <observability-kit.version>25.4-SNAPSHOT</observability-kit.version>
         <jspecify.version>1.0.1</jspecify.version>
-        <spotless.plugin.version>3.10.0</spotless.plugin.version>
-        <nullability.plugin.version>0.4.0</nullability.plugin.version>
-        <spring-ai.version>2.0.1</spring-ai.version>
-        <sentry.version>8.58.0</sentry.version>
+        <spotless.plugin.version>3.11.0</spotless.plugin.version>
+        <nullability.plugin.version>0.5.2</nullability.plugin.version>
+        <spring-ai.version>2.0.2</spring-ai.version>
+        <sentry.version>8.63.0</sentry.version>
         <atlassian-sourcemap.version>3.0.1</atlassian-sourcemap.version>
+        <playwright.version>1.64.0</playwright.version>
     </properties>
 
     <dependencyManagement>

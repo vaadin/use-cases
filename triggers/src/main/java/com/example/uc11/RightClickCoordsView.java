@@ -1,6 +1,5 @@
 package com.example.uc11;
 
-import com.example.PreventDefaultAction;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -17,14 +16,14 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC11 — Right-click and report pointer coordinates to the server.
+ * UC11 — Right-click coords.
  * <p>
  * The panel listens for {@code contextmenu} via a {@link MouseEventTrigger}. A
- * {@link com.example.PreventDefaultAction} suppresses the browser's native
- * context menu, then a {@link CallbackAction} consumes the value produced by
- * the custom {@link PointInput}: that input returns a JS {@code {x, y}} object
- * literal built from {@code event.clientX}/{@code event.clientY}, and Jackson
- * decodes it into a {@link Point} record on the server.
+ * {@link PreventDefaultAction} suppresses the browser's native context menu,
+ * then a {@link CallbackAction} consumes the value produced by the custom
+ * {@link PointInput}: that input returns a JS {@code {x, y}} object literal
+ * built from {@code event.clientX}/{@code event.clientY}, and Jackson decodes
+ * it into a {@link Point} record on the server.
  * <p>
  * Demonstrates a custom Input that produces a structured server-side value.
  */
@@ -37,19 +36,20 @@ public class RightClickCoordsView extends VerticalLayout {
 
     public RightClickCoordsView() {
         addClassName("uc11-view");
-        add(new H1("UC11 — Right-click coordinates"));
-        add(new Paragraph(
-                "Right-click anywhere in the box below. A custom PointInput "
-                        + "reads event.clientX/clientY in the trigger handler "
-                        + "and the value lands on the server as a Point record."));
+        add(new H1("UC11 — Right-click coords"));
+        add(new Paragraph("Right-click anywhere in the box below. The "
+                + "browser's own menu does not open. Instead, the position "
+                + "of the click is sent to "
+                + "the server, which shows it below the box. An application "
+                + "would open its own menu there."));
 
         Div panel = new Div("Right-click me");
         panel.setId("panel");
-        panel.addClassName("panel");
+        panel.addClassName("uc11-panel");
 
         Span lastClick = new Span("(no right-click yet)");
         lastClick.setId("last");
-        lastClick.addClassName("coords");
+        lastClick.addClassName("uc11-coords");
 
         MouseEventTrigger contextMenu = new MouseEventTrigger(panel,
                 "contextmenu");

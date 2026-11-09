@@ -19,7 +19,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC1 — One-shot request on user click.
+ * UC1 — Locate on click.
  * <p>
  * Classic "Use my location" button. The click handler calls
  * {@code Geolocation.getPosition(...)} and reacts to either the returned
@@ -27,15 +27,16 @@ import com.vaadin.flow.router.Route;
  * below is centered on the result and a marker is dropped.
  */
 @Route(value = "uc1", layout = MainLayout.class)
-@PageTitle("UC1 — One-shot request on user click")
+@PageTitle("UC1 — Locate on click")
 @UseCaseDescription("Asking for the user's location with a button")
-@Menu(order = 1, title = "UC1 — One-shot request")
+@Menu(order = 1, title = "UC1 — Locate on click")
 public class OneShotOnClickView extends VerticalLayout {
 
     public OneShotOnClickView() {
-        add(new H1("UC1 — One-shot request on user click"));
+        add(new H1("UC1 — Locate on click"));
         add(new Paragraph(
-                "Click the button below to request the current position once."));
+                "Click the button to read your current position once. The "
+                        + "browser asks for permission the first time."));
 
         Span result = new Span("(no reading yet)");
 

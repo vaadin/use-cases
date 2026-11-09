@@ -1,10 +1,10 @@
 .uc24-view {
-    .decisions {
+    .uc24-decisions {
         gap: 0.75rem;
         margin-top: 0.5rem;
     }
 
-    .status {
+    .uc24-status {
         color: var(--vaadin-text-color-secondary);
     }
 }

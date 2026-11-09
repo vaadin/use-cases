@@ -1,20 +1,22 @@
-/* Component#requestFullscreen() moves the stage out of the view into the
-   UI's fullscreen wrapper, so rules for the stage must not be scoped under
-   .uc2-view — they would stop matching while presenting. Only elements that
-   never leave the view are nested below. */
-.slideshow {
+/* Fullscreen.onClick(present).enter(stage) moves the stage out of the view
+   into the UI's fullscreen wrapper, so rules for the stage must not be scoped
+   under .uc2-view — they would stop matching while presenting. Only elements
+   that never leave the view are nested below. */
+.uc2-stage {
     width: 100%;
     aspect-ratio: 16 / 9;
-    background: linear-gradient(135deg, #1d2030 0%, #2a3052 100%);
+    background: linear-gradient(135deg,
+            color-mix(in srgb, var(--aura-accent-color) 25%, black) 0%,
+            color-mix(in srgb, var(--aura-accent-color) 45%, black) 100%);
     border-radius: var(--vaadin-radius-l);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2.25rem;
+    font-size: calc(var(--aura-font-size-xl) * 1.5);
     /* Unitless so the line-height scales with font-size; the body's
-       length-valued line-height would otherwise stay ~20px and the
-       wrapped slide text would overlap at 2.25rem / 4rem. */
+       length-valued line-height would otherwise stay small and the
+       wrapped slide text would overlap. */
     line-height: 1.2;
     text-align: center;
     padding: 2rem;
@@ -22,7 +24,7 @@
     max-width: 960px;
 }
 
-.slideshow.live {
+.uc2-stage.uc2-stage-live {
     aspect-ratio: auto;
     width: 100%;
     /* 100vh, not 100% — while fullscreen the stage's parent is the UI
@@ -30,14 +32,14 @@
     height: 100vh;
     max-width: none;
     border-radius: 0;
-    font-size: 4rem;
+    font-size: calc(var(--aura-font-size-xl) * 3);
 }
 
 .uc2-view {
-    .slideshow-footer {
+    .uc2-footer {
         text-align: center;
         margin-top: 1rem;
         color: var(--vaadin-text-color-secondary);
-        font-size: 0.85rem;
+        font-size: var(--aura-font-size-s);
     }
 }

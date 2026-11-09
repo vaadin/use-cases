@@ -8,9 +8,9 @@ import com.example.views.MainLayout;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.clipboard.Clipboard;
-import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -30,28 +30,34 @@ import com.vaadin.flow.router.Route;
  * HTML (an HTML table). The HTML branch is the only unambiguous one when cell
  * values contain tabs or newlines, so this view parses
  * {@link com.vaadin.flow.component.clipboard.PasteEvent#getHtml()} and hydrates
- * a {@link Grid} from it.
+ * a {@link Grid} from it. When there is no HTML table it falls back to the
+ * tab-separated plain text, which is what the Vaadin Spreadsheet copies.
+ * <p>
+ * {@code Clipboard.onPaste} only fires for the focused element, so the drop
+ * zone gets {@code tabindex="0"}.
  */
 @Route(value = "uc5", layout = MainLayout.class)
-@PageTitle("UC5 — Paste a table from a spreadsheet")
+@PageTitle("UC5 — Paste a table")
 @UseCaseDescription("Pasting cells from a spreadsheet into a grid")
 @Menu(order = 5, title = "UC5 — Paste a table")
-@StyleSheet("paste-drop-zone.css")
 public class PasteSpreadsheetView extends VerticalLayout {
 
     public PasteSpreadsheetView() {
-        add(new H1("UC5 — Paste a table from a spreadsheet"));
+        add(new H1("UC5 — Paste a table"));
         add(new Paragraph(
-                "Select cells in the spreadsheet below and copy with Ctrl/Cmd-C, "
-                        + "then paste into the drop zone. You can also copy a range "
-                        + "from Microsoft Excel or Google Sheets — the clipboard's "
-                        + "HTML branch is what makes cell boundaries unambiguous."));
+                "Select cells in the spreadsheet below and copy them with "
+                        + "Ctrl+C / Cmd+C. Click the drop zone and paste with "
+                        + "Ctrl+V / Cmd+V: the cells appear in a grid. You can "
+                        + "also copy a range from Microsoft Excel or Google "
+                        + "Sheets. Their copy includes an HTML table, which "
+                        + "keeps cells apart even when a cell holds a tab or a "
+                        + "line break."));
 
         Spreadsheet spreadsheet = buildSampleSpreadsheet();
         add(spreadsheet);
 
         Div dropZone = new Div();
-        dropZone.addClassName("drop-zone");
+        dropZone.addClassName("paste-drop-zone");
         dropZone.setText("Paste here (Ctrl+V / Cmd+V)");
         dropZone.setWidthFull();
         // paste fires on the focused element, so the non-editable Div needs
@@ -62,21 +68,8 @@ public class PasteSpreadsheetView extends VerticalLayout {
         grid.setVisible(false);
 
         Clipboard.onPaste(dropZone, event -> {
-            // Prefer HTML (Excel/Google Sheets always include a <table>;
-            // unambiguous when cells contain tabs or newlines). Fall back to
-            // tab-separated plain text, which is what the Vaadin Spreadsheet
-            // puts on the clipboard.
-            List<List<String>> rows = List.of();
-            String html = event.getHtml();
-            if (html != null) {
-                rows = parseHtmlTable(html);
-            }
-            if (rows.isEmpty()) {
-                String text = event.getText();
-                if (text != null) {
-                    rows = parseTsv(text);
-                }
-            }
+            List<List<String>> rows = parseRows(event.getHtml(),
+                    event.getText());
             if (rows.isEmpty()) {
                 dropZone.setText(
                         "No table on the clipboard — copy a range from "
@@ -84,7 +77,8 @@ public class PasteSpreadsheetView extends VerticalLayout {
                 return;
             }
             populateGrid(grid, rows);
-            dropZone.setText("Pasted " + rows.size() + " rows.");
+            dropZone.setText("Pasted " + rows.size()
+                    + " rows. The first row is used as the header.");
         });
 
         add(dropZone, grid);
@@ -111,7 +105,23 @@ public class PasteSpreadsheetView extends VerticalLayout {
         return spreadsheet;
     }
 
-    private List<List<String>> parseHtmlTable(String html) {
+    /**
+     * The rows of a pasted table: from the HTML table when there is one,
+     * otherwise from the tab-separated plain text.
+     */
+    static List<List<String>> parseRows(@Nullable String html,
+            @Nullable String text) {
+        // Excel and Google Sheets always include a <table>, which stays
+        // unambiguous when cells contain tabs or newlines.
+        List<List<String>> rows = html != null ? parseHtmlTable(html)
+                : List.of();
+        if (rows.isEmpty() && text != null) {
+            rows = parseTsv(text);
+        }
+        return rows;
+    }
+
+    private static List<List<String>> parseHtmlTable(String html) {
         Document doc = Jsoup.parse(html);
         Element table = doc.selectFirst("table");
         if (table == null) {
@@ -130,7 +140,7 @@ public class PasteSpreadsheetView extends VerticalLayout {
         return rows;
     }
 
-    private List<List<String>> parseTsv(String text) {
+    private static List<List<String>> parseTsv(String text) {
         List<List<String>> rows = new ArrayList<>();
         for (String line : text.split("\r?\n")) {
             if (line.isEmpty()) {

@@ -28,10 +28,6 @@ public class ScrollIntoViewAction extends Action {
         this.target = Objects.requireNonNull(target);
     }
 
-    public Element getTarget() {
-        return target;
-    }
-
     @Override
     protected JsFunction toJs(Trigger trigger) {
         return JsFunction.of(

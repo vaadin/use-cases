@@ -1,10 +1,10 @@
 .uc23-view {
-    .hint {
+    .uc23-hint {
         display: inline-block;
         padding: 0.4rem 0.9rem;
         border-radius: 999px;
         font-family: monospace;
-        font-size: 0.95rem;
+        font-size: var(--aura-font-size-s);
         background: var(--vaadin-background-container);
         border: 1px solid var(--vaadin-border-color);
     }

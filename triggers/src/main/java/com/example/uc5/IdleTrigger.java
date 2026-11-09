@@ -11,7 +11,7 @@ import com.vaadin.flow.shared.Registration;
  * Custom {@link Trigger} that fires when the user has been inactive for at
  * least {@code inactivityMs} milliseconds, and again when activity resumes
  * after an idle period. The trigger keeps a {@code setTimeout} timer that any
- * keyboard/pointer/scroll event on {@code window} resets.
+ * mouse, keyboard, wheel or touch event on {@code window} resets.
  * <p>
  * The handler receives a synthetic {@code CustomEvent} carrying
  * {@code event.idle === true|false}; the {@link EventData#idle} input exposes

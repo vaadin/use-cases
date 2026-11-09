@@ -7,10 +7,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.screenorientation.ScreenOrientationType;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -18,55 +19,39 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AdaptiveLayoutViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersHeadingAndContainer() {
-        navigate(AdaptiveLayoutView.class);
-
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC1 — Adaptive layout".equals(h.getText())));
-        assertTrue(hasContainer(), "expected the uc1-container to be rendered");
-    }
-
-    @Test
-    void containerReactsToOrientationChanges() {
+    void panesSitSideBySideOnlyInLandscape() {
         navigate(AdaptiveLayoutView.class);
         runPendingSignalsTasks();
 
-        // Mock UI starts at UNKNOWN -> stacked.
-        assertContainerClass("stacked");
-        assertBadgeContains("Orientation unknown");
+        // The browserless UI starts at UNKNOWN: stacked.
+        assertFalse(sideBySide());
+        assertEquals("Orientation unknown — defaulting to stacked", badge());
 
         setOrientation(ScreenOrientationType.LANDSCAPE_PRIMARY, 90);
-        assertContainerClass("side-by-side");
-        assertBadgeContains("Landscape");
+        assertTrue(sideBySide());
+        assertEquals("Landscape — side-by-side layout", badge());
 
         setOrientation(ScreenOrientationType.PORTRAIT_PRIMARY, 0);
-        assertContainerClass("stacked");
-        assertBadgeContains("Portrait");
+        assertFalse(sideBySide());
+        assertEquals("Portrait — stacked layout", badge());
 
         setOrientation(ScreenOrientationType.UNSUPPORTED, 0);
-        assertBadgeContains("not supported");
+        assertFalse(sideBySide());
+        assertEquals(
+                "Screen Orientation API not supported — defaulting to stacked",
+                badge());
     }
 
-    private boolean hasContainer() {
+    private boolean sideBySide() {
         return findInView(Div.class).all().stream()
-                .anyMatch(d -> d.getClassNames().stream()
-                        .anyMatch(c -> c.equals("uc1-container")));
+                .filter(d -> d.hasClassName("uc1-container")).findFirst()
+                .orElseThrow().hasClassName("uc1-side-by-side");
     }
 
-    private void assertContainerClass(String cls) {
-        assertTrue(
-                findInView(Div.class).all().stream().filter(
-                        d -> d.getClassNames().contains("uc1-container"))
-                        .anyMatch(d -> d.getClassNames().contains(cls)),
-                "expected uc1-container to carry class " + cls);
-    }
-
-    private void assertBadgeContains(String fragment) {
-        assertTrue(
-                findInView(Span.class).all().stream()
-                        .anyMatch(s -> s.getText() != null
-                                && s.getText().contains(fragment)),
-                "expected mode badge to contain \"" + fragment + "\"");
+    private String badge() {
+        return findInView(Span.class).all().stream()
+                .filter(s -> s.hasClassName("status-badge")).findFirst()
+                .orElseThrow().getText();
     }
 
     private void setOrientation(ScreenOrientationType type, int angle) {

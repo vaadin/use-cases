@@ -1,1 +1,24 @@
-/* Clipboard API use cases — small visual polish */
+/* Clipboard API use cases — app-wide rules */
+
+/* The paste target of UC5 and UC7: a focusable Div where Ctrl+V lands. */
+.paste-drop-zone {
+    border: 2px dashed var(--vaadin-border-color);
+    border-radius: var(--vaadin-radius-m);
+    padding: var(--vaadin-padding-l);
+    min-height: 120px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: border-color 120ms, background-color 120ms;
+}
+
+/* `paste` fires on the focused element, so make the focus state obvious —
+   otherwise the user can not tell whether Ctrl+V will land here. */
+.paste-drop-zone:focus {
+    outline: none;
+    border-style: solid;
+    border-color: var(--aura-accent-color);
+    background: var(--aura-accent-surface);
+}

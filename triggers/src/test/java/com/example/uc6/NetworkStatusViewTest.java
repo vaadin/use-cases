@@ -8,19 +8,23 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @ViewPackages(classes = NetworkStatusView.class)
 class NetworkStatusViewTest extends SpringBrowserlessTest {
 
+    // The badge is updated in the browser only, because the server can not
+    // be reached when it matters (API-GAPS.md #7), so the test checks what is
+    // rendered.
     @Test
-    void viewRendersWithStatusBadge() {
+    void viewRendersAStatusBadgeForTheBrowserToFillIn() {
         navigate(NetworkStatusView.class);
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC6 — Network status".equals(h.getText())));
-        assertNotNull(findInView(Span.class).id("status"));
+        assertEquals("UC6 — Network status",
+                findInView(H1.class).single().getText());
+        Span badge = findInView(Span.class).id("status");
+        assertEquals("…", badge.getText());
+        assertEquals("uc6-status", badge.getClassName());
     }
 }

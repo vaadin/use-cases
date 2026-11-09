@@ -1,5 +1,5 @@
 .uc16-view {
-    .panel {
+    .uc16-panel {
         height: 280px;
         background: var(--vaadin-background-container);
         border: 1px dashed var(--vaadin-border-color);
@@ -11,19 +11,21 @@
         font-style: italic;
         user-select: none;
         cursor: crosshair;
+        /* On a touch screen, moving a finger in the panel moves the pointer
+           instead of scrolling the page. */
+        touch-action: none;
     }
 
-    .readout-line {
+    .uc16-readout-line {
         display: inline-flex;
         gap: 0.5rem;
         align-items: baseline;
         font-family: monospace;
-        font-size: 1rem;
         margin-top: 0.75rem;
     }
 
-    .readout {
-        font-weight: 600;
+    .uc16-readout {
+        font-weight: var(--aura-font-weight-semibold);
         min-width: 5ch;
         text-align: right;
         margin-right: 1rem;

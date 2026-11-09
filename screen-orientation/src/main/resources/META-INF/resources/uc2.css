@@ -19,11 +19,11 @@
         gap: 0.25rem 1rem;
         align-items: baseline;
         font-family: monospace;
-        font-size: 0.95rem;
+        font-size: var(--aura-font-size-s);
         margin-top: 1rem;
     }
 
-    .uc2-table > .label {
+    .uc2-table > .uc2-label {
         color: var(--vaadin-text-color-secondary);
     }
 }

@@ -1,7 +1,6 @@
 package com.example;
 
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -13,38 +12,33 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Fires when a key + modifier combination is pressed while focus is in the
- * host's subtree. A local stand-in for the {@code ShortcutTrigger} that lives
- * on the {@code feature/triggers-actions} branch of vaadin/flow and has not
- * landed in mainline yet. Once the upstream class ships, delete this file and
- * import {@code com.vaadin.flow.component.trigger.internal.ShortcutTrigger}
- * instead.
- *
+ * Fires when a key is pressed with exactly the given modifiers, while the host
+ * is attached. Flow has no keyboard-shortcut {@code Trigger}, so this class is
+ * a local stand-in until it has one (API-GAPS.md #1). Once it does, delete this
+ * class and use Flow's.
  * <p>
- * Listens for {@code keydown} on {@code window} in capture phase — that's the
- * only reliable way to beat the browser's built-in shortcut handling (e.g.
- * {@code Ctrl+S} opens the Save Page dialog before any element-scoped listener
- * can see the event). The listener is installed when the host element attaches
- * and removed when it detaches, so the shortcut is "active while the view is
- * mounted" — not "active only when focus is in the host's subtree".
+ * Listens for {@code keydown} on {@code window} in the capture phase. That is
+ * the only reliable way to run before the browser's own shortcut (e.g.
+ * {@code Cmd+S} opens the Save Page dialog before an element listener sees the
+ * event). The listener is installed when the host attaches and removed when it
+ * detaches, so the shortcut works anywhere on the page while the view is open,
+ * wherever the focus is.
  * <p>
- * Filters by an exact modifier match (required modifiers must be pressed, all
- * others must NOT be pressed — so {@code Ctrl+S} doesn't also fire on
- * {@code Ctrl+Shift+S}, leaving that combo free to bind separately), matches
- * the key against both {@code event.key} and {@code event.code} so a single
- * binding handles {@link Key#KEY_S} regardless of which representation the
- * browser sends, and calls {@code preventDefault()} and
- * {@code stopPropagation()} so the browser's default action and any other
- * handler do not double-fire.
- *
+ * The modifiers must match exactly: the given ones must be pressed and all
+ * others must not, so {@code Ctrl+S} does not also fire on
+ * {@code Ctrl+Shift+S}. The key is matched against both {@code event.key} and
+ * {@code event.code}, so {@link Key#KEY_S} works whichever the browser sends.
+ * Before the actions run, the trigger calls {@code preventDefault()} and
+ * {@code stopPropagation()}, so the browser's default action and other handlers
+ * do not run too.
  * <p>
- * Example:
+ * To accept both {@code Ctrl+S} and {@code Cmd+S}, create one trigger for each
+ * modifier:
  *
  * <pre>{@code
- * new ShortcutTrigger(layout, Key.KEY_S, KeyModifier.CONTROL)
- *         .triggers(saveAction);
+ * new ShortcutTrigger(view, Key.KEY_S, KeyModifier.CONTROL).triggers(save);
+ * new ShortcutTrigger(view, Key.KEY_S, KeyModifier.META).triggers(save);
  * }</pre>
- *
  * <p>
  * {@link KeyModifier#ALT_GRAPH} is rejected because {@code KeyboardEvent} has
  * no {@code altGraphKey} flag.
@@ -84,45 +78,26 @@ public class ShortcutTrigger extends Trigger {
 
     @Override
     protected Registration install(JsFunction action) {
-        List<String> keyNames = key.getKeys();
-        StringBuilder allowed = new StringBuilder("[");
-        for (int i = 0; i < keyNames.size(); i++) {
-            if (i > 0) {
-                allowed.append(',');
-            }
-            allowed.append(JacksonUtils.getMapper().valueToTree(keyNames.get(i))
-                    .toString());
-        }
-        allowed.append("]");
-
-        StringBuilder js = new StringBuilder();
-        js.append("const allowed=").append(allowed).append(";");
-        js.append("const listener=(e)=>{");
-        // Exact-match modifier guard.
-        js.append("if(");
-        js.append(modifiers.contains(KeyModifier.CONTROL) ? "!e.ctrlKey"
-                : "e.ctrlKey");
-        js.append("||");
-        js.append(modifiers.contains(KeyModifier.SHIFT) ? "!e.shiftKey"
-                : "e.shiftKey");
-        js.append("||");
-        js.append(
-                modifiers.contains(KeyModifier.ALT) ? "!e.altKey" : "e.altKey");
-        js.append("||");
-        js.append(modifiers.contains(KeyModifier.META) ? "!e.metaKey"
-                : "e.metaKey");
-        js.append(")return;");
-        // Key match — try event.key and event.code so KEY_S works either way.
-        js.append(
-                "if(!allowed.includes(e.key)&&!allowed.includes(e.code))return;");
-        js.append("e.preventDefault();e.stopPropagation();$0(e);");
-        js.append("};");
-        // Window + capture: beats the browser's built-in shortcut handler
-        // (e.g. Ctrl+S Save Page) and any descendant handler that might
-        // stopPropagation before the event reaches the host's bubble phase.
-        js.append("window.addEventListener('keydown',listener,true);");
-        js.append(
-                "return ()=>window.removeEventListener('keydown',listener,true);");
-        return getHost().addJsInitializer(js.toString(), action);
+        // Listens on window in the capture phase, so it runs before the
+        // browser's own shortcut (e.g. Ctrl+S Save Page) and before any
+        // handler further down that might stop the event.
+        return getHost().addJsInitializer(
+                """
+                        const [keys, ctrl, shift, alt, meta] = [$1, $2, $3, $4, $5];
+                        const listener = (e) => {
+                            if (e.ctrlKey !== ctrl || e.shiftKey !== shift
+                                    || e.altKey !== alt || e.metaKey !== meta) return;
+                            if (!keys.includes(e.key) && !keys.includes(e.code)) return;
+                            e.preventDefault();
+                            e.stopPropagation();
+                            $0(e);
+                        };
+                        window.addEventListener('keydown', listener, true);
+                        return () => window.removeEventListener('keydown', listener, true);""",
+                action, JacksonUtils.getMapper().valueToTree(key.getKeys()),
+                modifiers.contains(KeyModifier.CONTROL),
+                modifiers.contains(KeyModifier.SHIFT),
+                modifiers.contains(KeyModifier.ALT),
+                modifiers.contains(KeyModifier.META));
     }
 }

@@ -32,7 +32,7 @@ public class ApplyNetworkStatusAction extends Action {
                 """
                         const online = navigator.onLine;
                         $0.textContent = online ? 'Online' : 'Offline';
-                        $0.className = online ? 'status-badge online' : 'status-badge offline';""",
+                        $0.className = online ? 'uc6-status uc6-online' : 'uc6-status uc6-offline';""",
                 target);
     }
 }

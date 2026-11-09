@@ -11,10 +11,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <flow-components.version>25.4.text-selection-SNAPSHOT</flow-components.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.example</groupId>

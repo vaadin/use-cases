@@ -1,6 +1,13 @@
 .uc17-view {
-    .fields {
+    .uc17-fields {
         align-items: end;
         gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .uc17-server {
+        font-family: monospace;
+        font-size: var(--aura-font-size-s);
+        color: var(--vaadin-text-color-secondary);
     }
 }

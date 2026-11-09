@@ -21,7 +21,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC7 — Paste images and files.
+ * UC7 — Paste files.
  * <p>
  * {@link Clipboard#onFilePaste(com.vaadin.flow.component.Component, com.vaadin.flow.server.streams.UploadHandler)
  * Clipboard.onFilePaste} registers a per-file upload handler for paste
@@ -31,27 +31,27 @@ import com.vaadin.flow.router.Route;
  * top: {@code onStart} fires once before the first file of a paste,
  * {@code onFile} fires per file with the bytes and metadata, and
  * {@code onComplete} fires once the paste's declared file count has been
- * delivered.
+ * delivered. All three run on the UI thread, and {@code onFilePaste} makes a
+ * round trip after the uploads, so the view needs no {@code @Push}.
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Paste files")
 @UseCaseDescription("Receiving pasted images and files on the server")
 @Menu(order = 7, title = "UC7 — Paste files")
-@StyleSheet("paste-drop-zone.css")
 @StyleSheet("uc7.css")
 public class PasteFilesView extends VerticalLayout {
 
     public PasteFilesView() {
         addClassName("uc7-view");
-        add(new H1("UC7 — Paste images and files"));
+        add(new H1("UC7 — Paste files"));
         add(new Paragraph(
-                "Click into the drop zone, then paste a screenshot or any "
-                        + "file with Ctrl+V / Cmd+V. The bytes are uploaded "
-                        + "to the server via the standard upload mechanism; "
-                        + "image MIME types are rendered as inline previews."));
+                "Click the drop zone, then paste a screenshot or a file "
+                        + "copied in your file manager with Ctrl+V / Cmd+V. "
+                        + "Each file is uploaded to the server, which lists "
+                        + "it below and shows images as a preview."));
 
         Div dropZone = new Div();
-        dropZone.addClassName("drop-zone");
+        dropZone.addClassName("paste-drop-zone");
         dropZone.setText("Paste a file here (Ctrl+V / Cmd+V)");
         dropZone.setWidthFull();
         // paste fires on the focused element, so the non-editable Div needs
@@ -59,7 +59,7 @@ public class PasteFilesView extends VerticalLayout {
         dropZone.getElement().setAttribute("tabindex", "0");
 
         Span log = new Span("File log will appear here…");
-        log.addClassName("file-log");
+        log.addClassName("uc7-file-log");
 
         ProgressBar progress = new ProgressBar();
         progress.setVisible(false);
@@ -118,7 +118,7 @@ public class PasteFilesView extends VerticalLayout {
         String dataUrl = "data:" + mime + ";base64,"
                 + Base64.getEncoder().encodeToString(file.bytes());
         Image img = new Image(dataUrl, file.fileName());
-        img.setMaxWidth("400px");
+        img.addClassName("uc7-preview");
         return img;
     }
 }

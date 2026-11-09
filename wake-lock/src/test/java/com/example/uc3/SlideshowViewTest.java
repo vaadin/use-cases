@@ -1,6 +1,8 @@
 package com.example.uc3;
 
-import com.example.WakeLockTestSupport;
+import java.util.List;
+
+import com.example.home.HomeView;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -8,115 +10,86 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 
+import static com.example.WakeLockTestSupport.RELEASE;
+import static com.example.WakeLockTestSupport.REQUEST;
+import static com.example.WakeLockTestSupport.answerWakeLockCalls;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ViewPackages(classes = SlideshowView.class)
+@ViewPackages(classes = { SlideshowView.class, HomeView.class })
 class SlideshowViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersAndStartsIdle() {
+    void lockIsHeldFromStartUntilStop() {
         navigate(SlideshowView.class);
+        assertFalse(answerWakeLockCalls().contains(REQUEST),
+                "the lock is not requested before the presentation starts");
         runPendingSignalsTasks();
+        assertBadge("Released");
 
-        assertTrue(
-                findInView(H1.class).all().stream()
-                        .anyMatch(h -> "UC3 — Presentation slideshow"
-                                .equals(h.getText())),
-                "view should render heading");
+        test(button("Start presentation")).click();
+        assertEquals(List.of(REQUEST), answerWakeLockCalls());
+        runPendingSignalsTasks();
+        assertBadge("Holding — the screen stays on until you stop");
 
-        Button start = findInView(Button.class).withText("Start presentation")
-                .single();
-        Button next = findInView(Button.class).withText("Next slide").single();
-        Button stop = findInView(Button.class).withText("Stop").single();
-        assertTrue(start.isEnabled(),
-                "Start should be enabled before presenting");
-        assertFalse(next.isEnabled(),
-                "Next should be disabled before presenting");
-        assertFalse(stop.isEnabled(),
-                "Stop should be disabled before presenting");
+        test(button("Stop")).click();
+        assertEquals(List.of(RELEASE), answerWakeLockCalls());
+        runPendingSignalsTasks();
+        assertBadge("Released");
     }
 
     @Test
-    void startEnablesNextAndStop_advancesSlide() {
+    void nextGoesThroughTheDeckAndPastTheLastSlideStops() {
         navigate(SlideshowView.class);
+        test(button("Start presentation")).click();
+        answerWakeLockCalls();
         runPendingSignalsTasks();
+        assertSlideTitle("Welcome");
 
-        test(findInView(Button.class).withText("Start presentation").single())
-                .click();
+        test(button("Next slide")).click();
         runPendingSignalsTasks();
+        assertSlideTitle("Why hold the lock");
 
-        assertSlideBodyContains("quick tour");
-
-        test(findInView(Button.class).withText("Next slide").single()).click();
-        runPendingSignalsTasks();
-        assertSlideBodyContains("Wake Lock API prevents");
-    }
-
-    @Test
-    void reachingLastSlideStopsPresentation() {
-        navigate(SlideshowView.class);
-        runPendingSignalsTasks();
-
-        Button start = findInView(Button.class).withText("Start presentation")
-                .single();
-        test(start).click();
-        runPendingSignalsTasks();
-
-        Button next = findInView(Button.class).withText("Next slide").single();
-        // 5 slides → click Next 5 times to fall off the end.
-        for (int i = 0; i < 5; i++) {
-            test(next).click();
-            runPendingSignalsTasks();
+        // Three more clicks reach the last of the five slides, one more
+        // goes past it.
+        for (int i = 0; i < 4; i++) {
+            test(button("Next slide")).click();
         }
-        // After advancing past the last slide, the presentation should stop.
-        Button stop = findInView(Button.class).withText("Stop").single();
-        assertFalse(stop.isEnabled(),
-                "Stop should be disabled once the deck ends");
-        assertTrue(start.isEnabled(),
-                "Start should be re-enabled after the deck ends");
+        runPendingSignalsTasks();
+
+        assertEquals(List.of(RELEASE), answerWakeLockCalls());
+        assertSlideTitle("End");
+        assertTrue(button("Start presentation").isEnabled());
+        assertFalse(button("Stop").isEnabled());
     }
 
     @Test
-    void badgeReflectsSimulatedLockState() {
+    void leavingMidPresentationReleasesTheLock() {
         navigate(SlideshowView.class);
-        runPendingSignalsTasks();
+        answerWakeLockCalls();
+        test(button("Start presentation")).click();
+        assertEquals(List.of(REQUEST), answerWakeLockCalls());
 
-        assertBadgeContains("Released");
+        navigate(HomeView.class);
 
-        test(findInView(Button.class).withText("Start presentation").single())
-                .click();
-        runPendingSignalsTasks();
-        // Server has called request(); the browser hasn't confirmed yet.
-        WakeLockTestSupport.simulateAcquired();
-        runPendingSignalsTasks();
-        assertBadgeContains("Holding");
-
-        test(findInView(Button.class).withText("Stop").single()).click();
-        runPendingSignalsTasks();
-        // Server has called release(); the browser confirms.
-        WakeLockTestSupport.simulateReleased();
-        runPendingSignalsTasks();
-        assertBadgeContains("Released");
+        assertEquals(List.of(RELEASE), answerWakeLockCalls());
     }
 
-    private void assertSlideBodyContains(String fragment) {
-        assertTrue(
-                findInView(Div.class).all().stream()
-                        .anyMatch(d -> d.getText() != null
-                                && d.getText().contains(fragment)),
-                "expected a slide body div containing \"" + fragment + "\"");
+    private Button button(String text) {
+        return findInView(Button.class).withText(text).single();
     }
 
-    private void assertBadgeContains(String fragment) {
-        assertTrue(
-                findInView(Span.class).all().stream()
-                        .anyMatch(s -> s.getText() != null
-                                && s.getText().contains(fragment)),
-                "expected status badge to contain \"" + fragment + "\"");
+    private void assertSlideTitle(String text) {
+        assertEquals(text, findInView(Div.class)
+                .withClassName("uc3-slide-title").single().getText());
+    }
+
+    private void assertBadge(String text) {
+        assertEquals(text, findInView(Span.class).withClassName("status-badge")
+                .single().getText());
     }
 }

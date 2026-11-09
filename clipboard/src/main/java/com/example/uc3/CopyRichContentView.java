@@ -16,13 +16,14 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC3 — Copy rich content (HTML with a plain-text fallback).
+ * UC3 — Copy rich content.
  * <p>
- * Writes both an HTML and a plain-text representation in a single clipboard
- * operation using {@link ClipboardContent}. Rich destinations (a doc editor, an
- * email composer) consume the HTML; terminals and code editors pick up the
- * plain-text fallback. The write happens client-side inside the click handler
- * so the user gesture is preserved.
+ * {@code Clipboard.onClick(button).write(content, onCopied, onError)} writes an
+ * HTML and a plain-text representation in a single clipboard operation, built
+ * with {@link ClipboardContent}. Rich destinations (a document editor, an email
+ * composer) use the HTML; terminals and code editors use the plain text. The
+ * write runs in the browser's click handler, so the user gesture is still
+ * valid.
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Copy rich content")
@@ -38,12 +39,12 @@ public class CopyRichContentView extends VerticalLayout {
             Visit Vaadin (https://vaadin.com) for Java web apps.""";
 
     public CopyRichContentView() {
-        add(new H1("UC3 — Copy rich content (HTML + plain-text fallback)"));
+        add(new H1("UC3 — Copy rich content"));
         add(new Paragraph(
-                "Both representations are written in a single clipboard "
-                        + "operation. Paste into a rich editor to see the HTML; "
-                        + "paste into a code editor or terminal to see the "
-                        + "plain text."));
+                "The button copies the text below twice in one clipboard "
+                        + "operation: as HTML and as plain text. Paste into a "
+                        + "rich editor to see the HTML; paste into a code "
+                        + "editor or terminal to see the plain text."));
 
         Div preview = new Div();
         preview.getElement().setProperty("innerHTML", HTML);
@@ -53,7 +54,7 @@ public class CopyRichContentView extends VerticalLayout {
         ClipboardContent content = ClipboardContent.create().text(PLAIN_TEXT)
                 .html(HTML);
         Clipboard.onClick(copyButton).write(content,
-                written -> Notification.show("Copied"),
+                copied -> Notification.show("Copied rich content"),
                 error -> Notification.show("Copy failed: " + error.message()));
 
         add(copyButton);

@@ -15,14 +15,14 @@ import com.example.uc16.PointerTrackerView;
 import com.example.uc17.AtomicResetView;
 import com.example.uc18.AutoSaveSignalView;
 import com.example.uc19.DynamicResponsiveStylingView;
-import com.example.uc2.SubmitAndDisableView;
+import com.example.uc2.ImageGalleryView;
 import com.example.uc20.DoubleClickOpenView;
 import com.example.uc21.ShortcutDownloadView;
 import com.example.uc22.KeyEventLogView;
 import com.example.uc23.KonamiCodeView;
 import com.example.uc24.DisableButtonGroupView;
-import com.example.uc3.LiveSignalCounterView;
-import com.example.uc4.JsTriggerView;
+import com.example.uc3.HiddenShareLinkView;
+import com.example.uc4.DoubleClickCopyView;
 import com.example.uc5.IdleWarningView;
 import com.example.uc6.NetworkStatusView;
 import com.example.uc7.CrossTabBroadcastView;
@@ -41,25 +41,21 @@ public class HomeView extends BaseHomeView {
 
     public HomeView() {
         super("Trigger / Action API — use cases",
-                "Each card below is one use case of the "
-                        + "com.vaadin.flow.component.trigger.internal API. A "
-                        + "Trigger fires on the client (a click, a keyboard "
-                        + "shortcut, a resize, an idle timeout, a cross-tab "
-                        + "broadcast, …), reads zero or more Inputs, and runs "
-                        + "one or more Actions — all inside the original "
-                        + "browser handler. The set focuses on the SPI itself "
-                        + "(custom Triggers, Actions, and Inputs against the "
-                        + "public abstract classes); basic clipboard or "
-                        + "fullscreen demos belong in the sibling clipboard/ "
-                        + "and fullscreen/ modules.");
+                "Each card below is one use case of Flow's trigger and "
+                        + "action API. A trigger fires in the browser on a "
+                        + "click, a keyboard shortcut, a resize, an idle "
+                        + "timeout or a message from another tab. It reads "
+                        + "inputs and runs actions inside the same browser "
+                        + "event, without a server round-trip. Many use cases "
+                        + "build their own triggers, actions and inputs.");
         addGroup("Browser APIs that need a gesture", VaadinIcon.HAND,
                 Accent.BLUE,
-                List.of(ShortcutSaveView.class, LiveSignalCounterView.class,
-                        JsTriggerView.class, DoubleClickOpenView.class,
+                List.of(ShortcutSaveView.class, HiddenShareLinkView.class,
+                        DoubleClickCopyView.class, DoubleClickOpenView.class,
                         ShortcutDownloadView.class));
         addGroup("Instant feedback in the browser", VaadinIcon.BOLT,
                 Accent.ORANGE,
-                List.of(SubmitAndDisableView.class, ScrollIntoViewView.class,
+                List.of(ImageGalleryView.class, ScrollIntoViewView.class,
                         HighlightView.class, AccessibleSaveView.class,
                         ClientFilterView.class, AtomicResetView.class,
                         DisableButtonGroupView.class));

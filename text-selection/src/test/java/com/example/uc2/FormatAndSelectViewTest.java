@@ -1,41 +1,38 @@
 package com.example.uc2;
 
+import java.util.Optional;
+
+import com.example.TextSelectionTestSupport.Requested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.textfield.TextField;
 
+import static com.example.TextSelectionTestSupport.clickAndReadSelection;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest
 @ViewPackages(classes = FormatAndSelectView.class)
 class FormatAndSelectViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersWithDefaultTitle() {
+    void formatSlugifiesTheValueAndSelectsAllOfIt() {
         navigate(FormatAndSelectView.class);
-
-        assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h -> "UC2 — Post-transform select-all".equals(h.getText())));
-        assertEquals("Hello, Awesome World!",
-                find(TextField.class).single().getValue());
-    }
-
-    @Test
-    void formatSlugifiesTheValue() {
-        navigate(FormatAndSelectView.class);
-
         TextField title = find(TextField.class).single();
         test(title).setValue("Hello, Awesome World!!!");
 
-        test(find(Button.class).withText("Format").single()).click();
-        runPendingSignalsTasks();
+        Optional<Requested> selection = clickAndReadSelection(
+                find(Button.class).withText("Format").single(), title);
 
         assertEquals("hello-awesome-world", title.getValue());
+        assertEquals(Optional.of(new Requested(0, Integer.MAX_VALUE)),
+                selection);
+        // Without autoselect, a later click into the field places the cursor
+        // instead of selecting everything again.
+        assertFalse(title.isAutoselect());
     }
 }

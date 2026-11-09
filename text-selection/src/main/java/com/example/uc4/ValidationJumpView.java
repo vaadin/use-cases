@@ -3,7 +3,6 @@ package com.example.uc4;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -22,11 +21,10 @@ import com.vaadin.flow.router.Route;
  * UC4 — Jump to validation error.
  * <p>
  * On submit the server validates the username and, on failure, selects the
- * exact substring that caused the failure so the user can immediately retype
- * it. This is one of the most user-respecting things selection control unlocks:
- * the user does not have to re-locate their mistake.
+ * first part of the value that breaks a rule with
+ * {@code setSelectionRange(start, end)}, so the user can retype it at once
+ * instead of looking for the mistake.
  */
-@UnreleasedApi("https://github.com/vaadin/flow-components/pull/10356")
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Jump to validation error")
 @UseCaseDescription("Pointing the user to the exact invalid part of a value")
@@ -39,15 +37,15 @@ public class ValidationJumpView extends VerticalLayout {
         add(new H1("UC4 — Jump to validation error"));
         add(new Paragraph(
                 "Usernames must be at least three characters and contain only "
-                        + "lowercase letters, digits, and underscores. On a "
-                        + "failed submit, the offending part of the value is "
-                        + "selected so you can retype just that part. Try "
-                        + "\"My Cool User\" to see the bad characters get "
-                        + "highlighted."));
+                        + "lowercase letters, digits and underscores. Press "
+                        + "Submit: the first invalid part of the value is "
+                        + "selected, so you can type over just that part. "
+                        + "Fix it and submit again to find the next one."));
 
         TextField username = new TextField("Username");
         username.setValue("My Cool User");
         username.setWidth("320px");
+        username.setMaxWidth("100%");
 
         Span status = new Span();
         status.addClassName("uc-status");
@@ -71,7 +69,6 @@ public class ValidationJumpView extends VerticalLayout {
                 status.addClassName("error");
                 return;
             }
-            username.deselect();
             status.setText("\"" + value + "\" is valid.");
             status.removeClassName("error");
             status.addClassName("success");
@@ -79,6 +76,7 @@ public class ValidationJumpView extends VerticalLayout {
 
         HorizontalLayout row = new HorizontalLayout(username, submit, status);
         row.setAlignItems(Alignment.END);
+        row.addClassName("uc-toolbar");
         add(row);
     }
 }

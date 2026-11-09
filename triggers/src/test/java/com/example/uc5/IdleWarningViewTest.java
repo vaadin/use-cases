@@ -1,16 +1,16 @@
 package com.example.uc5;
 
+import com.example.TriggerCallbacks;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -18,12 +18,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class IdleWarningViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersWithStatusBadge() {
-        navigate(IdleWarningView.class);
+    void badgeFollowsTheIdleStateTheBrowserReports() {
+        IdleWarningView view = navigate(IdleWarningView.class);
+        assertEquals("UC5 — Idle warning",
+                findInView(H1.class).single().getText());
+        Span badge = findInView(Span.class).id("status");
+        assertEquals("active", badge.getText());
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC5 — Idle warning".equals(h.getText())));
-        assertEquals("active", findInView(Span.class).id("status").getText());
-        assertNotNull(findInView(Button.class).id("reset"));
+        TriggerCallbacks.fire(view, true);
+        runPendingSignalsTasks();
+        assertEquals("idle", badge.getText());
+        assertTrue(badge.hasClassName("uc5-idle"));
+
+        TriggerCallbacks.fire(view, false);
+        runPendingSignalsTasks();
+        assertEquals("active", badge.getText());
+        assertFalse(badge.hasClassName("uc5-idle"));
     }
 }

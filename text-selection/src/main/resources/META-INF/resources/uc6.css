@@ -1,30 +1,45 @@
 .uc6-view {
-    .uc-info-grid {
+    .uc6-row {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .uc6-row > .uc-textarea {
+        flex: 3 1 20rem;
+    }
+
+    .uc6-panel {
+        flex: 1 1 16rem;
+    }
+
+    .uc6-info-grid {
         display: grid;
         grid-template-columns: max-content 1fr;
         gap: 0.25rem 1rem;
         align-items: baseline;
-        font-size: 0.95rem;
+        font-size: var(--aura-font-size-s);
     }
 
-    .uc-info-grid > .label {
+    .uc6-label {
         color: var(--vaadin-text-color-secondary);
     }
 
-    .uc-info-grid > .value {
-        font-weight: 600;
+    .uc6-value {
+        font-weight: var(--aura-font-weight-semibold);
         font-family: monospace;
     }
 
-    .uc-mono {
+    .uc6-preview {
         font-family: monospace;
-        font-size: 0.9rem;
+        font-size: var(--aura-font-size-s);
         background: var(--vaadin-background-container);
         border: 1px solid var(--vaadin-border-color);
         border-radius: var(--vaadin-radius-m);
-        padding: 0.4rem 0.6rem;
+        padding: var(--vaadin-padding-s);
         white-space: pre-wrap;
         word-break: break-word;
         min-height: 1.2em;
+        width: 100%;
+        box-sizing: border-box;
     }
 }
