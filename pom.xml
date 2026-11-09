@@ -28,7 +28,6 @@
         <module>collaboration</module>
         <module>date-range-picker</module>
         <module>page-visibility</module>
-        <module>pdf-viewer</module>
         <module>reporting</module>
         <module>printing</module>
         <module>route-hierarchy</module>
