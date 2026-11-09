@@ -46,7 +46,8 @@ framework internals. It sets the permission with
 `UIInternals#dumpPendingJavaScriptInvocations`, after running
 `StateTree#runExecutionsBeforeClientResponse` (calls through a JavaScript
 definition are queued only before a response). It reports clicks, closes and
-failures through each notification's `ReturnChannelRegistration`. Like the
+failures through the `ReturnChannelRegistration` all notifications of a UI
+share, with the notification's key first, as the browser does. Like the
 browser, it refuses to show without permission and closes a notification
 that a new one with the same tag replaces. `PageVisibilityTestSupport` drives
 the package-private `Page#setPageVisibility` through reflection.
