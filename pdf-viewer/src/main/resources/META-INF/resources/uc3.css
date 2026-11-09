@@ -1,0 +1,7 @@
+.uc3-viewer {
+    height: 70vh;
+}
+
+.uc3-message {
+    margin-top: var(--vaadin-padding-m, 1rem);
+}

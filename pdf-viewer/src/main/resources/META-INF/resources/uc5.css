@@ -1,0 +1,9 @@
+.uc5-viewer {
+    height: 70vh;
+}
+
+.uc5-decision {
+    display: block;
+    margin-top: var(--vaadin-padding-m, 1rem);
+    font-weight: 600;
+}

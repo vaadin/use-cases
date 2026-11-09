@@ -1,0 +1,19 @@
+.uc11-viewer {
+    height: 70vh;
+    width: 100%;
+}
+
+.uc11-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--vaadin-gap-s, 0.5rem);
+}
+
+.uc11-chapter {
+    font-weight: 600;
+}
+
+.uc11-bar vaadin-button {
+    margin-inline-start: auto;
+}

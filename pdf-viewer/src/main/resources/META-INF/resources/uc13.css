@@ -1,0 +1,8 @@
+.uc13-viewer {
+    height: 70vh;
+    width: 100%;
+}
+
+.uc13-status {
+    color: var(--vaadin-text-color-secondary);
+}

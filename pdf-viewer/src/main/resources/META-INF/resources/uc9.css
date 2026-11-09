@@ -1,0 +1,14 @@
+.uc9-viewer {
+    height: 70vh;
+}
+
+/* The order list needs room for its four columns. */
+.uc9-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+@media (max-width: 800px) {
+    .uc9-layout {
+        grid-template-columns: 1fr;
+    }
+}
