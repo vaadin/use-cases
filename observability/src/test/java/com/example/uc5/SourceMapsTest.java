@@ -1,10 +1,14 @@
 package com.example.uc5;
 
+import java.util.List;
+
 import com.atlassian.sourcemap.WritableSourceMap;
+import com.atlassian.sourcemap.WritableSourceMapImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -60,9 +64,11 @@ class SourceMapsTest {
                 "a source without a column is not a frame");
         // A real map, reached through the parent folder: only the chunk
         // name's ban on slashes keeps this from resolving.
-        assertTrue(SourceMaps.resolve(chunk.replace("/VAADIN/build/",
-                "/VAADIN/build/../build/") + ":1:" + TestSourceMaps.CHART_FROM)
-                .isEmpty(), "a chunk name cannot leave the build folder");
+        assertTrue(
+                SourceMaps.resolve(chunk.replace("/VAADIN/build/",
+                        "/VAADIN/build/../build/") + ":1:"
+                        + TestSourceMaps.CHART_FROM).isEmpty(),
+                "a chunk name cannot leave the build folder");
     }
 
     @Test
@@ -84,11 +90,24 @@ class SourceMapsTest {
     }
 
     @Test
-    void aPositionOutsideTheMappedCodeHasNoOriginal() {
+    void aPositionBeforeTheFirstMappingHasNoOriginal() {
         assertTrue(SourceMaps.resolve(chunk + ":1:10").isEmpty(),
                 "before the first mapping there is nothing to map to");
-        assertTrue(SourceMaps.resolve(chunk + ":2:1").isEmpty(),
-                "the chunk is one line; there is no line 2 to map");
+    }
+
+    @Test
+    void aMapWithoutSourcesContentStillGivesTheLocation() {
+        WritableSourceMap map = new WritableSourceMapImpl.Builder()
+                .withSources(List.of(TestSourceMaps.SOURCE_AS_BUILT)).build();
+        map.addMapping(0, 10, 4, 2, TestSourceMaps.SOURCE_AS_BUILT);
+        String noContent = "https://observability-cases.fly.dev"
+                + TestSourceMaps.write("no-content-test.js", map);
+
+        SourceMaps.Original original = SourceMaps.resolve(noContent + ":1:11")
+                .orElseThrow();
+
+        assertEquals(TestSourceMaps.SOURCE + ":5:3", original.location());
+        assertNull(original.code(), "there is no source to quote");
     }
 
     @Test
@@ -108,7 +127,7 @@ class SourceMapsTest {
         assertEquals(TestSourceMaps.SOURCE + ":1:1",
                 SourceMaps.resolve(twoLines + ":2:51").orElseThrow().location(),
                 "while line 2's own mapping still resolves");
-        assertEquals(TestSourceMaps.SOURCE + ":5:3", SourceMaps
-                .resolve(twoLines + ":1:20").orElseThrow().location());
+        assertTrue(SourceMaps.resolve(twoLines + ":3:1").isEmpty(),
+                "a line without mappings does not borrow line 2's");
     }
 }
