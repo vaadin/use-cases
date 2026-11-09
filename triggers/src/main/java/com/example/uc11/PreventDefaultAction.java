@@ -1,8 +1,14 @@
 package com.example.uc11;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsCalledWith;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 
 /**
  * Calls {@code event.preventDefault()} on the trigger's event. Wire it as the
@@ -20,6 +26,14 @@ public final class PreventDefaultAction extends Action {
 
     @Override
     protected JsFunction toJs(Trigger trigger) {
-        return JsFunction.of("event.preventDefault()").withArguments("event");
+        return JsSnippets.of(PreventDefaultJs.class).preventDefault();
+    }
+
+    @JsDefinition
+    private interface PreventDefaultJs extends Serializable {
+
+        @JsExpression("event.preventDefault()")
+        @JsCalledWith("event")
+        JsFunction preventDefault();
     }
 }

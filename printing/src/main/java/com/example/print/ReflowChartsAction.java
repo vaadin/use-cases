@@ -1,11 +1,16 @@
 package com.example.print;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 
 /**
  * Redraws every chart in a subtree at the width it currently has.
@@ -34,9 +39,17 @@ public class ReflowChartsAction extends Action {
 
     @Override
     protected JsFunction toJs(Trigger trigger) {
-        return JsFunction.of("""
+        return JsSnippets.of(ReflowChartsJs.class)
+                .reflowCharts(root.getElement());
+    }
+
+    @JsDefinition
+    private interface ReflowChartsJs extends Serializable {
+
+        @JsExpression("""
                 for (const chart of $0.querySelectorAll('vaadin-chart')) {
                     chart.configuration?.reflow();
-                }""", root.getElement());
+                }""")
+        JsFunction reflowCharts(Element element);
     }
 }

@@ -1,11 +1,16 @@
 package com.example.uc17;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 
 /**
  * Fires a {@code change} event on the target, so that a field synchronizes a
@@ -24,7 +29,14 @@ public class FireChangeAction extends Action {
 
     @Override
     protected JsFunction toJs(Trigger trigger) {
-        return JsFunction.of("$0.dispatchEvent(new Event('change'))",
-                target.getElement());
+        return JsSnippets.of(FireChangeJs.class)
+                .fireChange(target.getElement());
+    }
+
+    @JsDefinition
+    private interface FireChangeJs extends Serializable {
+
+        @JsExpression("$0.dispatchEvent(new Event('change'))")
+        JsFunction fireChange(Element target);
     }
 }

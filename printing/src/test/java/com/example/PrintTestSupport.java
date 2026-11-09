@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsCall;
 
 /**
  * What the views asked the browser to do. Printing itself cannot be observed
@@ -102,8 +103,13 @@ public final class PrintTestSupport {
 
     private static Stream<String> text(Object value) {
         if (value instanceof JsFunction function) {
-            return Stream.concat(Stream.of(function.getBody()), function
-                    .getCaptures().stream().flatMap(PrintTestSupport::text));
+            // A function declared by a JavaScript definition has no body;
+            // its JavaScript is the declared expression.
+            JsCall declared = function.getDeclaredCall();
+            String body = declared != null ? declared.getExpression()
+                    : function.getBody();
+            return Stream.concat(Stream.of(body), function.getCaptures()
+                    .stream().flatMap(PrintTestSupport::text));
         }
         return value instanceof String string ? Stream.of(string)
                 : Stream.empty();

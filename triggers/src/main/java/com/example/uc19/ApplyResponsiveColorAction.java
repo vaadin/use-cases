@@ -1,5 +1,6 @@
 package com.example.uc19;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -7,6 +8,10 @@ import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsCalledWith;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 
 /**
  * Custom action that picks one of three color pickers' current values based on
@@ -46,13 +51,22 @@ public class ApplyResponsiveColorAction extends Action {
 
     @Override
     protected JsFunction toJs(Trigger trigger) {
-        return JsFunction.of("""
+        return JsSnippets.of(ResponsiveColorJs.class).applyColor(target,
+                smallPicker, mediumPicker, largePicker, narrowMax, wideMin);
+    }
+
+    @JsDefinition
+    private interface ResponsiveColorJs extends Serializable {
+
+        @JsExpression("""
                 const w = (event && typeof event.width === 'number')
                         ? event.width
                         : $0.getBoundingClientRect().width;
                 const c = w < $4 ? $1.value : w >= $5 ? $3.value : $2.value;
-                $0.style.backgroundColor = c;""", target, smallPicker,
-                mediumPicker, largePicker, narrowMax, wideMin)
-                .withArguments("event");
+                $0.style.backgroundColor = c;""")
+        @JsCalledWith("event")
+        JsFunction applyColor(Element target, Element smallPicker,
+                Element mediumPicker, Element largePicker, int narrowMax,
+                int wideMin);
     }
 }

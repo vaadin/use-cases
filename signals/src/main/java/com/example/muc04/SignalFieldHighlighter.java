@@ -1,5 +1,6 @@
 package com.example.muc04;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
@@ -13,6 +14,8 @@ import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.fieldhighlighter.FieldHighlighterInitializer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
 
@@ -113,7 +116,7 @@ public class SignalFieldHighlighter extends FieldHighlighterInitializer {
      *            the users to display
      */
     public static void setUsers(Element element, Collection<User> users) {
-        element.executeJs(FH_CLASS + ".setUsers(this, $0)", toJson(users));
+        element.executeJs(FieldHighlighterJs.class).setUsers(toJson(users));
     }
 
     /**
@@ -125,7 +128,7 @@ public class SignalFieldHighlighter extends FieldHighlighterInitializer {
      *            the user to add
      */
     public static void addUser(Element element, User user) {
-        element.executeJs(FH_CLASS + ".addUser(this, $0)", toJson(user));
+        element.executeJs(FieldHighlighterJs.class).addUser(toJson(user));
     }
 
     /**
@@ -137,7 +140,7 @@ public class SignalFieldHighlighter extends FieldHighlighterInitializer {
      *            the user to remove
      */
     public static void removeUser(Element element, User user) {
-        element.executeJs(FH_CLASS + ".removeUser(this, $0)", toJson(user));
+        element.executeJs(FieldHighlighterJs.class).removeUser(toJson(user));
     }
 
     private static ArrayNode toJson(Collection<User> users) {
@@ -151,5 +154,18 @@ public class SignalFieldHighlighter extends FieldHighlighterInitializer {
         node.put("name", user.name());
         node.put("colorIndex", user.colorIndex());
         return node;
+    }
+
+    @JsDefinition
+    private interface FieldHighlighterJs extends Serializable {
+
+        @JsExpression(FH_CLASS + ".setUsers(this, $0)")
+        void setUsers(ArrayNode users);
+
+        @JsExpression(FH_CLASS + ".addUser(this, $0)")
+        void addUser(ObjectNode user);
+
+        @JsExpression(FH_CLASS + ".removeUser(this, $0)")
+        void removeUser(ObjectNode user);
     }
 }

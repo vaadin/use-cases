@@ -1,9 +1,13 @@
 package com.example;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadDropZone;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -64,11 +68,7 @@ public final class MissingAPI {
      * the real method.
      */
     public static void cancelUpload(Upload upload) {
-        upload.getElement().executeJs("""
-                this.files.filter(file => file.uploading).forEach(file =>
-                    this.dispatchEvent(new CustomEvent('file-abort',
-                        { detail: { file } })));
-                """);
+        upload.getElement().executeJs(UploadJs.class).cancelUploads();
     }
 
     /**
@@ -88,8 +88,26 @@ public final class MissingAPI {
         Element element = dropZone.getElement();
         // Runs again on every attach, in case Flow recreated the element.
         return dropZone.whenAttached(ui -> {
-            element.executeJs("window.fileDropGuard.install(this)");
-            return () -> element.executeJs("window.fileDropGuard.remove(this)");
+            element.executeJs(UploadJs.class).installFileDropGuard();
+            return () -> element.executeJs(UploadJs.class)
+                    .removeFileDropGuard();
         });
+    }
+
+    @JsDefinition
+    private interface UploadJs extends Serializable {
+
+        @JsExpression("""
+                this.files.filter(file => file.uploading).forEach(file =>
+                    this.dispatchEvent(new CustomEvent('file-abort',
+                        { detail: { file } })));
+                """)
+        void cancelUploads();
+
+        @JsExpression("window.fileDropGuard.install(this)")
+        void installFileDropGuard();
+
+        @JsExpression("window.fileDropGuard.remove(this)")
+        void removeFileDropGuard();
     }
 }

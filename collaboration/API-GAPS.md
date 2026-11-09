@@ -105,7 +105,7 @@ web component also only flashes a user's name tag for two seconds and then
 shows it on hover; there is no option to keep it visible while the outline is.
 **Workaround used:** `SignalFieldHighlighter` extends
 `FieldHighlighterInitializer` to inherit its `@JsModule` and `@NpmPackage`,
-and calls `setUsers` through `executeJs`. To keep the name tags visible it
+and calls `setUsers` through a JavaScript definition (`@JsDefinition`). To keep the name tags visible it
 opens them itself and patches the private tags element so they stay open
 while anybody is in the field. Browserless tests cannot see any of this,
 because it runs in the browser and there is no field highlighter tester, so

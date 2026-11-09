@@ -1,10 +1,12 @@
 package com.example.uc5;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import com.example.acme.DemoRig;
 import com.example.acme.InsightCard;
@@ -39,8 +41,11 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -324,11 +329,13 @@ public class ConnectionInsightsView extends VerticalLayout {
         // browser. Nothing about either failure is server-side, which is the
         // whole point of the story.
         Button stock = new Button("Show stock levels",
-                event -> raise(SHOW_STOCK, "Rendering the stock chart failed"));
+                event -> raise(PickingJs::showStockLevels,
+                        "Rendering the stock chart failed"));
         stock.setId("show-stock");
 
-        Button sync = new Button("Sync stock from the API", event -> raise(
-                SYNC_STOCK, "GET /api/warehouse/stock failed"));
+        Button sync = new Button("Sync stock from the API",
+                event -> raise(PickingJs::syncStock,
+                        "GET /api/warehouse/stock failed"));
         sync.setId("sync-stock");
 
         return new AppWindow("Acme Supply — Warehouse Picking",
@@ -392,7 +399,7 @@ public class ConnectionInsightsView extends VerticalLayout {
     private void simulate(String state, String message) {
         int millis = outageMillis();
         investigation.reveal();
-        getElement().executeJs(SIMULATE, state, millis);
+        getElement().executeJs(PickingJs.class).simulate(state, millis);
         Notification.show(message.formatted(millis / 1000d));
     }
 
@@ -412,10 +419,11 @@ public class ConnectionInsightsView extends VerticalLayout {
      * call's own return value — the ordering UC2's flush button relies on. If
      * it ever does not hold, the next pick refreshes the readout anyway.
      */
-    private void raise(String script, String message) {
+    private void raise(Function<PickingJs, PendingJavaScriptResult> feature,
+            String message) {
         investigation.reveal();
-        getElement().executeJs(script)
-                .then(thrown -> getElement().executeJs(FLUSH)
+        feature.apply(getElement().executeJs(PickingJs.class))
+                .then(thrown -> getElement().executeJs(PickingJs.class).flush()
                         .then(flushed -> investigation.refreshNow()));
         Notification.show(message + " — in the browser. Nothing was thrown on "
                 + "the server, so nothing was logged there.");
@@ -789,5 +797,21 @@ public class ConnectionInsightsView extends VerticalLayout {
                 "https://github.com/vaadin/use-cases/blob/main/observability/API-GAPS.md",
                 "See API-GAPS.md"));
         return caveats;
+    }
+
+    @JsDefinition
+    private interface PickingJs extends Serializable {
+
+        @JsExpression(SIMULATE)
+        void simulate(String state, int millis);
+
+        @JsExpression(SHOW_STOCK)
+        PendingJavaScriptResult showStockLevels();
+
+        @JsExpression(SYNC_STOCK)
+        PendingJavaScriptResult syncStock();
+
+        @JsExpression(FLUSH)
+        PendingJavaScriptResult flush();
     }
 }
