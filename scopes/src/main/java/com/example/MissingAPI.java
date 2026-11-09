@@ -142,7 +142,8 @@ public final class MissingAPI {
             return withBeanStore(store -> store.tabId);
         }
 
-        private static <T> T withBeanStore(Function<TabBeanStore, T> action) {
+        private static <T extends @Nullable Object> T withBeanStore(
+                Function<TabBeanStore, T> action) {
             UI ui = UI.getCurrentOrThrow();
             VaadinSession session = ui.getSession();
             if (session == null) {
