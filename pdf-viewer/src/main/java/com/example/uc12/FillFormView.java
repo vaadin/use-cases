@@ -107,16 +107,28 @@ public class FillFormView extends VerticalLayout {
 
     private void fillIn() {
         boolean complete = true;
+        boolean writable = true;
         for (AbstractField<?, ?> field : fields()) {
-            boolean empty = field.isEmpty()
-                    || field.getValue() instanceof String text
-                            && text.isBlank();
-            ((HasValidation) field).setErrorMessage("Required");
-            ((HasValidation) field).setInvalid(empty);
-            complete &= !empty;
+            String error = null;
+            if (field.isEmpty() || field.getValue() instanceof String text
+                    && text.isBlank()) {
+                error = "Required";
+                complete = false;
+            } else if (field.getValue() instanceof String text
+                    && !AddressChangeForm.canHold(text)) {
+                error = "The form can not hold some of these letters";
+                writable = false;
+            }
+            ((HasValidation) field).setErrorMessage(error);
+            ((HasValidation) field).setInvalid(error != null);
         }
         if (!complete) {
             status.setText("Answer every question first.");
+            return;
+        }
+        if (!writable) {
+            status.setText("The PDF form only holds Western European letters. "
+                    + "Write the marked answers without the others.");
             return;
         }
         Map<Field, String> values = new EnumMap<>(Field.class);

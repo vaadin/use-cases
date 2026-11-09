@@ -124,6 +124,28 @@ public final class AddressChangeForm {
     }
 
     /**
+     * Whether the form's fields can hold a text. They use the standard
+     * Helvetica font with WinAnsi encoding, which has Western European letters
+     * only: PDFBox can not fill in a field with, for example, "Ł" or Cyrillic
+     * letters.
+     *
+     * @param text
+     *            the answer, with line breaks for a multi-line field
+     * @return whether every character of the text can be written
+     */
+    static boolean canHold(String text) {
+        PDType1Font font = new PDType1Font(FontName.HELVETICA);
+        try {
+            for (String line : text.split("\\R")) {
+                font.encode(line);
+            }
+            return true;
+        } catch (IllegalArgumentException | IOException e) {
+            return false;
+        }
+    }
+
+    /**
      * Fills in the form and flattens it.
      *
      * @param values

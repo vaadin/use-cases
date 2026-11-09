@@ -9,6 +9,7 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -37,8 +38,9 @@ class FillFormViewTest extends SpringBrowserlessTest {
         test(fillButton()).click();
 
         assertNotEquals(blank, src());
-        assertTrue(src().endsWith("change-of-address-AP-12.pdf"), src());
         assertTrue(status().contains("with your answers"), status());
+        assertTrue(download().getHref().endsWith("change-of-address-AP-12.pdf"),
+                download().getHref());
     }
 
     @Test
@@ -46,14 +48,43 @@ class FillFormViewTest extends SpringBrowserlessTest {
         navigate(FillFormView.class);
         String blank = src();
         test(textField("Full name")).setValue("Maria Lind");
+        test(textField("Customer number")).setValue("   ");
 
         test(fillButton()).click();
 
         assertEquals(blank, src());
+        assertTrue(findInView(Anchor.class).withText("Download the filled form")
+                .all().isEmpty(), "Nothing to download yet");
         assertFalse(textField("Full name").isInvalid());
-        assertTrue(textField("Customer number").isInvalid());
+        assertTrue(textField("Customer number").isInvalid(),
+                "Only spaces is no answer");
         assertTrue(findInView(DatePicker.class).single().isInvalid());
         assertEquals("Answer every question first.", status());
+    }
+
+    @Test
+    void lettersTheFormCanNotHoldAreMarkedAndTheFormIsNotFilled() {
+        navigate(FillFormView.class);
+        String blank = src();
+        test(textField("Full name")).setValue("Łukasz Nowak");
+        test(textField("Customer number")).setValue("AP-448210");
+        test(textArea("Old address")).setValue("Hafenstrasse 12\nHamburg");
+        test(textArea("New address")).setValue("Kauppakatu 3\nJyväskylä");
+        test(findInView(DatePicker.class).single())
+                .setValue(LocalDate.of(2026, 11, 15));
+
+        test(fillButton()).click();
+
+        assertEquals(blank, src());
+        assertTrue(textField("Full name").isInvalid());
+        assertFalse(textArea("New address").isInvalid(),
+                "Western European letters fit");
+        assertTrue(status().contains("Western European letters"), status());
+    }
+
+    private Anchor download() {
+        return findInView(Anchor.class).withText("Download the filled form")
+                .single();
     }
 
     private TextField textField(String label) {

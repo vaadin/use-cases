@@ -91,6 +91,20 @@ class ShowOnceViewTest extends SpringBrowserlessTest {
     }
 
     @Test
+    void aBriefingOpenedElsewhereMeanwhileIsNotShown() {
+        ShowOnceView view = navigate(ShowOnceView.class);
+        test(button("Open the briefing")).click();
+        // Another tab fetched the file first, so this request gets 410 Gone.
+        document().take();
+
+        new PdfViewerTester(viewer(view)).fail("network");
+
+        assertFalse(viewer(view).isVisible());
+        assertFalse(button("Open the briefing").isEnabled());
+        assertTrue(status().startsWith("You opened the briefing at"), status());
+    }
+
+    @Test
     void theDemoControlsLetTheBriefingBeOpenedAgain() {
         document().take();
         navigate(ShowOnceView.class);

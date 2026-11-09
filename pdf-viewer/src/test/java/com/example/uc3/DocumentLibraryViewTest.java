@@ -44,6 +44,9 @@ class DocumentLibraryViewTest extends SpringBrowserlessTest {
                 .single();
         test(grid).select(row);
         assertNotEquals(firstSrc, viewer.getElement().getAttribute("src"));
+        assertEquals(DocumentLibraryView.FILES.get(row).name(),
+                viewer.getElement().getProperty("headerTitle"),
+                "The header shows the library's name for the file");
 
         new PdfViewerTester(viewer).fail(reason);
 
