@@ -1,0 +1,19 @@
+.uc10-viewer {
+    height: 70vh;
+    width: 100%;
+}
+
+.uc10-status {
+    color: var(--vaadin-text-color-secondary);
+}
+
+.uc10-demo {
+    border: 1px dashed var(--vaadin-border-color);
+    border-radius: var(--vaadin-radius-m);
+    padding: var(--vaadin-padding-m, 1rem);
+}
+
+.uc10-demo h2 {
+    font-size: var(--aura-font-size-m);
+    margin: 0;
+}
