@@ -1,4 +1,4 @@
-package com.example.uc6;
+package com.example.uc3;
 
 import com.example.tour.TourTestSupport;
 import org.junit.jupiter.api.Test;
@@ -82,6 +82,6 @@ class LearnByDoingViewTest extends TourTestSupport {
 
     private ComponentQuery<ListItem> tasks() {
         return find(ListItem.class).from(findInView(UnorderedList.class)
-                .withClassName("uc6-tasks").single());
+                .withClassName("uc3-tasks").single());
     }
 }

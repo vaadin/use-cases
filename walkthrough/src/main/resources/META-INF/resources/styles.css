@@ -127,7 +127,7 @@ vaadin-popover.tour-popover::part(overlay) {
     box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.55);
 }
 
-/* UC4: the "New" badge on features the user has not seen yet. */
+/* UC1: the "New" badge on features the user has not seen yet. */
 .tour-new {
     position: relative;
     overflow: visible;
@@ -147,7 +147,7 @@ vaadin-popover.tour-popover::part(overlay) {
     pointer-events: none;
 }
 
-/* UC8: a pulsing dot next to a new feature. */
+/* UC5: a pulsing dot next to a new feature. */
 vaadin-button.hotspot {
     box-sizing: border-box;
     min-width: 0;
@@ -176,16 +176,16 @@ vaadin-button.hotspot {
     }
 }
 
-/* UC5: the filter bar. */
-.uc5-filters {
+/* UC2: the filter bar. */
+.uc2-filters {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
     gap: var(--vaadin-gap-m);
 }
 
-/* UC6: the task form and list. */
-.uc6-form {
+/* UC3: the task form and list. */
+.uc3-form {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
@@ -193,29 +193,29 @@ vaadin-button.hotspot {
     margin-top: var(--vaadin-gap-m);
 }
 
-.uc6-list h2 {
+.uc3-list h2 {
     font-size: var(--aura-font-size-l);
 }
 
-/* UC7: the links between the three pages and their content. */
-.uc7-pages {
+/* UC4: the links between the three pages and their content. */
+.uc4-pages {
     display: flex;
     flex-wrap: wrap;
     gap: var(--vaadin-gap-m);
 }
 
-.uc7-pages a[highlight] {
+.uc4-pages a[highlight] {
     font-weight: var(--aura-font-weight-semibold);
     text-decoration: underline;
 }
 
-.uc7-kpis {
+.uc4-kpis {
     display: flex;
     flex-wrap: wrap;
     gap: var(--vaadin-gap-m);
 }
 
-.uc7-kpi {
+.uc4-kpi {
     display: flex;
     flex-direction: column;
     padding: var(--vaadin-padding-m);
@@ -224,32 +224,32 @@ vaadin-button.hotspot {
     background: var(--vaadin-background-color);
 }
 
-.uc7-kpi-value {
+.uc4-kpi-value {
     font-size: var(--aura-font-size-xl);
     font-weight: var(--aura-font-weight-semibold);
 }
 
-.uc7-report {
+.uc4-report {
     display: flex;
     flex-direction: column;
     gap: var(--vaadin-gap-s);
     max-width: 24rem;
 }
 
-.uc7-bar {
+.uc4-bar {
     display: grid;
     grid-template-columns: 3rem minmax(0, 1fr);
     align-items: center;
 }
 
-.uc7-bar-fill {
+.uc4-bar-fill {
     height: 1rem;
     border-radius: var(--vaadin-radius-s);
     background: var(--aura-accent-color);
 }
 
-/* UC9: a form long enough to need scrolling. */
-.uc9-form {
+/* UC6: a form long enough to need scrolling. */
+.uc6-form {
     display: flex;
     flex-direction: column;
     gap: var(--vaadin-gap-l);

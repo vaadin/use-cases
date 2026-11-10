@@ -7,6 +7,10 @@
  * selected yet. Opening from the server in the same round trip therefore
  * fails (API-GAPS.md #6), so the popover waits here, one animation frame at
  * a time, until its target has a size.
+ *
+ * Nor does a popover bring its target on screen (API-GAPS.md #3): a target
+ * below the fold, such as a button further down a long view, is scrolled to
+ * the middle of the screen first, so the step does not open out of sight.
  */
 type TourPopover = HTMLElement & {
   target?: HTMLElement;
@@ -22,6 +26,9 @@ function showStep(popover: TourPopover) {
     }
     const rect = popover.target?.getBoundingClientRect();
     if (rect && (rect.width > 0 || rect.height > 0)) {
+      if (rect.top < 0 || rect.bottom > window.innerHeight) {
+        popover.target!.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
       popover.opened = true;
     } else {
       requestAnimationFrame(open);

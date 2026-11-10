@@ -1,4 +1,4 @@
-package com.example.uc7;
+package com.example.uc4;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,7 +7,7 @@ import com.example.common.BuiltWith;
 import com.example.tour.Tour;
 import com.example.tour.TourPopover;
 import com.example.tour.TourStep;
-import com.example.uc7.CrossViewTour.PageStep;
+import com.example.uc4.CrossViewTour.PageStep;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -22,7 +22,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.RouterLink;
 
 /**
- * What the three pages of UC7 share: the intro, the links between the pages,
+ * What the three pages of UC4 share: the intro, the links between the pages,
  * the tour controls and the popover that shows a step of the
  * {@link CrossViewTour} when the step is on this page.
  */
@@ -39,7 +39,7 @@ abstract class CrossViewPage extends VerticalLayout {
         CrossViewTour tour = CrossViewTour.of(UI.getCurrentOrThrow());
         popover = new TourPopover(tour::back, tour::next, tour::skip);
 
-        add(new H1("UC7 — Tour across views"));
+        add(new H1("UC4 — Tour across views"));
         add(new Paragraph("A tour often has to show more than one page. Start "
                 + "the tour on the dashboard: when a step is on another page, "
                 + "the tour opens that page and continues there. The links "
@@ -56,7 +56,7 @@ abstract class CrossViewPage extends VerticalLayout {
                 new RouterLink("Dashboard", CrossViewTourView.class),
                 new RouterLink("Orders", CrossViewOrdersView.class),
                 new RouterLink("Reports", CrossViewReportsView.class));
-        pages.addClassName("uc7-pages");
+        pages.addClassName("uc4-pages");
         addTarget(PAGES, pages);
 
         content.add(new H2(pageName));
@@ -71,8 +71,8 @@ abstract class CrossViewPage extends VerticalLayout {
                         + "next page's components do not exist before the tour opens it.")
                 .point("When a step is on another page, the tour navigates; the new page "
                         + "shows the step when it is attached.")
-                .java("uc7/CrossViewTour").java("uc7/CrossViewPage")
-                .java("uc7/CrossViewTourView"));
+                .java("uc4/CrossViewTour").java("uc4/CrossViewPage")
+                .java("uc4/CrossViewTourView"));
 
         whenAttached(ui -> {
             tour.attach(this);

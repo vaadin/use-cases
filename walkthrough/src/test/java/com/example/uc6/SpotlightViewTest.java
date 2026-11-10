@@ -1,4 +1,4 @@
-package com.example.uc9;
+package com.example.uc6;
 
 import com.example.tour.TourTestSupport;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.example.uc9;
+package com.example.uc6;
 
 import java.util.List;
 
@@ -10,7 +10,6 @@ import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ScrollIntoViewOption;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -29,7 +28,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC9 — Spotlight.
+ * UC6 — Spotlight.
  * <p>
  * A tour that dims everything but the current target and blocks the rest of the
  * page. Two of its targets are not on screen at first: the app's side
@@ -38,10 +37,10 @@ import com.vaadin.flow.router.Route;
  * the drawer (and closes it again on the next step) and scrolls the button into
  * view before it points at them.
  */
-@Route(value = "uc9", layout = MainLayout.class)
-@PageTitle("UC9 — Spotlight")
+@Route(value = "uc6", layout = MainLayout.class)
+@PageTitle("UC6 — Spotlight")
 @UseCaseDescription("Dimming all but the target, and revealing targets that are off screen")
-@Menu(order = 9, title = "UC9 — Spotlight")
+@Menu(order = 6, title = "UC6 — Spotlight")
 public class SpotlightView extends VerticalLayout {
 
     private final Tour tour = new Tour(List.of()).withSpotlight();
@@ -50,7 +49,7 @@ public class SpotlightView extends VerticalLayout {
     private @Nullable AppLayout openedDrawer;
 
     public SpotlightView() {
-        add(new H1("UC9 — Spotlight"));
+        add(new H1("UC6 — Spotlight"));
         add(new Paragraph("A spotlight makes sure the user looks at the "
                 + "right place. Start the tour: the page dims around each "
                 + "target. The first target is the app menu — on a phone, or "
@@ -70,7 +69,7 @@ public class SpotlightView extends VerticalLayout {
         Div form = new Div(new TextField("Name"), email, new TextField("Phone"),
                 new TextField("Street"), new TextField("City"),
                 new TextField("Country"), new TextArea("Notes"), save);
-        form.addClassName("uc9-form");
+        form.addClassName("uc6-form");
 
         add(controls, form);
         add(new BuiltWith("A modal popover and a shadow around the target")
@@ -78,8 +77,9 @@ public class SpotlightView extends VerticalLayout {
                         + "can not be clicked; the target's own large shadow dims the page.")
                 .point("The step for the menu opens the drawer when it is closed, and "
                         + "the next step closes it again.")
-                .point("The step for the button scrolls it into view first.")
-                .java("uc9/SpotlightView").java("tour/TourPopover")
+                .point("Like every step, the step for the button scrolls its target "
+                        + "into view before it opens.")
+                .java("uc6/SpotlightView").java("tour/TourPopover")
                 .css("styles.css"));
 
         tour.addEndListener(state -> closeDrawerIfOpened());
@@ -110,9 +110,7 @@ public class SpotlightView extends VerticalLayout {
                         .beforeShow(this::closeDrawerIfOpened),
                 TourStep.of(save, "Save when you are done",
                         "Nothing is saved until you press this button.")
-                        .at(PopoverPosition.TOP)
-                        .beforeShow(() -> save.scrollIntoView(
-                                ScrollIntoViewOption.Block.CENTER)));
+                        .at(PopoverPosition.TOP));
     }
 
     private void openDrawer(AppLayout layout) {

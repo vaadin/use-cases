@@ -4,15 +4,12 @@ import java.util.List;
 
 import com.example.common.BaseHomeView;
 import com.example.common.UseCaseDescription;
-import com.example.uc1.FirstRunTourView;
-import com.example.uc2.ShowOnceView;
-import com.example.uc3.ReplayFromHelpView;
-import com.example.uc4.WhatsNewView;
-import com.example.uc5.ComplexViewTourView;
-import com.example.uc6.LearnByDoingView;
-import com.example.uc7.CrossViewTourView;
-import com.example.uc8.HotspotsView;
-import com.example.uc9.SpotlightView;
+import com.example.uc1.AppTourView;
+import com.example.uc2.ComplexViewTourView;
+import com.example.uc3.LearnByDoingView;
+import com.example.uc4.CrossViewTourView;
+import com.example.uc5.HotspotsView;
+import com.example.uc6.SpotlightView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -31,11 +28,8 @@ public class HomeView extends BaseHomeView {
                         + "the first time, after an update, or when a view "
                         + "needs explaining. Vaadin has no tour component, so "
                         + "these use cases build one from Popover.");
-        addGroup("Welcoming a new user", VaadinIcon.HANDS_UP, Accent.BLUE,
-                List.of(FirstRunTourView.class, ShowOnceView.class,
-                        ReplayFromHelpView.class));
-        addGroup("Showing what changed", VaadinIcon.STAR_O, Accent.GREEN,
-                List.of(WhatsNewView.class, HotspotsView.class));
+        addGroup("Introducing the app", VaadinIcon.HANDS_UP, Accent.BLUE,
+                List.of(AppTourView.class, HotspotsView.class));
         addGroup("Explaining a view or a task", VaadinIcon.LIGHTBULB,
                 Accent.ORANGE,
                 List.of(ComplexViewTourView.class, LearnByDoingView.class,

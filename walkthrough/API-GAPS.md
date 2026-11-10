@@ -17,12 +17,12 @@ step and keeps its state in a signal; a `TourCard` for the step's content.
 `new Tour(TourStep.of(target, title, text), …)` with `start()`,
 `startAt(int)`, `next()`, `back()`, `skip()`, a `Signal` of its state, and
 finish and skip listeners. Steps that wait for an action instead of "Next"
-(UC6) and an id with a hook to remember that a user has seen the tour (UC2)
+(UC3) and an id with a hook to remember that a user has seen the tour (UC1)
 belong with it.
 
 ## 2. No spotlight around the target
 
-**Where it bites:** UC9 / `SpotlightView.java`, `tour/TourPopover.java`
+**Where it bites:** UC6 / `SpotlightView.java`, `tour/TourPopover.java`
 **Symptom:** `Popover#setModal(true, true)` dims the whole page, the target
 included, so it can not point at something by dimming the rest.
 **Workaround used:** a modal popover without a backdrop, and a large
@@ -35,22 +35,23 @@ component.
 
 ## 3. Hidden targets are not revealed
 
-**Where it bites:** UC5 / `ComplexViewTourView.java`, UC9 / `SpotlightView.java`
+**Where it bites:** UC2 / `ComplexViewTourView.java`, UC6 / `SpotlightView.java`
 **Symptom:** a step can point at a field in a closed `Details`, a button on a
 `TabSheet` tab that is not selected, the side navigation in a closed
 drawer, or a button below the fold. Nothing makes the target visible first:
 a popover whose target has no size closes again (#6), and one whose target is
 below the fold points off screen.
 **Workaround used:** a `beforeShow` action per step that opens the panel,
-selects the tab, opens the drawer (and closes it again on the next step) or
-calls `scrollIntoView`.
+selects the tab, or opens the drawer (and closes it again on the next step).
+For every step, `tour-popover.ts` scrolls a target that is not fully on
+screen to the middle of the screen before it opens the popover.
 **Suggested API:** a tour step that brings its target on screen: scrolls it
 into view and, for the standard containers (`Details`, `TabSheet`,
 `AppLayout` drawer), opens what hides it.
 
 ## 4. A tour can not span routes
 
-**Where it bites:** UC7 / `CrossViewTour.java`, `CrossViewPage.java`
+**Where it bites:** UC4 / `CrossViewTour.java`, `CrossViewPage.java`
 **Symptom:** a popover's target is a component instance, but the components
 of the next route do not exist until the user navigates there. The tour state
 also has to outlive the view.
@@ -63,7 +64,7 @@ example by id), with the tour scoped to the `UI` and navigating by itself.
 
 ## 5. Local storage can not be read in browserless tests
 
-**Where it bites:** UC2 / `ShowOnceView.java`, `ShowOnceViewTest.java`
+**Where it bites:** UC1 / `AppTourView.java`, `AppTourViewTest.java`
 **Symptom:** whether this browser has seen the tour lives in local storage.
 `WebStorage#getItem(String, Callback)` answers after a round trip, so the
 view can only decide in the callback, and the browserless tests never get an
@@ -78,7 +79,7 @@ runs; the test only checks that the tour does not open before the answer.
 **Symptom:** the popover overlay closes itself when it opens while its target
 has no size. While Flow attaches a view, the view's container is hidden, so
 `Popover#open()` in the same round trip — a tour that starts when the page
-opens (UC1, UC2, UC4, UC5) — closes at once. The same happens for a target in
+opens (UC1, UC2) — closes at once. The same happens for a target in
 a closed `Details`. The server then gets a close from the browser that it can
 not tell apart from the user pressing Escape, so the tour counted it as
 skipped.
@@ -92,7 +93,7 @@ event that says why the popover closed.
 
 ## 7. A popover squeezes its content when its position has no room
 
-**Where it bites:** UC1 / `FirstRunTourView.java`, UC3 / `ReplayFromHelpView.java`, UC9 / `SpotlightView.java`
+**Where it bites:** UC1 / `AppTourView.java`, UC6 / `SpotlightView.java`
 **Symptom:** on a phone, a popover at `PopoverPosition.BOTTOM_END` of a target
 near the left edge, or at `END` of the full-width menu drawer, gets only the
 space on that side. Its content then overflows, and the step's buttons are cut

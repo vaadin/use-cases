@@ -1,4 +1,4 @@
-package com.example.uc5;
+package com.example.uc2;
 
 import com.example.home.HomeView;
 import com.example.tour.TourTestSupport;

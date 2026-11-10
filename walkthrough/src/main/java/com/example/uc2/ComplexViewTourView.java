@@ -1,4 +1,4 @@
-package com.example.uc5;
+package com.example.uc2;
 
 import java.util.List;
 
@@ -29,18 +29,19 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * UC5 — Tour of a busy view.
+ * UC2 — Tour of a busy view.
  * <p>
  * A screen with filters, a multi-select grid, a bulk action and a second tab
  * has its own short tour, which starts the first time the user opens the view
  * in this session. Two steps point at parts that are hidden at first: a date
  * filter inside the closed "More filters" panel and a button on the "History"
- * tab. The step opens the panel or selects the tab before it is shown.
+ * tab. The step opens the panel or selects the tab before it is shown. A target
+ * further down the page, as on a phone, is scrolled into view first.
  */
-@Route(value = "uc5", layout = MainLayout.class)
-@PageTitle("UC5 — Tour of a busy view")
+@Route(value = "uc2", layout = MainLayout.class)
+@PageTitle("UC2 — Tour of a busy view")
 @UseCaseDescription("A tour of one complex view, including parts hidden in panels and tabs")
-@Menu(order = 5, title = "UC5 — Tour of a busy view")
+@Menu(order = 2, title = "UC2 — Tour of a busy view")
 public class ComplexViewTourView extends VerticalLayout {
 
     /** The session attribute set once the user has opened this view. */
@@ -48,12 +49,13 @@ public class ComplexViewTourView extends VerticalLayout {
             + ".visited";
 
     public ComplexViewTourView() {
-        add(new H1("UC5 — Tour of a busy view"));
+        add(new H1("UC2 — Tour of a busy view"));
         add(new Paragraph("Some views need their own introduction, at the "
                 + "moment the user first opens them. The tour of this order "
                 + "screen starts on your first visit in this session. Some of "
                 + "its steps point at parts in a closed panel or on another "
-                + "tab; the tour opens them first. Leave the view and come "
+                + "tab; the tour opens them first, and scrolls to steps "
+                + "further down the page. Leave the view and come "
                 + "back: the tour does not start again."));
 
         TextField customer = new TextField("Customer");
@@ -62,7 +64,7 @@ public class ComplexViewTourView extends VerticalLayout {
         DatePicker orderedAfter = new DatePicker("Ordered after");
         Details moreFilters = new Details("More filters", orderedAfter);
         Div filters = new Div(customer, status, moreFilters);
-        filters.addClassName("uc5-filters");
+        filters.addClassName("uc2-filters");
 
         Grid<Order> orders = new Grid<>(Order.class, false);
         orders.addColumn(Order::number).setHeader("Order").setAutoWidth(true);
@@ -118,7 +120,7 @@ public class ComplexViewTourView extends VerticalLayout {
                         + "\"More filters\" panel or selects a tab, so the target is on screen.")
                 .point("A target on a tab that is not selected is not in the page yet; the "
                         + "popover is added once the tab shows it.")
-                .java("uc5/ComplexViewTourView").java("tour/TourStep"));
+                .java("uc2/ComplexViewTourView").java("tour/TourStep"));
 
         whenAttached(ui -> {
             VaadinSession session = ui.getSession();

@@ -1,4 +1,4 @@
-package com.example.uc8;
+package com.example.uc5;
 
 import java.util.HashSet;
 import java.util.List;
@@ -28,17 +28,17 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * UC8 — Hotspots.
+ * UC5 — Hotspots.
  * <p>
  * Instead of a tour that takes over the screen, small pulsing dots sit next to
  * three new features. Clicking a dot opens a hint in a {@link Popover}; "Got
  * it" removes that dot for the rest of the session. The user can ignore the
  * dots and keep working. "Show the hints again" brings them all back.
  */
-@Route(value = "uc8", layout = MainLayout.class)
-@PageTitle("UC8 — Hotspots")
+@Route(value = "uc5", layout = MainLayout.class)
+@PageTitle("UC5 — Hotspots")
 @UseCaseDescription("Hints next to new features that the user opens when they want")
-@Menu(order = 8, title = "UC8 — Hotspots")
+@Menu(order = 5, title = "UC5 — Hotspots")
 public class HotspotsView extends VerticalLayout {
 
     /** The session attribute holding the titles of the dismissed hints. */
@@ -52,7 +52,7 @@ public class HotspotsView extends VerticalLayout {
     private final List<Hint> hints;
 
     public HotspotsView() {
-        add(new H1("UC8 — Hotspots"));
+        add(new H1("UC5 — Hotspots"));
         add(new Paragraph("A tour stops the user; a hotspot waits. The "
                 + "pulsing dots in the app mark three new features. Click a "
                 + "dot to read its hint, and \"Got it\" to remove the dot. "
@@ -91,7 +91,7 @@ public class HotspotsView extends VerticalLayout {
                         + "it stays hidden when the user comes back.")
                 .point("The pulse is a CSS animation; it stops for users who prefer "
                         + "reduced motion.")
-                .java("uc8/HotspotsView").css("styles.css"));
+                .java("uc5/HotspotsView").css("styles.css"));
 
         refresh();
     }

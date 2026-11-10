@@ -1,4 +1,4 @@
-package com.example.uc7;
+package com.example.uc4;
 
 import com.example.views.MainLayout;
 
@@ -8,11 +8,11 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * The reports page of UC7 — Tour across views: the last step of the tour is
+ * The reports page of UC4 — Tour across views: the last step of the tour is
  * here.
  */
-@Route(value = "uc7/reports", layout = MainLayout.class)
-@PageTitle("UC7 — Tour across views")
+@Route(value = "uc4/reports", layout = MainLayout.class)
+@PageTitle("UC4 — Tour across views")
 public class CrossViewReportsView extends CrossViewPage {
 
     static final String REPORT = "report";
@@ -20,17 +20,17 @@ public class CrossViewReportsView extends CrossViewPage {
     public CrossViewReportsView() {
         super("Reports");
         Div report = new Div(bar("Jan", 40), bar("Feb", 65), bar("Mar", 90));
-        report.addClassName("uc7-report");
+        report.addClassName("uc4-report");
         addTarget(REPORT, report);
         addContent(report);
     }
 
     private static Div bar(String month, int percent) {
         Div fill = new Div();
-        fill.addClassName("uc7-bar-fill");
+        fill.addClassName("uc4-bar-fill");
         fill.getStyle().setWidth(percent + "%");
         Div bar = new Div(new Span(month), fill);
-        bar.addClassName("uc7-bar");
+        bar.addClassName("uc4-bar");
         return bar;
     }
 }

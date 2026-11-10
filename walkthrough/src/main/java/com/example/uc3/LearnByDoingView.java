@@ -1,4 +1,4 @@
-package com.example.uc6;
+package com.example.uc3;
 
 import java.util.List;
 
@@ -26,21 +26,21 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC6 — Learn by doing.
+ * UC3 — Learn by doing.
  * <p>
  * An interactive tutorial for a task list. The first three steps have no "Next"
  * button: the tour moves on when the user does what the step says — clicks "New
  * task", types a title, clicks "Save". The view's own listeners call
  * {@link Tour#next()} when the tour is at the matching step.
  */
-@Route(value = "uc6", layout = MainLayout.class)
-@PageTitle("UC6 — Learn by doing")
+@Route(value = "uc3", layout = MainLayout.class)
+@PageTitle("UC3 — Learn by doing")
 @UseCaseDescription("A tutorial that moves on when the user does what each step says")
-@Menu(order = 6, title = "UC6 — Learn by doing")
+@Menu(order = 3, title = "UC3 — Learn by doing")
 public class LearnByDoingView extends VerticalLayout {
 
     public LearnByDoingView() {
-        add(new H1("UC6 — Learn by doing"));
+        add(new H1("UC3 — Learn by doing"));
         add(new Paragraph("People learn faster by doing than by reading. "
                 + "Start the tutorial: it asks you to create a task, and "
                 + "moves on only when you have done each step."));
@@ -50,13 +50,13 @@ public class LearnByDoingView extends VerticalLayout {
         TextField title = new TextField("Title");
         Button save = new Button("Save");
         Div form = new Div(title, save);
-        form.addClassName("uc6-form");
+        form.addClassName("uc3-form");
         form.setVisible(false);
         Paragraph empty = new Paragraph("No tasks yet.");
         UnorderedList tasks = new UnorderedList();
-        tasks.addClassName("uc6-tasks");
+        tasks.addClassName("uc3-tasks");
         Div list = new Div(new H2("Your tasks"), empty, tasks);
-        list.addClassName("uc6-list");
+        list.addClassName("uc3-list");
         Div app = new Div(newTask, form, list);
         app.addClassName("demo-app");
 
@@ -115,7 +115,7 @@ public class LearnByDoingView extends VerticalLayout {
                         + "title's value change, the click on \"Save\" — move the tour on.")
                 .point("Tour.isAt(step) keeps them from moving the tour when it is at "
                         + "another step or not running.")
-                .java("uc6/LearnByDoingView").java("tour/TourStep"));
+                .java("uc3/LearnByDoingView").java("tour/TourStep"));
 
         whenAttached(ui -> tour::reset);
     }

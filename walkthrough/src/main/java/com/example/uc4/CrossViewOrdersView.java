@@ -1,4 +1,4 @@
-package com.example.uc7;
+package com.example.uc4;
 
 import com.example.demoapp.Order;
 import com.example.views.MainLayout;
@@ -8,11 +8,11 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * The orders page of UC7 — Tour across views: the tour continues here from the
+ * The orders page of UC4 — Tour across views: the tour continues here from the
  * dashboard.
  */
-@Route(value = "uc7/orders", layout = MainLayout.class)
-@PageTitle("UC7 — Tour across views")
+@Route(value = "uc4/orders", layout = MainLayout.class)
+@PageTitle("UC4 — Tour across views")
 public class CrossViewOrdersView extends CrossViewPage {
 
     static final String ORDERS = "orders";
