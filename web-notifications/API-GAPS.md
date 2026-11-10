@@ -7,8 +7,8 @@ case in this module awkward. The API wraps the browser
 [Notifications API](https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API):
 `WebNotification.onClick(button).requestPermission()`,
 `WebNotification.permissionSignal()`, `WebNotification.show(...)` returning a
-`WebNotificationHandle`, and `WebNotification.closeByTag(...)`. Entries 1, 2, 3
-and 5 were fixed by that API and are removed.
+`WebNotificationHandle`, and `WebNotification.closeByTag(...)`. Entries 1, 2, 3,
+5 and 8 were fixed by that API and are removed.
 
 ## 4. Unusable constructor only discovered when showing
 
@@ -90,20 +90,3 @@ for Web Push (3).
 Push, the service worker posts the notification's `data` to the focused
 client, which forwards it to the UI).
 Upstream: https://github.com/vaadin/flow/issues/20803
-
-## 8. No way to re-check the permission on demand
-
-**Where it bites:** UC6 / DeniedFallbackView.java (the help panel)
-**Symptom:** after a denial the user re-enables notifications in the site
-settings. The client publishes a new value to
-`WebNotification.permissionSignal()` only on the Permissions API `change`
-event and when the tab becomes visible again; window `focus` is not watched,
-and the server can not ask for a re-check. Safari does not fire `change`
-reliably, and the site settings popup next to the address bar never hides the
-tab. So the view only notices after the user switches tabs and back. A "Check
-again" button would have nothing to call; the help text tells the user to
-come back to the tab instead.
-**Workaround used:** none.
-**Suggested API:** also re-check on window `focus`, and/or add
-`WebNotification.refreshPermission()` that makes the client publish the
-current permission.
