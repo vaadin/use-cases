@@ -3,8 +3,9 @@ package com.example.uc1;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.TourTestSupport;
 import com.example.home.HomeView;
+import com.example.tour.TourPopover;
+import com.example.tour.TourTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -102,10 +103,13 @@ class FirstRunTourViewTest extends TourTestSupport {
     @Test
     void leavingThePageClosesTheTour() {
         navigate(FirstRunTourView.class);
+        TourPopover popover = find(TourPopover.class).single();
+        Component target = stepTarget();
 
         navigate(HomeView.class);
 
-        assertTrue(openPopovers().isEmpty());
+        assertFalse(isShowing(popover));
+        assertFalse(isHighlighted(target));
     }
 
     private static boolean isHighlighted(Component component) {

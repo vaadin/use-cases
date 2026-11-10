@@ -37,7 +37,7 @@ component.
 
 **Where it bites:** UC5 / `ComplexViewTourView.java`, UC9 / `SpotlightView.java`
 **Symptom:** a step can point at a field in a closed `Details`, a button on a
-`TabSheet` tab that is not selected, the side navigation in a closed overlay
+`TabSheet` tab that is not selected, the side navigation in a closed
 drawer, or a button below the fold. Nothing makes the target visible first:
 a popover whose target has no size closes again (#6), and one whose target is
 below the fold points off screen.

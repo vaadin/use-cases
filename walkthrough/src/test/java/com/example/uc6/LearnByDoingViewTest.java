@@ -1,6 +1,6 @@
 package com.example.uc6;
 
-import com.example.TourTestSupport;
+import com.example.tour.TourTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -30,6 +30,8 @@ class LearnByDoingViewTest extends TourTestSupport {
         clickInView("New task");
         assertEquals("Give it a title", stepTitle());
         assertFalse(stepHasButton("Next"));
+        assertFalse(stepHasButton("Back"),
+                "the click on \"New task\" can not be taken back");
 
         test(findInView(TextField.class).single()).setValue("Call the bank");
         assertEquals("Save it", stepTitle());
@@ -47,13 +49,11 @@ class LearnByDoingViewTest extends TourTestSupport {
         navigate(LearnByDoingView.class);
         clickInView("Start the tutorial");
         clickInView("New task");
-        clickInStep("Back");
 
-        // Saving is the third step's action, not the first's.
-        test(findInView(TextField.class).single()).setValue("Call the bank");
-        clickInView("Save");
+        // Clicking "New task" is the first step's action, not the second's.
+        clickInView("New task");
 
-        assertEquals("Create your first task", stepTitle());
+        assertEquals("Give it a title", stepTitle());
     }
 
     @Test

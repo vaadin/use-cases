@@ -1,8 +1,6 @@
-package com.example;
+package com.example.tour;
 
 import java.util.List;
-
-import com.example.tour.TourPopover;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.Component;
@@ -30,6 +28,14 @@ public abstract class TourTestSupport extends SpringBrowserlessTest {
                         ? tourPopover.isShowing()
                         : p.isOpened())
                 .all();
+    }
+
+    /**
+     * Whether a tour popover shows a step. The browser opens it once its target
+     * is on screen, and the tests run no browser.
+     */
+    protected static boolean isShowing(TourPopover popover) {
+        return popover.isShowing();
     }
 
     /** The one open popover. */

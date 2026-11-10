@@ -41,14 +41,14 @@ public class TourCard extends Div {
 
     /**
      * Shows the step with the given zero-based index of a tour with the given
-     * number of steps.
+     * number of steps, with "Back" only if the tour can go back from it.
      */
     public void show(String title, String text, int index, int total,
-            boolean waitsForAction) {
+            boolean waitsForAction, boolean canGoBack) {
         progress.setText("Step " + (index + 1) + " of " + total);
         this.title.setText(title);
         this.text.setText(text);
-        back.setVisible(index > 0);
+        back.setVisible(canGoBack);
         next.setVisible(!waitsForAction);
         next.setText(index == total - 1 ? "Done" : "Next");
     }

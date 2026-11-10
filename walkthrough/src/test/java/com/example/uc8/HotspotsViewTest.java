@@ -2,8 +2,8 @@ package com.example.uc8;
 
 import java.util.List;
 
-import com.example.TourTestSupport;
 import com.example.home.HomeView;
+import com.example.tour.TourTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 

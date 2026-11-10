@@ -43,6 +43,7 @@ final class CrossViewTour implements Serializable {
     private final ValueSignal<State> state = new ValueSignal<>(
             State.notStarted(STEPS.size()));
     private @Nullable CrossViewPage page;
+    private boolean navigating;
 
     /** The tour of the given browser tab. */
     static CrossViewTour of(UI ui) {
@@ -96,10 +97,17 @@ final class CrossViewTour implements Serializable {
         }
     }
 
-    /** Called by a page when it is left. */
+    /**
+     * Called by a page when it is left. Unless the tour itself moves to another
+     * page, the user has left the tour: it goes back to "Not started", like the
+     * tours of the other views.
+     */
     void detach(CrossViewPage page) {
         if (this.page == page) {
             this.page = null;
+        }
+        if (!navigating) {
+            state.set(State.notStarted(STEPS.size()));
         }
     }
 
@@ -113,7 +121,12 @@ final class CrossViewTour implements Serializable {
                 page.hideStep();
             }
             // The page shows the step when it attaches.
-            UI.getCurrentOrThrow().navigate(step.page());
+            navigating = true;
+            try {
+                UI.getCurrentOrThrow().navigate(step.page());
+            } finally {
+                navigating = false;
+            }
         }
     }
 

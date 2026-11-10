@@ -61,12 +61,13 @@ public class TourPopover extends Popover {
 
     /**
      * Shows the given step, the one with the given zero-based index of a tour
-     * with the given number of steps.
+     * with the given number of steps, with "Back" only if the tour can go back
+     * from it.
      */
-    public void show(TourStep step, int index, int total) {
+    public void show(TourStep step, int index, int total, boolean canGoBack) {
         highlight(step.target());
         card.show(step.title(), step.text(), index, total,
-                step.waitsForAction());
+                step.waitsForAction(), canGoBack);
         setPosition(step.position());
         setTarget(step.target());
         showing = true;
@@ -84,7 +85,7 @@ public class TourPopover extends Popover {
     }
 
     /** Whether a step is shown, or waits in the browser to be shown. */
-    public boolean isShowing() {
+    boolean isShowing() {
         return showing;
     }
 

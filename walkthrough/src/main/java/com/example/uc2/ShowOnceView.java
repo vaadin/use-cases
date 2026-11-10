@@ -58,6 +58,7 @@ public class ShowOnceView extends VerticalLayout {
     private final Select<String> account = new Select<>();
     private final RadioButtonGroup<Memory> memory = new RadioButtonGroup<>();
     private final ValueSignal<String> status = new ValueSignal<>("");
+    private int openCount;
 
     public ShowOnceView(SeenTours seenTours) {
         this.seenTours = seenTours;
@@ -118,6 +119,7 @@ public class ShowOnceView extends VerticalLayout {
 
     private void openApp() {
         tour.reset();
+        int open = ++openCount;
         String user = account.getValue();
         if (memory.getValue() == Memory.ACCOUNT) {
             if (seenTours.hasSeen(user)) {
@@ -129,6 +131,11 @@ public class ShowOnceView extends VerticalLayout {
         } else {
             status.set("Asking the browser whether the tour was seen…");
             WebStorage.getItem(STORAGE_KEY, value -> {
+                if (open != openCount) {
+                    // The app was opened again, or the mode changed, before
+                    // the browser answered.
+                    return;
+                }
                 if (value == null) {
                     status.set("This browser has not seen the tour yet.");
                     tour.start();

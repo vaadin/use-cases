@@ -1,6 +1,6 @@
 package com.example.uc2;
 
-import com.example.TourTestSupport;
+import com.example.tour.TourTestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +60,9 @@ class ShowOnceViewTest extends TourTestSupport {
         test(findInView(Select.class).single()).selectItem("Sam");
 
         assertFalse(seenTours.hasSeen("Alex"));
+        assertFalse(seenTours.hasSeen("Sam"));
+        assertEquals("Find your way", stepTitle());
+        assertEquals("Sam has not seen the tour yet.", status());
     }
 
     @Test

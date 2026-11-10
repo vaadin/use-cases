@@ -1,6 +1,6 @@
 package com.example.uc3;
 
-import com.example.TourTestSupport;
+import com.example.tour.TourTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 

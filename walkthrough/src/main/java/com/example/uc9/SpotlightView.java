@@ -33,10 +33,10 @@ import com.vaadin.flow.router.Route;
  * <p>
  * A tour that dims everything but the current target and blocks the rest of the
  * page. Two of its targets are not on screen at first: the app's side
- * navigation, which is a closed drawer on a phone, and the "Save changes"
- * button at the end of a long form. The tour opens the drawer (and closes it
- * again on the next step) and scrolls the button into view before it points at
- * them.
+ * navigation, which is in a closed drawer on a phone or when the user closed
+ * it, and the "Save changes" button at the end of a long form. The tour opens
+ * the drawer (and closes it again on the next step) and scrolls the button into
+ * view before it points at them.
  */
 @Route(value = "uc9", layout = MainLayout.class)
 @PageTitle("UC9 — Spotlight")
@@ -53,8 +53,9 @@ public class SpotlightView extends VerticalLayout {
         add(new H1("UC9 — Spotlight"));
         add(new Paragraph("A spotlight makes sure the user looks at the "
                 + "right place. Start the tour: the page dims around each "
-                + "target. The first target is the app menu — on a phone it "
-                + "is hidden in a drawer, which the tour opens. The last "
+                + "target. The first target is the app menu — on a phone, or "
+                + "when you closed it, it is hidden in a drawer, which the "
+                + "tour opens. The last "
                 + "target is at the end of the long form below; the tour "
                 + "scrolls to it."));
 
@@ -75,8 +76,8 @@ public class SpotlightView extends VerticalLayout {
         add(new BuiltWith("A modal popover and a shadow around the target")
                 .point("The popover is modal without a backdrop, so the rest of the page "
                         + "can not be clicked; the target's own large shadow dims the page.")
-                .point("The step for the menu opens the drawer when the layout shows it "
-                        + "as an overlay, and the next step closes it again.")
+                .point("The step for the menu opens the drawer when it is closed, and "
+                        + "the next step closes it again.")
                 .point("The step for the button scrolls it into view first.")
                 .java("uc9/SpotlightView").java("tour/TourPopover")
                 .css("styles.css"));
@@ -115,7 +116,7 @@ public class SpotlightView extends VerticalLayout {
     }
 
     private void openDrawer(AppLayout layout) {
-        if (layout.isOverlay() && !layout.isDrawerOpened()) {
+        if (!layout.isDrawerOpened()) {
             layout.setDrawerOpened(true);
             openedDrawer = layout;
         }

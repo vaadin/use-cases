@@ -76,9 +76,14 @@ public class Tour implements Serializable {
         startAt(0);
     }
 
-    /** Starts the tour at the step with the given zero-based index. */
+    /**
+     * Starts the tour at the step with the given zero-based index. A tour
+     * without steps does not start.
+     */
     public void startAt(int step) {
-        show(step);
+        if (!steps.isEmpty()) {
+            show(step);
+        }
     }
 
     /** Shows the next step, or finishes the tour at the last step. */
@@ -94,10 +99,14 @@ public class Tour implements Serializable {
         }
     }
 
-    /** Shows the previous step. */
+    /**
+     * Shows the previous step, unless the current step or the previous one
+     * waits for an action: the user can not do an action again, nor take it
+     * back.
+     */
     public void back() {
         int step = state.peek().step();
-        if (isRunning() && step > 0) {
+        if (isRunning() && canGoBack(step)) {
             show(step - 1);
         }
     }
@@ -155,8 +164,13 @@ public class Tour implements Serializable {
         if (beforeShow != null) {
             beforeShow.run();
         }
-        popover.show(step, index, steps.size());
+        popover.show(step, index, steps.size(), canGoBack(index));
         state.set(new State(Status.RUNNING, index, steps.size()));
+    }
+
+    private boolean canGoBack(int index) {
+        return index > 0 && !steps.get(index).waitsForAction()
+                && !steps.get(index - 1).waitsForAction();
     }
 
     private void end(Status status) {

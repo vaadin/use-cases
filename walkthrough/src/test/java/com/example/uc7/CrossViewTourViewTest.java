@@ -1,6 +1,6 @@
 package com.example.uc7;
 
-import com.example.TourTestSupport;
+import com.example.tour.TourTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -55,15 +55,15 @@ class CrossViewTourViewTest extends TourTestSupport {
     }
 
     @Test
-    void comingBackToTheStepsPageShowsTheStepAgain() {
+    void leavingTheTourByALinkEndsIt() {
         navigate(CrossViewTourView.class);
         clickInView("Start the tour");
 
         navigate(CrossViewReportsView.class);
-        assertTrue(openPopovers().isEmpty());
-        assertEquals("At step 1 of 4", status());
 
+        assertTrue(openPopovers().isEmpty());
+        assertEquals("Not started", status());
         navigate(CrossViewTourView.class);
-        assertEquals("Your day at a glance", stepTitle());
+        assertTrue(openPopovers().isEmpty());
     }
 }

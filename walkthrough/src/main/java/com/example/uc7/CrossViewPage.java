@@ -97,7 +97,7 @@ abstract class CrossViewPage extends VerticalLayout {
                     + " on " + getClass().getSimpleName());
         }
         popover.show(TourStep.of(target, step.title(), step.text()), index,
-                total);
+                total, index > 0);
     }
 
     void hideStep() {

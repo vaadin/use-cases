@@ -17,7 +17,7 @@ on a made-up order app. Where the API falls short is recorded in
 | UC6 | Learn by doing | A tutorial whose steps move on when the user does what they say: click "New task", type a title, click "Save". |
 | UC7 | Tour across views | A tour that navigates to the next route and continues there, and goes back with Back. |
 | UC8 | Hotspots | Pulsing dots next to new features; a click opens the hint, "Got it" removes the dot for the session. |
-| UC9 | Spotlight | A tour that dims all but its target and blocks the page, opens the menu drawer on a phone and scrolls to a button at the end of a long form. |
+| UC9 | Spotlight | A tour that dims all but its target and blocks the page, opens the menu drawer when it is closed and scrolls to a button at the end of a long form. |
 
 ## Run
 

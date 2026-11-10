@@ -1,7 +1,9 @@
 package com.example.uc9;
 
-import com.example.TourTestSupport;
+import com.example.tour.TourTestSupport;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.ViewPackages;
@@ -43,13 +45,15 @@ class SpotlightViewTest extends TourTestSupport {
         assertFalse(isSpotlit(save));
     }
 
-    @Test
-    void theTourOpensTheOverlayDrawerForTheMenuAndClosesItAfter() {
+    @ParameterizedTest(name = "overlay: {0}")
+    @ValueSource(booleans = { true, false })
+    void theTourOpensAClosedDrawerForTheMenuAndClosesItAfter(boolean overlay) {
         navigate(SpotlightView.class);
         AppLayout layout = (AppLayout) getCurrentView().getElement().getParent()
                 .getComponent().orElseThrow();
-        // As on a phone: the drawer is an overlay and closed.
-        layout.getElement().setProperty("overlay", true);
+        // An overlay on a phone; beside the content on a desktop, where the
+        // user closed it.
+        layout.getElement().setProperty("overlay", overlay);
         layout.setDrawerOpened(false);
 
         clickInView("Start the tour");
