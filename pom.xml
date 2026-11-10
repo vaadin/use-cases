@@ -56,6 +56,7 @@
         <nullability.plugin.version>0.5.2</nullability.plugin.version>
         <spring-ai.version>2.0.2</spring-ai.version>
         <sentry.version>8.63.0</sentry.version>
+        <atlassian-sourcemap.version>3.0.1</atlassian-sourcemap.version>
         <playwright.version>1.64.0</playwright.version>
     </properties>
 

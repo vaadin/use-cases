@@ -28,7 +28,7 @@ public class InsightCard extends Div {
      *            decides (route, component, event, occurrences, …)
      */
     public InsightCard(Map<String, Object> insight, List<String> chips) {
-        this(insight, null, chips);
+        this(insight, List.<String>of(), chips);
     }
 
     /**
@@ -43,6 +43,20 @@ public class InsightCard extends Div {
      */
     public InsightCard(Map<String, Object> insight, @Nullable String detail,
             List<String> chips) {
+        this(insight, detail == null ? List.of() : List.of(detail), chips);
+    }
+
+    /**
+     * @param insight
+     *            the insight as the endpoint serializes it
+     * @param details
+     *            lines of monospace detail under the summary, in order — a
+     *            message and the source line it maps back to, say
+     * @param chips
+     *            the evidence to show as chips, already formatted
+     */
+    public InsightCard(Map<String, Object> insight, List<String> details,
+            List<String> chips) {
         String severity = Insights.text(insight.get("severity"));
         String accent = Insights.accentOf(severity);
 
@@ -56,11 +70,11 @@ public class InsightCard extends Div {
         addClassNames("verdict-card", accent);
         add(pill, summary);
 
-        if (detail != null) {
+        details.forEach(detail -> {
             Span line = new Span(detail);
             line.addClassName("verdict-detail");
             add(line);
-        }
+        });
 
         Div evidence = new Div();
         evidence.addClassName("verdict-evidence");

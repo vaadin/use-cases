@@ -94,6 +94,18 @@
             <version>${sentry.version}</version>
         </dependency>
         <!--
+          UC5 maps a client error's minified frame back to source with the
+          build's sourcemaps (SourceMaps). Atlassian's Source Map v3 reader is a
+          small library (about 40 kB, Apache 2.0, Gson its only dependency),
+          published to Atlassian's own repository rather than Maven Central,
+          which is why this module declares that repository below.
+        -->
+        <dependency>
+            <groupId>com.atlassian.sourcemap</groupId>
+            <artifactId>sourcemap</artifactId>
+            <version>${atlassian-sourcemap.version}</version>
+        </dependency>
+        <!--
           UC2's join-table fetch demo needs a JPA layer and a database. H2 in
           memory is enough: the point is to make Hibernate's per-collection
           "1 row" fetches (the N+1) observable, not to ship a real datastore.
@@ -118,6 +130,17 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <!-- Only for com.atlassian.sourcemap, which is not on Maven Central. -->
+        <repository>
+            <id>atlassian-public</id>
+            <url>https://packages.atlassian.com/maven-public</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <build>
         <defaultGoal>spring-boot:run</defaultGoal>
