@@ -1,6 +1,5 @@
 package com.example.uc8;
 
-import com.example.common.UnreleasedApi;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -36,7 +35,6 @@ import com.vaadin.flow.server.menu.MenuEntry;
  * {@code getMenuEntriesTree()} is public, supported API — here in
  * {@code com.vaadin.flow.server.menu}.
  */
-@UnreleasedApi("https://github.com/vaadin/flow/pull/24556")
 @Route(value = "uc8", layout = MainLayout.class)
 @PageTitle("Hierarchical menu")
 @UseCaseDescription("Showing the menu as a tree that follows the route hierarchy")
