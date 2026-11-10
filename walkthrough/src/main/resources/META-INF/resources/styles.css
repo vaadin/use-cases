@@ -1,0 +1,256 @@
+/* Walkthrough use cases */
+
+/* The tour controls above each demo: status line and buttons. */
+.tour-controls,
+.tour-settings {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--vaadin-gap-m);
+}
+
+.tour-settings {
+    align-items: flex-start;
+}
+
+.tour-status {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: var(--aura-font-size-s);
+    background: color-mix(in srgb, var(--aura-blue) 15%, transparent);
+    color: var(--aura-blue-text);
+    border: 1px solid color-mix(in srgb, var(--aura-blue) 35%, transparent);
+}
+
+/* The made-up "Acme Orders" app the tours explain. */
+.demo-app {
+    box-sizing: border-box;
+    width: 100%;
+    padding: var(--vaadin-padding-m);
+    border: 1px solid var(--vaadin-border-color);
+    border-radius: var(--vaadin-radius-l);
+    background: var(--vaadin-background-container);
+}
+
+.demo-app-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--vaadin-gap-s);
+    margin-bottom: var(--vaadin-gap-m);
+}
+
+.demo-app-logo {
+    font-weight: var(--aura-font-weight-semibold);
+    margin-inline-end: auto;
+}
+
+.demo-app-body {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: var(--vaadin-gap-m);
+    align-items: start;
+}
+
+.demo-app-nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vaadin-gap-s);
+}
+
+.demo-app-nav-item {
+    padding: var(--vaadin-padding-s);
+    border-radius: var(--vaadin-radius-m);
+}
+
+@media (max-width: 600px) {
+    .demo-app-body {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .demo-app-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+}
+
+/* A tour step's popover is opaque, so a spotlight's dimming does not show
+   through Aura's translucent surface. */
+vaadin-popover.tour-popover::part(overlay) {
+    background: var(--aura-surface-color-solid);
+}
+
+/* The content of a tour step's popover. */
+.tour-card {
+    max-width: 18rem;
+}
+
+.tour-card h3 {
+    margin: 0 0 0.25em;
+    font-size: var(--aura-font-size-m);
+}
+
+.tour-card p {
+    margin: 0 0 var(--vaadin-gap-m);
+}
+
+.tour-card-progress {
+    font-size: var(--aura-font-size-xs);
+    color: var(--vaadin-text-color-secondary);
+}
+
+.tour-card-buttons {
+    display: flex;
+    gap: var(--vaadin-gap-s);
+}
+
+.tour-card-buttons > :first-child {
+    margin-inline-end: auto;
+}
+
+/* The target of the current step. */
+.tour-highlight {
+    outline: 2px solid var(--aura-accent-color);
+    outline-offset: 3px;
+    border-radius: var(--vaadin-radius-m);
+}
+
+/* The spotlight: the target casts a shadow over everything around it, so it
+   stays bright while the rest dims. The shadow is cut off at the edge of the
+   nearest scrolling container (API-GAPS.md #2). */
+.tour-spotlight {
+    position: relative;
+    z-index: 1;
+    border-radius: var(--vaadin-radius-m);
+    box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.55);
+}
+
+/* UC4: the "New" badge on features the user has not seen yet. */
+.tour-new {
+    position: relative;
+    overflow: visible;
+}
+
+.tour-new::after {
+    content: "New";
+    position: absolute;
+    top: -0.7em;
+    inset-inline-end: -0.6em;
+    padding: 0 0.4em;
+    border-radius: 999px;
+    font-size: var(--aura-font-size-xs);
+    line-height: 1.4;
+    background: var(--aura-green);
+    color: white;
+    pointer-events: none;
+}
+
+/* UC8: a pulsing dot next to a new feature. */
+.hotspot {
+    --vaadin-button-height: 0.9rem;
+    --vaadin-button-padding: 0;
+    --vaadin-button-border-width: 0;
+    min-width: 0;
+    width: 0.9rem;
+    border-radius: 50%;
+    background: var(--aura-accent-color);
+    animation: hotspot-pulse 1.6s ease-out infinite;
+}
+
+@keyframes hotspot-pulse {
+    from {
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--aura-accent-color) 60%, transparent);
+    }
+
+    to {
+        box-shadow: 0 0 0 0.6rem transparent;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hotspot {
+        animation: none;
+    }
+}
+
+/* UC5: the filter bar. */
+.uc5-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--vaadin-gap-m);
+}
+
+/* UC6: the task form and list. */
+.uc6-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--vaadin-gap-s);
+    margin-top: var(--vaadin-gap-m);
+}
+
+.uc6-list h2 {
+    font-size: var(--aura-font-size-l);
+}
+
+/* UC7: the links between the three pages and their content. */
+.uc7-pages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--vaadin-gap-m);
+}
+
+.uc7-pages a[highlight] {
+    font-weight: var(--aura-font-weight-semibold);
+    text-decoration: underline;
+}
+
+.uc7-kpis {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--vaadin-gap-m);
+}
+
+.uc7-kpi {
+    display: flex;
+    flex-direction: column;
+    padding: var(--vaadin-padding-m);
+    border: 1px solid var(--vaadin-border-color);
+    border-radius: var(--vaadin-radius-m);
+    background: var(--vaadin-background-color);
+}
+
+.uc7-kpi-value {
+    font-size: var(--aura-font-size-xl);
+    font-weight: var(--aura-font-weight-semibold);
+}
+
+.uc7-report {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vaadin-gap-s);
+    max-width: 24rem;
+}
+
+.uc7-bar {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    align-items: center;
+}
+
+.uc7-bar-fill {
+    height: 1rem;
+    border-radius: var(--vaadin-radius-s);
+    background: var(--aura-accent-color);
+}
+
+/* UC9: a form long enough to need scrolling. */
+.uc9-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vaadin-gap-l);
+    width: 100%;
+    max-width: 24rem;
+}
