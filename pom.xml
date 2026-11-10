@@ -16,6 +16,7 @@
 
     <modules>
         <module>common</module>
+        <module>ai</module>
         <module>async-ui</module>
         <module>custom-components</module>
         <module>file-uploads</module>

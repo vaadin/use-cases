@@ -1,0 +1,14 @@
+.uc5-view {
+    max-width: 48rem;
+
+    .uc5-quota,
+    .uc5-status {
+        margin: 0;
+        color: var(--vaadin-text-color-secondary);
+    }
+
+    .uc5-player audio {
+        display: block;
+        width: 100%;
+    }
+}
