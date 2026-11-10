@@ -100,11 +100,11 @@ public class SpotlightView extends VerticalLayout {
     private List<TourStep> steps(AppLayout layout) {
         Component menu = layout.getChildren().filter(SideNav.class::isInstance)
                 .findFirst().orElseThrow();
-        return List.of(TourStep
-                .of(menu, "The app menu",
+        return List.of(
+                TourStep.of(menu, "The app menu",
                         "All use cases are here. On a phone, the menu "
                                 + "button in the top bar opens it.")
-                .at(PopoverPosition.END).beforeShow(() -> openDrawer(layout)),
+                        .beforeShow(() -> openDrawer(layout)),
                 TourStep.of(email, "Your login",
                         "Changing your email changes how you sign in.")
                         .beforeShow(this::closeDrawerIfOpened),

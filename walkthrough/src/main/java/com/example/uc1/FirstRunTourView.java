@@ -56,8 +56,7 @@ public class FirstRunTourView extends VerticalLayout {
                         "The latest orders, with their status and total.")
                         .at(PopoverPosition.TOP),
                 TourStep.of(app.userMenu(), "Your account",
-                        "Change your profile and settings, or sign out.")
-                        .at(PopoverPosition.BOTTOM_END)));
+                        "Change your profile and settings, or sign out.")));
 
         Span status = new Span();
         status.addClassName("tour-status");

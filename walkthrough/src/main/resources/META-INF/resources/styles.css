@@ -83,7 +83,7 @@ vaadin-popover.tour-popover::part(overlay) {
 
 /* The content of a tour step's popover. */
 .tour-card {
-    max-width: 18rem;
+    max-width: min(18rem, calc(100vw - 3rem));
 }
 
 .tour-card h3 {
@@ -102,6 +102,7 @@ vaadin-popover.tour-popover::part(overlay) {
 
 .tour-card-buttons {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--vaadin-gap-s);
 }
 
@@ -147,12 +148,13 @@ vaadin-popover.tour-popover::part(overlay) {
 }
 
 /* UC8: a pulsing dot next to a new feature. */
-.hotspot {
-    --vaadin-button-height: 0.9rem;
-    --vaadin-button-padding: 0;
-    --vaadin-button-border-width: 0;
+vaadin-button.hotspot {
+    box-sizing: border-box;
     min-width: 0;
     width: 0.9rem;
+    height: 0.9rem;
+    padding: 0;
+    border: none;
     border-radius: 50%;
     background: var(--aura-accent-color);
     animation: hotspot-pulse 1.6s ease-out infinite;
@@ -169,7 +171,7 @@ vaadin-popover.tour-popover::part(overlay) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .hotspot {
+    vaadin-button.hotspot {
         animation: none;
     }
 }

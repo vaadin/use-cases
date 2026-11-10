@@ -89,3 +89,16 @@ browser.
 **Suggested API:** a `Popover` that waits until its target is laid out, or
 opens again when the target becomes visible, instead of closing; or a close
 event that says why the popover closed.
+
+## 7. A popover squeezes its content when its position has no room
+
+**Where it bites:** UC1 / `FirstRunTourView.java`, UC3 / `ReplayFromHelpView.java`, UC9 / `SpotlightView.java`
+**Symptom:** on a phone, a popover at `PopoverPosition.BOTTOM_END` of a target
+near the left edge, or at `END` of the full-width menu drawer, gets only the
+space on that side. Its content then overflows, and the step's buttons are cut
+off. The popover does not switch to a position that has room.
+**Workaround used:** the steps open above or below their target (`TOP`,
+`BOTTOM`), and the step card wraps its buttons and is never wider than the
+screen.
+**Suggested API:** a popover that moves to another position, or at least keeps
+to the screen width, when the requested position has no room.
