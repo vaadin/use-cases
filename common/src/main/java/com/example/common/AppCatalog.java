@@ -55,6 +55,8 @@ public final class AppCatalog {
                     "https://triggers-cases.fly.dev/"),
             new App("wake-lock", "Screen Wake Lock API",
                     "https://wake-lock-cases.fly.dev/"),
+            new App("walkthrough", "Walkthroughs & Product Tours",
+                    "https://walkthrough-cases.fly.dev/"),
             new App("web-notifications", "Web Notifications API",
                     "https://web-notifications-cases.fly.dev/"),
             new App("web-share", "Web Share API",
