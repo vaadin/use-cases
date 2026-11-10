@@ -26,6 +26,7 @@
         <module>multimedia</module>
         <module>clipboard</module>
         <module>collaboration</module>
+        <module>date-range-picker</module>
         <module>page-visibility</module>
         <module>pdf-viewer</module>
         <module>reporting</module>
