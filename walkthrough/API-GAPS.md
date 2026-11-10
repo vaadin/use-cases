@@ -65,10 +65,10 @@ example by id), with the tour scoped to the `UI` and navigating by itself.
 ## 5. Local storage can not be read in browserless tests
 
 **Where it bites:** UC1 / `AppTourView.java`, `AppTourViewTest.java`
-**Symptom:** whether this browser has seen the tour lives in local storage.
-`WebStorage#getItem(String, Callback)` answers after a round trip, so the
-view can only decide in the callback, and the browserless tests never get an
-answer: the per-browser path is checked only in a browser.
+**Symptom:** the version whose tour this browser saw last lives in local
+storage. `WebStorage#getItem(String, Callback)` answers after a round trip, so
+the view can only decide in the callback, and the browserless tests never get
+an answer: the per-browser path is checked only in a browser.
 **Workaround used:** the view shows "Asking the browser…" until the callback
 runs; the test only checks that the tour does not open before the answer.
 **Suggested API:** a browserless simulator for `WebStorage`.

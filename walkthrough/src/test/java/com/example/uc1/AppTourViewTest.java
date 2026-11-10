@@ -203,6 +203,23 @@ class AppTourViewTest extends TourTestSupport {
     }
 
     @Test
+    void takeTheTourSwitchesToTheFullTourFromTheFirstStep() {
+        seenVersions.set("Alex", "2.0");
+        navigate(AppTourView.class);
+        assertEquals(3, badged().size());
+
+        help().clickItem("Help", "Take the tour");
+        assertEquals("Step 1 of 5", stepProgress());
+        assertEquals(List.of(), badged());
+
+        clickInStep("Next");
+        clickInStep("Skip tour");
+        help().clickItem("Help", "Take the tour");
+
+        assertEquals("Step 1 of 5", stepProgress());
+    }
+
+    @Test
     @SuppressWarnings("unchecked")
     void perBrowserTheTourWaitsForTheBrowsersAnswer() {
         navigate(AppTourView.class);

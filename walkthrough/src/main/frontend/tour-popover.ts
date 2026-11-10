@@ -18,6 +18,14 @@ type TourPopover = HTMLElement & {
   walkthroughShowing?: boolean;
 };
 
+/** Whether the rectangle is inside the window and not under the app's top bar. */
+function isOnScreen(rect: DOMRect) {
+  const layout = document.querySelector('vaadin-app-layout');
+  const navbar = layout?.shadowRoot?.querySelector('[part~="navbar"]');
+  const top = navbar ? navbar.getBoundingClientRect().bottom : 0;
+  return rect.top >= top && rect.bottom <= window.innerHeight && rect.left >= 0 && rect.right <= window.innerWidth;
+}
+
 function showStep(popover: TourPopover) {
   popover.walkthroughShowing = true;
   const open = () => {
@@ -26,8 +34,8 @@ function showStep(popover: TourPopover) {
     }
     const rect = popover.target?.getBoundingClientRect();
     if (rect && (rect.width > 0 || rect.height > 0)) {
-      if (rect.top < 0 || rect.bottom > window.innerHeight) {
-        popover.target!.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      if (!isOnScreen(rect)) {
+        popover.target!.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' });
       }
       popover.opened = true;
     } else {

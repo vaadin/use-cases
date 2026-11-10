@@ -125,6 +125,8 @@ public class AppTourView extends VerticalLayout {
         help.addThemeVariants(MenuBarVariant.TERTIARY);
         SubMenu helpMenu = help.addItem("Help").getSubMenu();
         helpMenu.addItem("Take the tour", e -> {
+            // A pending answer from local storage must not replace this tour.
+            openCount++;
             showBadges(List.of());
             tour.setSteps(fullTour);
             tour.start();
