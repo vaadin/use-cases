@@ -25,8 +25,9 @@ public final class MissingAPI {
     /** Event data expressions, evaluated in the browser for each event. */
     static final String START = "element.inputElement.selectionStart";
     static final String END = "element.inputElement.selectionEnd";
-    static final String CONTENT = "element.inputElement.value.substring("
-            + START + ", " + END + ")";
+    // A plain property path, so the strict Content Security Policy does not
+    // block it; the selected text is cut out of it on the server.
+    static final String VALUE = "element.inputElement.value";
 
     private static final String DATA_KEY = MissingAPI.class.getName()
             + ".selection";
@@ -91,7 +92,7 @@ public final class MissingAPI {
             // it is added once, here, and needs no cleanup.
             element.addEventListener(SELECTION_CHANGE,
                     event -> created.set(read(event.getEventData())))
-                    .addEventData(START).addEventData(END).addEventData(CONTENT)
+                    .addEventData(START).addEventData(END).addEventData(VALUE)
                     .debounce(100);
             ComponentUtil.setData(component, DATA_KEY, created);
             signal = created;
@@ -100,8 +101,10 @@ public final class MissingAPI {
     }
 
     private static TextSelection read(JsonNode data) {
-        int start = data.path(START).asInt(0);
-        int end = Math.max(start, data.path(END).asInt(start));
-        return new TextSelection(start, end, data.path(CONTENT).asString(""));
+        String value = data.path(VALUE).asString("");
+        int start = Math.clamp(data.path(START).asInt(0), 0, value.length());
+        int end = Math.clamp(data.path(END).asInt(start), start,
+                value.length());
+        return new TextSelection(start, end, value.substring(start, end));
     }
 }
