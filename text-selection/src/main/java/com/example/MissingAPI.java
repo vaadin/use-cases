@@ -102,9 +102,8 @@ public final class MissingAPI {
 
     private static TextSelection read(JsonNode data) {
         String value = data.path(VALUE).asString("");
-        int start = Math.clamp(data.path(START).asInt(0), 0, value.length());
-        int end = Math.clamp(data.path(END).asInt(start), start,
-                value.length());
+        int start = data.path(START).asInt(0);
+        int end = Math.max(start, data.path(END).asInt(start));
         return new TextSelection(start, end, value.substring(start, end));
     }
 }
