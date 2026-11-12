@@ -39,8 +39,9 @@ import com.vaadin.flow.signals.Signal;
  * denied state, explains how to re-enable notifications in the common browsers,
  * and keeps working by falling back to in-app Vaadin notifications. When the
  * user re-enables notifications in the site settings, the view notices (the
- * browser reports the change, at the latest when the user returns to the tab)
- * and switches back to OS notifications without a reload.
+ * browser reports the change, at the latest when the window gets focus back or
+ * the tab is shown again) and switches back to OS notifications without a
+ * reload.
  */
 @UnreleasedApi("https://github.com/vaadin/flow/pull/26495")
 @Route(value = "uc6", layout = MainLayout.class)
@@ -121,8 +122,8 @@ public class DeniedFallbackView extends VerticalLayout {
                         + "\"Allow\" button can't help any more. You'll "
                         + "keep getting messages inside the app. To get "
                         + "OS notifications again:"),
-                steps, new Paragraph("Then come back to this tab: the view "
-                        + "notices the change on its own."));
+                steps, new Paragraph("Then close the site settings: the "
+                        + "view notices the change on its own."));
     }
 
     // Package-private so tests can call it without a click.

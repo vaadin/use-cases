@@ -31,10 +31,6 @@ breadcrumb — untouched. Use `@RouteParent` when a page really does live under
 another page, and `@Menu(parent = ...)` when only the navigation menu should
 group it that way.
 
-The hierarchical menu and `@Menu(parent = ...)` have not landed in the baseline
-Flow version yet, so this module pins `flow.version` to
-`25.4.hierarchical-menu-SNAPSHOT` (see [`pom.xml`](pom.xml)).
-
 | # | View | What it shows |
 | - | ---- | ------------- |
 | UC1 | URL-prefix trail | `uc1` → `uc1/electronics` → `uc1/electronics/laptops` with no annotations; the trail comes purely from `getRouteHierarchy`'s URL-prefix fallback. |
