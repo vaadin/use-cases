@@ -8,9 +8,9 @@ import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
-import com.vaadin.flow.js.JsCalledWith;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsFunctionParameterNames;
 import com.vaadin.flow.js.JsSnippets;
 
 /**
@@ -64,7 +64,7 @@ public class ApplyResponsiveColorAction extends Action {
                         : $0.getBoundingClientRect().width;
                 const c = w < $4 ? $1.value : w >= $5 ? $3.value : $2.value;
                 $0.style.backgroundColor = c;""")
-        @JsCalledWith("event")
+        @JsFunctionParameterNames("event")
         JsFunction applyColor(Element target, Element smallPicker,
                 Element mediumPicker, Element largePicker, int narrowMax,
                 int wideMin);

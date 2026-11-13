@@ -9,9 +9,9 @@ import com.vaadin.flow.component.trigger.internal.SizeTrigger;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
-import com.vaadin.flow.js.JsCalledWith;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsFunctionParameterNames;
 import com.vaadin.flow.js.JsSnippets;
 
 /**
@@ -78,7 +78,7 @@ public class ClassByWidthAction extends Action {
                 const cls = w < $1 ? $3 : w >= $2 ? $5 : $4;
                 $0.classList.remove($3, $4, $5);
                 $0.classList.add(cls);""")
-        @JsCalledWith("event")
+        @JsFunctionParameterNames("event")
         JsFunction classByWidth(Element target, int narrowMax, int wideMin,
                 String narrowClass, String mediumClass, String wideClass);
     }

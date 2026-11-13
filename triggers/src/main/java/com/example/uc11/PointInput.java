@@ -6,9 +6,9 @@ import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.MouseEventTrigger;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
-import com.vaadin.flow.js.JsCalledWith;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsFunctionParameterNames;
 import com.vaadin.flow.js.JsSnippets;
 
 /**
@@ -37,7 +37,7 @@ public final class PointInput extends Action.Input<Point> {
     private interface PointJs extends Serializable {
 
         @JsExpression("return {x: event.clientX, y: event.clientY}")
-        @JsCalledWith("event")
+        @JsFunctionParameterNames("event")
         JsFunction point();
     }
 }

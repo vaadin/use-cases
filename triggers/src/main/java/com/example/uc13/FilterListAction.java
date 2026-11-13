@@ -8,9 +8,9 @@ import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
-import com.vaadin.flow.js.JsCalledWith;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsFunctionParameterNames;
 import com.vaadin.flow.js.JsSnippets;
 
 /**
@@ -53,7 +53,7 @@ public class FilterListAction extends Action {
                 for (const row of $0.children) {
                     row.hidden = q && !row.textContent.toLowerCase().includes(q);
                 }""")
-        @JsCalledWith("event")
+        @JsFunctionParameterNames("event")
         JsFunction filterList(Element listContainer, JsFunction query);
     }
 }

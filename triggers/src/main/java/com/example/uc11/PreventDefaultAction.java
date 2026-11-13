@@ -5,9 +5,9 @@ import java.io.Serializable;
 import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
-import com.vaadin.flow.js.JsCalledWith;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsFunctionParameterNames;
 import com.vaadin.flow.js.JsSnippets;
 
 /**
@@ -33,7 +33,7 @@ public final class PreventDefaultAction extends Action {
     private interface PreventDefaultJs extends Serializable {
 
         @JsExpression("event.preventDefault()")
-        @JsCalledWith("event")
+        @JsFunctionParameterNames("event")
         JsFunction preventDefault();
     }
 }
