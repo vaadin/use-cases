@@ -66,29 +66,13 @@ class MUC06ViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void otherUserAddingTaskUpdatesView() {
-        try (var app = createApp()) {
-            var alice = app.newUser().newWindow();
-            var bob = app.newUser().newWindow();
-            alice.navigate(MUC06View.class);
-            bob.navigate(MUC06View.class);
-            assertEquals("Total: 4", statText(alice, "Total:"));
-
-            bob.test(addTaskButton(bob)).click();
-            bob.runPendingSignalsTasks();
-
-            assertEquals("Total: 5", statText(alice, "Total:"),
-                    "Alice should see the task Bob added");
-        }
-    }
-
-    @Test
     void bothUsersAddTasksConcurrently() {
         try (var app = createApp()) {
             var alice = app.newUser().newWindow();
             var bob = app.newUser().newWindow();
             alice.navigate(MUC06View.class);
             bob.navigate(MUC06View.class);
+            assertEquals("Total: 4", statText(alice, "Total:"));
 
             alice.test(addTaskButton(alice)).click();
             bob.test(addTaskButton(bob)).click();

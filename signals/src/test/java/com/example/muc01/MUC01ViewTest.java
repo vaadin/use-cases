@@ -107,28 +107,6 @@ class MUC01ViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void multipleUsersMessagesAccumulate() {
-        try (var app = SpringBrowserlessApplicationContext.createSecured(
-                applicationContext, b -> b.withViewPackages(MUC01View.class)
-                        .withSessionLockIsolation(true))) {
-            var alice = app.newUser("alice", "USER").newWindow();
-            var bob = app.newUser("bob", "USER").newWindow();
-            alice.navigate(MUC01View.class);
-            bob.navigate(MUC01View.class);
-
-            sendMessage(alice, "Hello from Alice");
-            alice.runPendingSignalsTasks();
-            sendMessage(bob, "Hello from Bob");
-            bob.runPendingSignalsTasks();
-
-            for (var window : List.of(alice, bob)) {
-                assertTrue(window.findInView(Div.class).all().stream().anyMatch(
-                        d -> "Total messages: 2".equals(d.getText())));
-            }
-        }
-    }
-
-    @Test
     void clearAllRemovesMessagesFromAllUsers() {
         try (var app = SpringBrowserlessApplicationContext.createSecured(
                 applicationContext, b -> b.withViewPackages(MUC01View.class)
@@ -141,8 +119,10 @@ class MUC01ViewTest extends SpringBrowserlessTest {
             sendMessage(alice, "Message 1");
             sendMessage(bob, "Message 2");
             bob.runPendingSignalsTasks();
-            assertTrue(bob.findInView(Div.class).all().stream()
-                    .anyMatch(d -> "Total messages: 2".equals(d.getText())));
+            for (var window : List.of(alice, bob)) {
+                assertTrue(window.findInView(Div.class).all().stream().anyMatch(
+                        d -> "Total messages: 2".equals(d.getText())));
+            }
 
             alice.test(alice.findInView(Button.class)
                     .withText("Clear All Messages").single()).click();

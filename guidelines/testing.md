@@ -89,10 +89,11 @@ try (var app = SpringBrowserlessApplicationContext.create(applicationContext,
     alice.navigate(MaintenanceBannerView.class);
     bob.navigate(MaintenanceBannerView.class);
 
+    alice.test(alice.find(TextField.class).single()).setValue("Read-only");
     alice.test(alice.find(Button.class).withText("Publish to everyone")
             .single()).click();
     alice.runPendingSignalsTasks();
-    assertEquals("...", bob.find(Div.class)
+    assertEquals("Read-only", bob.find(Div.class)
             .withClassName("maintenance-banner").single().getText());
 }
 ```

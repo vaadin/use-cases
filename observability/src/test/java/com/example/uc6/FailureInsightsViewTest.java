@@ -248,7 +248,7 @@ class FailureInsightsViewTest extends SpringBrowserlessTest {
     void readoutIsApplicationScopedAcrossSessions() {
         // The insights come from an application-scoped buffer the kit owns,
         // not from per-session state: a second clerk at another desk must see
-        // the same readout.
+        // Alice's failure in their readout.
         try (var app = SpringBrowserlessApplicationContext
                 .create(applicationContext,
                         b -> b.withViewPackages(FailureInsightsView.class,
@@ -260,15 +260,19 @@ class FailureInsightsViewTest extends SpringBrowserlessTest {
             bob.navigate(FailureInsightsView.class);
 
             processDefectiveReturn(alice);
-            long alicesCards = alice.findInView(Div.class).id("verdict")
-                    .getChildren().count();
+            // What the kit's ErrorCounter records for Alice's failure; a
+            // browserless click does not go through the request the kit
+            // measures.
+            Counter counter = errors("java.lang.IllegalStateException",
+                    FailureInsightsView.ROUTE,
+                    "com.vaadin.flow.component.button.Button");
+            counter.increment();
 
             processDefectiveReturn(bob);
-            assertEquals(alicesCards,
-                    bob.findInView(Div.class).id("verdict").getChildren()
-                            .count(),
-                    "both sessions should read the same application-wide "
-                            + "insights");
+            String text = bob.findInView(Paragraph.class).id("error-counter")
+                    .getElement().getTextRecursively();
+            assertTrue(text.contains("×" + (long) counter.count()),
+                    "Bob's readout should include Alice's failure: " + text);
         }
     }
 

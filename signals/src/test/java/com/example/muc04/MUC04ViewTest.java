@@ -14,6 +14,7 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,6 +68,10 @@ class MUC04ViewTest extends SpringBrowserlessTest {
             bob.test(field(bob, "Company Name")).focus();
             bob.runPendingSignalsTasks();
 
+            assertEquals(1,
+                    alice.findInView(Span.class).withClassName("editor-name")
+                            .all().size(),
+                    "The other user's edit should be listed");
             assertTrue(field(alice, "Company Name").isEnabled(),
                     "Field should remain enabled when locking is off");
             assertTrue(field(alice, "Address").isEnabled());
