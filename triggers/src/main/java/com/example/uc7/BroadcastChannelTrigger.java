@@ -1,5 +1,6 @@
 package com.example.uc7;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -7,6 +8,9 @@ import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.HandlerInput;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -33,10 +37,18 @@ public class BroadcastChannelTrigger extends Trigger {
 
     @Override
     protected Registration install(JsFunction action) {
-        return getHost().addJsInitializer("""
+        return getHost().addJsInitializer(JsSnippets
+                .of(BroadcastChannelJs.class).listen(action, channelName));
+    }
+
+    @JsDefinition
+    private interface BroadcastChannelJs extends Serializable {
+
+        @JsExpression("""
                 const channel = new BroadcastChannel($1);
                 channel.onmessage = (e) => $0(e);
-                return () => { channel.close(); };""", action, channelName);
+                return () => { channel.close(); };""")
+        JsFunction listen(JsFunction action, String channelName);
     }
 
     /** Inputs exposed by this trigger's handler scope. */

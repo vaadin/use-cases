@@ -47,7 +47,12 @@
     <properties>
         <java.version>25</java.version>
         <vaadin.version>25.4-SNAPSHOT</vaadin.version>
-        <flow.version>25.4-SNAPSHOT</flow.version>
+        <!--
+          The CSP-ready trigger API (trigger JavaScript as snippets and
+          Element#addJsInitializer(JsFunction)) has not landed in the baseline
+          Flow snapshot yet. Go back to 25.4-SNAPSHOT once it has.
+        -->
+        <flow.version>25.4.csp-trigger-snippets-SNAPSHOT</flow.version>
         <flow-components.version>25.4-SNAPSHOT</flow-components.version>
         <browserless-test.version>25.4-SNAPSHOT</browserless-test.version>
         <observability-kit.version>25.4-SNAPSHOT</observability-kit.version>
