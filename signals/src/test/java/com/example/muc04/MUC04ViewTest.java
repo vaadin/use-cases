@@ -3,9 +3,13 @@ package com.example.muc04;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 
+import com.vaadin.browserless.BrowserlessApplicationContext;
+import com.vaadin.browserless.BrowserlessUIContext;
+import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -22,11 +26,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class MUC04ViewTest extends SpringBrowserlessTest {
 
-    private static final SignalFieldHighlighter.User OTHER_USER = new SignalFieldHighlighter.User(
-            99, "otherUser", 1);
-
     @Autowired
     private MUC04Signals muc04Signals;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     private TextField getFieldByLabel(String label) {
         return findInView(TextField.class).all().stream()
@@ -54,53 +58,66 @@ class MUC04ViewTest extends SpringBrowserlessTest {
 
     @Test
     void fieldsRemainEnabledWhenLockingDisabled() {
-        navigate(MUC04View.class);
-        runPendingSignalsTasks();
+        try (var app = createApp()) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(MUC04View.class);
+            bob.navigate(MUC04View.class);
 
-        muc04Signals.startEditing("companyName", OTHER_USER);
-        runPendingSignalsTasks();
+            bob.test(field(bob, "Company Name")).focus();
+            bob.runPendingSignalsTasks();
 
-        assertTrue(getFieldByLabel("Company Name").isEnabled(),
-                "Field should remain enabled when locking is off");
-        assertTrue(getFieldByLabel("Address").isEnabled());
-        assertTrue(getFieldByLabel("Phone Number").isEnabled());
+            assertTrue(field(alice, "Company Name").isEnabled(),
+                    "Field should remain enabled when locking is off");
+            assertTrue(field(alice, "Address").isEnabled());
+            assertTrue(field(alice, "Phone Number").isEnabled());
+        }
     }
 
     @Test
     void fieldDisabledWhenLockingEnabledAndOtherUserEdits() {
-        navigate(MUC04View.class);
-        runPendingSignalsTasks();
+        try (var app = createApp()) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(MUC04View.class);
+            bob.navigate(MUC04View.class);
 
-        Checkbox lockingCheckbox = findInView(Checkbox.class).first();
-        test(lockingCheckbox).click();
-        runPendingSignalsTasks();
+            alice.test(alice.findInView(Checkbox.class).first()).click();
+            alice.runPendingSignalsTasks();
 
-        muc04Signals.startEditing("companyName", OTHER_USER);
-        runPendingSignalsTasks();
+            bob.test(field(bob, "Company Name")).focus();
+            bob.runPendingSignalsTasks();
 
-        assertFalse(getFieldByLabel("Company Name").isEnabled(),
-                "Field should be disabled when locking is on and another user is editing");
-        assertTrue(getFieldByLabel("Address").isEnabled());
-        assertTrue(getFieldByLabel("Phone Number").isEnabled());
+            assertFalse(field(alice, "Company Name").isEnabled(),
+                    "Field should be disabled when locking is on and another user is editing");
+            assertTrue(field(alice, "Address").isEnabled());
+            assertTrue(field(alice, "Phone Number").isEnabled());
+            // The editing user keeps the field
+            assertTrue(field(bob, "Company Name").isEnabled());
+        }
     }
 
     @Test
     void fieldReenabledWhenLockingToggledOff() {
-        navigate(MUC04View.class);
-        runPendingSignalsTasks();
+        try (var app = createApp()) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(MUC04View.class);
+            bob.navigate(MUC04View.class);
 
-        Checkbox lockingCheckbox = findInView(Checkbox.class).first();
-        test(lockingCheckbox).click();
-        muc04Signals.startEditing("companyName", OTHER_USER);
-        runPendingSignalsTasks();
+            Checkbox lockingCheckbox = alice.findInView(Checkbox.class).first();
+            alice.test(lockingCheckbox).click();
+            bob.test(field(bob, "Company Name")).focus();
+            bob.runPendingSignalsTasks();
 
-        assertFalse(getFieldByLabel("Company Name").isEnabled());
+            assertFalse(field(alice, "Company Name").isEnabled());
 
-        test(lockingCheckbox).click();
-        runPendingSignalsTasks();
+            alice.test(lockingCheckbox).click();
+            alice.runPendingSignalsTasks();
 
-        assertTrue(getFieldByLabel("Company Name").isEnabled(),
-                "Field should be re-enabled when locking is toggled off");
+            assertTrue(field(alice, "Company Name").isEnabled(),
+                    "Field should be re-enabled when locking is toggled off");
+        }
     }
 
     @Test
@@ -117,13 +134,28 @@ class MUC04ViewTest extends SpringBrowserlessTest {
 
     @Test
     void sharedValueFromOtherUserAppearsInField() {
-        navigate(MUC04View.class);
-        runPendingSignalsTasks();
+        try (var app = createApp()) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(MUC04View.class);
+            bob.navigate(MUC04View.class);
 
-        muc04Signals.getAddressSignal().set("123 Main St");
-        runPendingSignalsTasks();
+            bob.test(field(bob, "Address")).setValue("123 Main St");
+            bob.runPendingSignalsTasks();
 
-        TextField addressField = getFieldByLabel("Address");
-        assertEquals("123 Main St", addressField.getValue());
+            assertEquals("123 Main St", field(alice, "Address").getValue());
+        }
+    }
+
+    private BrowserlessApplicationContext createApp() {
+        return SpringBrowserlessApplicationContext.create(applicationContext,
+                b -> b.withViewPackages(MUC04View.class)
+                        .withSessionLockIsolation(true));
+    }
+
+    private static TextField field(BrowserlessUIContext window, String label) {
+        return window.findInView(TextField.class).all().stream()
+                .filter(f -> label.equals(f.getLabel())).findFirst()
+                .orElseThrow();
     }
 }

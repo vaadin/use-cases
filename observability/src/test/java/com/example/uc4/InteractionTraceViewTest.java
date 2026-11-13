@@ -10,7 +10,10 @@ import com.example.home.HomeView;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
+import com.vaadin.browserless.BrowserlessUIContext;
+import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.Component;
@@ -60,6 +63,9 @@ class InteractionTraceViewTest extends SpringBrowserlessTest {
 
     @Autowired
     ObservabilitySettings settings;
+
+    @Autowired
+    ApplicationContext applicationContext;
 
     @Test
     void opensWithTheShippingDeskAndTheInvestigationHidden() {
@@ -301,26 +307,34 @@ class InteractionTraceViewTest extends SpringBrowserlessTest {
         // per-session state: a second session reads the ones the first one
         // left behind, which is what a colleague looking over your shoulder
         // needs. Kept under MAX_TRAILS so the count can be compared at all.
-        navigate(InteractionTraceView.class);
-        dispatch();
-        String firstSessionTrace = cell(recentTrails().get(0), 0);
+        try (var app = SpringBrowserlessApplicationContext
+                .create(applicationContext,
+                        b -> b.withViewPackages(InteractionTraceView.class,
+                                HomeView.class)
+                                .withSessionLockIsolation(true))) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(InteractionTraceView.class);
+            bob.navigate(InteractionTraceView.class);
 
-        cleanVaadinEnvironment();
-        initVaadinEnvironment();
-        navigate(InteractionTraceView.class);
-        dispatch();
+            dispatch(alice);
+            String alicesTrace = cell(recentTrails(alice).get(0), 0);
 
-        List<String> traces = recentTrails().stream().map(row -> cell(row, 0))
-                .toList();
-        assertTrue(traces.contains(firstSessionTrace),
-                "the second session's dispatch joins the first session's "
-                        + "rather than replacing it: " + traces);
-        assertNotEquals(firstSessionTrace, traces.get(0),
-                "newest first, and the newest is this session's");
-        assertTrue(findInView(Div.class).id("trail-summary").getElement()
-                .getTextRecursively().contains(traces.get(0).replace("…", "")),
-                "and the trail this view follows is its own dispatch: "
-                        + traces.get(0));
+            dispatch(bob);
+            List<String> traces = recentTrails(bob).stream()
+                    .map(row -> cell(row, 0)).toList();
+            assertTrue(traces.contains(alicesTrace),
+                    "the second session's dispatch joins the first session's "
+                            + "rather than replacing it: " + traces);
+            assertNotEquals(alicesTrace, traces.get(0),
+                    "newest first, and the newest is this session's");
+            assertTrue(
+                    bob.findInView(Div.class).id("trail-summary").getElement()
+                            .getTextRecursively()
+                            .contains(traces.get(0).replace("…", "")),
+                    "and the trail this view follows is its own dispatch: "
+                            + traces.get(0));
+        }
     }
 
     @Test
@@ -418,6 +432,17 @@ class InteractionTraceViewTest extends SpringBrowserlessTest {
         Instant now = Instant.now();
         return new InteractionTrail.Span("trace", "span", null,
                 "vaadin.request.uidl", now, now, tags, null);
+    }
+
+    private static void dispatch(BrowserlessUIContext window) {
+        window.test(window.findInView(IntegerField.class).id("carrier-latency"))
+                .setValue(0);
+        window.test(window.findInView(Button.class)
+                .withText("Dispatch shipment").single()).click();
+    }
+
+    private static List<TableRow> recentTrails(BrowserlessUIContext window) {
+        return window.findInView(Table.class).id("recent-trails").getBodyRows();
     }
 
     private List<TableRow> recentTrails() {

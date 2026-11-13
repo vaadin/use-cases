@@ -1,5 +1,6 @@
 package com.example.uc1;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,7 +10,9 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
+import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.Component;
@@ -26,8 +29,6 @@ import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.router.RouteConfiguration;
 
-import java.time.Duration;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,8 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Note on coverage: the kit captures an interaction from Flow's RPC invocation
  * listener, which only fires while handling a real UIDL request, so the
  * populated verdict (step 3) is covered by using the running application. The
- * application's own action timer records in the click listener itself, so
- * step 4 is asserted for real here.
+ * application's own action timer records in the click listener itself, so step
+ * 4 is asserted for real here.
  */
 @SpringBootTest
 @ViewPackages(classes = { InteractionLatencyView.class, HomeView.class })
@@ -46,6 +47,9 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
 
     @Autowired
     MeterRegistry registry;
+
+    @Autowired
+    ApplicationContext applicationContext;
 
     @Test
     void opensWithTheInvoicingDeskAndTheInvestigationHidden() {
@@ -70,9 +74,8 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
     void theNumberedRouteIsAnAliasForTheStoryRoute() {
         navigate(InteractionLatencyView.class);
 
-        assertEquals(InteractionLatencyView.class,
-                RouteConfiguration.forSessionScope().getRoute("uc1")
-                        .orElseThrow());
+        assertEquals(InteractionLatencyView.class, RouteConfiguration
+                .forSessionScope().getRoute("uc1").orElseThrow());
         assertEquals(InteractionLatencyView.class,
                 RouteConfiguration.forSessionScope()
                         .getRoute(InteractionLatencyView.ROUTE).orElseThrow(),
@@ -83,8 +86,9 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
     void theTaxServiceDefaultsAboveTheInsightsBudget() {
         navigate(InteractionLatencyView.class);
 
-        assertTrue(findInView(IntegerField.class).id("tax-delay")
-                .getValue() > 1_000,
+        assertTrue(
+                findInView(IntegerField.class).id("tax-delay")
+                        .getValue() > 1_000,
                 "issuing an invoice must exceed the 1 s UX budget on the first "
                         + "try, or step 3 has nothing to show");
     }
@@ -108,8 +112,9 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
         assertEquals(List.of("1 — Work an invoice"),
                 findInView(H3.class).all().stream().map(H3::getText).toList());
         List<Details> steps = findInView(Details.class).all();
-        assertEquals(List.of("2 — What the framework times",
-                "3 — The kit's verdict", "4 — Per action, the app's own timer"),
+        assertEquals(
+                List.of("2 — What the framework times", "3 — The kit's verdict",
+                        "4 — Per action, the app's own timer"),
                 steps.stream().map(Details::getSummaryText).toList());
         assertTrue(steps.get(0).isOpened());
         assertFalse(steps.get(1).isOpened());
@@ -130,8 +135,8 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
                 "vaadin.client.request.duration",
                 "vaadin.client.render.duration",
                 "vaadin.client.navigation.duration",
-                "vaadin.client.web_vitals.lcp",
-                "vaadin.client.web_vitals.fcp"), meters,
+                "vaadin.client.web_vitals.lcp", "vaadin.client.web_vitals.fcp"),
+                meters,
                 "the framework and browser timers are always listed, with a "
                         + "dash until they have samples");
     }
@@ -143,8 +148,8 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
 
         List<TableRow> rows = findInView(Table.class).id("framework-timers")
                 .getBodyRows();
-        assertEquals("route=invoices", tagsOf(rows,
-                "vaadin.client.request.duration"),
+        assertEquals("route=invoices",
+                tagsOf(rows, "vaadin.client.request.duration"),
                 "the browser's round trip is read for this route, the tag "
                         + "the kit puts on it");
         assertEquals("route=invoices",
@@ -166,16 +171,17 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
 
         List<TableRow> rows = findInView(Table.class).id("framework-timers")
                 .getBodyRows();
-        assertTrue(readsOf(rows, "vaadin.client.render.duration")
-                .contains("vaadin.requestTiming=true"),
+        assertTrue(
+                readsOf(rows, "vaadin.client.render.duration")
+                        .contains("vaadin.requestTiming=true"),
                 "round trips without render figures can only mean Flow's "
                         + "request timing is off, and the row should say so");
     }
 
     @Test
     void theNetworkShareIsWorkedOutFromBothEnds() {
-        registry.timer("vaadin.request.duration", "vaadin.request.type",
-                "uidl", "http.method", "POST", "outcome", "success",
+        registry.timer("vaadin.request.duration", "vaadin.request.type", "uidl",
+                "http.method", "POST", "outcome", "success",
                 "vaadin.interaction", "rpc", "error", "none")
                 .record(Duration.ofMillis(120));
         registry.timer("vaadin.client.request.duration", "route", "invoices")
@@ -207,10 +213,10 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
 
         List<TableRow> rows = findInView(Table.class).id("action-timers")
                 .getBodyRows();
-        assertEquals(String.valueOf(savesBefore + 1), countOf(rows,
-                "action=" + InteractionLatencyView.ACTION_SAVE));
-        assertEquals(String.valueOf(issuesBefore + 2), countOf(rows,
-                "action=" + InteractionLatencyView.ACTION_ISSUE),
+        assertEquals(String.valueOf(savesBefore + 1),
+                countOf(rows, "action=" + InteractionLatencyView.ACTION_SAVE));
+        assertEquals(String.valueOf(issuesBefore + 2),
+                countOf(rows, "action=" + InteractionLatencyView.ACTION_ISSUE),
                 "the business action timer counts the clicks per action — "
                         + "the granularity the kit's meters do not carry");
         assertEquals("Invoice INV-24312 issued",
@@ -223,8 +229,9 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
         click("Save draft");
         openAllSteps();
 
-        assertTrue(findInView(Div.class).id("verdict").getElement()
-                .getTextRecursively().contains("UX budget"),
+        assertTrue(
+                findInView(Div.class).id("verdict").getElement()
+                        .getTextRecursively().contains("UX budget"),
                 "the empty verdict must say what would make a finding appear");
     }
 
@@ -241,25 +248,37 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
 
     @Test
     void theActionTimerIsSharedAcrossSessions() {
-        // Session 1 issues an invoice; the app's timer records into the
-        // application-scoped registry.
-        navigate(InteractionLatencyView.class);
-        findInView(IntegerField.class).id("tax-delay").setValue(0);
-        click("Apply discounts");
+        try (var app = SpringBrowserlessApplicationContext
+                .create(applicationContext,
+                        b -> b.withViewPackages(InteractionLatencyView.class,
+                                HomeView.class)
+                                .withSessionLockIsolation(true))) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(InteractionLatencyView.class);
+            bob.navigate(InteractionLatencyView.class);
 
-        // Session 2: a fresh Vaadin environment, same Spring context. The
-        // action recorded by session 1 must be visible.
-        cleanVaadinEnvironment();
-        initVaadinEnvironment();
-        navigate(InteractionLatencyView.class);
-        click("Save draft");
-        openAllSteps();
+            // Alice applies discounts; the app's timer records into the
+            // application-scoped registry.
+            alice.test(alice.findInView(IntegerField.class).id("tax-delay"))
+                    .setValue(0);
+            alice.test(alice.findInView(Button.class)
+                    .withText("Apply discounts").single()).click();
 
-        assertTrue(findInView(Table.class).id("action-timers").getBodyRows()
-                .stream().anyMatch(row -> cell(row, 1).equals(
-                        "action=" + InteractionLatencyView.ACTION_DISCOUNTS)),
-                "an action recorded in the first session should be visible "
-                        + "in the second");
+            // Bob, at his own desk, sees her action in his readout.
+            bob.test(bob.findInView(Button.class).withText("Save draft")
+                    .single()).click();
+            bob.findInView(Details.class).all()
+                    .forEach(step -> step.setOpened(true));
+
+            assertTrue(
+                    bob.findInView(Table.class).id("action-timers")
+                            .getBodyRows().stream()
+                            .anyMatch(row -> cell(row, 1).equals("action="
+                                    + InteractionLatencyView.ACTION_DISCOUNTS)),
+                    "an action recorded in one session should be visible "
+                            + "in another");
+        }
     }
 
     private void click(String label) {
@@ -267,8 +286,7 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
     }
 
     private void openAllSteps() {
-        findInView(Details.class).all()
-                .forEach(step -> step.setOpened(true));
+        findInView(Details.class).all().forEach(step -> step.setOpened(true));
     }
 
     private long clicks(String action) {
@@ -296,8 +314,7 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
     }
 
     private static String cell(TableRow row, int index) {
-        return row.getDataCells().get(index).getElement()
-                .getTextRecursively();
+        return row.getDataCells().get(index).getElement().getTextRecursively();
     }
 
     private static Component investigationOf(Component root) {

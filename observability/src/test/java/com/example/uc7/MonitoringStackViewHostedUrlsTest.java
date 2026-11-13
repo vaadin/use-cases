@@ -86,16 +86,20 @@ class MonitoringStackViewHostedUrlsTest extends SpringBrowserlessTest {
                 .filter(r -> "Prometheus scrape target".equals(r.signal()))
                 .findFirst().orElseThrow();
         assertEquals("http://127.0.0.1:1/api/v1/targets", scrape.source());
-        assertTrue(scrape.value().contains("not reachable at http://127.0.0.1:1"),
+        assertTrue(
+                scrape.value().contains("not reachable at http://127.0.0.1:1"),
                 "the readout should name the API address it tried: "
                         + scrape.value());
     }
 
-    /** The action links are anchors wrapping a tertiary button as their face. */
+    /**
+     * The action links are anchors wrapping a tertiary button as their face.
+     */
     private String href(String label) {
         return findInView(Anchor.class).all().stream()
-                .filter(a -> a.getChildren().anyMatch(c -> c instanceof Button b
-                        && label.equals(b.getText())))
+                .filter(a -> a.getChildren()
+                        .anyMatch(c -> c instanceof Button b
+                                && label.equals(b.getText())))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("no link " + label))
                 .getHref();

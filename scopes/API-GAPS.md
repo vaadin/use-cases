@@ -29,9 +29,11 @@ now stays in the same `BrowserTab`. A second tab in the same session needs
 offer. Two things the scope exists for can not be simulated at all: a
 duplicated tab (a second UI with the same window name), and a closed tab
 expiring after the heartbeat timeout (`BrowserTab.destroyInactiveTabs` is
-package-private). The tests cover rendering, the non-tab state, and tab
-destruction at session end.
-**Workaround used:** None; tab behaviour was checked manually in a browser.
+package-private). The tests cover rendering, the non-tab state, a second tab,
+and tab destruction at session end.
+**Workaround used:** The UC6 and UC7 tests open a second tab through the
+multi-user `SpringBrowserlessApplicationContext`; duplicated tabs and tab
+expiry were checked manually in a browser.
 **Suggested API:** browserless helpers such as `duplicateTab()`, a way to expire
 inactive tabs or advance the heartbeat clock, and `newWindow()` in
 `SpringBrowserlessTest`.
@@ -68,15 +70,16 @@ expose `BrowserTab#isDuplicate()` so that the application can decide.
 bound to Spring Test's own `MockHttpServletRequest` for the whole test method.
 `cleanVaadinEnvironment()` + `initVaadinEnvironment()` create a new Vaadin
 session and HTTP session, but `@SessionScope` beans keep resolving to the old
-Spring mock session. UC7's test therefore has to expect the HTTP session
-counter to keep counting in the "new session" case.
+Spring mock session.
 `SpringBrowserlessApplicationContext` already binds each user's request to
 `RequestContextHolder` (vaadin/browserless-test#110), but
 `SpringBrowserlessTest#initVaadinEnvironment()` does not.
 Related, and also true in production: `@SessionScope` beans only resolve on
 threads that are handling an HTTP request, so they cannot be used from
 `UI.access` in background threads or from server push.
-**Workaround used:** The test expectation documents the behaviour.
+**Workaround used:** UC7's test simulates another browser with a second user
+of the multi-user `SpringBrowserlessApplicationContext`, where the HTTP session
+counter starts over.
 **Suggested API:** `SpringBrowserlessTest` could bind `RequestContextHolder`
 to the mock Vaadin request in `initVaadinEnvironment()`, as the multi-user
 context does, so that Spring web scopes follow the simulated session.

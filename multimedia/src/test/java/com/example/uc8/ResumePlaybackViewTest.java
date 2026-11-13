@@ -2,8 +2,11 @@ package com.example.uc8;
 
 import com.example.MediaTester;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
+import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -17,6 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ViewPackages(classes = ResumePlaybackView.class)
 class ResumePlaybackViewTest extends SpringBrowserlessTest {
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Test
     void firstVisitStartsFromTheBeginning() {
@@ -72,17 +78,35 @@ class ResumePlaybackViewTest extends SpringBrowserlessTest {
 
     @Test
     void positionsAreNotSharedBetweenSessions() {
-        navigate(ResumePlaybackView.class);
-        PlaybackPositions.current().save(ResumePlaybackView.RECORDING, 30);
+        try (var app = SpringBrowserlessApplicationContext.create(
+                applicationContext,
+                b -> b.withViewPackages(ResumePlaybackView.class)
+                        .withSessionLockIsolation(true))) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(ResumePlaybackView.class);
+            alice.runPendingSignalsTasks();
 
-        cleanVaadinEnvironment();
-        initVaadinEnvironment();
-        navigate(ResumePlaybackView.class);
-        runPendingSignalsTasks();
+            // Alice watches half a minute and pauses.
+            alice.activate();
+            new MediaTester(alice.findInView(Video.class).single())
+                    .fire("pause", "element.currentTime", 30.0);
 
-        assertStatus("Starting from the beginning");
-        assertTrue(PlaybackPositions.current().get(ResumePlaybackView.RECORDING)
-                .isEmpty());
+            // Bob, in his own browser, opens the recording.
+            bob.navigate(ResumePlaybackView.class);
+            bob.runPendingSignalsTasks();
+            assertTrue(
+                    bob.findInView(Span.class).all().stream()
+                            .anyMatch(s -> "Starting from the beginning"
+                                    .equals(s.getText())),
+                    "another browser must not resume from Alice's position");
+
+            // Alice, reloading, still gets her own position back.
+            alice.reload();
+            alice.runPendingSignalsTasks();
+            assertTrue(alice.findInView(Span.class).all().stream()
+                    .anyMatch(s -> "Resuming from 0:30".equals(s.getText())));
+        }
     }
 
     private double savedPosition() {

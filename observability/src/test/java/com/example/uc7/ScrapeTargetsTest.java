@@ -13,11 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The local compose config lists two ports, so Prometheus always has one
- * target that is not this app (whatever else listens there, or nothing). The
- * view must judge itself by its own target only and report the rest apart,
- * which is what went wrong when a stranger's 302 page on port 8080 was
- * summarised as this app being down.
+ * The local compose config lists two ports, so Prometheus always has one target
+ * that is not this app (whatever else listens there, or nothing). The view must
+ * judge itself by its own target only and report the rest apart, which is what
+ * went wrong when a stranger's 302 page on port 8080 was summarised as this app
+ * being down.
  */
 class ScrapeTargetsTest {
 
@@ -47,7 +47,8 @@ class ScrapeTargetsTest {
 
     @Test
     void judgesThisAppByItsOwnPortOnly() {
-        Scrape scrape = MonitoringStackView.readTargets(json(TWO_TARGETS), 8082);
+        Scrape scrape = MonitoringStackView.readTargets(json(TWO_TARGETS),
+                8082);
 
         assertEquals(Health.UP, scrape.health());
         assertTrue(scrape.detail().startsWith("up"), scrape.detail());
@@ -60,17 +61,20 @@ class ScrapeTargetsTest {
 
     @Test
     void reportsTheOtherTargetApartWithItsError() {
-        Scrape scrape = MonitoringStackView.readTargets(json(TWO_TARGETS), 8082);
+        Scrape scrape = MonitoringStackView.readTargets(json(TWO_TARGETS),
+                8082);
 
         assertEquals(1, scrape.others().size());
         String other = scrape.others().get(0);
-        assertTrue(other.startsWith("host.docker.internal:8080 is down"), other);
+        assertTrue(other.startsWith("host.docker.internal:8080 is down"),
+                other);
         assertTrue(other.contains("text/html"), other);
     }
 
     @Test
     void ownTargetDownIsDownWithItsError() {
-        Scrape scrape = MonitoringStackView.readTargets(json(TWO_TARGETS), 8080);
+        Scrape scrape = MonitoringStackView.readTargets(json(TWO_TARGETS),
+                8080);
 
         assertEquals(Health.DOWN, scrape.health());
         assertTrue(scrape.detail().startsWith("down: received unsupported"),
@@ -81,7 +85,8 @@ class ScrapeTargetsTest {
 
     @Test
     void noTargetOnThisPortIsItsOwnVerdict() {
-        Scrape scrape = MonitoringStackView.readTargets(json(TWO_TARGETS), 9999);
+        Scrape scrape = MonitoringStackView.readTargets(json(TWO_TARGETS),
+                9999);
 
         assertEquals(Health.NO_TARGET, scrape.health());
         assertTrue(scrape.detail().contains("9999"), scrape.detail());

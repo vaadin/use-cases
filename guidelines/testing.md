@@ -32,8 +32,8 @@ Use `SpringBrowserlessTest` (from `browserless-test-spring`) with
 `@SpringBootTest` and `@ViewPackages(classes = MyView.class)`. A view that needs
 no Spring beans can use plain `BrowserlessTest`. Examples to mirror:
 `page-visibility/src/test/java/com/example/uc1/` (per-view interaction) and
-`signals/src/test/java/com/example/muc01/` (cross-session state through a
-shared bean).
+`signals/src/test/java/com/example/muc01/` (a second user in their own
+window).
 
 Logic that does not need a UI — a status derived from timestamps, a parser, an
 encoder — gets a plain unit test.
@@ -76,11 +76,34 @@ Prefer the first: a fresh context per method makes the module's build slower.
 ## Second session
 
 When a view depends on an application-scoped bean that holds shared state,
-also write a test that simulates a second session — either by mutating the
-bean directly from the test thread, or by calling `cleanVaadinEnvironment()` +
-`initVaadinEnvironment()` between two `navigate()` calls. This catches
-`ListSignal`-vs-`SharedListSignal` mistakes and other cross-session leaks at
-test time rather than in the second browser tab.
+also write a test with a second user. Open a multi-user context with session
+lock isolation on, let one user act in their own window, and assert what the
+other user's window shows:
+
+```java
+try (var app = SpringBrowserlessApplicationContext.create(applicationContext,
+        b -> b.withViewPackages(MaintenanceBannerView.class)
+                .withSessionLockIsolation(true))) {
+    var alice = app.newUser().newWindow();
+    var bob = app.newUser().newWindow();
+    alice.navigate(MaintenanceBannerView.class);
+    bob.navigate(MaintenanceBannerView.class);
+
+    alice.test(alice.find(Button.class).withText("Publish to everyone")
+            .single()).click();
+    alice.runPendingSignalsTasks();
+    assertEquals("...", bob.find(Div.class)
+            .withClassName("maintenance-banner").single().getText());
+}
+```
+
+This catches `ListSignal`-vs-`SharedListSignal` mistakes and other
+cross-session leaks at test time rather than in the second browser tab. With
+lock isolation, a user's session is locked only while one of that user's
+windows is active, as in a real request. Code that changes another user's UI
+without `UI.access()` therefore fails the test instead of passing silently.
+Use `createSecured(...)` and `app.newUser("alice", "USER")` when the view
+needs a signed-in user.
 
 ## Lifecycle
 

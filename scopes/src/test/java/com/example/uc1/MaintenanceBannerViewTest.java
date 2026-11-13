@@ -3,8 +3,10 @@ package com.example.uc1;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 
+import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -21,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MaintenanceBannerViewTest extends SpringBrowserlessTest {
 
     @Autowired
-    private MaintenanceNotice notice;
+    private ApplicationContext applicationContext;
 
     @Test
     void viewRendersHeadingAndConsole() {
@@ -54,20 +56,30 @@ class MaintenanceBannerViewTest extends SpringBrowserlessTest {
 
     @Test
     void noticePublishedInAnotherSessionIsShown() {
-        navigate(MaintenanceBannerView.class);
-        runPendingSignalsTasks();
+        try (var app = SpringBrowserlessApplicationContext.create(
+                applicationContext,
+                b -> b.withViewPackages(MaintenanceBannerView.class)
+                        .withSessionLockIsolation(true))) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(MaintenanceBannerView.class);
+            bob.navigate(MaintenanceBannerView.class);
 
-        // Another user's session publishes through the same singleton bean.
-        notice.publish("Read-only mode until 9:00");
-        runPendingSignalsTasks();
-        assertEquals("Read-only mode until 9:00", banner().getText());
+            alice.test(alice.find(TextField.class).single())
+                    .setValue("Read-only mode until 9:00");
+            alice.test(alice.find(Button.class).withText("Publish to everyone")
+                    .single()).click();
+            alice.runPendingSignalsTasks();
+            assertEquals("Read-only mode until 9:00", bob.find(Div.class)
+                    .withClassName("maintenance-banner").single().getText());
 
-        // A brand new session sees the same notice.
-        cleanVaadinEnvironment();
-        initVaadinEnvironment();
-        navigate(MaintenanceBannerView.class);
-        runPendingSignalsTasks();
-        assertEquals("Read-only mode until 9:00", banner().getText());
+            // A brand new session sees the same notice.
+            var carol = app.newUser().newWindow();
+            carol.navigate(MaintenanceBannerView.class);
+            carol.runPendingSignalsTasks();
+            assertEquals("Read-only mode until 9:00", carol.find(Div.class)
+                    .withClassName("maintenance-banner").single().getText());
+        }
     }
 
     private Div banner() {

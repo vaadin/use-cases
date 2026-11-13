@@ -12,11 +12,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import tools.jackson.databind.node.JsonNodeFactory;
 import tools.jackson.databind.node.ObjectNode;
 
+import com.vaadin.browserless.BrowserlessApplicationContext;
+import com.vaadin.browserless.BrowserlessUIContext;
 import com.vaadin.browserless.ComponentTester;
 import com.vaadin.browserless.ComponentTesterPackages;
+import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.UI;
@@ -36,6 +40,9 @@ class ServiceDeskViewTest extends SpringBrowserlessTest {
 
     @Autowired
     private TicketStore store;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     /**
      * The store is shared by every test. It is reset inside the test's session,
@@ -139,40 +146,50 @@ class ServiceDeskViewTest extends SpringBrowserlessTest {
 
     @Test
     void aSaveInAnotherSessionShowsInAnOpenDesk() {
-        ServiceDeskView view = navigate(ServiceDeskView.class);
-        test(view.grid()).select(1);
+        try (var app = multiUser()) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            ServiceDeskView aliceDesk = alice.navigate(ServiceDeskView.class);
+            ServiceDeskView bobDesk = bob.navigate(ServiceDeskView.class);
+            alice.activate();
+            alice.test(aliceDesk.grid()).select(1);
 
-        // Another user, in another session, saves a ticket: the shared bean
-        // changes directly from the test thread.
-        Ticket edited = store.all().getFirst().withEdits(5, null, "#dc2626",
-                false);
-        store.save(edited);
-        // The change applies in one round of pending signal tasks, and the
-        // effect that redraws the list runs in the next.
-        runAllPendingSignalsTasks();
+            // Another user saves a ticket in their own desk.
+            save(bob, bobDesk, 0, 5);
+            // The change applies in one round of pending signal tasks, and
+            // the effect that redraws the list runs in the next.
+            runAllPendingSignalsTasks(alice);
 
-        RatingStars rating = (RatingStars) test(view.grid()).getCellComponent(0,
-                "rating");
-        assertEquals(5, rating.getValue());
-        // The ticket being worked on here stays selected.
-        assertEquals(4522, view.grid().asSingleSelect().getValue().id());
-        assertTrue(view.detail().getContent().isVisible());
+            RatingStars rating = (RatingStars) alice.test(aliceDesk.grid())
+                    .getCellComponent(0, "rating");
+            assertEquals(5, rating.getValue());
+            // The ticket being worked on here stays selected.
+            assertEquals(4522,
+                    aliceDesk.grid().asSingleSelect().getValue().id());
+            assertTrue(aliceDesk.detail().getContent().isVisible());
+        }
     }
 
     @Test
     void anotherSessionsSaveOfTheOpenTicketRefreshesTheDetail() {
-        ServiceDeskView view = navigate(ServiceDeskView.class);
-        test(view.grid()).select(0);
-        assertEquals(0, view.detail().rating().getValue());
+        try (var app = multiUser()) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            ServiceDeskView aliceDesk = alice.navigate(ServiceDeskView.class);
+            ServiceDeskView bobDesk = bob.navigate(ServiceDeskView.class);
+            alice.activate();
+            alice.test(aliceDesk.grid()).select(0);
+            assertEquals(0, aliceDesk.detail().rating().getValue());
 
-        store.save(store.all().getFirst().withEdits(4, null, "#dc2626", false));
-        runAllPendingSignalsTasks();
+            save(bob, bobDesk, 0, 4);
+            runAllPendingSignalsTasks(alice);
 
-        // The form shows the stored ticket, so saving here can not undo
-        // the other session's change without the user seeing it.
-        assertEquals(4, view.detail().rating().getValue());
-        assertEquals("Ticket #4521 was changed in another session",
-                test($(Notification.class).last()).getText());
+            // The form shows the stored ticket, so saving here can not undo
+            // the other session's change without the user seeing it.
+            assertEquals(4, aliceDesk.detail().rating().getValue());
+            assertEquals("Ticket #4521 was changed in another session", alice
+                    .test(alice.find(Notification.class).last()).getText());
+        }
     }
 
     @Test
@@ -190,18 +207,45 @@ class ServiceDeskViewTest extends SpringBrowserlessTest {
 
     @Test
     void aSaveInOneSessionShowsInTheNext() {
-        ServiceDeskView first = navigate(ServiceDeskView.class);
-        test(first.grid()).select(0);
-        test(RatingStarsTester.class, first.detail().rating()).rate(3);
-        test(first.detail().saveButton()).click();
+        try (var app = multiUser()) {
+            var alice = app.newUser().newWindow();
+            save(alice, alice.navigate(ServiceDeskView.class), 0, 3);
 
-        // Another user, in another session, opens the desk.
-        cleanVaadinEnvironment();
-        initVaadinEnvironment();
-        ServiceDeskView second = navigate(ServiceDeskView.class);
+            // Another user opens the desk.
+            var bob = app.newUser().newWindow();
+            ServiceDeskView bobDesk = bob.navigate(ServiceDeskView.class);
 
-        RatingStars rating = (RatingStars) test(second.grid())
-                .getCellComponent(0, "rating");
-        assertEquals(3, rating.getValue());
+            RatingStars rating = (RatingStars) bob.test(bobDesk.grid())
+                    .getCellComponent(0, "rating");
+            assertEquals(3, rating.getValue());
+        }
+    }
+
+    /**
+     * A multi-user context. The typed {@code test(Grid)}, {@code test(Button)}
+     * overloads of a window do not activate it, so a window is activated before
+     * its components are driven.
+     */
+    private BrowserlessApplicationContext multiUser() {
+        return SpringBrowserlessApplicationContext.create(applicationContext,
+                b -> b.withViewPackages(ServiceDeskView.class)
+                        .withComponentTesterPackages("com.example.components")
+                        .withSessionLockIsolation(true));
+    }
+
+    /** Rates a ticket in the given window's desk and saves it. */
+    private static void save(BrowserlessUIContext window, ServiceDeskView desk,
+            int row, int rating) {
+        window.activate();
+        window.test(desk.grid()).select(row);
+        window.test(RatingStarsTester.class, desk.detail().rating())
+                .rate(rating);
+        window.test(desk.detail().saveButton()).click();
+    }
+
+    private static void runAllPendingSignalsTasks(BrowserlessUIContext window) {
+        while (window.runPendingSignalsTasks()) {
+            // until nothing is pending
+        }
     }
 }
