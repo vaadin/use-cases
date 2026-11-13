@@ -1,5 +1,6 @@
 package com.example.uc9;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -7,6 +8,9 @@ import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 
 /**
  * Custom {@link Action} that calls {@code target.scrollIntoView} on a target
@@ -30,8 +34,13 @@ public class ScrollIntoViewAction extends Action {
 
     @Override
     protected JsFunction toJs(Trigger trigger) {
-        return JsFunction.of(
-                "$0.scrollIntoView({behavior:'smooth',block:'center'})",
-                target);
+        return JsSnippets.of(ScrollJs.class).scrollIntoView(target);
+    }
+
+    @JsDefinition
+    private interface ScrollJs extends Serializable {
+
+        @JsExpression("$0.scrollIntoView({behavior:'smooth',block:'center'})")
+        JsFunction scrollIntoView(Element target);
     }
 }

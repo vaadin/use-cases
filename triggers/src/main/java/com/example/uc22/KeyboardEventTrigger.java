@@ -1,10 +1,15 @@
 package com.example.uc22;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.HandlerInput;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -29,11 +34,17 @@ public class KeyboardEventTrigger extends Trigger {
         // Listen on window in the capture phase: a view with no focusable
         // children never receives a bubbled keydown on the host element.
         return getHost().addJsInitializer(
-                """
-                        const listener = (e) => $0(e);
-                        window.addEventListener('keydown', listener, true);
-                        return () => window.removeEventListener('keydown', listener, true);""",
-                action);
+                JsSnippets.of(KeyboardJs.class).listenForKeydown(action));
+    }
+
+    @JsDefinition
+    private interface KeyboardJs extends Serializable {
+
+        @JsExpression("""
+                const listener = (e) => $0(e);
+                window.addEventListener('keydown', listener, true);
+                return () => window.removeEventListener('keydown', listener, true);""")
+        JsFunction listenForKeydown(JsFunction action);
     }
 
     /**

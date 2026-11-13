@@ -1,5 +1,6 @@
 package com.example.uc10;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -7,6 +8,9 @@ import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 
 /**
  * Custom {@link Action} that briefly tints the target's background with a
@@ -39,12 +43,19 @@ public class HighlightAction extends Action {
 
     @Override
     protected JsFunction toJs(Trigger trigger) {
-        return JsFunction.of("""
+        return JsSnippets.of(HighlightJs.class).highlight(target, color,
+                durationMs);
+    }
+
+    @JsDefinition
+    private interface HighlightJs extends Serializable {
+
+        @JsExpression("""
                 const t=$0;
                 const o=t.style.backgroundColor;
                 t.style.transition='background-color 200ms';
                 t.style.backgroundColor=$1;
-                window.setTimeout(()=>{t.style.backgroundColor=o;},$2);""",
-                target, color, durationMs);
+                window.setTimeout(()=>{t.style.backgroundColor=o;},$2);""")
+        JsFunction highlight(Element target, String color, int durationMs);
     }
 }

@@ -13,7 +13,8 @@ cursor, show details about the selected text, or enable a button only while
 text is selected, without listening to the browser itself.
 **Workaround used:** `MissingAPI.selectionSignal(field)` adds a debounced DOM
 listener for `selectionchange` that sends `selectionStart`, `selectionEnd`
-and the selected text to the server, and keeps them in a read-only signal.
+and the field's value to the server, which cuts the selected text out of the
+value and keeps the result in a read-only signal.
 **Suggested API:** a read-only signal on the field, e.g.
 `Signal<SelectionRange> selectionSignal()` with
 `record SelectionRange(int start, int end, String content)`. It was

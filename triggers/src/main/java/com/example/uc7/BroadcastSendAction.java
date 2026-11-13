@@ -1,10 +1,15 @@
 package com.example.uc7;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsFunctionParameterNames;
+import com.vaadin.flow.js.JsSnippets;
 
 /**
  * Custom {@link Action} that posts a message on a named
@@ -25,10 +30,18 @@ public class BroadcastSendAction extends Action {
 
     @Override
     protected JsFunction toJs(Trigger trigger) {
-        return JsFunction.of("""
+        return JsSnippets.of(BroadcastJs.class).send(channelName,
+                message.toJs(trigger));
+    }
+
+    @JsDefinition
+    private interface BroadcastJs extends Serializable {
+
+        @JsExpression("""
                 const channel = new BroadcastChannel($0);
                 channel.postMessage($1(event));
-                channel.close();""", channelName, message.toJs(trigger))
-                .withArguments("event");
+                channel.close();""")
+        @JsFunctionParameterNames("event")
+        JsFunction send(String channelName, JsFunction message);
     }
 }
