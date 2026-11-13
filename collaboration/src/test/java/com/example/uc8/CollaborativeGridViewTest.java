@@ -6,8 +6,10 @@ import com.example.uc8.RosterTopic.Employee;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 
+import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -24,6 +26,9 @@ class CollaborativeGridViewTest extends SpringBrowserlessTest {
 
     @Autowired
     RosterTopic topic;
+
+    @Autowired
+    ApplicationContext applicationContext;
 
     @Test
     void rowsAddedAndRemovedByOnePeerReachTheOthers() {
@@ -80,16 +85,31 @@ class CollaborativeGridViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void anEmployeeAddedFromAnotherSessionShowsUp() {
-        topic.rows().insertLast(
-                new Employee("x1", "Someone", "Else", "someone@example.com"));
+    void aRowAddedInAnotherSessionShowsUp() {
+        try (var app = SpringBrowserlessApplicationContext
+                .create(applicationContext,
+                        b -> b.withViewPackages(CollaborativeGridView.class,
+                                HomeView.class)
+                                .withSessionLockIsolation(true))) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(CollaborativeGridView.class);
+            bob.navigate(CollaborativeGridView.class);
+            alice.runPendingSignalsTasks();
+            PeerRig alicesRig = alice.findInView(PeerRig.class).single();
+            @SuppressWarnings("unchecked")
+            Grid<SharedValueSignal<Employee>> alicesGrid = alice
+                    .find(Grid.class, alicesRig.getPanel(0)).single();
+            int before = alice.test(alicesGrid).size();
 
-        navigate(CollaborativeGridView.class);
-        runPendingSignalsTasks();
+            PeerRig bobsRig = bob.findInView(PeerRig.class).single();
+            bob.test(bob.find(Button.class, bobsRig.getPanel(0))
+                    .withText("Add row").single()).click();
+            bob.runPendingSignalsTasks();
 
-        assertTrue(test(grid(findInView(PeerRig.class).single(), 0))
-                .getCellText(rows(findInView(PeerRig.class).single(), 0) - 1, 0)
-                .equals("Someone"));
+            assertEquals(before + 1, alice.test(alicesGrid).size());
+            assertEquals("New", alice.test(alicesGrid).getCellText(before, 0));
+        }
     }
 
     private Grid<SharedValueSignal<Employee>> grid(PeerRig rig, int panel) {

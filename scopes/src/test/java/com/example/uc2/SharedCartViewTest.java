@@ -4,8 +4,12 @@ import java.util.List;
 
 import com.example.common.BuiltWith;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
+import com.vaadin.browserless.BrowserlessUIContext;
+import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -19,6 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ViewPackages(classes = SharedCartView.class)
 class SharedCartViewTest extends SpringBrowserlessTest {
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Test
     void viewRendersProductsAndEmptyCart() {
@@ -35,39 +42,37 @@ class SharedCartViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void addedItemsAreKeptForTheSessionButNotSharedWithOthers() {
-        navigate(SharedCartView.class);
-        runPendingSignalsTasks();
+    void cartIsSharedByTheTabsOfASessionButNotWithOtherUsers() {
+        try (var app = SpringBrowserlessApplicationContext.create(
+                applicationContext,
+                b -> b.withViewPackages(SharedCartView.class)
+                        .withSessionLockIsolation(true))) {
+            var aliceTab = app.newUser().newWindow();
+            var aliceOtherTab = aliceTab.getUser().newWindow();
+            var bob = app.newUser().newWindow();
+            aliceTab.navigate(SharedCartView.class);
+            aliceOtherTab.navigate(SharedCartView.class);
+            bob.navigate(SharedCartView.class);
 
-        test(button("Add Travel mug")).click();
-        runPendingSignalsTasks();
-        assertEquals(1, cartItems().size());
+            aliceTab.test(aliceTab.find(Button.class).withText("Add Travel mug")
+                    .single()).click();
+            aliceTab.runPendingSignalsTasks();
+            assertEquals(List.of("Travel mug"), cartItems(aliceTab));
 
-        // A new view instance in the same session sees the same cart, like a
-        // second tab would.
-        navigate(SharedCartView.class);
-        runPendingSignalsTasks();
-        assertTrue(findInView(H2.class).all().stream()
-                .anyMatch(h -> "Cart (1)".equals(h.getText())));
+            // The other tab of the same session shows the same cart.
+            aliceOtherTab.runPendingSignalsTasks();
+            assertEquals(List.of("Travel mug"), cartItems(aliceOtherTab));
 
-        // Another user's session has its own, empty cart.
-        cleanVaadinEnvironment();
-        initVaadinEnvironment();
-        navigate(SharedCartView.class);
-        runPendingSignalsTasks();
-        assertTrue(cartItems().isEmpty());
+            // Another user's session has its own, empty cart.
+            bob.runPendingSignalsTasks();
+            assertTrue(cartItems(bob).isEmpty());
+        }
     }
 
     /** The cart's items, not the points of "How it is built". */
-    private List<ListItem> cartItems() {
-        return findInView(ListItem.class).all().stream()
+    private static List<String> cartItems(BrowserlessUIContext window) {
+        return window.find(ListItem.class).all().stream()
                 .filter(item -> item.findAncestor(BuiltWith.class) == null)
-                .toList();
-    }
-
-    private Button button(String text) {
-        return findInView(Button.class).all().stream()
-                .filter(b -> text.equals(b.getText())).findFirst()
-                .orElseThrow();
+                .map(ListItem::getText).toList();
     }
 }

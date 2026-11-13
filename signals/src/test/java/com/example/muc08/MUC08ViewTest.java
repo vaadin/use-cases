@@ -3,10 +3,15 @@ package com.example.muc08;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 
+import com.vaadin.browserless.BrowserlessUIContext;
+import com.vaadin.browserless.SecuredBrowserlessApplicationContext;
+import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -31,6 +36,9 @@ class MUC08ViewTest extends SpringBrowserlessTest {
 
     @Autowired
     private MUC08Signals muc08Signals;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     // Browserless queries only return visible components, so a hidden banner
     // is simply not found.
@@ -123,49 +131,74 @@ class MUC08ViewTest extends SpringBrowserlessTest {
 
     @Test
     void announcementFromAnotherSessionAppearsImmediately() {
-        navigate(MUC08View.class);
-        runPendingSignalsTasks();
+        try (var app = createApp()) {
+            var alice = app.newUser("alice", "USER").newWindow();
+            var admin = app.newUser("admin", "ADMIN").newWindow();
+            alice.navigate(MUC08View.class);
+            admin.navigate(MUC08View.class);
 
-        // Simulate an admin in another session posting via the shared bean
-        muc08Signals.post(
-                new MUC08Signals.Announcement("admin", "Coffee in the lobby"));
-        runPendingSignalsTasks();
+            post(admin, "Coffee in the lobby");
 
-        assertTrue(bannerShown());
-        assertEquals("Coffee in the lobby", bannerText().getText());
-        assertTrue(find(Notification.class).all().stream()
-                .anyMatch(n -> "Announcement: Coffee in the lobby"
-                        .equals(test(n).getText())));
+            assertEquals("Coffee in the lobby", alice.findInView(Span.class)
+                    .withClassName("announcement-text").single().getText());
+            assertTrue(alice.find(Notification.class).all().stream()
+                    .anyMatch(n -> "Announcement: Coffee in the lobby"
+                            .equals(alice.test(n).getText())));
+        }
     }
 
     @Test
     void lateJoinerSeesCurrentAnnouncementWithoutToast() {
-        // Another session posted before this session opened the view
-        muc08Signals
-                .post(new MUC08Signals.Announcement("admin", "System update"));
+        try (var app = createApp()) {
+            var admin = app.newUser("admin", "ADMIN").newWindow();
+            admin.navigate(MUC08View.class);
+            post(admin, "System update");
 
-        navigate(MUC08View.class);
-        runPendingSignalsTasks();
+            // This session opens the view after the announcement was posted
+            var alice = app.newUser("alice", "USER").newWindow();
+            alice.navigate(MUC08View.class);
+            alice.runPendingSignalsTasks();
 
-        assertTrue(bannerShown());
-        assertEquals("System update", bannerText().getText());
-        assertTrue(find(Notification.class).all().isEmpty(),
-                "Late joiner sees the banner, not a toast");
+            assertEquals("System update", alice.findInView(Span.class)
+                    .withClassName("announcement-text").single().getText());
+            assertTrue(alice.find(Notification.class).all().isEmpty(),
+                    "Late joiner sees the banner, not a toast");
+        }
     }
 
     @Test
     void clearingRemovesBannerForEveryone() {
-        muc08Signals.post(new MUC08Signals.Announcement("admin", "Fire drill"));
+        try (var app = createApp()) {
+            var alice = app.newUser("alice", "USER").newWindow();
+            var admin = app.newUser("admin", "ADMIN").newWindow();
+            alice.navigate(MUC08View.class);
+            admin.navigate(MUC08View.class);
+            post(admin, "Fire drill");
+            assertFalse(alice.findInView(Div.class)
+                    .withClassName("announcement-banner").all().isEmpty());
 
-        navigate(MUC08View.class);
-        runPendingSignalsTasks();
-        assertTrue(bannerShown());
+            alice.test(alice.findInView(Button.class)
+                    .withText("Clear announcement").single()).click();
+            alice.runPendingSignalsTasks();
 
-        test(button("Clear announcement")).click();
-        runPendingSignalsTasks();
+            assertNull(muc08Signals.getAnnouncementSignal().peek());
+            assertTrue(admin.findInView(Div.class)
+                    .withClassName("announcement-banner").all().isEmpty());
+            assertFalse(admin.findInView(Button.class)
+                    .withText("Clear announcement").single().isEnabled());
+        }
+    }
 
-        assertNull(muc08Signals.getAnnouncementSignal().peek());
-        assertFalse(bannerShown());
-        assertFalse(button("Clear announcement").isEnabled());
+    private SecuredBrowserlessApplicationContext<Authentication> createApp() {
+        return SpringBrowserlessApplicationContext.createSecured(
+                applicationContext, b -> b.withViewPackages(MUC08View.class)
+                        .withSessionLockIsolation(true));
+    }
+
+    private static void post(BrowserlessUIContext window, String text) {
+        window.test(window.findInView(TextArea.class).single()).setValue(text);
+        window.test(window.findInView(Button.class)
+                .withText("Post announcement").single()).click();
+        window.runPendingSignalsTasks();
     }
 }

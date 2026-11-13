@@ -1,14 +1,14 @@
 package com.example.uc1;
 
-import com.example.collab.Peer;
 import com.example.collab.PeerRig;
-import com.example.collab.Presence;
 import com.example.home.HomeView;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 
+import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.avatar.AvatarGroup;
@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PresenceViewTest extends SpringBrowserlessTest {
 
     @Autowired
-    Presence presence;
+    ApplicationContext applicationContext;
 
     @Test
     void everyPeerSeesEveryOtherPeer() {
@@ -79,20 +79,33 @@ class PresenceViewTest extends SpringBrowserlessTest {
 
     @Test
     void presenceFromAnotherSessionShowsUp() {
-        // The bean outlives any session, so a peer written from outside this
-        // one stands in for a second browser. If the view used a plain
+        // A second browser with a rig of its own. If the view used a plain
         // ListSignal or ValueSignal instead of a shared one, this is the test
         // that would fail.
-        Peer stranger = new Peer(999, "Someone Else", 5);
-        presence.topic(PresenceView.TOPIC).put(stranger.key(), stranger);
+        try (var app = SpringBrowserlessApplicationContext.create(
+                applicationContext,
+                b -> b.withViewPackages(PresenceView.class, HomeView.class)
+                        .withSessionLockIsolation(true))) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(PresenceView.class);
+            alice.runPendingSignalsTasks();
+            PeerRig rig = alice.findInView(PeerRig.class).single();
+            assertEquals(2, alice.find(AvatarGroup.class, rig.getPanel(0))
+                    .single().getItems().size());
 
-        navigate(PresenceView.class);
-        runPendingSignalsTasks();
+            bob.navigate(PresenceView.class);
+            bob.runPendingSignalsTasks();
+            assertEquals(4,
+                    alice.find(AvatarGroup.class, rig.getPanel(0)).single()
+                            .getItems().size(),
+                    "the two local peers and the two from the other session");
 
-        PeerRig rig = findInView(PeerRig.class).single();
-        assertEquals(3,
-                find(AvatarGroup.class, rig.getPanel(0)).single().getItems()
-                        .size(),
-                "the two local peers and the one from the other session");
+            // Leaving the other browser takes its peers out again.
+            bob.navigate(HomeView.class);
+            bob.runPendingSignalsTasks();
+            assertEquals(2, alice.find(AvatarGroup.class, rig.getPanel(0))
+                    .single().getItems().size());
+        }
     }
 }

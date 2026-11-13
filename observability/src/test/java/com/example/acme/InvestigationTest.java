@@ -34,13 +34,12 @@ class InvestigationTest {
     void stepsAreCollapsibleAndKeepTheirRequestedState() {
         Investigation investigation = new Investigation("lead");
 
-        Details first = investigation.step("2 — First", true,
-                new Span("a"));
-        Details second = investigation.step("3 — Second", false,
-                new Span("b"));
+        Details first = investigation.step("2 — First", true, new Span("a"));
+        Details second = investigation.step("3 — Second", false, new Span("b"));
 
         assertEquals("2 — First", first.getSummaryText());
-        assertTrue(first.isOpened(), "the first step is where the reader lands");
+        assertTrue(first.isOpened(),
+                "the first step is where the reader lands");
         assertFalse(second.isOpened(),
                 "later steps wait until the reader has taken the earlier ones");
         assertTrue(first.getClassNames().contains("investigation-step"));

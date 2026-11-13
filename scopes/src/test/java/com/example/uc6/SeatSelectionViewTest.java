@@ -3,8 +3,12 @@ package com.example.uc6;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 
+import com.vaadin.browserless.BrowserlessApplicationContext;
+import com.vaadin.browserless.BrowserlessUIContext;
+import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -15,9 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Covers rendering and the application-scoped seat inventory. Reloads are not
- * covered yet; a second tab and tab expiry cannot be simulated in these tests;
- * see API-GAPS.md #2.
+ * Covers rendering, the application-scoped seat inventory shared by several
+ * users, and the separate bookings of two tabs of one session. Reloads are not
+ * covered yet; a duplicated tab and tab expiry cannot be simulated in these
+ * tests; see API-GAPS.md #2.
  */
 @SpringBootTest
 @ViewPackages(classes = SeatSelectionView.class)
@@ -25,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SeatSelectionViewTest extends SpringBrowserlessTest {
 
     @Autowired
-    private SeatInventory inventory;
+    private ApplicationContext applicationContext;
 
     @Test
     void viewRendersStepsAndSeats() {
@@ -44,45 +49,80 @@ class SeatSelectionViewTest extends SpringBrowserlessTest {
 
     @Test
     void heldSeatsAreSharedAndReleasedWhenTheSessionEnds() {
-        navigate(SeatSelectionView.class);
-        runPendingSignalsTasks();
+        try (var app = multiUser()) {
+            var aliceTab = app.newUser().newWindow();
+            var aliceOtherTab = aliceTab.getUser().newWindow();
+            var bob = app.newUser().newWindow();
+            aliceTab.navigate(SeatSelectionView.class);
+            aliceOtherTab.navigate(SeatSelectionView.class);
+            bob.navigate(SeatSelectionView.class);
 
-        test(seat("A1")).click();
-        runPendingSignalsTasks();
-        assertTrue(seat("A1").hasThemeName("primary"));
+            aliceTab.test(seat(aliceTab, "A1")).click();
+            aliceTab.runPendingSignalsTasks();
+            assertTrue(seat(aliceTab, "A1").hasThemeName("primary"));
 
-        // Another user holds B2 through the shared inventory.
-        inventory.hold("B2", "someone-else");
-        runPendingSignalsTasks();
-        assertFalse(seat("B2").isEnabled());
+            // A second tab of the same session has a booking of its own: the
+            // first tab's seat is taken there.
+            aliceOtherTab.runPendingSignalsTasks();
+            assertFalse(seat(aliceOtherTab, "A1").isEnabled());
+            aliceOtherTab.test(seat(aliceOtherTab, "A2")).click();
+            aliceOtherTab.runPendingSignalsTasks();
+            assertTrue(seat(aliceOtherTab, "A2").hasThemeName("primary"));
+            assertTrue(seat(aliceTab, "A1").hasThemeName("primary"));
+            assertFalse(seat(aliceTab, "A2").isEnabled());
 
-        // Ending the session destroys its browser tabs; the browser-tab
-        // scoped booking releases A1. B2 is still held by the other user.
-        cleanVaadinEnvironment();
-        initVaadinEnvironment();
-        navigate(SeatSelectionView.class);
-        runPendingSignalsTasks();
-        assertTrue(seat("A1").isEnabled());
-        assertFalse(seat("B2").isEnabled());
+            // Another user holds B2.
+            bob.test(seat(bob, "B2")).click();
+            bob.runPendingSignalsTasks();
+            assertFalse(seat(bob, "A1").isEnabled());
+            assertFalse(seat(aliceTab, "B2").isEnabled());
+
+            // Ending Alice's session destroys her browser tabs; the browser-tab
+            // scoped bookings release A1 and A2. B2 is still held by Bob.
+            aliceTab.getUser().close();
+            bob.runPendingSignalsTasks();
+            assertTrue(seat(bob, "A1").isEnabled());
+            assertTrue(seat(bob, "A2").isEnabled());
+            assertTrue(seat(bob, "B2").hasThemeName("primary"));
+
+            var carol = app.newUser().newWindow();
+            carol.navigate(SeatSelectionView.class);
+            carol.runPendingSignalsTasks();
+            assertTrue(seat(carol, "A1").isEnabled());
+            assertFalse(seat(carol, "B2").isEnabled());
+        }
     }
 
     @Test
     void pickingAnotherSeatReleasesTheFirstOne() {
-        navigate(SeatSelectionView.class);
-        runPendingSignalsTasks();
+        try (var app = multiUser()) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(SeatSelectionView.class);
+            bob.navigate(SeatSelectionView.class);
 
-        test(seat("A1")).click();
-        test(seat("A2")).click();
-        runPendingSignalsTasks();
+            alice.test(seat(alice, "A1")).click();
+            alice.test(seat(alice, "A2")).click();
+            alice.runPendingSignalsTasks();
+            assertTrue(seat(alice, "A2").hasThemeName("primary"));
 
-        assertTrue(seat("A2").hasThemeName("primary"));
-        assertFalse(inventory.holders().peek().containsKey("A1"));
-        assertTrue(inventory.hold("A1", "someone-else"));
+            // A1 is free again: another user can take it.
+            bob.runPendingSignalsTasks();
+            assertTrue(seat(bob, "A1").isEnabled());
+            assertFalse(seat(bob, "A2").isEnabled());
+            bob.test(seat(bob, "A1")).click();
+            bob.runPendingSignalsTasks();
+            assertTrue(seat(bob, "A1").hasThemeName("primary"));
+        }
     }
 
-    private Button seat(String name) {
-        return findInView(Button.class).all().stream()
-                .filter(b -> name.equals(b.getText())).findFirst()
-                .orElseThrow();
+    private BrowserlessApplicationContext multiUser() {
+        return SpringBrowserlessApplicationContext.create(applicationContext,
+                b -> b.withViewPackages(SeatSelectionView.class)
+                        .withSessionLockIsolation(true));
+    }
+
+    private static Button seat(BrowserlessUIContext window, String name) {
+        return window.find(Button.class).withText(name).single();
     }
 }

@@ -1,13 +1,18 @@
 package com.example.muc06;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 
+import com.vaadin.browserless.BrowserlessApplicationContext;
+import com.vaadin.browserless.BrowserlessUIContext;
+import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -27,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MUC06ViewTest extends SpringBrowserlessTest {
 
     @Autowired
-    private MUC06Signals muc06Signals;
+    private ApplicationContext applicationContext;
 
     private String getStatText(String prefix) {
         return findInView(Span.class).all().stream()
@@ -61,141 +66,104 @@ class MUC06ViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void otherUserAddingTaskUpdatesView() {
-        navigate(MUC06View.class);
-        runPendingSignalsTasks();
-
-        assertTrue(getStatText("Total:").contains("4"));
-
-        // Simulate User B adding a task via the shared signal
-        muc06Signals.getTasksSignal().insertLast(new MUC06Signals.Task(
-                "task-userB", "User B's task", false, LocalDate.now()));
-        runPendingSignalsTasks();
-
-        // User A's view should reflect the new task
-        assertTrue(getStatText("Total:").contains("5"),
-                "User A should see task added by User B");
-    }
-
-    @Test
     void bothUsersAddTasksConcurrently() {
-        navigate(MUC06View.class);
-        runPendingSignalsTasks();
+        try (var app = createApp()) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(MUC06View.class);
+            bob.navigate(MUC06View.class);
+            assertEquals("Total: 4", statText(alice, "Total:"));
 
-        // User A adds a task via the UI
-        Button addButton = findInView(Button.class).all().stream()
-                .filter(b -> "Add Task".equals(b.getText())).findFirst()
-                .orElseThrow();
-        test(addButton).click();
-        runPendingSignalsTasks();
+            alice.test(addTaskButton(alice)).click();
+            bob.test(addTaskButton(bob)).click();
+            bob.runPendingSignalsTasks();
 
-        // User B adds a task via the shared signal
-        muc06Signals.getTasksSignal().insertLast(new MUC06Signals.Task(
-                "task-userB", "User B's task", false, LocalDate.now()));
-        runPendingSignalsTasks();
-
-        // Both tasks should be visible
-        assertTrue(getStatText("Total:").contains("6"),
-                "Should show 6 tasks (4 seed + 1 from A + 1 from B)");
+            for (var window : List.of(alice, bob)) {
+                assertEquals("Total: 6", statText(window, "Total:"),
+                        "Should show 6 tasks (4 seed + 1 from each user)");
+                assertEquals(6,
+                        window.findInView(TextField.class).all().size());
+            }
+        }
     }
 
     @Test
-    void otherUserCompletingTaskUpdatesStatistics() {
-        navigate(MUC06View.class);
-        runPendingSignalsTasks();
+    void otherUserCompletingTaskUpdatesCheckboxAndStatistics() {
+        try (var app = createApp()) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(MUC06View.class);
+            bob.navigate(MUC06View.class);
 
-        // Initially 1 completed (task-2 from seed data)
-        assertTrue(getStatText("Completed:").contains("1"));
+            // Seed data: task-2 is the only completed task, task-1 is first
+            assertEquals("Completed: 1", statText(alice, "Completed:"));
+            Checkbox aliceFirstCheckbox = alice.findInView(Checkbox.class)
+                    .first();
+            assertFalse(aliceFirstCheckbox.getValue(),
+                    "Checkbox should initially be unchecked");
 
-        // Simulate User B completing another task via the shared signal
-        var tasks = muc06Signals.getTasksSignal().peek();
-        // Find an incomplete task and mark it complete
-        for (var taskSignal : tasks) {
-            MUC06Signals.Task task = taskSignal.peek();
-            if (!task.completed()) {
-                taskSignal.set(new MUC06Signals.Task(task.id(), task.title(),
-                        true, task.dueDate()));
-                break;
-            }
+            bob.test(bob.findInView(Checkbox.class).first()).click();
+            bob.runPendingSignalsTasks();
+
+            assertEquals("Completed: 2", statText(alice, "Completed:"),
+                    "Completed count should increase when Bob completes a task");
+            assertTrue(aliceFirstCheckbox.getValue(),
+                    "Checkbox should update when Bob completes the task");
         }
-        runPendingSignalsTasks();
-
-        // User A should see the updated completed count
-        assertTrue(getStatText("Completed:").contains("2"),
-                "Completed count should increase when other user completes a task");
-    }
-
-    @Test
-    void otherUserCompletingTaskUpdatesCheckbox() {
-        navigate(MUC06View.class);
-        runPendingSignalsTasks();
-
-        // Find the first unchecked checkbox (corresponds to first incomplete
-        // task)
-        Checkbox firstCheckbox = findInView(Checkbox.class).all().stream()
-                .filter(cb -> !cb.getValue()).findFirst().orElseThrow();
-        assertFalse(firstCheckbox.getValue(),
-                "Checkbox should initially be unchecked");
-
-        // Simulate User B completing the first incomplete task via the shared
-        // signal
-        var tasks = muc06Signals.getTasksSignal().peek();
-        for (var taskSignal : tasks) {
-            MUC06Signals.Task task = taskSignal.peek();
-            if (!task.completed()) {
-                taskSignal.set(new MUC06Signals.Task(task.id(), task.title(),
-                        true, task.dueDate()));
-                break;
-            }
-        }
-        runPendingSignalsTasks();
-
-        // User A's checkbox should now be checked
-        assertTrue(firstCheckbox.getValue(),
-                "Checkbox should update when other user completes the task");
     }
 
     @Test
     void otherUserRenamingTaskUpdatesTitleField() {
-        navigate(MUC06View.class);
-        runPendingSignalsTasks();
+        try (var app = createApp()) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(MUC06View.class);
+            bob.navigate(MUC06View.class);
+            TextField aliceFirstTitle = alice.findInView(TextField.class)
+                    .first();
 
-        // Get the first text field (first task's title)
-        TextField firstTitle = findInView(TextField.class).first();
-        String originalTitle = firstTitle.getValue();
+            bob.test(bob.findInView(TextField.class).first())
+                    .setValue("Renamed by Bob");
+            bob.runPendingSignalsTasks();
 
-        // Simulate User B renaming the first task via the shared signal
-        var tasks = muc06Signals.getTasksSignal().peek();
-        var firstTaskSignal = tasks.getFirst();
-        MUC06Signals.Task task = firstTaskSignal.peek();
-        firstTaskSignal.set(new MUC06Signals.Task(task.id(),
-                "Renamed by User B", task.completed(), task.dueDate()));
-        runPendingSignalsTasks();
-
-        // User A's text field should show the new title
-        assertEquals("Renamed by User B", firstTitle.getValue(),
-                "Title field should update when other user renames the task");
+            assertEquals("Renamed by Bob", aliceFirstTitle.getValue(),
+                    "Title field should update when Bob renames the task");
+        }
     }
 
     @Test
     void otherUserChangingDueDateUpdatesDatePicker() {
-        navigate(MUC06View.class);
-        runPendingSignalsTasks();
+        try (var app = createApp()) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(MUC06View.class);
+            bob.navigate(MUC06View.class);
+            DatePicker aliceFirstDatePicker = alice.findInView(DatePicker.class)
+                    .first();
+            LocalDate newDate = LocalDate.of(2030, 12, 25);
 
-        // Get the first date picker
-        DatePicker firstDatePicker = findInView(DatePicker.class).first();
-        LocalDate newDate = LocalDate.of(2030, 12, 25);
+            bob.test(bob.findInView(DatePicker.class).first())
+                    .setValue(newDate);
+            bob.runPendingSignalsTasks();
 
-        // Simulate User B changing the due date via the shared signal
-        var tasks = muc06Signals.getTasksSignal().peek();
-        var firstTaskSignal = tasks.getFirst();
-        MUC06Signals.Task task = firstTaskSignal.peek();
-        firstTaskSignal.set(new MUC06Signals.Task(task.id(), task.title(),
-                task.completed(), newDate));
-        runPendingSignalsTasks();
+            assertEquals(newDate, aliceFirstDatePicker.getValue(),
+                    "Date picker should update when Bob changes the due date");
+        }
+    }
 
-        // User A's date picker should show the new date
-        assertEquals(newDate, firstDatePicker.getValue(),
-                "Date picker should update when other user changes due date");
+    private BrowserlessApplicationContext createApp() {
+        return SpringBrowserlessApplicationContext.create(applicationContext,
+                b -> b.withViewPackages(MUC06View.class)
+                        .withSessionLockIsolation(true));
+    }
+
+    private static Button addTaskButton(BrowserlessUIContext window) {
+        return window.findInView(Button.class).withText("Add Task").single();
+    }
+
+    private static String statText(BrowserlessUIContext window, String prefix) {
+        return window.findInView(Span.class).all().stream().map(Span::getText)
+                .filter(text -> text != null && text.startsWith(prefix))
+                .findFirst().orElse("");
     }
 }

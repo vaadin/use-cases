@@ -1,15 +1,14 @@
 package com.example.uc4;
 
-import java.time.Instant;
-
 import com.example.collab.PeerRig;
 import com.example.home.HomeView;
-import com.example.uc4.ChatTopic.Message;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 
+import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -27,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ChatViewTest extends SpringBrowserlessTest {
 
     @Autowired
-    ChatTopic chat;
+    ApplicationContext applicationContext;
 
     @Test
     void aMessageSentByOnePeerArrivesAtTheOthers() {
@@ -71,18 +70,30 @@ class ChatViewTest extends SpringBrowserlessTest {
 
     @Test
     void aMessageFromAnotherSessionArrivesToo() {
-        // The shared list is application-scoped, so an append from outside any
-        // session stands in for a second browser.
-        chat.send(new Message(42, "Someone Else", 3, "Shipped this morning",
-                Instant.now()));
+        try (var app = SpringBrowserlessApplicationContext.create(
+                applicationContext,
+                b -> b.withViewPackages(ChatView.class, HomeView.class)
+                        .withSessionLockIsolation(true))) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(ChatView.class);
+            bob.navigate(ChatView.class);
+            alice.runPendingSignalsTasks();
 
-        navigate(ChatView.class);
-        runPendingSignalsTasks();
+            PeerRig bobsRig = bob.findInView(PeerRig.class).single();
+            bob.test(bob.find(MessageInput.class, bobsRig.getPanel(0)).single())
+                    .send("Shipped this morning");
+            bob.runPendingSignalsTasks();
 
-        assertTrue(test(find(MessageList.class,
-                findInView(PeerRig.class).single().getPanel(0)).single())
-                .getMessages().stream().anyMatch(
-                        item -> "Shipped this morning".equals(item.getText())));
+            PeerRig alicesRig = alice.findInView(PeerRig.class).single();
+            assertTrue(alice
+                    .test(alice.find(MessageList.class, alicesRig.getPanel(0))
+                            .single())
+                    .getMessages().stream()
+                    .anyMatch(item -> "Shipped this morning"
+                            .equals(item.getText())),
+                    "a message sent in another browser should arrive here");
+        }
     }
 
     @Test

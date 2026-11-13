@@ -10,7 +10,10 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
+import com.vaadin.browserless.BrowserlessUIContext;
+import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.Component;
@@ -53,6 +56,9 @@ class FailureInsightsViewTest extends SpringBrowserlessTest {
     @Autowired
     MeterRegistry registry;
 
+    @Autowired
+    ApplicationContext applicationContext;
+
     @Test
     void opensWithTheReturnsDeskAndTheInvestigationHidden() {
         FailureInsightsView view = navigate(FailureInsightsView.class);
@@ -66,8 +72,8 @@ class FailureInsightsViewTest extends SpringBrowserlessTest {
                 findInView(TextField.class).id("order-number").getValue(),
                 "a plausible order number is prefilled so the first return "
                         + "is one click away");
-        assertNotNull(findInView(Button.class).withText("Process return")
-                .single());
+        assertNotNull(
+                findInView(Button.class).withText("Process return").single());
         assertNotNull(findInView(Table.class).id("returns-log"));
         assertNotNull(findInView(Div.class).id("simulation-rig"),
                 "the bank lookup latency is demo rigging, not a kit readout");
@@ -116,8 +122,8 @@ class FailureInsightsViewTest extends SpringBrowserlessTest {
         assertTrue(investigationOf(view).isVisible(),
                 "the reveal happens before the work, so it survives the "
                         + "failure and lands in the same response");
-        assertEquals(1, findInView(Table.class).id("returns-log")
-                .getBodyRows().size(),
+        assertEquals(1,
+                findInView(Table.class).id("returns-log").getBodyRows().size(),
                 "a failed return is not registered — only the empty-state "
                         + "row remains");
     }
@@ -142,16 +148,18 @@ class FailureInsightsViewTest extends SpringBrowserlessTest {
 
         assertTrue(investigationOf(view).isVisible(),
                 "a hang is a problem the clerk feels, so it reveals too");
-        assertEquals(1, findInView(Table.class).id("returns-log")
-                .getBodyRows().size(), "slow, but registered");
+        assertEquals(1,
+                findInView(Table.class).id("returns-log").getBodyRows().size(),
+                "slow, but registered");
     }
 
     @Test
     void theBankLookupDefaultsAboveTheInsightsBudget() {
         navigate(FailureInsightsView.class);
 
-        assertTrue(findInView(IntegerField.class).id("bank-delay")
-                .getValue() > 1_000,
+        assertTrue(
+                findInView(IntegerField.class).id("bank-delay")
+                        .getValue() > 1_000,
                 "the first bank-transfer refund must already exceed the 1 s "
                         + "UX budget, or step 3 shows nothing for it");
     }
@@ -208,8 +216,8 @@ class FailureInsightsViewTest extends SpringBrowserlessTest {
         findInView(Details.class).all().forEach(d -> d.setOpened(true));
 
         Div verdict = findInView(Div.class).id("verdict");
-        assertTrue(verdict.getElement().getTextRecursively()
-                .contains("UX budget"),
+        assertTrue(
+                verdict.getElement().getTextRecursively().contains("UX budget"),
                 "the empty verdict must say what would make a finding appear");
     }
 
@@ -226,8 +234,9 @@ class FailureInsightsViewTest extends SpringBrowserlessTest {
                         + "nothing to restore or leak");
         selectReason(FailureInsightsView.REASON_DEFECTIVE);
         assertThrows(IllegalStateException.class, this::processReturn);
-        assertTrue($(Notification.class).all().stream()
-                .anyMatch(Notification::isOpened),
+        assertTrue(
+                $(Notification.class).all().stream()
+                        .anyMatch(Notification::isOpened),
                 "the clerk sees a notification even though the exception "
                         + "propagates");
 
@@ -238,23 +247,41 @@ class FailureInsightsViewTest extends SpringBrowserlessTest {
     @Test
     void readoutIsApplicationScopedAcrossSessions() {
         // The insights come from an application-scoped buffer the kit owns,
-        // not from per-session state: a second session must see the same
-        // readout.
-        navigate(FailureInsightsView.class);
-        selectReason(FailureInsightsView.REASON_DEFECTIVE);
-        assertThrows(IllegalStateException.class, this::processReturn);
-        long firstSessionCards = findInView(Div.class).id("verdict")
-                .getChildren().count();
+        // not from per-session state: a second clerk at another desk must see
+        // Alice's failure in their readout.
+        try (var app = SpringBrowserlessApplicationContext
+                .create(applicationContext,
+                        b -> b.withViewPackages(FailureInsightsView.class,
+                                HomeView.class)
+                                .withSessionLockIsolation(true))) {
+            var alice = app.newUser().newWindow();
+            var bob = app.newUser().newWindow();
+            alice.navigate(FailureInsightsView.class);
+            bob.navigate(FailureInsightsView.class);
 
-        cleanVaadinEnvironment();
-        initVaadinEnvironment();
-        navigate(FailureInsightsView.class);
-        selectReason(FailureInsightsView.REASON_DEFECTIVE);
-        assertThrows(IllegalStateException.class, this::processReturn);
+            processDefectiveReturn(alice);
+            // What the kit's ErrorCounter records for Alice's failure; a
+            // browserless click does not go through the request the kit
+            // measures.
+            Counter counter = errors("java.lang.IllegalStateException",
+                    FailureInsightsView.ROUTE,
+                    "com.vaadin.flow.component.button.Button");
+            counter.increment();
 
-        assertEquals(firstSessionCards, findInView(Div.class).id("verdict")
-                .getChildren().count(),
-                "both sessions should read the same application-wide insights");
+            processDefectiveReturn(bob);
+            String text = bob.findInView(Paragraph.class).id("error-counter")
+                    .getElement().getTextRecursively();
+            assertTrue(text.contains("×" + (long) counter.count()),
+                    "Bob's readout should include Alice's failure: " + text);
+        }
+    }
+
+    private static void processDefectiveReturn(BrowserlessUIContext window) {
+        window.test(window.findInView(Select.class).id("return-reason"),
+                String.class).selectItem(FailureInsightsView.REASON_DEFECTIVE);
+        assertThrows(IllegalStateException.class,
+                () -> window.test(window.findInView(Button.class)
+                        .withText("Process return").single()).click());
     }
 
     private void processReturn() {

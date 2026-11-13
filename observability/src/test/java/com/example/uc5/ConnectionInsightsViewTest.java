@@ -15,8 +15,11 @@ import io.micrometer.core.instrument.Timer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 
+import com.vaadin.browserless.BrowserlessUIContext;
+import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.Component;
@@ -85,6 +88,9 @@ class ConnectionInsightsViewTest extends SpringBrowserlessTest {
     @Autowired
     ObservabilitySettings settings;
 
+    @Autowired
+    ApplicationContext applicationContext;
+
     @Test
     void moduleKeepsTheKitsClientCollectionAndInsightsOn() {
         // Everything this view shows depends on these three. Client collection
@@ -116,8 +122,9 @@ class ConnectionInsightsViewTest extends SpringBrowserlessTest {
                 "the order on the tablet is part of the scene");
         assertEquals(ConnectionInsightsView.PICK_LIST.size(), pickRows().size(),
                 "the whole pick list is on screen");
-        assertTrue(pickRows().stream()
-                .allMatch(row -> "Pending".equals(cell(row, 3))),
+        assertTrue(
+                pickRows().stream()
+                        .allMatch(row -> "Pending".equals(cell(row, 3))),
                 "nothing is picked until the picker says so");
         assertNotNull(findInView(Div.class).id("simulation-rig"),
                 "the outage is demo rigging, attached to the window rather "
@@ -148,11 +155,9 @@ class ConnectionInsightsViewTest extends SpringBrowserlessTest {
     void everyPickListLineIsARealCatalogProduct() {
         // The scene has to read like the rest of the Acme application, not
         // like a fixture invented for this view.
-        assertTrue(
-                AcmeCatalog.products()
-                        .containsAll(ConnectionInsightsView.PICK_LIST.stream()
-                                .map(ConnectionInsightsView.Pick::item)
-                                .toList()),
+        assertTrue(AcmeCatalog.products()
+                .containsAll(ConnectionInsightsView.PICK_LIST.stream()
+                        .map(ConnectionInsightsView.Pick::item).toList()),
                 "the pick list should come out of Acme's own catalog");
     }
 
@@ -162,8 +167,9 @@ class ConnectionInsightsViewTest extends SpringBrowserlessTest {
         // an outage the reader does not notice explains nothing.
         navigate(ConnectionInsightsView.class);
 
-        assertTrue(findInView(IntegerField.class).id("outage-length")
-                .getValue() >= 1_000,
+        assertTrue(
+                findInView(IntegerField.class).id("outage-length")
+                        .getValue() >= 1_000,
                 "the simulated outage should last long enough to be felt");
     }
 
@@ -314,8 +320,8 @@ class ConnectionInsightsViewTest extends SpringBrowserlessTest {
         // "Nothing has happened" and "nothing is watching" are different
         // answers, and a browserless run has no collector at all — so the
         // meter does not exist rather than reading zero.
-        assertEquals("—", reports(MeterNames.CLIENT_CONNECTION,
-                "state=connection-lost"));
+        assertEquals("—",
+                reports(MeterNames.CLIENT_CONNECTION, "state=connection-lost"));
         assertEquals("—", value(MeterNames.CLIENT_CONNECTION_DOWNTIME,
                 "state=reconnecting"));
     }
@@ -334,18 +340,19 @@ class ConnectionInsightsViewTest extends SpringBrowserlessTest {
         transitions(MeterNames.STATE_CONNECTION_LOST).increment();
         view.connectionRestored();
 
-        assertEquals("1", reports(MeterNames.CLIENT_CONNECTION_DOWNTIME,
-                "state=connection-lost"),
+        assertEquals("1",
+                reports(MeterNames.CLIENT_CONNECTION_DOWNTIME,
+                        "state=connection-lost"),
                 "the given-up-on time should be read from its own tag");
-        assertTrue(value(MeterNames.CLIENT_CONNECTION_DOWNTIME,
-                "state=reconnecting").contains("total, longest"),
+        assertTrue(
+                value(MeterNames.CLIENT_CONNECTION_DOWNTIME,
+                        "state=reconnecting").contains("total, longest"),
                 "so should the retrying time");
         // The kit splits the timer because the two states mean different
         // things; adding them back is the application's job, and is the number
         // an SLO would use.
         assertEquals("%.1f s across both states".formatted(4.5),
-                value(MeterNames.CLIENT_CONNECTION_DOWNTIME,
-                        "state=* summed"),
+                value(MeterNames.CLIENT_CONNECTION_DOWNTIME, "state=* summed"),
                 "the whole outage is the sum, not either tag alone");
     }
 
@@ -416,9 +423,8 @@ class ConnectionInsightsViewTest extends SpringBrowserlessTest {
         capture("uncaught", "orders", chartError(), 0);
         view.connectionRestored();
 
-        assertEquals(2, cards(),
-                "same route groups, different route does not: "
-                        + verdictText());
+        assertEquals(2, cards(), "same route groups, different route does not: "
+                + verdictText());
         assertTrue(verdictText().contains("2×"),
                 "the grouped finding should carry its occurrence count: "
                         + verdictText());
@@ -439,8 +445,9 @@ class ConnectionInsightsViewTest extends SpringBrowserlessTest {
         capture("uncaught", ConnectionInsightsView.ROUTE, chartError(), 0);
         view.connectionRestored();
 
-        assertTrue(verdictText().contains("held") && verdictText()
-                .contains("offline"),
+        assertTrue(
+                verdictText().contains("held")
+                        && verdictText().contains("offline"),
                 "the group reports the longest wait of its occurrences, so it "
                         + "speaks for at least one of them: " + verdictText());
     }
@@ -483,38 +490,50 @@ class ConnectionInsightsViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void aSecondSessionReadsTheSameApplicationWideBuffer() {
-        navigate(ConnectionInsightsView.class);
+    void twoTabletsReadTheSameApplicationWideBuffer() {
+        // Two tablets, each its own session, in one running service: the
+        // buffer the kit's service-init listener published is the one both
+        // capture into and both read from.
+        try (var app = SpringBrowserlessApplicationContext
+                .create(applicationContext,
+                        b -> b.withViewPackages(ConnectionInsightsView.class,
+                                HomeView.class)
+                                .withSessionLockIsolation(true))) {
+            var first = app.newUser().newWindow();
+            var second = app.newUser().newWindow();
+            first.navigate(ConnectionInsightsView.class);
+            ConnectionInsightsView secondView = second
+                    .navigate(ConnectionInsightsView.class);
+            second.test(second.findInView(Button.class).id("show-stock"))
+                    .click();
+            second.findInView(Details.class).all()
+                    .forEach(step -> step.setOpened(true));
 
-        // A second tablet. Re-initialising the Vaadin environment runs the
-        // kit's service-init again, which builds a fresh insight buffer — a
-        // harness artefact, since a production service is initialised once —
-        // so what this checks is that the readout holds no per-view state and
-        // reads the buffer the running service has. That two tablets'
-        // identical errors become one finding is covered above, where the
-        // buffer survives.
-        cleanVaadinEnvironment();
-        initVaadinEnvironment();
-        ConnectionInsightsView view = navigate(ConnectionInsightsView.class);
-        click("show-stock");
-        openAllSteps();
+            Map<String, String> rejection = Map.of(
+                    ClientErrorCollector.DETAIL_ROUTE, "/picking",
+                    ClientErrorCollector.DETAIL_MESSAGE,
+                    "GET /api/warehouse/stock failed");
+            capture(first, "promise", rejection);
+            capture(second, "promise", rejection);
+            second.activate();
+            secondView.connectionRestored();
 
-        capture("promise", ConnectionInsightsView.ROUTE,
-                Map.of(ClientErrorCollector.DETAIL_ROUTE, "/picking",
-                        ClientErrorCollector.DETAIL_MESSAGE,
-                        "GET /api/warehouse/stock failed"),
-                0);
-        view.connectionRestored();
-
-        assertEquals(1, cards(),
-                "the second session's view should read the live buffer");
-        assertTrue(verdictText().contains("promise"), verdictText());
-        // No stack frame and no script: a rejection has no filename at all,
-        // and the page's own URL is not substituted for one, so the kit's own
-        // summary says so rather than naming a location.
-        assertTrue(verdictText().contains("an unreported script"),
-                "a location is published only when there is one: "
-                        + verdictText());
+            String verdict = second.findInView(Div.class).id("verdict")
+                    .getElement().getTextRecursively();
+            assertEquals(1,
+                    second.findInView(Div.class).id("verdict").getChildren()
+                            .count(),
+                    "the same error on two tablets is one finding: " + verdict);
+            assertTrue(verdict.contains("2×"),
+                    "and it counts both tablets: " + verdict);
+            assertTrue(verdict.contains("promise"), verdict);
+            // No stack frame and no script: a rejection has no filename at
+            // all, and the page's own URL is not substituted for one, so the
+            // kit's own summary says so rather than naming a location.
+            assertTrue(verdict.contains("an unreported script"),
+                    "a location is published only when there is one: "
+                            + verdict);
+        }
     }
 
     // ---------- driving the view ----------
@@ -548,6 +567,14 @@ class ConnectionInsightsViewTest extends SpringBrowserlessTest {
             long bufferedMs) {
         new ClientErrorCollector(buffer(), settings).capture(kind, route,
                 detail, bufferedMs, UI.getCurrent());
+    }
+
+    /** Captures one browser error from the given tablet's UI. */
+    private void capture(BrowserlessUIContext window, String kind,
+            Map<String, String> detail) {
+        window.activate();
+        new ClientErrorCollector(buffer(), settings).capture(kind,
+                ConnectionInsightsView.ROUTE, detail, 0, window.getUI());
     }
 
     private static Map<String, String> chartError() {
