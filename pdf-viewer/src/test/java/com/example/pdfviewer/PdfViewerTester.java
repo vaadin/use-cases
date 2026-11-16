@@ -6,7 +6,6 @@ import tools.jackson.databind.node.ObjectNode;
 
 import com.vaadin.browserless.ComponentTester;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -52,11 +51,32 @@ public class PdfViewerTester extends ComponentTester<PdfViewer> {
 
     /**
      * Takes the pages the server asked the viewer to scroll to with
-     * {@link PdfViewer#scrollToPage(int)} since the last call, in order.
+     * {@link PdfViewer#scrollToPage(int)} since the last call, in order. Other
+     * calls queued for the viewer are dropped.
      *
      * @return the pages
      */
     public List<Integer> takeScrollToPage() {
+        return takeCalls("scrollToPage").stream()
+                .map(arguments -> (Integer) arguments.getFirst()).toList();
+    }
+
+    /**
+     * Takes the number of times the server asked the viewer to download the
+     * document with {@link PdfViewer#download()} since the last call. Other
+     * calls queued for the viewer are dropped.
+     *
+     * @return the number of downloads
+     */
+    public int takeDownloads() {
+        return takeCalls("download").size();
+    }
+
+    /**
+     * Takes the arguments of each call of a function of the web component
+     * queued with {@code callJsFunction}, and drops the other calls.
+     */
+    private List<List<Object>> takeCalls(String function) {
         UI ui = UI.getCurrent();
         // callJsFunction is queued before the response; run that step without
         // the rest of the round trip, which would discard the calls.
@@ -64,11 +84,10 @@ public class PdfViewerTester extends ComponentTester<PdfViewer> {
         return ui.getInternals().dumpPendingJavaScriptInvocations().stream()
                 .filter(invocation -> invocation.getOwner() == getComponent()
                         .getElement().getNode())
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .map(invocation -> invocation.getParameters())
-                .filter(parameters -> parameters.contains("scrollToPage"))
-                .map(parameters -> (Integer) parameters
-                        .get(parameters.indexOf("scrollToPage") + 1))
+                .map(invocation -> invocation.getInvocation().getParameters())
+                .filter(parameters -> parameters.contains(function))
+                .map(parameters -> parameters.subList(
+                        parameters.indexOf(function) + 1, parameters.size()))
                 .toList();
     }
 }

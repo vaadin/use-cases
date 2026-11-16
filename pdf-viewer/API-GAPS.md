@@ -215,3 +215,35 @@ pages, which the application knows because it generated the guide.
 an `outline` the server can read after `document-load`, so an application can
 build its own navigation for documents it did not write. The VCF add-on has a
 sidebar with an outline and thumbnails (`setSidebarOpened`).
+
+## 15. The toolbar can not be hidden
+
+**Where it bites:** UC14 / `PresentResultsView.java`
+**Symptom:** an application that has its own controls for the viewer wants it
+to show only the pages. `setHeaderVisible(false)` hides the header, but then
+the toolbar is always shown: `setToolbarCollapsed(true)` only collapses it
+while the header is visible (`vaadin-pdf-viewer-toolbar-mixin.js`). So either
+the header or the toolbar stays.
+**Workaround used:** the view hides the header with `setHeaderVisible(false)`
+and the toolbar with `::part(toolbar) { display: none; }` in `uc14.css`. The
+`toolbar` part is documented for styling, but hiding it is not a documented
+use; the viewer's keyboard shortcuts for the pages still work.
+**Suggested API:** `setToolbarVisible(boolean)` (a `toolbarHidden` property),
+independent of the header, so the application can drive the viewer with
+`scrollToPage(int)`, `setZoom(Zoom)` and `download()` from its own controls.
+
+## 16. A file can only be shown once it is uploaded
+
+**Where it bites:** UC15 / `AttachContractView.java`
+**Symptom:** the viewer takes a URL (`setSrc(String)`) or a
+`DownloadHandler`, so it can only show a file the server can serve. A file the
+user picks in the `Upload` has to be uploaded in full before the user can see
+whether it is the right one, and the server has to keep it, at least in
+memory, until the user decides. For a large scan on a slow connection, that is
+a long wait for a file that may be the wrong one.
+**Workaround used:** the view uploads the file into memory
+(`UploadHandler.inMemory`), checks it with PDFBox and serves it back to the
+viewer from memory. The bytes go to the server and back to the browser.
+**Suggested API:** a way to show the file the user picked before it is
+uploaded, e.g. letting the viewer show a file selected in an `Upload` that
+does not upload by itself, with the upload started once the user confirms.
