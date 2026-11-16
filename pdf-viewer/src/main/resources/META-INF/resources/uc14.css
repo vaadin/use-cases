@@ -1,0 +1,25 @@
+.uc14-viewer {
+    width: 100%;
+    height: 65vh;
+}
+
+/* setHeaderVisible(false) shows the toolbar for good, and there is no API to
+   hide it (API-GAPS.md #15). */
+.uc14-viewer::part(toolbar) {
+    display: none;
+}
+
+.uc14-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--vaadin-gap-m, 1rem);
+    width: 100%;
+}
+
+.uc14-position {
+    min-width: 8rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}

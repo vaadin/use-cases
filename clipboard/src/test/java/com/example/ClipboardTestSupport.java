@@ -38,11 +38,6 @@ import com.vaadin.flow.server.streams.UploadHandler;
  */
 public final class ClipboardTestSupport {
 
-    // Copied from Clipboard: the paste listener reads the event data under
-    // these exact JavaScript expressions.
-    private static final String PASTE_TEXT_EXPR = "event.clipboardData?.getData('text/plain') || null";
-    private static final String PASTE_HTML_EXPR = "event.clipboardData?.getData('text/html') || null";
-
     private static final String FILE_PASTE_ATTRIBUTE_PREFIX = "_vaadin-paste-upload-";
 
     private static final AtomicLong PASTE_IDS = new AtomicLong();
@@ -93,12 +88,28 @@ public final class ClipboardTestSupport {
     /** Pastes text and HTML into {@code target}, as the browser does. */
     public static void paste(Component target, @Nullable String text,
             @Nullable String html) {
-        ObjectNode data = JacksonUtils.createObjectNode();
-        data.put(PASTE_TEXT_EXPR, text);
-        data.put(PASTE_HTML_EXPR, html);
         Element element = target.getElement();
-        element.getNode().getFeature(ElementListenerMap.class)
-                .fireEvent(new DomEvent(element, "paste", data));
+        ElementListenerMap listeners = element.getNode()
+                .getFeature(ElementListenerMap.class);
+        ObjectNode data = JacksonUtils.createObjectNode();
+        data.put(pasteDataKey(listeners, "text/plain"), text);
+        data.put(pasteDataKey(listeners, "text/html"), html);
+        listeners.fireEvent(new DomEvent(element, "paste", data));
+    }
+
+    /**
+     * The key the browser sends the pasted content of a MIME type under: the
+     * key of the event data that the paste listener declares with the MIME type
+     * as its argument.
+     */
+    private static String pasteDataKey(ElementListenerMap listeners,
+            String mimeType) {
+        return listeners.getSnippetEntries("paste").stream()
+                .filter(entry -> entry.call().arguments()
+                        .equals(List.of(mimeType)))
+                .map(ElementListenerMap.SnippetEntry::key).findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "No paste listener reads " + mimeType));
     }
 
     /**

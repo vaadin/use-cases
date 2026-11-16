@@ -3,7 +3,6 @@ package com.example.uc4;
 import java.util.List;
 import java.util.Map;
 
-import com.example.MissingAPI;
 import com.example.common.UseCaseDescription;
 import com.example.documents.SampleDocuments;
 import com.example.documents.SampleDocuments.Manual;
@@ -32,20 +31,19 @@ import com.vaadin.flow.router.RouterLink;
  * <p>
  * Help links point into a long user guide at the page that answers the
  * question. The page is a query parameter, {@code uc4?page=5}: the view reads
- * it in {@code beforeEnter} and sets the viewer's page, so a link opens the
- * guide at the right place, from inside the app or from an email. While the
- * user scrolls, the view writes the current page back into the URL with
- * {@code replaceState}, so reloading or sharing the address keeps the place.
+ * it in {@code beforeEnter} and calls {@link PdfViewer#scrollToPage(int)},
+ * which waits for the guide to load, so a link opens the guide at the right
+ * place, from inside the app or from an email. While the user scrolls, the view
+ * writes the current page back into the URL with {@code replaceState}, so
+ * reloading or sharing the address keeps the place.
  * <p>
  * The application generated the guide, so it knows which page each chapter
  * starts on. The guide also has bookmarks, but the viewer has no outline to
  * show them in (API-GAPS.md #14).
  * <p>
- * The Flow component can read the page but not set it, so the view sets the web
- * component's property through {@code MissingAPI} (API-GAPS.md #12).
- * <p>
  * A link past the last page is corrected to the last page once the guide has
- * loaded, because the viewer does not do that itself.
+ * loaded: the viewer ignores a page it does not have, without telling the
+ * application (API-GAPS.md #6).
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Open the manual at a page")
@@ -73,6 +71,7 @@ public class ManualDeepLinkView extends VerticalLayout
 
     private final PdfViewer viewer = new PdfViewer();
     private final Span address = new Span();
+    private int requestedPage = 1;
 
     public ManualDeepLinkView() {
         addClassName("uc4-view");
@@ -105,12 +104,12 @@ public class ManualDeepLinkView extends VerticalLayout
                 replaceAddress(event.getPage());
             }
         });
-        // A link to a page past the end leaves the viewer on page 1 with the
-        // page property unchanged and an empty page field (API-GAPS.md #6),
-        // so the view corrects it once it knows the number of pages.
+        // scrollToPage ignores a page past the end and leaves the viewer on
+        // page 1 (API-GAPS.md #6), so the view goes to the last page once it
+        // knows the number of pages.
         viewer.addDocumentLoadListener(event -> {
-            if (viewer.getPage() > event.getPageCount()) {
-                MissingAPI.setPage(viewer, event.getPageCount());
+            if (requestedPage > event.getPageCount()) {
+                viewer.scrollToPage(event.getPageCount());
                 replaceAddress(event.getPageCount());
             }
         });
@@ -118,8 +117,8 @@ public class ManualDeepLinkView extends VerticalLayout
         Div layout = new Div(topics, viewer);
         layout.addClassNames("uc4-layout", "side-by-side");
         add(layout);
-        add(ApiGap.note(12, "the Flow component can not set the page. The "
-                + "view sets the web component's property instead."));
+        add(ApiGap.note(6, "the viewer ignores a page past the end of the "
+                + "guide, so the view goes to the last page itself."));
     }
 
     @Override
@@ -127,7 +126,8 @@ public class ManualDeepLinkView extends VerticalLayout
         int page = event.getLocation().getQueryParameters()
                 .getSingleParameter("page").map(ManualDeepLinkView::parsePage)
                 .orElse(1);
-        MissingAPI.setPage(viewer, page);
+        requestedPage = page;
+        viewer.scrollToPage(page);
         showAddress(page);
     }
 

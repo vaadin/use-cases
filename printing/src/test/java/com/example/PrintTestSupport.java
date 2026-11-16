@@ -101,15 +101,21 @@ public final class PrintTestSupport {
         return value instanceof Element ? Stream.empty() : Stream.of(value);
     }
 
+    @SuppressWarnings("removal")
     private static Stream<String> text(Object value) {
         if (value instanceof JsFunction function) {
-            // A function declared by a JavaScript definition has no body;
-            // its JavaScript is the declared expression.
-            JsCall declared = function.getDeclaredCall();
-            String body = declared != null ? declared.getExpression()
-                    : function.getBody();
-            return Stream.concat(Stream.of(body), function.getCaptures()
-                    .stream().flatMap(PrintTestSupport::text));
+            // A function declared by a JavaScript definition has no body:
+            // its JavaScript is the declared expression, and its method and
+            // arguments say what it does.
+            JsCall call = function.getDeclaredCall();
+            Stream<String> code = call == null ? Stream.of(function.getBody())
+                    : Stream.of(
+                            Stream.of(call.getExpression(), call.methodName()),
+                            call.arguments().stream()
+                                    .flatMap(PrintTestSupport::text))
+                            .flatMap(stream -> stream);
+            return Stream.concat(code, function.getCaptures().stream()
+                    .flatMap(PrintTestSupport::text));
         }
         return value instanceof String string ? Stream.of(string)
                 : Stream.empty();

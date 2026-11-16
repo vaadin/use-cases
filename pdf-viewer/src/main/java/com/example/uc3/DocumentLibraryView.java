@@ -2,7 +2,6 @@ package com.example.uc3;
 
 import java.util.List;
 
-import com.example.MissingAPI;
 import com.example.common.UseCaseDescription;
 import com.example.documents.Pdf;
 import com.example.documents.SampleDocuments;
@@ -42,9 +41,8 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * asks for the password.
  * <p>
  * The viewer's header shows the name the library gives the file, "Travel
- * policy", rather than its file name, {@code travel-policy.pdf}. The Flow
- * component has no setter for the header title, so the view sets the web
- * component's property (API-GAPS.md #12).
+ * policy", rather than its file name, {@code travel-policy.pdf}, through
+ * {@link PdfViewer#setHeaderTitle(String)}.
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Document library")
@@ -112,16 +110,13 @@ public class DocumentLibraryView extends VerticalLayout {
         add(layout);
         add(ApiGap.note(3, "the viewer can not open a password-protected "
                 + "PDF; it only reports the reason \"password\"."));
-        add(ApiGap.note(12, "the Flow component has no setter for the "
-                + "header title. The view sets the web component's property "
-                + "to show the name the library uses."));
         grid.select(FILES.getFirst());
     }
 
     private void open(LibraryFile file) {
         message.setText("Loading " + file.name() + "…");
         viewer.setSrc(file.handler());
-        MissingAPI.setHeaderTitle(viewer, file.name());
+        viewer.setHeaderTitle(file.name());
     }
 
     private void explain(DocumentErrorEvent event) {

@@ -3,7 +3,6 @@ package com.example.uc7;
 import java.util.List;
 import java.util.OptionalInt;
 
-import com.example.MissingAPI;
 import com.example.common.UseCaseDescription;
 import com.example.documents.Pdf;
 import com.example.documents.SampleDocuments;
@@ -31,12 +30,12 @@ import com.vaadin.flow.router.Route;
  * questions and wants the clause that answers each one. The application did not
  * write the contract and does not know its layout, so it searches the text:
  * {@link ClauseFinder} extracts each page's text with PDFBox on the server, and
- * the view sets the viewer's page to the first match.
+ * the view scrolls the viewer to the first match with
+ * {@link PdfViewer#scrollToPage(int)}.
  * <p>
  * That is as far as the API goes. The viewer has no find bar and no API to
  * highlight text from code, so the reviewer still has to find the sentence on
- * the page. The Flow component can not set the page either, so the view sets
- * the web component's property (API-GAPS.md #12).
+ * the page (API-GAPS.md #1).
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Jump to a clause")
@@ -103,7 +102,7 @@ public class JumpToClauseView extends VerticalLayout {
                     + "contract.");
             return;
         }
-        MissingAPI.setPage(viewer, page.getAsInt());
+        viewer.scrollToPage(page.getAsInt());
         // On a phone the viewer is below the checklist.
         viewer.scrollIntoView(ScrollIntoViewOption.Block.NEAREST);
         result.setText("Look for \"" + question.phrase() + "\" on page "
