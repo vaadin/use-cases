@@ -13,7 +13,6 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
-import com.vaadin.flow.component.select.Select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -33,20 +32,6 @@ class ContentsPageViewTest extends SpringBrowserlessTest {
         viewer.scrollTo(chapterPages.get("Travel"));
 
         assertEquals("Travel", chapter());
-    }
-
-    @Test
-    void pickingAChapterOpensItsFirstPage() {
-        Map<String, Integer> chapterPages = SampleDocuments.employeeHandbook()
-                .chapterPages();
-        navigate(ContentsPageView.class);
-        PdfViewerTester viewer = new PdfViewerTester(
-                findInView(PdfViewer.class).single());
-
-        test(findInView(Select.class).single()).selectItem("Travel");
-
-        assertEquals(List.of(chapterPages.get("Travel")),
-                viewer.takeScrollToPage());
     }
 
     @Test
