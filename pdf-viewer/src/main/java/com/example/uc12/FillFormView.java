@@ -18,7 +18,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -36,8 +35,8 @@ import com.vaadin.flow.router.Route;
  * A pension fund only accepts its own PDF form, AP-12, for a change of address.
  * The user answers its questions in ordinary Vaadin fields; the server writes
  * the answers into the PDF's form fields with PDFBox, flattens them, and shows
- * the filled copy in the viewer. The viewer has no download button (API-GAPS.md
- * #13), so a link under the form gives the user the filled copy.
+ * the filled copy in the viewer. The user saves it with the viewer's download
+ * button, which saves the copy the viewer shows without fetching it again.
  * <p>
  * The viewer does not let the user type into a PDF form (API-GAPS.md #7).
  * Filling the form on the server also keeps the application in charge of the
@@ -65,7 +64,6 @@ public class FillFormView extends VerticalLayout {
             Field.MOVING_DATE.label());
     private final Paragraph status = new Paragraph();
     private final PdfViewer viewer = new PdfViewer();
-    private final Anchor download = new Anchor("", "Download the filled form");
 
     public FillFormView() {
         addClassName("uc12-view");
@@ -74,7 +72,7 @@ public class FillFormView extends VerticalLayout {
                 + "a change of address. Answer the questions and choose "
                 + "\"Fill in the form\". The server writes your answers "
                 + "into the PDF and shows the filled copy. Download it with "
-                + "the link under the form."));
+                + "the viewer's download button."));
 
         FormLayout form = new FormLayout(name, customerNumber, oldAddress,
                 newAddress, movingDate);
@@ -86,8 +84,7 @@ public class FillFormView extends VerticalLayout {
         Button fill = new Button("Fill in the form", event -> fillIn());
         fill.addThemeVariants(ButtonVariant.PRIMARY);
         status.addClassName("uc12-status");
-        download.setVisible(false);
-        Div side = new Div(form, fill, status, download);
+        Div side = new Div(form, fill, status);
         side.addClassName("uc12-form");
 
         viewer.addClassName("uc12-viewer");
@@ -99,8 +96,6 @@ public class FillFormView extends VerticalLayout {
         add(layout);
         add(ApiGap.note(7, "the viewer shows a PDF form, but you can not "
                 + "type into its fields."));
-        add(ApiGap.note(13, "the viewer has no download button, so the app "
-                + "offers its own link to the filled form."));
         add(ApiGap.note(10, "the viewer can not add a signature to a PDF, nor "
                 + "show whether an existing signature is valid."));
     }
@@ -139,8 +134,6 @@ public class FillFormView extends VerticalLayout {
         values.put(Field.MOVING_DATE, DATE.format(movingDate.getValue()));
         Pdf filled = new Pdf(FILE_NAME, AddressChangeForm.fill(values));
         viewer.setSrc(filled.handler());
-        download.setHref(filled.handler());
-        download.setVisible(true);
         status.setText("The viewer shows the form with your answers. Change "
                 + "an answer and fill in the form again to update it.");
     }

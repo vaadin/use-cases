@@ -9,7 +9,6 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -39,8 +38,8 @@ class FillFormViewTest extends SpringBrowserlessTest {
 
         assertNotEquals(blank, src());
         assertTrue(status().contains("with your answers"), status());
-        assertTrue(download().getHref().endsWith("change-of-address-AP-12.pdf"),
-                download().getHref());
+        // The viewer's download button saves the file under this name.
+        assertTrue(src().endsWith("change-of-address-AP-12.pdf"), src());
     }
 
     @Test
@@ -53,8 +52,6 @@ class FillFormViewTest extends SpringBrowserlessTest {
         test(fillButton()).click();
 
         assertEquals(blank, src());
-        assertTrue(findInView(Anchor.class).withText("Download the filled form")
-                .all().isEmpty(), "Nothing to download yet");
         assertFalse(textField("Full name").isInvalid());
         assertTrue(textField("Customer number").isInvalid(),
                 "Only spaces is no answer");
@@ -80,11 +77,6 @@ class FillFormViewTest extends SpringBrowserlessTest {
         assertFalse(textArea("New address").isInvalid(),
                 "Western European letters fit");
         assertTrue(status().contains("Western European letters"), status());
-    }
-
-    private Anchor download() {
-        return findInView(Anchor.class).withText("Download the filled form")
-                .single();
     }
 
     private TextField textField(String label) {

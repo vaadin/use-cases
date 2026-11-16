@@ -1,5 +1,6 @@
 package com.example.uc4;
 
+import java.util.List;
 import java.util.Map;
 
 import com.example.documents.SampleDocuments;
@@ -23,7 +24,9 @@ class ManualDeepLinkViewTest extends SpringBrowserlessTest {
     void aLinkOpensTheGuideAtItsPage() {
         navigate("uc4?page=5", ManualDeepLinkView.class);
 
-        assertEquals(5, findInView(PdfViewer.class).single().getPage());
+        assertEquals(List.of(5),
+                new PdfViewerTester(findInView(PdfViewer.class).single())
+                        .takeScrollToPage());
         assertEquals("uc4?page=5", address());
     }
 
@@ -51,10 +54,12 @@ class ManualDeepLinkViewTest extends SpringBrowserlessTest {
     @Test
     void aLinkPastTheEndOpensTheLastPage() {
         navigate("uc4?page=99", ManualDeepLinkView.class);
-        PdfViewer viewer = findInView(PdfViewer.class).single();
-        new PdfViewerTester(viewer).load(12, "");
+        PdfViewerTester viewer = new PdfViewerTester(
+                findInView(PdfViewer.class).single());
+        viewer.takeScrollToPage();
+        viewer.load(12, "");
 
-        assertEquals(12, viewer.getPage());
+        assertEquals(List.of(12), viewer.takeScrollToPage());
         assertEquals("uc4?page=12", address());
     }
 
