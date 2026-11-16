@@ -1,5 +1,6 @@
 package com.example.uc11;
 
+import java.util.List;
 import java.util.Map;
 
 import com.example.documents.SampleDocuments;
@@ -39,25 +40,25 @@ class ContentsPageViewTest extends SpringBrowserlessTest {
         Map<String, Integer> chapterPages = SampleDocuments.employeeHandbook()
                 .chapterPages();
         navigate(ContentsPageView.class);
-        PdfViewer viewer = findInView(PdfViewer.class).single();
+        PdfViewerTester viewer = new PdfViewerTester(
+                findInView(PdfViewer.class).single());
 
         test(findInView(Select.class).single()).selectItem("Travel");
 
-        assertEquals(chapterPages.get("Travel"), viewer.getPage());
-        assertEquals("Travel", chapter());
+        assertEquals(List.of(chapterPages.get("Travel")),
+                viewer.takeScrollToPage());
     }
 
     @Test
     void backToContentsOpensTheFirstPage() {
         navigate(ContentsPageView.class);
-        PdfViewer viewer = findInView(PdfViewer.class).single();
-        new PdfViewerTester(viewer).scrollTo(4);
+        PdfViewerTester viewer = new PdfViewerTester(
+                findInView(PdfViewer.class).single());
 
         test(findInView(Button.class).withText("Back to contents").single())
                 .click();
 
-        assertEquals(1, viewer.getPage());
-        assertEquals("Contents", chapter());
+        assertEquals(List.of(1), viewer.takeScrollToPage());
     }
 
     private String chapter() {

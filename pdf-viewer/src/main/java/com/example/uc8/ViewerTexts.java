@@ -9,9 +9,7 @@ import com.vaadin.flow.component.pdfviewer.PdfViewerI18n;
  * <p>
  * Every text of the component has to be supplied by the application, for every
  * language it supports: there are no built-in translations, and the component
- * does not follow the UI's locale (API-GAPS.md #4). The texts for links and the
- * download button are set too, though the web component that the Flow component
- * loads has neither yet (API-GAPS.md #9, #13).
+ * does not follow the UI's locale (API-GAPS.md #4).
  */
 final class ViewerTexts {
 

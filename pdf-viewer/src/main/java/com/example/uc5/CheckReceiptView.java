@@ -3,7 +3,6 @@ package com.example.uc5;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.example.MissingAPI;
 import com.example.common.UseCaseDescription;
 import com.example.documents.SampleDocuments;
 import com.example.documents.SampleDocuments.ExpenseClaim;
@@ -33,9 +32,8 @@ import com.vaadin.flow.router.Route;
  * An approver compares what an expense claim says with the receipt that comes
  * with it. The receipt sits next to the claim, fitted into the viewer with
  * {@code Zoom.PAGE_FIT}, with the toolbar collapsed behind the file name, so
- * the small receipt gets all the room. On a phone the two stack. The Flow
- * component can not collapse the toolbar, so the view sets the web component's
- * property (API-GAPS.md #12).
+ * the small receipt gets all the room ({@link PdfViewer#setToolbarCollapsed}).
+ * On a phone the two stack.
  * <p>
  * The first claim asks for more than the receipt shows; the point of the view
  * is that the approver can see that without leaving the form.
@@ -84,7 +82,7 @@ public class CheckReceiptView extends VerticalLayout {
 
         viewer.addClassName("uc5-viewer");
         viewer.setZoom(Zoom.PAGE_FIT);
-        MissingAPI.setToolbarCollapsed(viewer, true);
+        viewer.setToolbarCollapsed(true);
 
         Div layout = new Div(claim, viewer);
         layout.addClassNames("uc5-layout", "side-by-side");
