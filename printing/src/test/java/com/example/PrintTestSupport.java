@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsCall;
 
 /**
  * What the views asked the browser to do. Printing itself cannot be observed
@@ -100,10 +101,19 @@ public final class PrintTestSupport {
         return value instanceof Element ? Stream.empty() : Stream.of(value);
     }
 
+    @SuppressWarnings("removal")
     private static Stream<String> text(Object value) {
         if (value instanceof JsFunction function) {
-            return Stream.concat(Stream.of(function.getBody()), function
-                    .getCaptures().stream().flatMap(PrintTestSupport::text));
+            // A function that Flow declares in a @JsDefinition interface has
+            // its JavaScript in the bundle, not a body; its method and
+            // arguments say what it does.
+            JsCall call = function.getDeclaredCall();
+            Stream<String> code = call == null ? Stream.of(function.getBody())
+                    : Stream.concat(Stream.of(call.methodName()),
+                            call.arguments().stream()
+                                    .flatMap(PrintTestSupport::text));
+            return Stream.concat(code, function.getCaptures().stream()
+                    .flatMap(PrintTestSupport::text));
         }
         return value instanceof String string ? Stream.of(string)
                 : Stream.empty();
