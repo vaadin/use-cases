@@ -105,15 +105,13 @@ public final class PrintTestSupport {
     private static Stream<String> text(Object value) {
         if (value instanceof JsFunction function) {
             // A function declared by a JavaScript definition has no body:
-            // its JavaScript is the declared expression, and its method and
-            // arguments say what it does.
+            // its JavaScript is the declared expression, and its arguments
+            // carry the rest, such as the event name.
             JsCall call = function.getDeclaredCall();
             Stream<String> code = call == null ? Stream.of(function.getBody())
-                    : Stream.of(
-                            Stream.of(call.getExpression(), call.methodName()),
+                    : Stream.concat(Stream.of(call.getExpression()),
                             call.arguments().stream()
-                                    .flatMap(PrintTestSupport::text))
-                            .flatMap(stream -> stream);
+                                    .flatMap(PrintTestSupport::text));
             return Stream.concat(code, function.getCaptures().stream()
                     .flatMap(PrintTestSupport::text));
         }
