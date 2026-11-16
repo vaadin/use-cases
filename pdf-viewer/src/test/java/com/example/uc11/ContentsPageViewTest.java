@@ -54,7 +54,6 @@ class ContentsPageViewTest extends SpringBrowserlessTest {
         navigate(ContentsPageView.class);
         PdfViewerTester viewer = new PdfViewerTester(
                 findInView(PdfViewer.class).single());
-        viewer.scrollTo(4);
 
         test(findInView(Button.class).withText("Back to contents").single())
                 .click();

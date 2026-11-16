@@ -23,10 +23,13 @@ class ManualDeepLinkViewTest extends SpringBrowserlessTest {
     @Test
     void aLinkOpensTheGuideAtItsPage() {
         navigate("uc4?page=5", ManualDeepLinkView.class);
+        PdfViewerTester viewer = new PdfViewerTester(
+                findInView(PdfViewer.class).single());
 
-        assertEquals(List.of(5),
-                new PdfViewerTester(findInView(PdfViewer.class).single())
-                        .takeScrollToPage());
+        assertEquals(List.of(5), viewer.takeScrollToPage());
+        viewer.load(12, "");
+        assertEquals(List.of(), viewer.takeScrollToPage(),
+                "A page of the guide is not corrected");
         assertEquals("uc4?page=5", address());
     }
 
@@ -56,7 +59,7 @@ class ManualDeepLinkViewTest extends SpringBrowserlessTest {
         navigate("uc4?page=99", ManualDeepLinkView.class);
         PdfViewerTester viewer = new PdfViewerTester(
                 findInView(PdfViewer.class).single());
-        viewer.takeScrollToPage();
+        assertEquals(List.of(99), viewer.takeScrollToPage());
         viewer.load(12, "");
 
         assertEquals(List.of(12), viewer.takeScrollToPage());

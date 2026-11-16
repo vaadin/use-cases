@@ -36,7 +36,8 @@ import com.vaadin.flow.router.Route;
  * The user answers its questions in ordinary Vaadin fields; the server writes
  * the answers into the PDF's form fields with PDFBox, flattens them, and shows
  * the filled copy in the viewer. The user saves it with the viewer's download
- * button, which saves the copy the viewer shows without fetching it again.
+ * button, which saves the copy the viewer shows without fetching it again. The
+ * button is hidden while the viewer shows the empty form.
  * <p>
  * The viewer does not let the user type into a PDF form (API-GAPS.md #7).
  * Filling the form on the server also keeps the application in charge of the
@@ -88,6 +89,7 @@ public class FillFormView extends VerticalLayout {
         side.addClassName("uc12-form");
 
         viewer.addClassName("uc12-viewer");
+        viewer.setDownloadButtonVisible(false);
         viewer.setSrc(new Pdf(FILE_NAME, AddressChangeForm.blank()).handler());
         status.setText("The viewer shows the empty form.");
 
@@ -134,6 +136,7 @@ public class FillFormView extends VerticalLayout {
         values.put(Field.MOVING_DATE, DATE.format(movingDate.getValue()));
         Pdf filled = new Pdf(FILE_NAME, AddressChangeForm.fill(values));
         viewer.setSrc(filled.handler());
+        viewer.setDownloadButtonVisible(true);
         status.setText("The viewer shows the form with your answers. Change "
                 + "an answer and fill in the form again to update it.");
     }

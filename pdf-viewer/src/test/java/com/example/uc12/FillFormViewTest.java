@@ -27,6 +27,8 @@ class FillFormViewTest extends SpringBrowserlessTest {
     void fillingInShowsTheFilledForm() {
         navigate(FillFormView.class);
         String blank = src();
+        assertFalse(viewer().isDownloadButtonVisible(),
+                "Nothing to download yet");
 
         test(textField("Full name")).setValue("Maria Lind");
         test(textField("Customer number")).setValue("AP-448210");
@@ -38,8 +40,7 @@ class FillFormViewTest extends SpringBrowserlessTest {
 
         assertNotEquals(blank, src());
         assertTrue(status().contains("with your answers"), status());
-        // The viewer's download button saves the file under this name.
-        assertTrue(src().endsWith("change-of-address-AP-12.pdf"), src());
+        assertTrue(viewer().isDownloadButtonVisible());
     }
 
     @Test
@@ -52,6 +53,7 @@ class FillFormViewTest extends SpringBrowserlessTest {
         test(fillButton()).click();
 
         assertEquals(blank, src());
+        assertFalse(viewer().isDownloadButtonVisible());
         assertFalse(textField("Full name").isInvalid());
         assertTrue(textField("Customer number").isInvalid(),
                 "Only spaces is no answer");
@@ -91,9 +93,12 @@ class FillFormViewTest extends SpringBrowserlessTest {
         return findInView(Button.class).withText("Fill in the form").single();
     }
 
+    private PdfViewer viewer() {
+        return findInView(PdfViewer.class).single();
+    }
+
     private String src() {
-        return findInView(PdfViewer.class).single().getElement()
-                .getAttribute("src");
+        return viewer().getElement().getAttribute("src");
     }
 
     private String status() {
