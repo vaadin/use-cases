@@ -103,7 +103,7 @@ the next online build replaces with the published snapshot, and a build with
 ./mvnw -pl <module> -am test
 
 # 2. Install the upstream change into ~/m2-local, reading the rest from ~/.m2
-(cd ../flow && ./mvnw -pl flow-server -am install -DskipTests \
+(cd ../flow && mvn -pl flow-server -am install -DskipTests \
    -Dmaven.repo.local=$HOME/m2-local -Dmaven.repo.local.tail=$HOME/.m2/repository)
 
 # 3. Build the use case offline: the local build wins, nothing is replaced
