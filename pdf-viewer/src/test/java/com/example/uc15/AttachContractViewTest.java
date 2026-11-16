@@ -49,19 +49,27 @@ class AttachContractViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void aFileTheServerCanNotOpenIsTurnedAwayWithItsReason() {
+    void aFileTheServerCanNotOpenReplacesTheShownOneWithItsReason() {
         view = navigate(AttachContractView.class);
+        Pdf contract = SampleDocuments.serviceAgreement();
+        upload(contract.fileName(), contract.bytes());
+        new PdfViewerTester(viewer()).load(4, "Master Service Agreement");
+        assertTrue(submit().isEnabled());
+
+        Pdf damaged = SampleDocuments.damagedReport();
+        upload(damaged.fileName(), damaged.bytes());
+        assertFalse(viewer().isVisible());
+        assertFalse(submit().isEnabled());
+        assertTrue(status().contains("not a PDF, or it is damaged"), status());
 
         upload("contract.pdf",
                 "not a PDF at all".getBytes(StandardCharsets.UTF_8));
-        assertFalse(viewer().isVisible());
         assertTrue(status().contains("not a PDF, or it is damaged"), status());
 
         Pdf payslip = SampleDocuments.payslip();
         upload(payslip.fileName(), payslip.bytes());
         assertFalse(viewer().isVisible());
         assertTrue(status().contains("protected with a password"), status());
-        assertFalse(submit().isEnabled());
     }
 
     @Test
@@ -69,22 +77,16 @@ class AttachContractViewTest extends SpringBrowserlessTest {
         view = navigate(AttachContractView.class);
         Pdf contract = SampleDocuments.serviceAgreement();
         upload(contract.fileName(), contract.bytes());
+        PdfViewerTester viewer = new PdfViewerTester(viewer());
 
-        new PdfViewerTester(viewer()).fail("invalid");
-
+        viewer.fail("invalid");
         assertFalse(viewer().isVisible());
-        assertFalse(submit().isEnabled());
         assertEquals("The viewer can not show this file. Upload another copy.",
                 status());
-    }
 
-    @Test
-    void theDamagedSampleIsTurnedAwayByTheServer() {
-        assertTrue(AttachContractView
-                .problemOf(SampleDocuments.damagedReport().bytes())
-                .contains("damaged"));
-        assertEquals(null, AttachContractView
-                .problemOf(SampleDocuments.serviceAgreement().bytes()));
+        // A load that arrives after the error does not make it submittable.
+        viewer.load(4, "Master Service Agreement");
+        assertFalse(submit().isEnabled());
     }
 
     private void upload(String fileName, byte[] content) {

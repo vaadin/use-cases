@@ -53,6 +53,10 @@ import com.vaadin.flow.server.streams.UploadMetadata;
 @StyleSheet("uc15.css")
 public class AttachContractView extends VerticalLayout {
 
+    /**
+     * The largest file the browser sends. The server enforces the same limit
+     * with {@code spring.servlet.multipart.max-file-size}.
+     */
     static final int MAX_FILE_BYTES = 10 * 1024 * 1024;
 
     private final Upload upload = new Upload(
@@ -73,7 +77,8 @@ public class AttachContractView extends VerticalLayout {
 
         upload.setMaxFiles(1);
         upload.setMaxFileSize(MAX_FILE_BYTES);
-        upload.setAcceptedFileTypes(".pdf", "application/pdf");
+        upload.setAcceptedMimeTypes("application/pdf");
+        upload.setAcceptedFileExtensions(".pdf");
         upload.addFileRejectedListener(
                 event -> status.setText(event.getErrorMessage()));
         upload.setWidthFull();
@@ -89,8 +94,10 @@ public class AttachContractView extends VerticalLayout {
         viewer.addClassName("uc15-viewer");
         viewer.setVisible(false);
         viewer.addDocumentLoadListener(event -> {
-            submit.setEnabled(uploaded != null);
-            status.setText("Check the contract, then submit it.");
+            if (uploaded != null) {
+                submit.setEnabled(true);
+                status.setText("Check the contract, then submit it.");
+            }
         });
         viewer.addDocumentErrorListener(event -> {
             uploaded = null;
@@ -146,8 +153,7 @@ public class AttachContractView extends VerticalLayout {
      */
     static @Nullable String problemOf(byte[] bytes) {
         try (PDDocument document = Loader.loadPDF(bytes)) {
-            return document.getNumberOfPages() == 0 ? "the PDF has no pages."
-                    : null;
+            return null;
         } catch (InvalidPasswordException e) {
             return "the PDF is protected with a password. Ask the supplier "
                     + "for a copy without one.";
