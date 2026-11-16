@@ -11,6 +11,7 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
+import com.vaadin.flow.component.pdfviewer.Zoom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -21,11 +22,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PresentResultsViewTest extends SpringBrowserlessTest {
 
     @Test
+    void theViewerShowsTheSlidesFittedWithoutItsHeader() {
+        navigate(PresentResultsView.class);
+        PdfViewer viewer = findInView(PdfViewer.class).single();
+
+        assertFalse(viewer.isHeaderVisible());
+        assertEquals(Zoom.PAGE_FIT, viewer.getZoom());
+        assertTrue(viewer.getSrc().endsWith("q3-2026-results.pdf"),
+                viewer.getSrc());
+    }
+
+    @Test
     void theAppsButtonsMoveBetweenSlidesAndFollowThePage() {
         navigate(PresentResultsView.class);
-        PdfViewer pdfViewer = findInView(PdfViewer.class).single();
-        assertFalse(pdfViewer.isHeaderVisible());
-        PdfViewerTester viewer = new PdfViewerTester(pdfViewer);
+        PdfViewerTester viewer = new PdfViewerTester(
+                findInView(PdfViewer.class).single());
         assertEquals("Loading…", position());
         assertFalse(button("Next").isEnabled());
 
@@ -45,6 +56,25 @@ class PresentResultsViewTest extends SpringBrowserlessTest {
         assertEquals("Slide 5 of 5", position());
         assertFalse(button("Next").isEnabled());
         assertTrue(button("Previous").isEnabled());
+    }
+
+    @Test
+    void theAppsDownloadButtonDownloadsTheLoadedSlides() {
+        navigate(PresentResultsView.class);
+        PdfViewerTester viewer = new PdfViewerTester(
+                findInView(PdfViewer.class).single());
+        assertFalse(downloadButton().isEnabled());
+
+        viewer.load(5, "Q3 2026 Results");
+        test(downloadButton()).click();
+
+        assertEquals(1, viewer.takeDownloads());
+    }
+
+    private Button downloadButton() {
+        return findInView(Button.class).all().stream().filter(
+                button -> button.getAriaLabel().orElse("").equals("Download"))
+                .findFirst().orElseThrow();
     }
 
     private Button button(String text) {

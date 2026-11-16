@@ -62,7 +62,7 @@ public class PresentResultsView extends VerticalLayout {
         Signal<Integer> pageCount = viewer.pageCountSignal();
         Button previous = new Button("Previous", VaadinIcon.ARROW_LEFT.create(),
                 event -> viewer.scrollToPage(viewer.getPage() - 1));
-        previous.bindEnabled(() -> pageCount.get() > 0 && page.get() > 1);
+        previous.bindEnabled(() -> page.get() > 1);
         Button next = new Button("Next", VaadinIcon.ARROW_RIGHT.create(),
                 event -> viewer.scrollToPage(viewer.getPage() + 1));
         next.setIconAfterText(true);
