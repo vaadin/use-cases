@@ -90,6 +90,36 @@ API get no annotation. Once that change is merged, switch back to the mainline
 snapshot, remove the annotations and remove the workarounds the change makes
 unnecessary.
 
+### Testing against a local Flow or browserless-test build
+
+To try a use case against a Flow or browserless-test change that exists only
+on your machine, keep the local build in its own Maven repository. A plain
+`mvn install` puts it in `~/.m2/repository` as the same `25.4-SNAPSHOT` that
+the next online build replaces with the published snapshot, and a build with
+`-o` alone fails on artifacts that were never downloaded.
+
+```bash
+# 1. Once, online: download everything the module needs into ~/.m2
+./mvnw -pl <module> -am test
+
+# 2. Install the upstream change into ~/m2-local, reading the rest from ~/.m2
+(cd ../flow && ./mvnw -pl flow-server -am install -DskipTests \
+   -Dmaven.repo.local=$HOME/m2-local -Dmaven.repo.local.tail=$HOME/.m2/repository)
+
+# 3. Build the use case offline: the local build wins, nothing is replaced
+./mvnw -o -pl <module> -am test \
+   -Dmaven.repo.local=$HOME/m2-local -Dmaven.repo.local.tail=$HOME/.m2/repository
+```
+
+Repeat steps 2 and 3 after each upstream change. The upstream branch must
+have the version the parent pom pins (`flow.version`,
+`browserless-test.version`). Delete `~/m2-local` when you are done.
+
+The Vaadin build can regenerate the module's `package.json` and
+`package-lock.json`. Restore them with `git checkout <module>/package.json
+<module>/package-lock.json` before committing (see
+[Generated files](#generated-files)).
+
 After the parent pom moves to a newer snapshot, an app can start with a
 frontend bundle built against the old client. The browser then shows
 client-side errors from Vaadin internals, such as `e.Atmosphere is not a
