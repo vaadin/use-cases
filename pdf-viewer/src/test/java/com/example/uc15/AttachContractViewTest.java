@@ -73,6 +73,23 @@ class AttachContractViewTest extends SpringBrowserlessTest {
     }
 
     @Test
+    void aFileOverTheLimitIsTurnedAway() {
+        view = navigate(AttachContractView.class);
+
+        // The browser refuses it, and the view shows the upload's message.
+        upload("scan.pdf", new byte[AttachContractView.MAX_FILE_BYTES + 1]);
+        assertFalse(viewer().isVisible());
+        assertEquals("File is Too Big.", status());
+
+        // The server refuses it too, also when the request hides its size.
+        assertTrue(AttachContractView
+                .fitsLimit(AttachContractView.MAX_FILE_BYTES));
+        assertFalse(AttachContractView
+                .fitsLimit(AttachContractView.MAX_FILE_BYTES + 1L));
+        assertFalse(AttachContractView.fitsLimit(-1));
+    }
+
+    @Test
     void aFileTheViewerCanNotShowCanNotBeSubmitted() {
         view = navigate(AttachContractView.class);
         Pdf contract = SampleDocuments.serviceAgreement();

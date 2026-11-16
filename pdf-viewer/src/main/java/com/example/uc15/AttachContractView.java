@@ -53,14 +53,17 @@ import com.vaadin.flow.server.streams.UploadMetadata;
 @StyleSheet("uc15.css")
 public class AttachContractView extends VerticalLayout {
 
-    /**
-     * The largest file the browser sends. The server enforces the same limit
-     * with {@code spring.servlet.multipart.max-file-size}.
-     */
     static final int MAX_FILE_BYTES = 10 * 1024 * 1024;
 
-    private final Upload upload = new Upload(
-            UploadHandler.inMemory(this::fileReceived));
+    // setMaxFileSize only stops the browser. The server reads an upload into
+    // memory, so it refuses one that is too large, or of unknown size, before
+    // reading it.
+    private final Upload upload = new Upload(UploadHandler
+            .inMemory(this::fileReceived).validateMetadata(event -> {
+                if (!fitsLimit(event.getFileSize())) {
+                    event.reject("The file is larger than 10 MB.");
+                }
+            }));
     private final Paragraph status = new Paragraph();
     private final PdfViewer viewer = new PdfViewer();
     private final Button submit = new Button("Submit the contract");
@@ -140,6 +143,18 @@ public class AttachContractView extends VerticalLayout {
         viewer.setSrc(uploaded.handler());
         viewer.setVisible(true);
         status.setText("Opening " + metadata.fileName() + "…");
+    }
+
+    /**
+     * Whether an upload of the given size may be read into memory.
+     *
+     * @param size
+     *            the size the request declares, or a negative number if it does
+     *            not declare one
+     * @return {@code true} if the size is known and within the limit
+     */
+    static boolean fitsLimit(long size) {
+        return size >= 0 && size <= MAX_FILE_BYTES;
     }
 
     /**
