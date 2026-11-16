@@ -215,3 +215,19 @@ pages, which the application knows because it generated the guide.
 an `outline` the server can read after `document-load`, so an application can
 build its own navigation for documents it did not write. The VCF add-on has a
 sidebar with an outline and thumbnails (`setSidebarOpened`).
+
+## 15. The toolbar can not be hidden
+
+**Where it bites:** UC14 / `PresentResultsView.java`
+**Symptom:** an application that has its own controls for the viewer wants it
+to show only the pages. `setHeaderVisible(false)` hides the header, but then
+the toolbar is always shown: `setToolbarCollapsed(true)` only collapses it
+while the header is visible (`vaadin-pdf-viewer-toolbar-mixin.js`). So either
+the header or the toolbar stays.
+**Workaround used:** the view hides the header with `setHeaderVisible(false)`
+and the toolbar with `::part(toolbar) { display: none; }` in `uc14.css`. The
+`toolbar` part is documented for styling, but hiding it is not a documented
+use; the viewer's keyboard shortcuts for the pages still work.
+**Suggested API:** `setToolbarVisible(boolean)` (a `toolbarHidden` property),
+independent of the header, so the application can drive the viewer with
+`scrollToPage(int)`, `setZoom(Zoom)` and `download()` from its own controls.

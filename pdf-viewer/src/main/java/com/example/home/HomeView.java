@@ -9,6 +9,7 @@ import com.example.uc10.ShowOnceView;
 import com.example.uc11.ContentsPageView;
 import com.example.uc12.FillFormView;
 import com.example.uc13.TurnScanView;
+import com.example.uc14.PresentResultsView;
 import com.example.uc2.ReadBeforeAcceptingView;
 import com.example.uc3.DocumentLibraryView;
 import com.example.uc4.ManualDeepLinkView;
@@ -50,7 +51,7 @@ public class HomeView extends BaseHomeView {
                 List.of(ApproveInToolbarView.class, FillFormView.class));
         addGroup("Fit the app", VaadinIcon.COG_O, Accent.ORANGE,
                 List.of(PrintLabelView.class, LocalizedViewerView.class,
-                        ShowOnceView.class));
+                        ShowOnceView.class, PresentResultsView.class));
         add(new Paragraph(new Text("The viewer is behind the "
                 + "pdfViewerComponent feature flag, which this app turns on. "
                 + "Where the API falls short, the use case says so and links "
