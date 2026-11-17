@@ -2,6 +2,10 @@ package com.example;
 
 import java.io.Serializable;
 
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadDropZone;
 import com.vaadin.flow.dom.Element;
@@ -51,11 +55,26 @@ public final class MissingAPI {
      */
     public static Registration addQueueSizeListener(Upload upload,
             SerializableConsumer<Integer> listener) {
-        return upload.getElement()
-                .addEventListener(FILES_CHANGED,
-                        event -> listener.accept(
-                                event.getEventData().get(QUEUED_COUNT).asInt()))
-                .addEventData(QUEUED_COUNT);
+        return ComponentUtil.addListener(upload, QueueSizeChangedEvent.class,
+                event -> listener.accept(event.queued));
+    }
+
+    /**
+     * The upload's file list changed in the browser. The count is declared with
+     * {@link EventData} rather than added to a listener at run time, so the
+     * build puts the expression into the frontend bundle and a strict Content
+     * Security Policy does not block it.
+     */
+    @DomEvent(FILES_CHANGED)
+    public static class QueueSizeChangedEvent extends ComponentEvent<Upload> {
+
+        private final int queued;
+
+        public QueueSizeChangedEvent(Upload source, boolean fromClient,
+                @EventData(QUEUED_COUNT) int queued) {
+            super(source, fromClient);
+            this.queued = queued;
+        }
     }
 
     /**
