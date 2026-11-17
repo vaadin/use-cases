@@ -22,7 +22,7 @@ viewer throws an exception when it is attached.
 | UC8 | Viewer in your language | The viewer's texts in English, Finnish or German, starting from the browser's language. |
 | UC9 | Approve in the toolbar | "Approve" and "Reject" buttons with tooltips in the viewer's toolbar (`getToolbarActions()`); each decision opens the next waiting purchase order. |
 | UC10 | Show a document once | A confidential briefing in a viewer with the download button hidden and no print, sent by the server only for the first request; a reload says it was opened already. |
-| UC11 | Go to a chapter | A handbook whose contents page links to its chapters; the viewer follows the links, and the view adds its own chapter select, the current chapter and a "Back to contents", as the viewer has no way back. |
+| UC11 | Go to a chapter | A handbook whose contents page links to its chapters; the viewer follows the links, and the view shows the current chapter and adds a "Back to contents", as the viewer has no way back. |
 | UC12 | Fill in a PDF form | Answers from Vaadin fields are written into the PDF form's fields with PDFBox on the server, flattened, and the filled copy is shown; the viewer's download button, hidden for the empty form, saves it. |
 | UC13 | Turn a sideways scan | "Turn left" and "Turn right" in the toolbar turn the current page on the server with PDFBox, turning it in the file itself (kept while the view is open). |
 | UC14 | Present the results | Quarterly results as slides: the viewer's header is hidden with `setHeaderVisible(false)` and its toolbar with CSS, and the app's own bar moves between slides (`scrollToPage`), shows the slide number from `pageSignal()` and downloads with `download()`. |
