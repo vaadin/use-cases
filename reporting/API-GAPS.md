@@ -29,9 +29,10 @@ in their own way.
 **Where it bites:** opening a generated document from server code, next to
 UC2 / `OpenInNewTabView.java`
 **Symptom:** UC2's button opens the document with
-`OpenInNewTab.onClick(component, DownloadHandler)`, but that only works for a
-click. `Page#open(String)` needs a URL, and a `DownloadHandler` has no URL
-until it is bound to an element. Only `Anchor#getHref()` gives it back. So
+`Download.onClick(component, DownloadHandler, DownloadTarget.NEW_TAB)`, but
+that only works for a click. `Page#open(String)` needs a URL, and a
+`DownloadHandler` has no URL until it is bound to an element. Only
+`Anchor#getHref()` gives it back. So
 nothing helps when the server decides later to open the document: after
 saving a draft, after a confirm dialog, or from a context menu item. Nor
 anything else that needs the URL: a mail body, a QR code.
@@ -96,9 +97,8 @@ Upstream: https://github.com/vaadin/flow/issues/13283 (the general case: a
 behind an `Anchor` and returns the bytes. It does not give back the file
 name, the content type or the `Content-Disposition` (inline or attachment)
 that the handler sets, and there is no tester for an `IFrame` source or for
-`Download.onClick` / `OpenInNewTab.onClick`. So a test can not check that the
-link delivers the right file under the right name, which is the main
-behaviour of this module.
+`Download.onClick`. So a test can not check that the link delivers the right
+file under the right name, which is the main behaviour of this module.
 **Workaround used:** the document generation is a plain class with its own
 test (`InvoicePdfTest` reads the PDFs back with PDFBox). The view tests
 download the anchors and read the PDF back, but for UC2's button and UC3's
@@ -106,4 +106,4 @@ frame they check only that a handler is bound.
 **Suggested API:** a download result in the browserless test kit, e.g.
 `test(anchor).download()` that returns the bytes, the file name, the content
 type and the disposition, and the same for an `IFrame` and for components
-bound with `Download` or `OpenInNewTab`.
+bound with `Download`.
