@@ -72,7 +72,7 @@ public class SeatSelectionView extends VerticalLayout {
 
         add(new BuiltWith(
                 "A browser tab scoped bean, released with @PreDestroy")
-                .point("@BrowserTabScope keeps one booking per browser tab, across reloads and full page navigation. Vaadin has no such scope yet: MissingAPI adds it on top of BrowserTab.")
+                .point("@BrowserTabScope keeps one booking per browser tab, across reloads and full page navigation.")
                 .point("Each step of the wizard is its own route and gets the booking through its constructor.")
                 .point("When the tab is gone and its heartbeat times out, Spring calls the @PreDestroy method and the seat goes back on sale.")
                 .java("uc6/BookingDraft", "scope")

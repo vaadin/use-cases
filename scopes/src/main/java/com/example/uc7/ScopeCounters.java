@@ -1,10 +1,10 @@
 package com.example.uc7;
 
-import com.example.MissingAPI.BrowserTabScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.annotation.SessionScope;
 
+import com.vaadin.flow.spring.annotation.BrowserTabScope;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
