@@ -5,6 +5,7 @@ import tools.jackson.databind.node.ObjectNode;
 
 import com.vaadin.browserless.ComponentTester;
 import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
 /**
  * Plays parts of the browser that the upload testers leave out: reporting the
@@ -36,9 +37,12 @@ public class BrowserUpload extends ComponentTester<Upload> {
     private void fireFileEvent(String type, String fileName) {
         ObjectNode data = JsonNodeFactory.instance.objectNode();
         data.put("event.detail.file.name", fileName);
-        // Upload's own listener for these events checks whether files are still
-        // uploading; the tests report the last one to finish.
-        data.put("element.files.some(file => file.uploading)", false);
+        // Upload's own listener for these events checks, through event data
+        // declared in the bundle, whether files are still uploading; the tests
+        // report the last one to finish.
+        getComponent().getElement().getNode()
+                .getFeature(ElementListenerMap.class).getSnippetEntries(type)
+                .forEach(entry -> data.put(entry.key(), false));
         fireDomEvent(type, data);
     }
 }
