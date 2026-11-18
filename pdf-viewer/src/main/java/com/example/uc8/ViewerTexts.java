@@ -33,10 +33,12 @@ final class ViewerTexts {
 
     private static PdfViewerI18n finnish() {
         return new PdfViewerI18n().setPreviousPage("Edellinen sivu")
-                .setNextPage("Seuraava sivu").setPageError("Anna 1–{pageCount}")
-                .setZoomIn("Lähennä").setZoomOut("Loitonna")
+                .setNextPage("Seuraava sivu").setPage("Sivu")
+                .setPageError("Anna 1–{pageCount}").setZoomIn("Lähennä")
+                .setZoomOut("Loitonna").setZoom("Zoomaus")
                 .setPageWidth("Sivun leveys").setPageFit("Koko sivu")
-                .setDocument("PDF-asiakirja").setLink("Linkki")
+                .setDocument("PDF-asiakirja").setPageLabel("Sivu {page}")
+                .setLoading("Ladataan").setLink("Linkki")
                 .setGoToPage("Siirry sivulle {page}")
                 .setExternalLink("{text} (avautuu uuteen välilehteen)")
                 .setDownload("Lataa");
@@ -44,11 +46,13 @@ final class ViewerTexts {
 
     private static PdfViewerI18n german() {
         return new PdfViewerI18n().setPreviousPage("Vorherige Seite")
-                .setNextPage("Nächste Seite")
+                .setNextPage("Nächste Seite").setPage("Seite")
                 .setPageError("1–{pageCount} eingeben").setZoomIn("Vergrößern")
-                .setZoomOut("Verkleinern").setPageWidth("Seitenbreite")
-                .setPageFit("Ganze Seite").setDocument("PDF-Dokument")
-                .setLink("Link").setGoToPage("Gehe zu Seite {page}")
+                .setZoomOut("Verkleinern").setZoom("Zoom")
+                .setPageWidth("Seitenbreite").setPageFit("Ganze Seite")
+                .setDocument("PDF-Dokument").setPageLabel("Seite {page}")
+                .setLoading("Wird geladen").setLink("Link")
+                .setGoToPage("Gehe zu Seite {page}")
                 .setExternalLink("{text} (öffnet in einem neuen Tab)")
                 .setDownload("Herunterladen");
     }
