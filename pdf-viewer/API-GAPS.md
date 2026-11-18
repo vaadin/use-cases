@@ -68,7 +68,7 @@ event that says whether it was wrong.
 
 **Where it bites:** UC8 / `LocalizedViewerView.java`, `ViewerTexts.java`
 **Symptom:** the viewer ships English only and does not follow the UI's
-locale, so an application has to supply all of `PdfViewerI18n`'s twelve texts
+locale, so an application has to supply all of `PdfViewerI18n`'s sixteen texts
 for every language.
 **Workaround used:** `ViewerTexts` holds the Finnish and German texts, and the
 view sets them with `setI18n(...)` when the language changes.
