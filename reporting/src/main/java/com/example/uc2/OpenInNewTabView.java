@@ -62,7 +62,7 @@ public class OpenInNewTabView extends VerticalLayout {
                 "The same generated PDF, delivered inline instead of as an "
                         + "attachment. The link opens it in a new tab by "
                         + "itself; Download with the NEW_TAB target gives the "
-                        + "button the same " + "behaviour."));
+                        + "button the same behaviour."));
 
         Anchor view = new Anchor(handler(invoice), AttachmentType.INLINE,
                 "View invoice " + invoice.number());

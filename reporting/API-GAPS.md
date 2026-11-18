@@ -97,8 +97,8 @@ Upstream: https://github.com/vaadin/flow/issues/13283 (the general case: a
 behind an `Anchor` and returns the bytes. It does not give back the file
 name, the content type or the `Content-Disposition` (inline or attachment)
 that the handler sets, and there is no tester for an `IFrame` source or for
-`Download.onClick`. So a test can not check that the link delivers the right file under the right name, which is the main
-behaviour of this module.
+`Download.onClick`. So a test can not check that the link delivers the right
+file under the right name, which is the main behaviour of this module.
 **Workaround used:** the document generation is a plain class with its own
 test (`InvoicePdfTest` reads the PDFs back with PDFBox). The view tests
 download the anchors and read the PDF back, but for UC2's button and UC3's
