@@ -21,7 +21,7 @@ jobs:
           distribution: temurin
           java-version: 25
           cache: maven
-      - run: ./mvnw -B -U -DskipTests dependency:go-offline
+      - run: ./mvnw -B -DskipTests dependency:go-offline
         env:
           VAADIN_PRO_KEY: ${{ secrets.VAADIN_PRO_KEY }}
       - id: find
