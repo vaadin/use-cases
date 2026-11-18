@@ -4,19 +4,19 @@ import jakarta.annotation.PreDestroy;
 
 import java.util.UUID;
 
-import com.example.MissingAPI.BrowserTabScope;
 import org.jspecify.annotations.Nullable;
 
+import com.vaadin.flow.spring.annotation.BrowserTabScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 
 /**
  * The half-finished booking in one browser tab.
  * <p>
- * {@code @BrowserTabScope} (from {@link com.example.MissingAPI}) keeps the
- * booking for as long as the browser tab stays open, across page reloads and
- * full page navigation between the wizard steps. A second tab gets its own
- * booking. When the tab is closed and its heartbeat times out, Spring calls
- * {@link #releaseHold()} and the held seat goes back on sale.
+ * {@link BrowserTabScope @BrowserTabScope} keeps the booking for as long as the
+ * browser tab stays open, across page reloads and full page navigation between
+ * the wizard steps. A second tab gets its own booking. When the tab is closed
+ * and its heartbeat times out, Spring calls {@link #releaseHold()} and the held
+ * seat goes back on sale.
  */
 // tag::scope[]
 @SpringComponent

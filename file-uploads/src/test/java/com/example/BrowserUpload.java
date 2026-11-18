@@ -37,12 +37,25 @@ public class BrowserUpload extends ComponentTester<Upload> {
     private void fireFileEvent(String type, String fileName) {
         ObjectNode data = JsonNodeFactory.instance.objectNode();
         data.put("event.detail.file.name", fileName);
-        // Upload's own listener for these events checks, through event data
-        // declared in the bundle, whether files are still uploading; the tests
-        // report the last one to finish.
-        getComponent().getElement().getNode()
-                .getFeature(ElementListenerMap.class).getSnippetEntries(type)
-                .forEach(entry -> data.put(entry.key(), false));
+        // Upload's own listener for these events checks whether files are still
+        // uploading; the tests report the last one to finish.
+        data.put(filesUploadingKey(type), false);
         fireDomEvent(type, data);
+    }
+
+    /**
+     * The key the browser sends Upload's "are files still uploading" event data
+     * under, which Upload declares as a function of the bundle.
+     */
+    private String filesUploadingKey(String type) {
+        return getComponent().getElement().getNode()
+                .getFeature(ElementListenerMap.class).getSnippetEntries(type)
+                .stream()
+                .filter(entry -> entry.call().methodName()
+                        .equals("filesUploading"))
+                .map(ElementListenerMap.SnippetEntry::key).findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Upload does not read whether files are uploading on "
+                                + type));
     }
 }

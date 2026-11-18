@@ -11,12 +11,13 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.download.Download;
+import com.vaadin.flow.component.download.DownloadTarget;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.html.AttachmentType;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.newtab.OpenInNewTab;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
@@ -33,9 +34,10 @@ import com.vaadin.flow.server.streams.DownloadResponse;
  * {@code Content-Disposition: attachment} and {@code inline}, and
  * {@link AttachmentType#INLINE} on the anchor is all it takes.
  * <p>
- * A button does the same with {@link OpenInNewTab#onClick} and the handler: the
- * tab opens in the browser's own click handler, so popup blockers let it
- * through, and the handler is switched to inline delivery.
+ * A button does the same with {@link Download#onClick} and
+ * {@link DownloadTarget#NEW_TAB}: the tab opens in the browser's own click
+ * handler, so popup blockers let it through, and the handler is switched to
+ * inline delivery.
  * <p>
  * What is still missing is opening the document when the server decides to —
  * after saving a draft, say, or after a confirm dialog. {@code Page#open} needs
@@ -59,8 +61,8 @@ public class OpenInNewTabView extends VerticalLayout {
         add(new Paragraph(
                 "The same generated PDF, delivered inline instead of as an "
                         + "attachment. The link opens it in a new tab by "
-                        + "itself; OpenInNewTab gives the button the same "
-                        + "behaviour."));
+                        + "itself; Download with the NEW_TAB target gives the "
+                        + "button the same behaviour."));
 
         Anchor view = new Anchor(handler(invoice), AttachmentType.INLINE,
                 "View invoice " + invoice.number());
@@ -68,7 +70,7 @@ public class OpenInNewTabView extends VerticalLayout {
         view.setId("view-link");
 
         Button open = new Button("Open in a new tab");
-        OpenInNewTab.onClick(open, handler(invoice));
+        Download.onClick(open, handler(invoice), DownloadTarget.NEW_TAB);
         open.addThemeVariants(ButtonVariant.PRIMARY);
         open.setId("open-button");
 
