@@ -13,7 +13,7 @@
 
     <properties>
         <!-- Snapshot of vaadin/flow#25901, which adds com.vaadin.flow.server.BrowserTab
-             (used by UC6, UC7 and the browser-tab Spring scope in MissingAPI).
+             and @BrowserTabScope (used by UC6 and UC7).
              flow-bom is imported before vaadin-bom in the parent, so this wins.
              Switch back to the parent's flow.version once the PR is released. -->
         <flow.version>25.4.browser-tab-scope-SNAPSHOT</flow.version>

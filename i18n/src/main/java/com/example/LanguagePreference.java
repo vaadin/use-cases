@@ -2,6 +2,7 @@ package com.example;
 
 import jakarta.servlet.http.Cookie;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -11,6 +12,8 @@ import java.util.Optional;
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.signals.Signal;
@@ -96,10 +99,8 @@ public final class LanguagePreference {
         // Gap: there is no server-side API for this, and with WebSocket push
         // there is no HTTP response to put a Set-Cookie header in
         // (API-GAPS.md #6, vaadin/flow#26382).
-        UI.getCurrent().getPage().executeJs(
-                "document.cookie = $0 + '=' + $1 + ';path=/;max-age=' + $2"
-                        + " + ';SameSite=Lax'",
-                COOKIE, locale.toLanguageTag(), ONE_YEAR);
+        UI.getCurrent().getPage().executeJs(CookieJs.class).write(COOKIE,
+                locale.toLanguageTag(), ONE_YEAR);
     }
 
     /**
@@ -109,9 +110,7 @@ public final class LanguagePreference {
     public void forget() {
         VaadinSession.getCurrent().setLocale(matched);
         remembered.set(null);
-        UI.getCurrent().getPage().executeJs(
-                "document.cookie = $0 + '=;path=/;max-age=0;SameSite=Lax'",
-                COOKIE);
+        UI.getCurrent().getPage().executeJs(CookieJs.class).delete(COOKIE);
     }
 
     static Optional<Locale> fromCookies(Cookie @Nullable [] cookies) {
@@ -122,5 +121,16 @@ public final class LanguagePreference {
                 .filter(cookie -> COOKIE.equals(cookie.getName()))
                 .map(cookie -> Locale.forLanguageTag(cookie.getValue()))
                 .filter(SupportedLocales.ALL::contains).findFirst();
+    }
+
+    @JsDefinition
+    private interface CookieJs extends Serializable {
+
+        @JsExpression("document.cookie = $0 + '=' + $1 + ';path=/;max-age=' + $2"
+                + " + ';SameSite=Lax'")
+        void write(String name, String value, int maxAge);
+
+        @JsExpression("document.cookie = $0 + '=;path=/;max-age=0;SameSite=Lax'")
+        void delete(String name);
     }
 }

@@ -47,7 +47,7 @@ public final class TextSelectionTestSupport {
         ObjectNode data = JacksonUtils.createObjectNode();
         data.put(MissingAPI.START, start);
         data.put(MissingAPI.END, end);
-        data.put(MissingAPI.CONTENT, value.substring(start, end));
+        data.put(MissingAPI.VALUE, value);
         // The listener is debounced, so it only takes the event the browser
         // sends when the debounce timeout ends.
         data.put("for", DebouncePhase.TRAILING.getIdentifier());

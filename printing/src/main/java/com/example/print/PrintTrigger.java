@@ -1,8 +1,13 @@
 package com.example.print;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -58,10 +63,17 @@ public final class PrintTrigger extends Trigger {
 
     @Override
     protected Registration install(JsFunction action) {
-        return getHost().addJsInitializer("""
+        return getHost().addJsInitializer(JsSnippets.of(PrintTriggerJs.class)
+                .listenOnWindow(action, eventName));
+    }
+
+    @JsDefinition
+    private interface PrintTriggerJs extends Serializable {
+
+        @JsExpression("""
                 const listener = event => $0(event);
                 window.addEventListener($1, listener);
-                return () => window.removeEventListener($1, listener);""",
-                action, eventName);
+                return () => window.removeEventListener($1, listener);""")
+        JsFunction listenOnWindow(JsFunction action, String eventName);
     }
 }

@@ -1,5 +1,7 @@
 package com.example.uc3;
 
+import java.io.Serializable;
+
 import com.example.HlsDownloadHandler;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
@@ -15,6 +17,9 @@ import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.html.Video;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -78,11 +83,18 @@ public class AdaptiveStreamingView extends VerticalLayout {
         video.addSource(new HlsDownloadHandler("hls"), HLS_TYPE);
         add(video);
 
-        video.getElement().executeJs("return window.multimediaAttachHls(this)")
-                .then(String.class, how -> playback.set(switch (how) {
+        video.getElement().executeJs(HlsJs.class).attachHls().then(String.class,
+                how -> playback.set(switch (how) {
                 case "native" -> "native HLS";
                 case "hls.js" -> "hls.js (Media Source Extensions)";
                 default -> "not supported in this browser";
                 }));
+    }
+
+    @JsDefinition
+    private interface HlsJs extends Serializable {
+
+        @JsExpression("return window.multimediaAttachHls(this)")
+        PendingJavaScriptResult attachHls();
     }
 }

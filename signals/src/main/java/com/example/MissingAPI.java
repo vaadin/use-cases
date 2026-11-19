@@ -8,6 +8,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -79,34 +81,6 @@ public class MissingAPI {
 
     private static final String RESIZE_EVENT = "component-resize";
 
-    private static final String SETUP_RESIZE_OBSERVER_JS = """
-            const resizeObserver = new ResizeObserver(entries => {
-                for (let entry of entries) {
-                    const width = Math.floor(entry.contentRect.width);
-                    const height = Math.floor(entry.contentRect.height);
-                    const event = new CustomEvent('%s', {
-                        detail: { width: width, height: height }
-                    });
-                    this.dispatchEvent(event);
-                }
-            });
-            resizeObserver.observe(this);
-            window[$0] = resizeObserver;
-            const rect = this.getBoundingClientRect();
-            const event = new CustomEvent('%s', {
-                detail: { width: Math.floor(rect.width), height: Math.floor(rect.height) }
-            });
-            this.dispatchEvent(event);
-            """
-            .formatted(RESIZE_EVENT, RESIZE_EVENT);
-
-    private static final String CLEANUP_RESIZE_OBSERVER_JS = """
-            if (window[$0]) {
-                window[$0].disconnect();
-                delete window[$0];
-            }
-            """;
-
     /**
      * Creates a read-only signal that tracks the size of the given component's
      * element using a ResizeObserver.
@@ -128,17 +102,50 @@ public class MissingAPI {
                         signal.set(event.getEventDetail(ComponentSize.class));
                     }).addEventData("event.detail");
 
-            component.getElement().executeJs(SETUP_RESIZE_OBSERVER_JS,
-                    cleanupKey);
+            component.getElement().executeJs(ResizeObserverJs.class)
+                    .observe(cleanupKey, RESIZE_EVENT);
 
             component.addDetachListener(detachEvent -> {
                 detachEvent.unregisterListener();
                 reg.remove();
-                detachEvent.getUI().getPage()
-                        .executeJs(CLEANUP_RESIZE_OBSERVER_JS, cleanupKey);
+                detachEvent.getUI().getPage().executeJs(ResizeObserverJs.class)
+                        .disconnect(cleanupKey);
             });
         });
 
         return signal.asReadonly();
+    }
+
+    @JsDefinition
+    private interface ResizeObserverJs extends Serializable {
+
+        @JsExpression("""
+                const resizeObserver = new ResizeObserver(entries => {
+                    for (let entry of entries) {
+                        const width = Math.floor(entry.contentRect.width);
+                        const height = Math.floor(entry.contentRect.height);
+                        const event = new CustomEvent($1, {
+                            detail: { width: width, height: height }
+                        });
+                        this.dispatchEvent(event);
+                    }
+                });
+                resizeObserver.observe(this);
+                window[$0] = resizeObserver;
+                const rect = this.getBoundingClientRect();
+                const event = new CustomEvent($1, {
+                    detail: { width: Math.floor(rect.width), height: Math.floor(rect.height) }
+                });
+                this.dispatchEvent(event);
+                """)
+        void observe(String key, String eventName);
+
+        @JsExpression("""
+                if (window[$0]) {
+                    window[$0].disconnect();
+                    delete window[$0];
+                }
+                """)
+        void disconnect(String key);
     }
 }

@@ -12,14 +12,14 @@ Data *export* is tracked in [vaadin/platform#7196](https://github.com/vaadin/pla
 
 **Where it bites:** UC1 / PrintCurrentViewView.java, and every other use case
 **Symptom:** the most common printing operation — open the browser's print dialog for the current page — has no Java API. `Page` has `reload()`, `open()`, `setTitle()` and `fetchCurrentURL()`, but nothing for printing.
-**Workaround used:** `MissingAPI#print(UI)`, which calls `executeJs("window.print()")`.
+**Workaround used:** `MissingAPI#print(UI)`, which runs `window.print()` through a JavaScript definition.
 **Suggested API:** `Page#print()`, and a `Page#print(Component)` that prints one component's subtree.
 
 ## 2. The server cannot learn that anything was printed
 
 **Where it bites:** UC1 / PrintCurrentViewView.java
 **Symptom:** "who printed this invoice, and when" is a normal audit requirement. The browser fires `beforeprint` and `afterprint`, but on `window`, and Flow's `Element` API can only listen on elements. So there is no server-side event without JavaScript. Removing the listener is harder than adding it: a `window.addEventListener` from `onAttach` outlives the view, so every visit leaks one more listener, and JavaScript scheduled on an element that is being detached never reaches the browser.
-**Workaround used:** `PrintEvents`, an invisible component. It registers the two listeners against an `AbortController` that it stores in a registry on `window` under its own key, maps them to `@ClientCallable` methods, and aborts the controller from `onDetach` through `Page#executeJs` (`Element#executeJs` would never be sent). `MissingAPI#withPrintListenerRegistry` and `#abortPrintListeners` hold that pattern.
+**Workaround used:** `PrintEvents`, an invisible component. It registers the two listeners against an `AbortController` that it stores in a registry on `window` under its own key, maps them to `@ClientCallable` methods, and aborts the controller from `onDetach` through `Page#executeJs` (`Element#executeJs` would never be sent). `MissingAPI#PRINT_LISTENER_REGISTRY` and `#abortPrintListeners` hold that pattern.
 **Suggested API:** `Page#addBeforePrintListener` / `addAfterPrintListener` returning a `Registration`, like the existing `Page#addBrowserWindowResizeListener`. A `printStateSignal()` like `pageVisibilitySignal()` would fit the 25.x style even better.
 
 Such listeners can only observe printing, never change it: the browser lays out the pages synchronously after `beforeprint`, before any round trip returns. Changing what is printed needs a trigger that runs in the browser (#4).

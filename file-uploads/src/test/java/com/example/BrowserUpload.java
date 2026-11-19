@@ -5,6 +5,7 @@ import tools.jackson.databind.node.ObjectNode;
 
 import com.vaadin.browserless.ComponentTester;
 import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
 /**
  * Plays parts of the browser that the upload testers leave out: reporting the
@@ -38,7 +39,23 @@ public class BrowserUpload extends ComponentTester<Upload> {
         data.put("event.detail.file.name", fileName);
         // Upload's own listener for these events checks whether files are still
         // uploading; the tests report the last one to finish.
-        data.put("element.files.some(file => file.uploading)", false);
+        data.put(filesUploadingKey(type), false);
         fireDomEvent(type, data);
+    }
+
+    /**
+     * The key the browser sends Upload's "are files still uploading" event data
+     * under, which Upload declares as a function of the bundle.
+     */
+    private String filesUploadingKey(String type) {
+        return getComponent().getElement().getNode()
+                .getFeature(ElementListenerMap.class).getSnippetEntries(type)
+                .stream()
+                .filter(entry -> entry.call().methodName()
+                        .equals("filesUploading"))
+                .map(ElementListenerMap.SnippetEntry::key).findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Upload does not read whether files are uploading on "
+                                + type));
     }
 }

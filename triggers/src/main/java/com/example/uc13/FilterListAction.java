@@ -1,5 +1,6 @@
 package com.example.uc13;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -7,6 +8,10 @@ import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsFunctionParameterNames;
+import com.vaadin.flow.js.JsSnippets;
 
 /**
  * Custom {@link Action} that hides children of a list container whose
@@ -36,13 +41,19 @@ public class FilterListAction extends Action {
 
     @Override
     protected JsFunction toJs(Trigger trigger) {
-        return JsFunction
-                .of("""
-                        const q = ($1(event) || '').toLowerCase();
-                        for (const row of $0.children) {
-                            row.hidden = q && !row.textContent.toLowerCase().includes(q);
-                        }""",
-                        listContainer, query.toJs(trigger))
-                .withArguments("event");
+        return JsSnippets.of(FilterListJs.class).filterList(listContainer,
+                query.toJs(trigger));
+    }
+
+    @JsDefinition
+    private interface FilterListJs extends Serializable {
+
+        @JsExpression("""
+                const q = ($1(event) || '').toLowerCase();
+                for (const row of $0.children) {
+                    row.hidden = q && !row.textContent.toLowerCase().includes(q);
+                }""")
+        @JsFunctionParameterNames("event")
+        JsFunction filterList(Element listContainer, JsFunction query);
     }
 }

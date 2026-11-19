@@ -1,7 +1,10 @@
 package com.example;
 
+import java.io.Serializable;
 import java.util.EnumSet;
 import java.util.Objects;
+
+import tools.jackson.databind.JsonNode;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
@@ -9,6 +12,9 @@ import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -82,22 +88,30 @@ public class ShortcutTrigger extends Trigger {
         // browser's own shortcut (e.g. Ctrl+S Save Page) and before any
         // handler further down that might stop the event.
         return getHost().addJsInitializer(
-                """
-                        const [keys, ctrl, shift, alt, meta] = [$1, $2, $3, $4, $5];
-                        const listener = (e) => {
-                            if (e.ctrlKey !== ctrl || e.shiftKey !== shift
-                                    || e.altKey !== alt || e.metaKey !== meta) return;
-                            if (!keys.includes(e.key) && !keys.includes(e.code)) return;
-                            e.preventDefault();
-                            e.stopPropagation();
-                            $0(e);
-                        };
-                        window.addEventListener('keydown', listener, true);
-                        return () => window.removeEventListener('keydown', listener, true);""",
-                action, JacksonUtils.getMapper().valueToTree(key.getKeys()),
-                modifiers.contains(KeyModifier.CONTROL),
-                modifiers.contains(KeyModifier.SHIFT),
-                modifiers.contains(KeyModifier.ALT),
-                modifiers.contains(KeyModifier.META));
+                JsSnippets.of(ShortcutJs.class).listenForShortcut(action,
+                        JacksonUtils.getMapper().valueToTree(key.getKeys()),
+                        modifiers.contains(KeyModifier.CONTROL),
+                        modifiers.contains(KeyModifier.SHIFT),
+                        modifiers.contains(KeyModifier.ALT),
+                        modifiers.contains(KeyModifier.META)));
+    }
+
+    @JsDefinition
+    private interface ShortcutJs extends Serializable {
+
+        @JsExpression("""
+                const [keys, ctrl, shift, alt, meta] = [$1, $2, $3, $4, $5];
+                const listener = (e) => {
+                    if (e.ctrlKey !== ctrl || e.shiftKey !== shift
+                            || e.altKey !== alt || e.metaKey !== meta) return;
+                    if (!keys.includes(e.key) && !keys.includes(e.code)) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    $0(e);
+                };
+                window.addEventListener('keydown', listener, true);
+                return () => window.removeEventListener('keydown', listener, true);""")
+        JsFunction listenForShortcut(JsFunction action, JsonNode keys,
+                boolean ctrl, boolean shift, boolean alt, boolean meta);
     }
 }

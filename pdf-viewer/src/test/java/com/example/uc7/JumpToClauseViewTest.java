@@ -1,6 +1,9 @@
 package com.example.uc7;
 
+import java.util.List;
+
 import com.example.documents.SampleDocuments;
+import com.example.pdfviewer.PdfViewerTester;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -20,7 +23,8 @@ class JumpToClauseViewTest extends SpringBrowserlessTest {
     @Test
     void eachQuestionOpensThePageOfItsAnswer() {
         navigate(JumpToClauseView.class);
-        PdfViewer viewer = findInView(PdfViewer.class).single();
+        PdfViewerTester viewer = new PdfViewerTester(
+                findInView(PdfViewer.class).single());
         ClauseFinder finder = new ClauseFinder(
                 SampleDocuments.serviceAgreement().bytes());
 
@@ -28,7 +32,8 @@ class JumpToClauseViewTest extends SpringBrowserlessTest {
             test(findInView(Button.class).withText(question.text()).single())
                     .click();
             int page = finder.pageOf(question.phrase()).orElseThrow();
-            assertEquals(page, viewer.getPage(), question.text());
+            assertEquals(List.of(page), viewer.takeScrollToPage(),
+                    question.text());
             assertEquals("Look for \"" + question.phrase() + "\" on page "
                     + page + ".", result());
         }

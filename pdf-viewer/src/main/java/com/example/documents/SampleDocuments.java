@@ -693,6 +693,27 @@ public final class SampleDocuments {
         }
     }
 
+    /**
+     * The slides of UC14: the quarterly results, one topic per landscape page,
+     * shown at a meeting.
+     */
+    public static Pdf quarterlyResults() {
+        PdfBuilder pdf = new PdfBuilder("Q3 2026 Results")
+                .pageSize(new PDRectangle(PDRectangle.A4.getHeight(),
+                        PDRectangle.A4.getWidth()), 60)
+                .bodySize(16).chaptersOnNewPages();
+        pdf.large("Acme Software Ltd — all-hands meeting, 22 October 2026");
+        section(pdf, "Revenue", "18.4 million EUR, up 12% on Q3 last year.",
+                "Subscriptions grew to 61% of revenue.");
+        section(pdf, "Profit",
+                "Operating profit 2.1 million EUR, a margin " + "of 11.4%.");
+        section(pdf, "Customers", "214 new customers this quarter. Churn "
+                + "fell to 1.8% a month.");
+        section(pdf, "Next quarter", "Launch the reporting module in "
+                + "November. Hire twelve people for support and sales.");
+        return new Pdf("q3-2026-results.pdf", pdf.build());
+    }
+
     private static void section(PdfBuilder pdf, String heading,
             String... paragraphs) {
         pdf.heading(heading);

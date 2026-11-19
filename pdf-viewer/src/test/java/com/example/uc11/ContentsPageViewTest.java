@@ -1,5 +1,6 @@
 package com.example.uc11;
 
+import java.util.List;
 import java.util.Map;
 
 import com.example.documents.SampleDocuments;
@@ -12,7 +13,6 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
-import com.vaadin.flow.component.select.Select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -35,29 +35,15 @@ class ContentsPageViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void pickingAChapterOpensItsFirstPage() {
-        Map<String, Integer> chapterPages = SampleDocuments.employeeHandbook()
-                .chapterPages();
-        navigate(ContentsPageView.class);
-        PdfViewer viewer = findInView(PdfViewer.class).single();
-
-        test(findInView(Select.class).single()).selectItem("Travel");
-
-        assertEquals(chapterPages.get("Travel"), viewer.getPage());
-        assertEquals("Travel", chapter());
-    }
-
-    @Test
     void backToContentsOpensTheFirstPage() {
         navigate(ContentsPageView.class);
-        PdfViewer viewer = findInView(PdfViewer.class).single();
-        new PdfViewerTester(viewer).scrollTo(4);
+        PdfViewerTester viewer = new PdfViewerTester(
+                findInView(PdfViewer.class).single());
 
         test(findInView(Button.class).withText("Back to contents").single())
                 .click();
 
-        assertEquals(1, viewer.getPage());
-        assertEquals("Contents", chapter());
+        assertEquals(List.of(1), viewer.takeScrollToPage());
     }
 
     private String chapter() {

@@ -9,9 +9,7 @@ import com.vaadin.flow.component.pdfviewer.PdfViewerI18n;
  * <p>
  * Every text of the component has to be supplied by the application, for every
  * language it supports: there are no built-in translations, and the component
- * does not follow the UI's locale (API-GAPS.md #4). The texts for links and the
- * download button are set too, though the web component that the Flow component
- * loads has neither yet (API-GAPS.md #9, #13).
+ * does not follow the UI's locale (API-GAPS.md #4).
  */
 final class ViewerTexts {
 
@@ -35,10 +33,12 @@ final class ViewerTexts {
 
     private static PdfViewerI18n finnish() {
         return new PdfViewerI18n().setPreviousPage("Edellinen sivu")
-                .setNextPage("Seuraava sivu").setPageError("Anna 1–{pageCount}")
-                .setZoomIn("Lähennä").setZoomOut("Loitonna")
+                .setNextPage("Seuraava sivu").setPage("Sivu")
+                .setPageError("Anna 1–{pageCount}").setZoomIn("Lähennä")
+                .setZoomOut("Loitonna").setZoom("Zoomaus")
                 .setPageWidth("Sivun leveys").setPageFit("Koko sivu")
-                .setDocument("PDF-asiakirja").setLink("Linkki")
+                .setDocument("PDF-asiakirja").setPageLabel("Sivu {page}")
+                .setLoading("Ladataan").setLink("Linkki")
                 .setGoToPage("Siirry sivulle {page}")
                 .setExternalLink("{text} (avautuu uuteen välilehteen)")
                 .setDownload("Lataa");
@@ -46,11 +46,13 @@ final class ViewerTexts {
 
     private static PdfViewerI18n german() {
         return new PdfViewerI18n().setPreviousPage("Vorherige Seite")
-                .setNextPage("Nächste Seite")
+                .setNextPage("Nächste Seite").setPage("Seite")
                 .setPageError("1–{pageCount} eingeben").setZoomIn("Vergrößern")
-                .setZoomOut("Verkleinern").setPageWidth("Seitenbreite")
-                .setPageFit("Ganze Seite").setDocument("PDF-Dokument")
-                .setLink("Link").setGoToPage("Gehe zu Seite {page}")
+                .setZoomOut("Verkleinern").setZoom("Zoom")
+                .setPageWidth("Seitenbreite").setPageFit("Ganze Seite")
+                .setDocument("PDF-Dokument").setPageLabel("Seite {page}")
+                .setLoading("Wird geladen").setLink("Link")
+                .setGoToPage("Gehe zu Seite {page}")
                 .setExternalLink("{text} (öffnet in einem neuen Tab)")
                 .setDownload("Herunterladen");
     }

@@ -1,5 +1,6 @@
 package com.example.views;
 
+import java.io.Serializable;
 import java.util.Locale;
 import java.util.Map;
 
@@ -24,6 +25,9 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.Location;
 import com.vaadin.flow.router.PageTitle;
@@ -228,12 +232,8 @@ public class MainLayout extends BaseMainLayout {
         }
 
         // Set up Page Visibility API listener to track tab activity
-        getElement().executeJs("const updateVisibility = () => {"
-                + "  const isVisible = document.visibilityState === 'visible';"
-                + "  $0.$server.onVisibilityChange(isVisible);" + "};"
-                + "document.addEventListener('visibilitychange', updateVisibility);"
-                + "updateVisibility();" // Report initial state
-                , getElement());
+        getElement().executeJs(MainLayoutJs.class)
+                .trackVisibility(getElement());
     }
 
     @Override
@@ -276,5 +276,17 @@ public class MainLayout extends BaseMainLayout {
         case "superadmin" -> "/profile-pictures/superadmin.png";
         default -> ""; // No image for unknown users
         };
+    }
+
+    @JsDefinition
+    private interface MainLayoutJs extends Serializable {
+
+        @JsExpression("const updateVisibility = () => {"
+                + "  const isVisible = document.visibilityState === 'visible';"
+                + "  $0.$server.onVisibilityChange(isVisible);" + "};"
+                + "document.addEventListener('visibilitychange', updateVisibility);"
+                + "updateVisibility();" // Report initial state
+        )
+        void trackVisibility(Element layout);
     }
 }

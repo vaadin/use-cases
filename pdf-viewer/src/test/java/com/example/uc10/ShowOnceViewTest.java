@@ -69,6 +69,7 @@ class ShowOnceViewTest extends SpringBrowserlessTest {
 
         test(button("Open the briefing")).click();
         assertTrue(viewer(view).isVisible());
+        assertFalse(viewer(view).isDownloadButtonVisible());
         assertFalse(button("Open the briefing").isEnabled());
         assertTrue(viewer(view).getElement().getAttribute("src")
                 .endsWith("board-briefing-q3.pdf"));

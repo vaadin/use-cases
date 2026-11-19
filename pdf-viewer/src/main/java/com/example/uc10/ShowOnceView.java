@@ -28,10 +28,12 @@ import com.vaadin.flow.router.Route;
  * UC10 — Show a document once.
  * <p>
  * A confidential briefing may be read once, in the app, and must not be
- * downloaded or printed. Two things make that so: the viewer has no download or
- * print button, and {@link OneTimeDocument} sends the file only for the first
- * request. A reload, a second tab or the file's address opened elsewhere gets
- * 410 Gone, and the view says that the briefing was opened already.
+ * downloaded or printed. Two things make that so: the view hides the viewer's
+ * download button with {@link PdfViewer#setDownloadButtonVisible(boolean)} (the
+ * viewer has no print button), and {@link OneTimeDocument} sends the file only
+ * for the first request. A reload, a second tab or the file's address opened
+ * elsewhere gets 410 Gone, and the view says that the briefing was opened
+ * already.
  * <p>
  * What happens in the browser can not be fully controlled: the reader can still
  * select and copy the text, use the browser's own print command or take a
@@ -66,6 +68,7 @@ public class ShowOnceView extends VerticalLayout {
         open.addClickListener(event -> openBriefing());
         status.addClassName("uc10-status");
         viewer.addClassName("uc10-viewer");
+        viewer.setDownloadButtonVisible(false);
         viewer.setVisible(false);
         viewer.addDocumentLoadListener(event -> showOpened());
         viewer.addDocumentErrorListener(event -> {

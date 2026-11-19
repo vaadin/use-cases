@@ -49,7 +49,7 @@ jobs:
           distribution: temurin
           java-version: 25
           cache: maven
-      - run: ./mvnw -pl ${{ matrix.module }} -am install
+      - run: ./mvnw -U -pl ${{ matrix.module }} -am install
         env:
           VAADIN_PRO_KEY: ${{ secrets.VAADIN_PRO_KEY }}
 

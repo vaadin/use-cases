@@ -1,5 +1,6 @@
 package com.example;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -12,6 +13,8 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.function.SerializableSupplier;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -111,8 +114,7 @@ public final class MissingAPI {
      * <p>
      * Gap: Flow has no server-side visibility (IntersectionObserver) event, so
      * deferring work until something is actually on screen needs this
-     * {@code executeJs} (API-GAPS.md #7). Migrate to a built-in event once one
-     * exists.
+     * JavaScript (API-GAPS.md #7). Migrate to a built-in event once one exists.
      */
     public static Registration onFirstVisible(Component component,
             Runnable action) {
@@ -122,16 +124,8 @@ public final class MissingAPI {
                     registration[0].remove();
                     action.run();
                 });
-        component.getElement().executeJs("""
-                const element = this;
-                const observer = new IntersectionObserver(entries => {
-                  if (entries.some(entry => entry.isIntersecting)) {
-                    observer.disconnect();
-                    element.dispatchEvent(new CustomEvent($0));
-                  }
-                });
-                observer.observe(element);
-                """, VISIBLE_EVENT);
+        component.getElement().executeJs(VisibilityJs.class)
+                .dispatchWhenVisible(VISIBLE_EVENT);
         return registration[0];
     }
 
@@ -145,5 +139,21 @@ public final class MissingAPI {
         public BecameVisibleEvent(Component source, boolean fromClient) {
             super(source, fromClient);
         }
+    }
+
+    @JsDefinition
+    private interface VisibilityJs extends Serializable {
+
+        @JsExpression("""
+                const element = this;
+                const observer = new IntersectionObserver(entries => {
+                  if (entries.some(entry => entry.isIntersecting)) {
+                    observer.disconnect();
+                    element.dispatchEvent(new CustomEvent($0));
+                  }
+                });
+                observer.observe(element);
+                """)
+        void dispatchWhenVisible(String eventName);
     }
 }

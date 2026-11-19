@@ -1,5 +1,6 @@
 package com.example.collab;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
@@ -13,6 +14,8 @@ import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.fieldhighlighter.FieldHighlighterInitializer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
 
@@ -23,7 +26,7 @@ import com.vaadin.flow.signals.Signal;
  * <p>
  * The component ships with the platform, but its Java side is
  * {@link FieldHighlighterInitializer}: one {@code protected static init()} and
- * nothing else, so the users have to be pushed over with {@code executeJs}.
+ * nothing else, so the users have to be pushed over with JavaScript of our own.
  * Extending the initializer is what makes its {@code @JsModule} and
  * {@code @NpmPackage} annotations apply, which is why this class inherits from
  * a class it uses none of. See API-GAPS.md #6.
@@ -33,8 +36,6 @@ import com.vaadin.flow.signals.Signal;
  * update the highlight.
  */
 public class SignalFieldHighlighter extends FieldHighlighterInitializer {
-
-    private static final String FH_CLASS = "customElements.get('vaadin-field-highlighter')";
 
     private SignalFieldHighlighter() {
     }
@@ -71,8 +72,27 @@ public class SignalFieldHighlighter extends FieldHighlighterInitializer {
      * missing Java API (API-GAPS.md #6).
      */
     public static void setUsers(Element element, Collection<Peer> peers) {
-        element.executeJs("""
-                const fh = %s;
+        element.executeJs(FieldHighlighterJs.class).setUsers(toJson(peers));
+    }
+
+    private static ArrayNode toJson(Collection<Peer> peers) {
+        return peers.stream().map(SignalFieldHighlighter::toJson)
+                .collect(JacksonUtils.asArray());
+    }
+
+    private static ObjectNode toJson(Peer peer) {
+        ObjectNode node = JsonNodeFactory.instance.objectNode();
+        node.put("id", peer.id());
+        node.put("name", peer.name());
+        node.put("colorIndex", peer.colorIndex());
+        return node;
+    }
+
+    @JsDefinition
+    private interface FieldHighlighterJs extends Serializable {
+
+        @JsExpression("""
+                const fh = customElements.get('vaadin-field-highlighter');
                 const controller = fh.init(this);
                 // Private state: if a component update renames it, the tags
                 // only lose their stickiness, highlighting itself still works.
@@ -95,19 +115,7 @@ public class SignalFieldHighlighter extends FieldHighlighterInitializer {
                 if (pin && $0.length === 0) {
                     tags.hide();
                 }
-                """.formatted(FH_CLASS), toJson(peers));
-    }
-
-    private static ArrayNode toJson(Collection<Peer> peers) {
-        return peers.stream().map(SignalFieldHighlighter::toJson)
-                .collect(JacksonUtils.asArray());
-    }
-
-    private static ObjectNode toJson(Peer peer) {
-        ObjectNode node = JsonNodeFactory.instance.objectNode();
-        node.put("id", peer.id());
-        node.put("name", peer.name());
-        node.put("colorIndex", peer.colorIndex());
-        return node;
+                """)
+        void setUsers(ArrayNode users);
     }
 }
