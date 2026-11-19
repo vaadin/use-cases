@@ -76,9 +76,9 @@ class MUC06ViewTest extends SpringBrowserlessTest {
 
             alice.test(addTaskButton(alice)).click();
             bob.test(addTaskButton(bob)).click();
-            bob.runPendingSignalsTasks();
 
             for (var window : List.of(alice, bob)) {
+                window.runPendingSignalsTasks();
                 assertEquals("Total: 6", statText(window, "Total:"),
                         "Should show 6 tasks (4 seed + 1 from each user)");
                 assertEquals(6,

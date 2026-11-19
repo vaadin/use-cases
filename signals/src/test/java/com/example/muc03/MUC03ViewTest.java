@@ -28,9 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MUC03ViewTest extends SpringBrowserlessTest {
 
     @Autowired
-    private MUC03Signals muc03Signals;
-
-    @Autowired
     private ApplicationContext applicationContext;
 
     @Test
@@ -103,10 +100,10 @@ class MUC03ViewTest extends SpringBrowserlessTest {
 
             alice.test(alice.findInView(Button.class).withText("Reset Scores")
                     .single()).click();
-            alice.runPendingSignalsTasks();
 
             // No score spans remain for anyone (leaderboard cleared)
             for (var window : List.of(alice, bob)) {
+                window.runPendingSignalsTasks();
                 assertTrue(window.findInView(Span.class).all().stream()
                         .noneMatch(s -> s.getText() != null
                                 && s.getText().contains("points")));
@@ -128,6 +125,6 @@ class MUC03ViewTest extends SpringBrowserlessTest {
         bob.test(
                 bob.findInView(Button.class).withText("CLICK ME! (5)").single())
                 .click();
-        bob.runPendingSignalsTasks();
+        alice.runPendingSignalsTasks();
     }
 }

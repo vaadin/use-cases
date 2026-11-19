@@ -138,6 +138,7 @@ class MUC08ViewTest extends SpringBrowserlessTest {
             admin.navigate(MUC08View.class);
 
             post(admin, "Coffee in the lobby");
+            alice.runPendingSignalsTasks();
 
             assertEquals("Coffee in the lobby", alice.findInView(Span.class)
                     .withClassName("announcement-text").single().getText());
@@ -174,12 +175,13 @@ class MUC08ViewTest extends SpringBrowserlessTest {
             alice.navigate(MUC08View.class);
             admin.navigate(MUC08View.class);
             post(admin, "Fire drill");
+            alice.runPendingSignalsTasks();
             assertFalse(alice.findInView(Div.class)
                     .withClassName("announcement-banner").all().isEmpty());
 
             alice.test(alice.findInView(Button.class)
                     .withText("Clear announcement").single()).click();
-            alice.runPendingSignalsTasks();
+            admin.runPendingSignalsTasks();
 
             assertNull(muc08Signals.getAnnouncementSignal().peek());
             assertTrue(admin.findInView(Div.class)

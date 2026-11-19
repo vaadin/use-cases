@@ -116,8 +116,8 @@ class MUC01ViewTest extends SpringBrowserlessTest {
 
             sendMessage(alice, "Message 1");
             sendMessage(bob, "Message 2");
-            bob.runPendingSignalsTasks();
             for (var window : List.of(alice, bob)) {
+                window.runPendingSignalsTasks();
                 assertTrue(window.findInView(Div.class).all().stream().anyMatch(
                         d -> "Total messages: 2".equals(d.getText())));
             }
