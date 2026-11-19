@@ -68,7 +68,7 @@ class MaintenanceBannerViewTest extends SpringBrowserlessTest {
                     .setValue("Read-only mode until 9:00");
             alice.test(alice.find(Button.class).withText("Publish to everyone")
                     .single()).click();
-            alice.runPendingSignalsTasks();
+            bob.runPendingSignalsTasks();
             assertEquals("Read-only mode until 9:00", bob.find(Div.class)
                     .withClassName("maintenance-banner").single().getText());
 

@@ -92,7 +92,7 @@ class MUC01ViewTest extends SpringBrowserlessTest {
             bob.navigate(MUC01View.class);
 
             sendMessage(bob, "Hello from Bob");
-            bob.runPendingSignalsTasks();
+            alice.runPendingSignalsTasks();
 
             assertTrue(alice.findInView(Div.class).all().stream()
                     .anyMatch(d -> "Total messages: 1".equals(d.getText())));
@@ -124,7 +124,7 @@ class MUC01ViewTest extends SpringBrowserlessTest {
 
             alice.test(alice.findInView(Button.class)
                     .withText("Clear All Messages").single()).click();
-            alice.runPendingSignalsTasks();
+            bob.runPendingSignalsTasks();
 
             assertTrue(bob.findInView(Div.class).all().stream()
                     .anyMatch(d -> "Total messages: 0".equals(d.getText())));

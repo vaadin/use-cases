@@ -68,6 +68,7 @@ class SeatSelectionViewTest extends SpringBrowserlessTest {
             aliceOtherTab.test(seat(aliceOtherTab, "A2")).click();
             aliceOtherTab.runPendingSignalsTasks();
             assertTrue(seat(aliceOtherTab, "A2").hasThemeName("primary"));
+            aliceTab.runPendingSignalsTasks();
             assertTrue(seat(aliceTab, "A1").hasThemeName("primary"));
             assertFalse(seat(aliceTab, "A2").isEnabled());
 
@@ -75,6 +76,7 @@ class SeatSelectionViewTest extends SpringBrowserlessTest {
             bob.test(seat(bob, "B2")).click();
             bob.runPendingSignalsTasks();
             assertFalse(seat(bob, "A1").isEnabled());
+            aliceTab.runPendingSignalsTasks();
             assertFalse(seat(aliceTab, "B2").isEnabled());
 
             // Ending Alice's session destroys her browser tabs; the browser-tab

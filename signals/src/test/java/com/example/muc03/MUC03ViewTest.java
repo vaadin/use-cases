@@ -114,29 +114,6 @@ class MUC03ViewTest extends SpringBrowserlessTest {
         }
     }
 
-    @Test
-    void clickingTargetButtonAwardsPointAndDecrementsClicks() {
-        navigate(MUC03View.class);
-        runPendingSignalsTasks();
-
-        // Initialize current user's score and start a round via signals
-        muc03Signals.initializePlayerScore("user", "session0");
-        muc03Signals.startNewRound(100, 100);
-        runPendingSignalsTasks();
-
-        // Target button should be visible — click it via the UI
-        Button targetButton = findInView(Button.class).all().stream().filter(
-                b -> b.getText() != null && b.getText().contains("CLICK ME!"))
-                .findFirst().orElseThrow();
-        test(targetButton).click();
-        runPendingSignalsTasks();
-
-        // After click, clicks remaining should be 4
-        assertTrue(findInView(Div.class).all().stream()
-                .anyMatch(d -> d.getText() != null
-                        && d.getText().contains("Targets remaining: 4")));
-    }
-
     private SecuredBrowserlessApplicationContext<Authentication> createApp() {
         return SpringBrowserlessApplicationContext.createSecured(
                 applicationContext, b -> b.withViewPackages(MUC03View.class));

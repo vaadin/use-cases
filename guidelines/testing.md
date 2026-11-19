@@ -90,14 +90,16 @@ try (var app = SpringBrowserlessApplicationContext.create(applicationContext,
     alice.test(alice.find(TextField.class).single()).setValue("Read-only");
     alice.test(alice.find(Button.class).withText("Publish to everyone")
             .single()).click();
-    alice.runPendingSignalsTasks();
+    bob.runPendingSignalsTasks();
     assertEquals("Read-only", bob.find(Div.class)
             .withClassName("maintenance-banner").single().getText());
 }
 ```
 
 This catches `ListSignal`-vs-`SharedListSignal` mistakes and other
-cross-session leaks at test time rather than in the second browser tab. Use
+cross-session leaks at test time rather than in the second browser tab. Call
+`runPendingSignalsTasks()` on the window you assert on, right before the
+assertion: it runs the pending signal work and makes that window current. Use
 `createSecured(...)` and `app.newUser("alice", "USER")` when the view
 needs a signed-in user.
 

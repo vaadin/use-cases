@@ -66,7 +66,7 @@ class MUC04ViewTest extends SpringBrowserlessTest {
             bob.navigate(MUC04View.class);
 
             bob.test(field(bob, "Company Name")).focus();
-            bob.runPendingSignalsTasks();
+            alice.runPendingSignalsTasks();
 
             assertEquals(1,
                     alice.findInView(Span.class).withClassName("editor-name")
@@ -91,7 +91,7 @@ class MUC04ViewTest extends SpringBrowserlessTest {
             alice.runPendingSignalsTasks();
 
             bob.test(field(bob, "Company Name")).focus();
-            bob.runPendingSignalsTasks();
+            alice.runPendingSignalsTasks();
 
             assertFalse(field(alice, "Company Name").isEnabled(),
                     "Field should be disabled when locking is on and another user is editing");
@@ -113,7 +113,7 @@ class MUC04ViewTest extends SpringBrowserlessTest {
             Checkbox lockingCheckbox = alice.findInView(Checkbox.class).first();
             alice.test(lockingCheckbox).click();
             bob.test(field(bob, "Company Name")).focus();
-            bob.runPendingSignalsTasks();
+            alice.runPendingSignalsTasks();
 
             assertFalse(field(alice, "Company Name").isEnabled());
 
@@ -146,7 +146,7 @@ class MUC04ViewTest extends SpringBrowserlessTest {
             bob.navigate(MUC04View.class);
 
             bob.test(field(bob, "Address")).setValue("123 Main St");
-            bob.runPendingSignalsTasks();
+            alice.runPendingSignalsTasks();
 
             assertEquals("123 Main St", field(alice, "Address").getValue());
         }

@@ -2,24 +2,6 @@
 
 Places where the APIs used by this module were missing or awkward.
 
-## 1. No Spring scope for `BrowserTab`
-
-**Where it bites:** UC6 / BookingDraft.java, UC7 / ScopeCounters.java
-**Symptom:** vaadin/flow#25901 adds `BrowserTab` with a programmatic attribute
-map (`getAttribute` / `setAttribute` / `addDestroyListener`), but there is no
-matching bean scope. Every other Vaadin lifetime (`@VaadinSessionScope`,
-`@UIScope`, `@RouteScope`) can be used with plain injection, so tab-scoped state
-would otherwise be the only kind that has to be looked up and created by hand.
-**Workaround used:** `MissingAPI.BrowserTabScope`, `MissingAPI.VaadinBrowserTabScope`
-and `MissingAPI.BrowserTabScopeConfig`: a Spring `Scope` that keeps the beans in
-a `BrowserTab` attribute and runs their destruction callbacks (`@PreDestroy`)
-from a tab destroy listener. It has to take the session lock itself, because
-`BrowserTab.get(UI)` and the attribute methods require it.
-**Suggested API:** `@BrowserTabScope` in `com.vaadin.flow.spring.annotation`,
-backed by a `VaadinBrowserTabScope` registered in `VaadinScopesConfig` next to
-the existing scopes, and the CDI equivalent in vaadin-cdi.
-Upstream: https://github.com/vaadin/flow/issues/13468
-
 ## 2. Some browser tab behaviour cannot be simulated in browserless tests
 
 **Where it bites:** UC6 and UC7 tests
@@ -58,7 +40,7 @@ interval.
 is duplicated. The duplicate shares the booking with the original, which is
 exactly the mix-up the scope is meant to prevent, and the application has no
 way to notice.
-**Workaround used:** None; documented in the `@BrowserTabScope` Javadoc and in UC7.
+**Workaround used:** None; documented in UC7.
 **Suggested API:** Detect a second live UI claiming the same tab id (for
 example with a per-page `sessionStorage` marker) and either give it a new id or
 expose `BrowserTab#isDuplicate()` so that the application can decide.
