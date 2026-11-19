@@ -92,14 +92,16 @@ try (var app = SpringBrowserlessApplicationContext.create(applicationContext,
     alice.test(alice.find(TextField.class).single()).setValue("Read-only");
     alice.test(alice.find(Button.class).withText("Publish to everyone")
             .single()).click();
-    alice.runPendingSignalsTasks();
+    bob.runPendingSignalsTasks();
     assertEquals("Read-only", bob.find(Div.class)
             .withClassName("maintenance-banner").single().getText());
 }
 ```
 
 This catches `ListSignal`-vs-`SharedListSignal` mistakes and other
-cross-session leaks at test time rather than in the second browser tab. With
+cross-session leaks at test time rather than in the second browser tab. Call
+`runPendingSignalsTasks()` on the window you assert on, right before the
+assertion: it runs the pending signal work and makes that window current. With
 lock isolation, a user's session is locked only while one of that user's
 windows is active, as in a real request. Code that changes another user's UI
 without `UI.access()` therefore fails the test instead of passing silently.

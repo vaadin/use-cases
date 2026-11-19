@@ -83,7 +83,7 @@ class ChatViewTest extends SpringBrowserlessTest {
             PeerRig bobsRig = bob.findInView(PeerRig.class).single();
             bob.test(bob.find(MessageInput.class, bobsRig.getPanel(0)).single())
                     .send("Shipped this morning");
-            bob.runPendingSignalsTasks();
+            alice.runPendingSignalsTasks();
 
             PeerRig alicesRig = alice.findInView(PeerRig.class).single();
             assertTrue(alice

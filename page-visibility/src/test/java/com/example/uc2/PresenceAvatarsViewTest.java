@@ -98,7 +98,7 @@ class PresenceAvatarsViewTest extends SpringBrowserlessTest {
 
             bob.activate();
             PageVisibilityTestSupport.setPageVisibility(PageVisibility.VISIBLE);
-            runAllPendingSignalsTasks(bob);
+            runAllPendingSignalsTasks(alice);
             assertTrue(avatarOf(alice, bobName).isPresent(),
                     "the other user should be in the room");
             assertTrue(avatarOf(alice, bobName).orElseThrow()
@@ -106,14 +106,14 @@ class PresenceAvatarsViewTest extends SpringBrowserlessTest {
 
             bob.activate();
             PageVisibilityTestSupport.setPageVisibility(PageVisibility.HIDDEN);
-            runAllPendingSignalsTasks(bob);
+            runAllPendingSignalsTasks(alice);
             assertTrue(
                     avatarOf(alice, bobName).orElseThrow()
                             .hasClassName("uc2-avatar-hidden"),
                     "the other user's hidden tab should grey out the avatar");
 
             bob.navigate(HomeView.class);
-            runAllPendingSignalsTasks(bob);
+            runAllPendingSignalsTasks(alice);
             assertTrue(avatarOf(alice, bobName).isEmpty(),
                     "the other user should leave the room with the view");
         }

@@ -95,7 +95,7 @@ class PresenceViewTest extends SpringBrowserlessTest {
                     .single().getItems().size());
 
             bob.navigate(PresenceView.class);
-            bob.runPendingSignalsTasks();
+            alice.runPendingSignalsTasks();
             assertEquals(4,
                     alice.find(AvatarGroup.class, rig.getPanel(0)).single()
                             .getItems().size(),
@@ -103,7 +103,7 @@ class PresenceViewTest extends SpringBrowserlessTest {
 
             // Leaving the other browser takes its peers out again.
             bob.navigate(HomeView.class);
-            bob.runPendingSignalsTasks();
+            alice.runPendingSignalsTasks();
             assertEquals(2, alice.find(AvatarGroup.class, rig.getPanel(0))
                     .single().getItems().size());
         }

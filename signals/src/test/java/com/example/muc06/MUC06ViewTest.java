@@ -103,7 +103,7 @@ class MUC06ViewTest extends SpringBrowserlessTest {
                     "Checkbox should initially be unchecked");
 
             bob.test(bob.findInView(Checkbox.class).first()).click();
-            bob.runPendingSignalsTasks();
+            alice.runPendingSignalsTasks();
 
             assertEquals("Completed: 2", statText(alice, "Completed:"),
                     "Completed count should increase when Bob completes a task");
@@ -124,7 +124,6 @@ class MUC06ViewTest extends SpringBrowserlessTest {
 
             bob.test(bob.findInView(TextField.class).first())
                     .setValue("Renamed by Bob");
-            bob.runPendingSignalsTasks();
             alice.runPendingSignalsTasks();
 
             assertEquals("Renamed by Bob", aliceFirstTitle.getValue(),
@@ -145,7 +144,6 @@ class MUC06ViewTest extends SpringBrowserlessTest {
 
             bob.test(bob.findInView(DatePicker.class).first())
                     .setValue(newDate);
-            bob.runPendingSignalsTasks();
             alice.runPendingSignalsTasks();
 
             assertEquals(newDate, aliceFirstDatePicker.getValue(),
