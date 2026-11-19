@@ -1,10 +1,15 @@
 package com.example.uc5;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.HandlerInput;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -38,25 +43,31 @@ public class IdleTrigger extends Trigger {
         // elapses (idle=true) and once on the first activity after that
         // (idle=false). Initial state is "active"; we don't fire on install.
         return getHost().addJsInitializer(
-                """
-                        const ms = $1;
-                        const events = ['mousemove','mousedown','keydown','wheel','touchstart'];
-                        let idle = false;
-                        let timer = null;
-                        const fire = (state) => $0(Object.assign(new CustomEvent('idle'), {idle: state}));
-                        const goIdle = () => { idle = true; fire(true); };
-                        const onActivity = () => {
-                            if (idle) { idle = false; fire(false); }
-                            if (timer) clearTimeout(timer);
-                            timer = setTimeout(goIdle, ms);
-                        };
-                        for (const e of events) window.addEventListener(e, onActivity, {passive: true});
-                        onActivity();
-                        return () => {
-                            if (timer) clearTimeout(timer);
-                            for (const e of events) window.removeEventListener(e, onActivity);
-                        };""",
-                action, inactivityMs);
+                JsSnippets.of(IdleJs.class).watchIdle(action, inactivityMs));
+    }
+
+    @JsDefinition
+    private interface IdleJs extends Serializable {
+
+        @JsExpression("""
+                const ms = $1;
+                const events = ['mousemove','mousedown','keydown','wheel','touchstart'];
+                let idle = false;
+                let timer = null;
+                const fire = (state) => $0(Object.assign(new CustomEvent('idle'), {idle: state}));
+                const goIdle = () => { idle = true; fire(true); };
+                const onActivity = () => {
+                    if (idle) { idle = false; fire(false); }
+                    if (timer) clearTimeout(timer);
+                    timer = setTimeout(goIdle, ms);
+                };
+                for (const e of events) window.addEventListener(e, onActivity, {passive: true});
+                onActivity();
+                return () => {
+                    if (timer) clearTimeout(timer);
+                    for (const e of events) window.removeEventListener(e, onActivity);
+                };""")
+        JsFunction watchIdle(JsFunction action, int inactivityMs);
     }
 
     /** Inputs exposed by this trigger's handler scope. */

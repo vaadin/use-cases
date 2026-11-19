@@ -1,6 +1,10 @@
 package com.example;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 
 /**
  * The printing primitives Vaadin Flow does not have.
@@ -35,7 +39,7 @@ public final class MissingAPI {
      *            the UI to print
      */
     public static void print(UI ui) {
-        ui.getPage().executeJs("window.print()");
+        ui.getPage().executeJs(PrintingJs.class).print();
     }
 
     /**
@@ -52,8 +56,7 @@ public final class MissingAPI {
      *            the UI to print
      */
     public static void printAfterRender(UI ui) {
-        ui.getPage().executeJs(
-                "requestAnimationFrame(() => requestAnimationFrame(() => window.print()))");
+        ui.getPage().executeJs(PrintingJs.class).printAfterRender();
     }
 
     /**
@@ -65,8 +68,7 @@ public final class MissingAPI {
      *            the UI whose window should close
      */
     public static void closeWindowAfterPrint(UI ui) {
-        ui.getPage().executeJs(
-                "window.addEventListener('afterprint', () => window.close(), { once: true })");
+        ui.getPage().executeJs(PrintingJs.class).closeWindowAfterPrint();
     }
 
     /**
@@ -84,8 +86,7 @@ public final class MissingAPI {
      *            the URL to open, relative to the application root
      */
     public static void openPrintWindow(UI ui, String url) {
-        ui.getPage().executeJs(
-                "window.open($0, '_blank', 'width=900,height=1000')", url);
+        ui.getPage().executeJs(PrintingJs.class).openPrintWindow(url);
     }
 
     /**
@@ -106,15 +107,8 @@ public final class MissingAPI {
      *            the full rule, e.g. {@code @page { size: A4 landscape; }}
      */
     public static void setPageRule(UI ui, String pageRule) {
-        ui.getPage().executeJs("""
-                let style = document.getElementById($1);
-                if (!style) {
-                    style = document.createElement('style');
-                    style.id = $1;
-                    document.head.appendChild(style);
-                }
-                style.textContent = $0;
-                """, pageRule, PAGE_RULE_ID);
+        ui.getPage().executeJs(PrintingJs.class).setPageRule(pageRule,
+                PAGE_RULE_ID);
     }
 
     /**
@@ -126,8 +120,7 @@ public final class MissingAPI {
      *            the UI whose page box to reset
      */
     public static void clearPageRule(UI ui) {
-        ui.getPage().executeJs("document.getElementById($0)?.remove()",
-                PAGE_RULE_ID);
+        ui.getPage().executeJs(PrintingJs.class).clearPageRule(PAGE_RULE_ID);
     }
 
     /**
@@ -147,13 +140,7 @@ public final class MissingAPI {
      *            the registry key they were registered under
      */
     public static void abortPrintListeners(UI ui, String key) {
-        ui.getPage().executeJs("""
-                const registry = window.__printListenerRegistry;
-                if (registry && registry[$0]) {
-                    registry[$0].abort();
-                    delete registry[$0];
-                }
-                """, key);
+        ui.getPage().executeJs(PrintingJs.class).abortPrintListeners(key);
     }
 
     /**
@@ -162,23 +149,56 @@ public final class MissingAPI {
      * {@code AbortController} and expose its {@code signal} to the statements
      * that follow.
      * <p>
-     * Concatenated into the caller's script rather than executed on its own, so
-     * that the listeners are registered in the same round trip that opens the
-     * controller.
-     *
-     * @param script
-     *            the JavaScript that registers the listeners; it can use
-     *            {@code signal} and {@code self}, and {@code $0} is the key
-     * @return the full script to pass to {@code Element#executeJs}
+     * Concatenated in front of the caller's {@code @JsExpression} rather than
+     * executed on its own, so that the listeners are registered in the same
+     * round trip that opens the controller. The statements that follow can use
+     * {@code signal} and {@code self}, and {@code $0} is the key.
      */
-    public static String withPrintListenerRegistry(String script) {
-        return """
-                const self = this;
-                const registry = (window.__printListenerRegistry ??= {});
-                registry[$0]?.abort();
-                const controller = new AbortController();
-                registry[$0] = controller;
-                const signal = controller.signal;
-                """ + script;
+    public static final String PRINT_LISTENER_REGISTRY = """
+            const self = this;
+            const registry = (window.__printListenerRegistry ??= {});
+            registry[$0]?.abort();
+            const controller = new AbortController();
+            registry[$0] = controller;
+            const signal = controller.signal;
+            """;
+
+    @JsDefinition
+    private interface PrintingJs extends Serializable {
+
+        @JsExpression("window.print()")
+        void print();
+
+        @JsExpression("requestAnimationFrame(() => requestAnimationFrame(() => window.print()))")
+        void printAfterRender();
+
+        @JsExpression("window.addEventListener('afterprint', () => window.close(), { once: true })")
+        void closeWindowAfterPrint();
+
+        @JsExpression("window.open($0, '_blank', 'width=900,height=1000')")
+        void openPrintWindow(String url);
+
+        @JsExpression("""
+                let style = document.getElementById($1);
+                if (!style) {
+                    style = document.createElement('style');
+                    style.id = $1;
+                    document.head.appendChild(style);
+                }
+                style.textContent = $0;
+                """)
+        void setPageRule(String pageRule, String id);
+
+        @JsExpression("document.getElementById($0)?.remove()")
+        void clearPageRule(String id);
+
+        @JsExpression("""
+                const registry = window.__printListenerRegistry;
+                if (registry && registry[$0]) {
+                    registry[$0].abort();
+                    delete registry[$0];
+                }
+                """)
+        void abortPrintListeners(String key);
     }
 }

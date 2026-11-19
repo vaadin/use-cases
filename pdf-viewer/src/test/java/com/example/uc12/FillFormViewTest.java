@@ -9,7 +9,6 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -28,6 +27,8 @@ class FillFormViewTest extends SpringBrowserlessTest {
     void fillingInShowsTheFilledForm() {
         navigate(FillFormView.class);
         String blank = src();
+        assertFalse(viewer().isDownloadButtonVisible(),
+                "Nothing to download yet");
 
         test(textField("Full name")).setValue("Maria Lind");
         test(textField("Customer number")).setValue("AP-448210");
@@ -39,8 +40,7 @@ class FillFormViewTest extends SpringBrowserlessTest {
 
         assertNotEquals(blank, src());
         assertTrue(status().contains("with your answers"), status());
-        assertTrue(download().getHref().endsWith("change-of-address-AP-12.pdf"),
-                download().getHref());
+        assertTrue(viewer().isDownloadButtonVisible());
     }
 
     @Test
@@ -53,8 +53,7 @@ class FillFormViewTest extends SpringBrowserlessTest {
         test(fillButton()).click();
 
         assertEquals(blank, src());
-        assertTrue(findInView(Anchor.class).withText("Download the filled form")
-                .all().isEmpty(), "Nothing to download yet");
+        assertFalse(viewer().isDownloadButtonVisible());
         assertFalse(textField("Full name").isInvalid());
         assertTrue(textField("Customer number").isInvalid(),
                 "Only spaces is no answer");
@@ -82,11 +81,6 @@ class FillFormViewTest extends SpringBrowserlessTest {
         assertTrue(status().contains("Western European letters"), status());
     }
 
-    private Anchor download() {
-        return findInView(Anchor.class).withText("Download the filled form")
-                .single();
-    }
-
     private TextField textField(String label) {
         return findInView(TextField.class).withCaption(label).single();
     }
@@ -99,9 +93,12 @@ class FillFormViewTest extends SpringBrowserlessTest {
         return findInView(Button.class).withText("Fill in the form").single();
     }
 
+    private PdfViewer viewer() {
+        return findInView(PdfViewer.class).single();
+    }
+
     private String src() {
-        return findInView(PdfViewer.class).single().getElement()
-                .getAttribute("src");
+        return viewer().getElement().getAttribute("src");
     }
 
     private String status() {

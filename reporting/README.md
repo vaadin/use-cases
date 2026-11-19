@@ -17,7 +17,7 @@ helping — most usefully the one the community already filed,
 | # | View | What it shows |
 | - | ---- | ------------- |
 | UC1 | Download the invoice | A PDF generated per row and delivered through `DownloadHandler.fromInputStream`, with the invoice number as the file name. |
-| UC2 | Open it in a new tab | Inline delivery via `AttachmentType.INLINE` on a link, and `OpenInNewTab.onClick` for a button. |
+| UC2 | Open it in a new tab | Inline delivery via `AttachmentType.INLINE` on a link, and `Download.onClick` with `DownloadTarget.NEW_TAB` for a button. |
 | UC3 | Check it before sending | The real generated document in an `IFrame`, beside the application's own rendering of the same invoice. |
 | UC4 | The monthly billing run | A multi-select billing run rendered as one document with continuous page numbers, plus transfer progress. |
 | UC5 | Know that it arrived | An invoice marked sent only when the transfer completed, in an application-scoped book every session sees. |

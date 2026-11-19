@@ -54,7 +54,7 @@ Upstream: https://github.com/vaadin/web-components/issues/1559
 
 **Where it bites:** UC6 / `DeferredSectionsView.java`
 **Symptom:** tabs and `Details` have server-side events that make lazy building easy, but a section further down the page has no event for "scrolled into view". `Component` and `Element` have no viewport listener or signal. Deferring a heavy chart or table until the user scrolls to it needs an `IntersectionObserver` written in JavaScript.
-**Workaround used:** `MissingAPI.onFirstVisible(component, action)`. It uses `executeJs` to install an `IntersectionObserver` that dispatches a custom DOM event, received as `MissingAPI.BecameVisibleEvent`.
+**Workaround used:** `MissingAPI.onFirstVisible(component, action)`. It uses a JavaScript definition (`@JsDefinition`) to install an `IntersectionObserver` that dispatches a custom DOM event, received as `MissingAPI.BecameVisibleEvent`.
 **Suggested API:** `Component#addVisibleInViewportListener(...)` or `Signal<Boolean> Element#inViewportSignal()`, like the other `*Signal()` accessors such as `Element#sizeSignal()`.
 
 ## 8. Push cannot be throttled or batched

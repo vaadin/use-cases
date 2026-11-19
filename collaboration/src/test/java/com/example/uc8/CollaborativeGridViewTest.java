@@ -105,7 +105,7 @@ class CollaborativeGridViewTest extends SpringBrowserlessTest {
             PeerRig bobsRig = bob.findInView(PeerRig.class).single();
             bob.test(bob.find(Button.class, bobsRig.getPanel(0))
                     .withText("Add row").single()).click();
-            bob.runPendingSignalsTasks();
+            alice.runPendingSignalsTasks();
 
             assertEquals(before + 1, alice.test(alicesGrid).size());
             assertEquals("New", alice.test(alicesGrid).getCellText(before, 0));

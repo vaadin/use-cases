@@ -42,7 +42,7 @@ class OpenInNewTabViewTest extends SpringBrowserlessTest {
         navigate(OpenInNewTabView.class);
         Button open = findInView(Button.class).id("open-button");
 
-        // OpenInNewTab registers the handler on the button itself, under an
+        // Download registers the handler on the button itself, under an
         // internal attribute; there is no browserless tester that fetches it
         // (API-GAPS.md #6).
         assertTrue(

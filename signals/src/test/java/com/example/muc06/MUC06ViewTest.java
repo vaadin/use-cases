@@ -125,6 +125,7 @@ class MUC06ViewTest extends SpringBrowserlessTest {
             bob.test(bob.findInView(TextField.class).first())
                     .setValue("Renamed by Bob");
             bob.runPendingSignalsTasks();
+            alice.runPendingSignalsTasks();
 
             assertEquals("Renamed by Bob", aliceFirstTitle.getValue(),
                     "Title field should update when Bob renames the task");
@@ -145,6 +146,7 @@ class MUC06ViewTest extends SpringBrowserlessTest {
             bob.test(bob.findInView(DatePicker.class).first())
                     .setValue(newDate);
             bob.runPendingSignalsTasks();
+            alice.runPendingSignalsTasks();
 
             assertEquals(newDate, aliceFirstDatePicker.getValue(),
                     "Date picker should update when Bob changes the due date");

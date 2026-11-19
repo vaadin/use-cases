@@ -1,5 +1,6 @@
 package com.example.uc2;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -37,7 +38,10 @@ import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -237,10 +241,9 @@ public class ApplicationHealthView extends VerticalLayout {
         joinFetch.setId("join-fetch");
 
         Button flush = new Button("Flush client metrics now",
-                e -> getUI().ifPresent(ui -> ui.getPage()
-                        .executeJs("window.__vaadinMicrometer && "
-                                + "window.__vaadinMicrometer.flush();")
-                        .then(ignored -> investigation.refreshNow())));
+                e -> getUI().ifPresent(
+                        ui -> ui.getPage().executeJs(CollectorJs.class).flush()
+                                .then(ignored -> investigation.refreshNow())));
         flush.setId("flush-client");
 
         DemoRig rig = new DemoRig(joinFetch, flush);
@@ -583,5 +586,13 @@ public class ApplicationHealthView extends VerticalLayout {
             rows += s.totalAmount();
         }
         return new FetchTotals(!summaries.isEmpty(), count, rows);
+    }
+
+    @JsDefinition
+    private interface CollectorJs extends Serializable {
+
+        @JsExpression("window.__vaadinMicrometer && "
+                + "window.__vaadinMicrometer.flush();")
+        PendingJavaScriptResult flush();
     }
 }

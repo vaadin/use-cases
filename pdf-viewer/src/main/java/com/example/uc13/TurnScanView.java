@@ -1,6 +1,5 @@
 package com.example.uc13;
 
-import com.example.MissingAPI;
 import com.example.common.UseCaseDescription;
 import com.example.documents.Pdf;
 import com.example.documents.SampleDocuments;
@@ -44,7 +43,6 @@ public class TurnScanView extends VerticalLayout {
     private final PdfViewer viewer = new PdfViewer();
     private final Paragraph status = new Paragraph();
     private Pdf scan = SampleDocuments.scannedDeliveryNote();
-    private int pageAfterLoad;
 
     public TurnScanView() {
         addClassName("uc13-view");
@@ -64,15 +62,6 @@ public class TurnScanView extends VerticalLayout {
         viewer.addClassName("uc13-viewer");
         viewer.setZoom(Zoom.PAGE_FIT);
         viewer.setSrc(scan.handler());
-        // setSrc starts the new document at page 1, and the Flow component can
-        // not set the page (API-GAPS.md #12). Go back to the page once the
-        // document has loaded.
-        viewer.addDocumentLoadListener(event -> {
-            if (pageAfterLoad > 0) {
-                MissingAPI.setPage(viewer, pageAfterLoad);
-                pageAfterLoad = 0;
-            }
-        });
         status.addClassName("uc13-status");
         status.setText("Page 2 is stored turned by 90°.");
 
@@ -95,7 +84,8 @@ public class TurnScanView extends VerticalLayout {
         scan = new Pdf(scan.fileName(),
                 PageRotation.rotate(scan.bytes(), page, degrees));
         viewer.setSrc(scan.handler());
-        pageAfterLoad = page;
+        // The new document opens at page 1; scrollToPage waits for it to load.
+        viewer.scrollToPage(page);
         int rotation = PageRotation.rotation(scan.bytes(), page);
         status.setText(
                 "Page " + page + " is now stored " + (rotation == 0 ? "upright."

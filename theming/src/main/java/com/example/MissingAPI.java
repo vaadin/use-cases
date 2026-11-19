@@ -1,5 +1,6 @@
 package com.example;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +11,8 @@ import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -46,12 +49,8 @@ public final class MissingAPI {
                         .set(e.getEventData().get("event.detail").asBoolean()))
                 .addEventData("event.detail");
         owner.whenAttached(ui -> {
-            owner.getElement().executeJs("""
-                    const query = matchMedia($0);
-                    const send = () => this.dispatchEvent(
-                        new CustomEvent($1, { detail: query.matches }));
-                    query.addEventListener('change', send);
-                    send();""", query, event);
+            owner.getElement().executeJs(ThemingJs.class)
+                    .dispatchMediaQuery(query, event);
             return null;
         });
         return matches.asReadonly();
@@ -84,15 +83,7 @@ public final class MissingAPI {
                 values.put(name, value);
             }
         });
-        ui.getPage().executeJs("""
-                const style = document.documentElement.style;
-                for (const [name, value] of Object.entries($0)) {
-                  if (value === null) {
-                    style.removeProperty(name);
-                  } else {
-                    style.setProperty(name, value);
-                  }
-                }""", values);
+        ui.getPage().executeJs(ThemingJs.class).setRootProperties(values);
         Map<String, String> applied = new HashMap<>(rootProperties(ui));
         properties.forEach((name, value) -> {
             if (value == null) {
@@ -124,9 +115,34 @@ public final class MissingAPI {
      * client preference store once there is one.
      */
     public static void writeCookie(String name, String value) {
-        UI.getCurrent().getPage()
-                .executeJs("document.cookie = $0 + '=' + encodeURIComponent($1)"
-                        + " + ';path=/;max-age=' + $2 + ';SameSite=Lax'", name,
-                        value, ONE_YEAR);
+        UI.getCurrent().getPage().executeJs(ThemingJs.class).writeCookie(name,
+                value, ONE_YEAR);
+    }
+
+    @JsDefinition
+    private interface ThemingJs extends Serializable {
+
+        @JsExpression("""
+                const query = matchMedia($0);
+                const send = () => this.dispatchEvent(
+                    new CustomEvent($1, { detail: query.matches }));
+                query.addEventListener('change', send);
+                send();""")
+        void dispatchMediaQuery(String query, String event);
+
+        @JsExpression("""
+                const style = document.documentElement.style;
+                for (const [name, value] of Object.entries($0)) {
+                  if (value === null) {
+                    style.removeProperty(name);
+                  } else {
+                    style.setProperty(name, value);
+                  }
+                }""")
+        void setRootProperties(ObjectNode properties);
+
+        @JsExpression("document.cookie = $0 + '=' + encodeURIComponent($1)"
+                + " + ';path=/;max-age=' + $2 + ';SameSite=Lax'")
+        void writeCookie(String name, String value, int maxAge);
     }
 }
