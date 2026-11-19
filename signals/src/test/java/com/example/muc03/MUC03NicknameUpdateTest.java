@@ -42,6 +42,7 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
                             + spans(alice));
 
             setNickname(bob, "CoolPlayer");
+            alice.runPendingSignalsTasks();
 
             assertEquals(1, scoreLabels(alice, "CoolPlayer: 1 points"),
                     () -> "Leaderboard should show the nickname; "
@@ -67,6 +68,7 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
                             + spans(alice));
 
             setNickname(bob, "");
+            alice.runPendingSignalsTasks();
 
             assertEquals(1, scoreLabels(alice, "bob: 1 points"),
                     () -> "Leaderboard should revert to the username; "
@@ -89,7 +91,7 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
         bob.test(
                 bob.findInView(Button.class).withText("CLICK ME! (5)").single())
                 .click();
-        bob.runPendingSignalsTasks();
+        alice.runPendingSignalsTasks();
     }
 
     private static void setNickname(BrowserlessUIContext window,
