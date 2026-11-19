@@ -137,8 +137,9 @@ class LazyListLatencyViewTest extends SpringBrowserlessTest {
         openAllSteps();
 
         Div verdict = findInView(Div.class).id("verdict");
-        assertTrue(verdict.getChildren().findFirst().orElseThrow().getElement()
-                .getText().contains("UX budget"),
+        assertTrue(
+                verdict.getChildren().findFirst().orElseThrow().getElement()
+                        .getText().contains("UX budget"),
                 "the empty verdict must say what would make a finding appear");
     }
 
@@ -205,8 +206,7 @@ class LazyListLatencyViewTest extends SpringBrowserlessTest {
         // try, which is the exact dead end this view exists to avoid.
         navigate(LazyListLatencyView.class);
 
-        IntegerField delay = findInView(IntegerField.class)
-                .id("backend-delay");
+        IntegerField delay = findInView(IntegerField.class).id("backend-delay");
         assertTrue(delay.getValue() > 1_000,
                 "the first search must already exceed the insights budget");
     }
@@ -294,8 +294,7 @@ class LazyListLatencyViewTest extends SpringBrowserlessTest {
      * reader would.
      */
     private void openAllSteps() {
-        findInView(Details.class).all()
-                .forEach(step -> step.setOpened(true));
+        findInView(Details.class).all().forEach(step -> step.setOpened(true));
     }
 
     private void quickenTheCatalog() {
@@ -351,7 +350,6 @@ class LazyListLatencyViewTest extends SpringBrowserlessTest {
         // The meter, tag and value cells render their content as styled child
         // spans, so the cell's own text is empty and the text has to be read
         // from the whole subtree.
-        return row.getDataCells().get(index).getElement()
-                .getTextRecursively();
+        return row.getDataCells().get(index).getElement().getTextRecursively();
     }
 }
