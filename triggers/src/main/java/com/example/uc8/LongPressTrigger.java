@@ -1,8 +1,13 @@
 package com.example.uc8;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -30,7 +35,14 @@ public class LongPressTrigger extends Trigger {
 
     @Override
     protected Registration install(JsFunction action) {
-        return getHost().addJsInitializer("""
+        return getHost().addJsInitializer(JsSnippets.of(LongPressJs.class)
+                .listenForLongPress(action, holdMs));
+    }
+
+    @JsDefinition
+    private interface LongPressJs extends Serializable {
+
+        @JsExpression("""
                 const ms = $1;
                 let timer = null;
                 let triggered = false;
@@ -64,6 +76,7 @@ public class LongPressTrigger extends Trigger {
                     this.removeEventListener('pointercancel', cancel);
                     this.removeEventListener('pointerleave', cancel);
                     this.removeEventListener('click', onClick, {capture: true});
-                };""", action, holdMs);
+                };""")
+        JsFunction listenForLongPress(JsFunction action, int holdMs);
     }
 }

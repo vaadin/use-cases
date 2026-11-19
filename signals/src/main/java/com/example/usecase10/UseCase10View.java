@@ -1,5 +1,6 @@
 package com.example.usecase10;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 import com.example.common.UseCaseDescription;
@@ -19,6 +20,8 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -251,24 +254,12 @@ public class UseCase10View extends VerticalLayout {
         String unregisterKey = UUID.randomUUID().toString();
 
         // Bridge: prefers-color-scheme: dark → darkModeSignal
-        getElement().executeJs(
-                """
-                            const mq = window.matchMedia('(prefers-color-scheme: dark)');
-                            const update = (e) => this.$server.onDarkModeChange(mq.matches);
-                            mq.addEventListener('change', update);
-                            window[$0] = () => mq.removeEventListener('change', update);
-                            update();
-                        """,
-                unregisterKey);
+        getElement().executeJs(UseCase10Js.class).trackDarkMode(unregisterKey);
 
         addDetachListener(detach -> {
             detach.unregisterListener();
-            detach.getUI().getPage().executeJs("""
-                        if (window[$0]) {
-                          window[$0]();
-                          delete window[$0];
-                        }
-                    """, unregisterKey);
+            detach.getUI().getPage().executeJs(UseCase10Js.class)
+                    .unregister(unregisterKey);
         });
     }
 
@@ -309,5 +300,26 @@ public class UseCase10View extends VerticalLayout {
 
         row.add(dot, label);
         return row;
+    }
+
+    @JsDefinition
+    private interface UseCase10Js extends Serializable {
+
+        @JsExpression("""
+                    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+                    const update = (e) => this.$server.onDarkModeChange(mq.matches);
+                    mq.addEventListener('change', update);
+                    window[$0] = () => mq.removeEventListener('change', update);
+                    update();
+                """)
+        void trackDarkMode(String unregisterKey);
+
+        @JsExpression("""
+                    if (window[$0]) {
+                      window[$0]();
+                      delete window[$0];
+                    }
+                """)
+        void unregister(String unregisterKey);
     }
 }

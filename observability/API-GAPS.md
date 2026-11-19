@@ -259,7 +259,8 @@ yet" for several seconds. The collector has a drain,
 comments it `// Expose for tests / dashboards (debug only)`. There is no
 supported API, on either side, to say "send what you have now".
 **Workaround used:** UC2 and UC5 call `window.__vaadinMicrometer.flush()` from
-`executeJs`, guarded so it does nothing if the internal goes away.
+a JavaScript definition (`@JsDefinition`), guarded so it does nothing if the
+internal goes away.
 **Suggested API:** a public flush on the client collector (e.g.
 `window.Vaadin.observability.flush(): Promise<void>`) and/or a server-side
 counterpart on the `<vaadin-metrics-collector>` element.

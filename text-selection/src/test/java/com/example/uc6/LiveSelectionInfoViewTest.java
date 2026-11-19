@@ -26,11 +26,11 @@ class LiveSelectionInfoViewTest extends SpringBrowserlessTest {
         assertEquals("(no selection)", preview());
 
         TextArea text = find(TextArea.class).single();
-        // "The quick brown fox"
-        selectInBrowser(text, 0, 19);
+        // "quick brown fox"
+        selectInBrowser(text, 4, 19);
         runPendingSignalsTasks();
-        assertEquals(List.of("0 – 19", "19 chars", "4 words"), values());
-        assertEquals("The quick brown fox", preview());
+        assertEquals(List.of("4 – 19", "15 chars", "3 words"), values());
+        assertEquals("quick brown fox", preview());
 
         // Clicking places the cursor and clears the selection.
         selectInBrowser(text, 5, 5);

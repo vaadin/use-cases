@@ -1,14 +1,20 @@
 package com.example.uc23;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import tools.jackson.databind.JsonNode;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -52,20 +58,27 @@ public class SequenceTrigger extends Trigger {
         // sequence slot by slot. Listens on window in the capture phase: a
         // view with no focusable children never receives a bubbled keydown.
         return getHost().addJsInitializer(
-                """
-                        const seq = $1;
-                        let recent = [];
-                        const listener = (e) => {
-                            recent.push([e.key, e.code]);
-                            if (recent.length > seq.length) recent.shift();
-                            if (recent.length === seq.length && seq.every((slot, i) =>
-                                    slot.includes(recent[i][0]) || slot.includes(recent[i][1]))) {
-                                recent = [];
-                                $0(e);
-                            }
-                        };
-                        window.addEventListener('keydown', listener, true);
-                        return () => window.removeEventListener('keydown', listener, true);""",
-                action, JacksonUtils.getMapper().valueToTree(sequenceKeys));
+                JsSnippets.of(SequenceJs.class).listenForSequence(action,
+                        JacksonUtils.getMapper().valueToTree(sequenceKeys)));
+    }
+
+    @JsDefinition
+    private interface SequenceJs extends Serializable {
+
+        @JsExpression("""
+                const seq = $1;
+                let recent = [];
+                const listener = (e) => {
+                    recent.push([e.key, e.code]);
+                    if (recent.length > seq.length) recent.shift();
+                    if (recent.length === seq.length && seq.every((slot, i) =>
+                            slot.includes(recent[i][0]) || slot.includes(recent[i][1]))) {
+                        recent = [];
+                        $0(e);
+                    }
+                };
+                window.addEventListener('keydown', listener, true);
+                return () => window.removeEventListener('keydown', listener, true);""")
+        JsFunction listenForSequence(JsFunction action, JsonNode sequence);
     }
 }

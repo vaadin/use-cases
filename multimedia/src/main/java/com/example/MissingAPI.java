@@ -1,5 +1,7 @@
 package com.example;
 
+import java.io.Serializable;
+
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.html.Media;
@@ -7,6 +9,8 @@ import com.vaadin.flow.component.html.Video;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
@@ -43,8 +47,7 @@ public final class MissingAPI {
      *            the player
      */
     public static void play(Media media) {
-        media.getElement().executeJs(
-                "const p = this.play(); if (p) { p.catch(() => {}); }");
+        media.getElement().executeJs(MediaJs.class).play();
     }
 
     /**
@@ -78,7 +81,7 @@ public final class MissingAPI {
      *            the new position in seconds
      */
     public static void seek(Media media, double seconds) {
-        media.getElement().executeJs("this.currentTime = $0", seconds);
+        media.getElement().executeJs(MediaJs.class).seek(seconds);
     }
 
     /**
@@ -91,10 +94,7 @@ public final class MissingAPI {
      *            the offset in seconds, negative to go back
      */
     public static void seekBy(Media media, double seconds) {
-        media.getElement().executeJs(
-                "this.currentTime = Math.max(0, Math.min(this.duration || 0,"
-                        + " this.currentTime + $0))",
-                seconds);
+        media.getElement().executeJs(MediaJs.class).seekBy(seconds);
     }
 
     /**
@@ -107,13 +107,7 @@ public final class MissingAPI {
      *            the start position in seconds
      */
     public static void startAt(Media media, double seconds) {
-        media.getElement().executeJs(
-                """
-                        const seek = () => { this.currentTime = $0; };
-                        if (this.readyState >= 1) { seek(); }
-                        else { this.addEventListener('loadedmetadata', seek, { once: true }); }
-                        """,
-                seconds);
+        media.getElement().executeJs(MediaJs.class).startAt(seconds);
     }
 
     /**
@@ -297,16 +291,38 @@ public final class MissingAPI {
      *            the language to show, or {@code null} to hide all tracks
      */
     public static void showTextTrack(Media media, @Nullable String language) {
-        media.getElement().executeJs(
-                """
-                        const show = () => {
-                          for (const track of this.textTracks) {
-                            track.mode = track.language === $0 ? 'showing' : 'disabled';
-                          }
-                        };
-                        if (this.readyState >= 1) { show(); }
-                        else { this.addEventListener('loadedmetadata', show, { once: true }); }
-                        """,
-                language);
+        media.getElement().executeJs(MediaJs.class).showTextTrack(language);
+    }
+
+    @JsDefinition
+    private interface MediaJs extends Serializable {
+
+        @JsExpression("const p = this.play(); if (p) { p.catch(() => {}); }")
+        void play();
+
+        @JsExpression("this.currentTime = $0")
+        void seek(double seconds);
+
+        @JsExpression("this.currentTime = Math.max(0, Math.min(this.duration || 0,"
+                + " this.currentTime + $0))")
+        void seekBy(double seconds);
+
+        @JsExpression("""
+                const seek = () => { this.currentTime = $0; };
+                if (this.readyState >= 1) { seek(); }
+                else { this.addEventListener('loadedmetadata', seek, { once: true }); }
+                """)
+        void startAt(double seconds);
+
+        @JsExpression("""
+                const show = () => {
+                  for (const track of this.textTracks) {
+                    track.mode = track.language === $0 ? 'showing' : 'disabled';
+                  }
+                };
+                if (this.readyState >= 1) { show(); }
+                else { this.addEventListener('loadedmetadata', show, { once: true }); }
+                """)
+        void showTextTrack(@Nullable String language);
     }
 }

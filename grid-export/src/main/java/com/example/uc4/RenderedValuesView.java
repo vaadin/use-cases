@@ -1,5 +1,6 @@
 package com.example.uc4;
 
+import java.io.Serializable;
 import java.util.Locale;
 
 import com.example.common.UseCaseDescription;
@@ -23,10 +24,14 @@ import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -105,13 +110,14 @@ public class RenderedValuesView extends VerticalLayout {
                 .setAutoWidth(true);
         grid.addColumn(new LocalDateRenderer<>(Employee::hired, DATE_PATTERN))
                 .setHeader("Hired").setKey("hired").setAutoWidth(true);
-        grid.addColumn(LitRenderer.<Employee> of("<span>${item.country}</span>")
+        grid.addColumn(LitRenderer
+                .<Employee> of(JsSnippets.of(ColumnTemplates.class).country())
                 .withProperty("country", Employee::country))
                 .setHeader("Country").setKey("country").setAutoWidth(true);
         contactColumn = grid
                 .addColumn(LitRenderer
-                        .<Employee> of("<span>${item.name} &middot; "
-                                + "${item.country}</span>")
+                        .<Employee> of(
+                                JsSnippets.of(ColumnTemplates.class).contact())
                         .withProperty("name", Employee::name)
                         .withProperty("country", Employee::country))
                 .setHeader("Contact").setKey("contact").setAutoWidth(true);
@@ -185,5 +191,15 @@ public class RenderedValuesView extends VerticalLayout {
     /** Test seam: the CSV the download link would produce. */
     String csv() {
         return CsvWriter.toCsv(report());
+    }
+
+    @JsDefinition
+    private interface ColumnTemplates extends Serializable {
+
+        @JsExpression("return html`<span>${item.country}</span>`;")
+        CompiledLitTemplate country();
+
+        @JsExpression("return html`<span>${item.name} &middot; ${item.country}</span>`;")
+        CompiledLitTemplate contact();
     }
 }

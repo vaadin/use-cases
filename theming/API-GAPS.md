@@ -26,7 +26,7 @@ Upstream: https://github.com/vaadin/flow/issues/26390
 
 **Where it bites:** UC2 / DarkModeView.java, UC4 / UserPreferencesView.java, UC8 / AccessibleThemingView.java, UC9 / ThemeSwitchView.java
 **Symptom:** a user's color scheme, accent color, text size or theme should still be there on the next visit. Flow has no place for such preferences. Writing a cookie from the server does not work either: with WebSocket push there is no HTTP response to put the `Set-Cookie` header in.
-**Workaround used:** `MissingAPI.writeCookie` through `executeJs("document.cookie = …")`, read back by a session init listener in `Appearance`.
+**Workaround used:** `MissingAPI.writeCookie` through a JavaScript definition (`@JsDefinition`) that sets `document.cookie`, read back by a session init listener in `Appearance`.
 **Suggested API:** a small client-side preference store reachable from the server (cookie- or `localStorage`-backed, readable at session start), or appearance persistence built into the theme API above.
 Upstream: https://github.com/vaadin/flow/issues/26391
 
@@ -42,7 +42,7 @@ Upstream: https://github.com/vaadin/flow/issues/26392
 
 **Where it bites:** UC4 / UserPreferencesView.java, UC8 / AccessibleThemingView.java
 **Symptom:** the themes define their tokens on `:root` and compute some from others there (Aura's accent color from its light and dark variants). An override has to go on the same element to take part in that computation, but `UI#getElement()` is the `<body>`, and the server has no handle for `<html>`.
-**Workaround used:** `MissingAPI.setRootProperties(ui, properties)`, which sets and removes inline custom properties on `document.documentElement` through `executeJs`.
+**Workaround used:** `MissingAPI.setRootProperties(ui, properties)`, which sets and removes inline custom properties on `document.documentElement` through a JavaScript definition (`@JsDefinition`).
 **Suggested API:** `Page#getRootStyle()` returning a `Style` for `<html>` (with `bind` like the element `Style`), or `UI#setCssProperty(String, String)` that targets the root.
 Upstream: https://github.com/vaadin/flow/issues/26393
 
