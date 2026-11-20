@@ -11,6 +11,18 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <properties>
+        <!--
+          UC8 binds Clipboard.writeText() (vaadin/flow#25366) to a LitRenderer
+          template with LitRenderer.withClientAction
+          (vaadin/flow-components#10470). Neither is in 25.4-SNAPSHOT yet, so
+          this module builds against both feature snapshots. Switch back to the
+          parent's versions once both are merged.
+        -->
+        <flow.version>25.4.client-actions-for-client-rendered-templates-SNAPSHOT</flow.version>
+        <flow-components.version>25.4.litrenderer-client-actions-SNAPSHOT</flow-components.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.example</groupId>
