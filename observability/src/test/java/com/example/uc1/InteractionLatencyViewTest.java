@@ -248,10 +248,11 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
 
     @Test
     void theActionTimerIsSharedAcrossSessions() {
-        try (var app = SpringBrowserlessApplicationContext.create(
-                applicationContext,
-                b -> b.withViewPackages(InteractionLatencyView.class,
-                        HomeView.class))) {
+        try (var app = SpringBrowserlessApplicationContext
+                .create(applicationContext,
+                        b -> b.withViewPackages(InteractionLatencyView.class,
+                                HomeView.class)
+                                .withSessionLockIsolation(true))) {
             var alice = app.newUser().newWindow();
             var bob = app.newUser().newWindow();
             alice.navigate(InteractionLatencyView.class);

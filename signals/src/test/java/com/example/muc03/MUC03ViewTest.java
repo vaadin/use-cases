@@ -113,7 +113,8 @@ class MUC03ViewTest extends SpringBrowserlessTest {
 
     private SecuredBrowserlessApplicationContext<Authentication> createApp() {
         return SpringBrowserlessApplicationContext.createSecured(
-                applicationContext, b -> b.withViewPackages(MUC03View.class));
+                applicationContext, b -> b.withViewPackages(MUC03View.class)
+                        .withSessionLockIsolation(true));
     }
 
     private static void bobScoresAPoint(BrowserlessUIContext alice,

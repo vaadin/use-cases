@@ -72,7 +72,8 @@ class ChatViewTest extends SpringBrowserlessTest {
     void aMessageFromAnotherSessionArrivesToo() {
         try (var app = SpringBrowserlessApplicationContext.create(
                 applicationContext,
-                b -> b.withViewPackages(ChatView.class, HomeView.class))) {
+                b -> b.withViewPackages(ChatView.class, HomeView.class)
+                        .withSessionLockIsolation(true))) {
             var alice = app.newUser().newWindow();
             var bob = app.newUser().newWindow();
             alice.navigate(ChatView.class);

@@ -58,7 +58,8 @@ class MaintenanceBannerViewTest extends SpringBrowserlessTest {
     void noticePublishedInAnotherSessionIsShown() {
         try (var app = SpringBrowserlessApplicationContext.create(
                 applicationContext,
-                b -> b.withViewPackages(MaintenanceBannerView.class))) {
+                b -> b.withViewPackages(MaintenanceBannerView.class)
+                        .withSessionLockIsolation(true))) {
             var alice = app.newUser().newWindow();
             var bob = app.newUser().newWindow();
             alice.navigate(MaintenanceBannerView.class);

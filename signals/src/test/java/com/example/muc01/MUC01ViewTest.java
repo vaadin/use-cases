@@ -85,7 +85,8 @@ class MUC01ViewTest extends SpringBrowserlessTest {
     @Test
     void otherUserMessageAppearsInView() {
         try (var app = SpringBrowserlessApplicationContext.createSecured(
-                applicationContext, b -> b.withViewPackages(MUC01View.class))) {
+                applicationContext, b -> b.withViewPackages(MUC01View.class)
+                        .withSessionLockIsolation(true))) {
             var alice = app.newUser("alice", "USER").newWindow();
             var bob = app.newUser("bob", "USER").newWindow();
             alice.navigate(MUC01View.class);
@@ -108,7 +109,8 @@ class MUC01ViewTest extends SpringBrowserlessTest {
     @Test
     void clearAllRemovesMessagesFromAllUsers() {
         try (var app = SpringBrowserlessApplicationContext.createSecured(
-                applicationContext, b -> b.withViewPackages(MUC01View.class))) {
+                applicationContext, b -> b.withViewPackages(MUC01View.class)
+                        .withSessionLockIsolation(true))) {
             var alice = app.newUser("alice", "USER").newWindow();
             var bob = app.newUser("bob", "USER").newWindow();
             alice.navigate(MUC01View.class);

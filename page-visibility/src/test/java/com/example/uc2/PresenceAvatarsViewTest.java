@@ -84,10 +84,11 @@ class PresenceAvatarsViewTest extends SpringBrowserlessTest {
      */
     @Test
     void anotherUsersPresenceAndVisibilityShowInTheRoom() {
-        try (var app = SpringBrowserlessApplicationContext.create(
-                applicationContext,
-                b -> b.withViewPackages(PresenceAvatarsView.class,
-                        HomeView.class))) {
+        try (var app = SpringBrowserlessApplicationContext
+                .create(applicationContext,
+                        b -> b.withViewPackages(PresenceAvatarsView.class,
+                                HomeView.class)
+                                .withSessionLockIsolation(true))) {
             var alice = app.newUser().newWindow();
             var bob = app.newUser().newWindow();
             alice.navigate(PresenceAvatarsView.class);

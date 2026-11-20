@@ -153,7 +153,8 @@ class MUC06ViewTest extends SpringBrowserlessTest {
 
     private BrowserlessApplicationContext createApp() {
         return SpringBrowserlessApplicationContext.create(applicationContext,
-                b -> b.withViewPackages(MUC06View.class));
+                b -> b.withViewPackages(MUC06View.class)
+                        .withSessionLockIsolation(true));
     }
 
     private static Button addTaskButton(BrowserlessUIContext window) {

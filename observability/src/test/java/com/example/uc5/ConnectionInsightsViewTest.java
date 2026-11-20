@@ -494,10 +494,11 @@ class ConnectionInsightsViewTest extends SpringBrowserlessTest {
         // Two tablets, each its own session, in one running service: the
         // buffer the kit's service-init listener published is the one both
         // capture into and both read from.
-        try (var app = SpringBrowserlessApplicationContext.create(
-                applicationContext,
-                b -> b.withViewPackages(ConnectionInsightsView.class,
-                        HomeView.class))) {
+        try (var app = SpringBrowserlessApplicationContext
+                .create(applicationContext,
+                        b -> b.withViewPackages(ConnectionInsightsView.class,
+                                HomeView.class)
+                                .withSessionLockIsolation(true))) {
             var first = app.newUser().newWindow();
             var second = app.newUser().newWindow();
             first.navigate(ConnectionInsightsView.class);

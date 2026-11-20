@@ -80,7 +80,8 @@ class ResumePlaybackViewTest extends SpringBrowserlessTest {
     void positionsAreNotSharedBetweenSessions() {
         try (var app = SpringBrowserlessApplicationContext.create(
                 applicationContext,
-                b -> b.withViewPackages(ResumePlaybackView.class))) {
+                b -> b.withViewPackages(ResumePlaybackView.class)
+                        .withSessionLockIsolation(true))) {
             var alice = app.newUser().newWindow();
             var bob = app.newUser().newWindow();
             alice.navigate(ResumePlaybackView.class);

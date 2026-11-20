@@ -84,7 +84,8 @@ class PresenceViewTest extends SpringBrowserlessTest {
         // that would fail.
         try (var app = SpringBrowserlessApplicationContext.create(
                 applicationContext,
-                b -> b.withViewPackages(PresenceView.class, HomeView.class))) {
+                b -> b.withViewPackages(PresenceView.class, HomeView.class)
+                        .withSessionLockIsolation(true))) {
             var alice = app.newUser().newWindow();
             var bob = app.newUser().newWindow();
             alice.navigate(PresenceView.class);

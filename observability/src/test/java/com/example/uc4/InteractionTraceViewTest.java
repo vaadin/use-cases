@@ -307,10 +307,11 @@ class InteractionTraceViewTest extends SpringBrowserlessTest {
         // per-session state: a second session reads the ones the first one
         // left behind, which is what a colleague looking over your shoulder
         // needs. Kept under MAX_TRAILS so the count can be compared at all.
-        try (var app = SpringBrowserlessApplicationContext.create(
-                applicationContext,
-                b -> b.withViewPackages(InteractionTraceView.class,
-                        HomeView.class))) {
+        try (var app = SpringBrowserlessApplicationContext
+                .create(applicationContext,
+                        b -> b.withViewPackages(InteractionTraceView.class,
+                                HomeView.class)
+                                .withSessionLockIsolation(true))) {
             var alice = app.newUser().newWindow();
             var bob = app.newUser().newWindow();
             alice.navigate(InteractionTraceView.class);

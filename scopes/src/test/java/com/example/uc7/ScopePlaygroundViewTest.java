@@ -47,10 +47,11 @@ class ScopePlaygroundViewTest extends SpringBrowserlessTest {
 
     @Test
     void countersShowTheLifetimeOfEachScope() {
-        try (var app = SpringBrowserlessApplicationContext.create(
-                applicationContext,
-                b -> b.withViewPackages(ScopePlaygroundView.class,
-                        HomeView.class))) {
+        try (var app = SpringBrowserlessApplicationContext
+                .create(applicationContext,
+                        b -> b.withViewPackages(ScopePlaygroundView.class,
+                                HomeView.class)
+                                .withSessionLockIsolation(true))) {
             var alice = app.newUser().newWindow();
             alice.navigate(ScopePlaygroundView.class);
             assertEquals(List.of(1, 1, 1, 1, 1, 1),

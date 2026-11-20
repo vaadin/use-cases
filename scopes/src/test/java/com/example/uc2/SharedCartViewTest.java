@@ -45,7 +45,8 @@ class SharedCartViewTest extends SpringBrowserlessTest {
     void cartIsSharedByTheTabsOfASessionButNotWithOtherUsers() {
         try (var app = SpringBrowserlessApplicationContext.create(
                 applicationContext,
-                b -> b.withViewPackages(SharedCartView.class))) {
+                b -> b.withViewPackages(SharedCartView.class)
+                        .withSessionLockIsolation(true))) {
             var aliceTab = app.newUser().newWindow();
             var aliceOtherTab = aliceTab.getUser().newWindow();
             var bob = app.newUser().newWindow();

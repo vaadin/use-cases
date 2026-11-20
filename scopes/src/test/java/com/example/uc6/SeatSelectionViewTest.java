@@ -120,7 +120,8 @@ class SeatSelectionViewTest extends SpringBrowserlessTest {
 
     private BrowserlessApplicationContext multiUser() {
         return SpringBrowserlessApplicationContext.create(applicationContext,
-                b -> b.withViewPackages(SeatSelectionView.class));
+                b -> b.withViewPackages(SeatSelectionView.class)
+                        .withSessionLockIsolation(true));
     }
 
     private static Button seat(BrowserlessUIContext window, String name) {

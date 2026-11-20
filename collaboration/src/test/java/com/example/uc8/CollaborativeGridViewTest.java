@@ -86,10 +86,11 @@ class CollaborativeGridViewTest extends SpringBrowserlessTest {
 
     @Test
     void aRowAddedInAnotherSessionShowsUp() {
-        try (var app = SpringBrowserlessApplicationContext.create(
-                applicationContext,
-                b -> b.withViewPackages(CollaborativeGridView.class,
-                        HomeView.class))) {
+        try (var app = SpringBrowserlessApplicationContext
+                .create(applicationContext,
+                        b -> b.withViewPackages(CollaborativeGridView.class,
+                                HomeView.class)
+                                .withSessionLockIsolation(true))) {
             var alice = app.newUser().newWindow();
             var bob = app.newUser().newWindow();
             alice.navigate(CollaborativeGridView.class);

@@ -249,10 +249,11 @@ class FailureInsightsViewTest extends SpringBrowserlessTest {
         // The insights come from an application-scoped buffer the kit owns,
         // not from per-session state: a second clerk at another desk must see
         // Alice's failure in their readout.
-        try (var app = SpringBrowserlessApplicationContext.create(
-                applicationContext,
-                b -> b.withViewPackages(FailureInsightsView.class,
-                        HomeView.class))) {
+        try (var app = SpringBrowserlessApplicationContext
+                .create(applicationContext,
+                        b -> b.withViewPackages(FailureInsightsView.class,
+                                HomeView.class)
+                                .withSessionLockIsolation(true))) {
             var alice = app.newUser().newWindow();
             var bob = app.newUser().newWindow();
             alice.navigate(FailureInsightsView.class);

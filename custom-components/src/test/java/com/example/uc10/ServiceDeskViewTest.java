@@ -229,7 +229,8 @@ class ServiceDeskViewTest extends SpringBrowserlessTest {
     private BrowserlessApplicationContext multiUser() {
         return SpringBrowserlessApplicationContext.create(applicationContext,
                 b -> b.withViewPackages(ServiceDeskView.class)
-                        .withComponentTesterPackages("com.example.components"));
+                        .withComponentTesterPackages("com.example.components")
+                        .withSessionLockIsolation(true));
     }
 
     /** Rates a ticket in the given window's desk and saves it. */

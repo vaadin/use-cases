@@ -76,12 +76,14 @@ Prefer the first: a fresh context per method makes the module's build slower.
 ## Second session
 
 When a view depends on an application-scoped bean that holds shared state,
-also write a test with a second user. Open a multi-user context, let one user
-act in their own window, and assert what the other user's window shows:
+also write a test with a second user. Open a multi-user context with session
+lock isolation on, let one user act in their own window, and assert what the
+other user's window shows:
 
 ```java
 try (var app = SpringBrowserlessApplicationContext.create(applicationContext,
-        b -> b.withViewPackages(MaintenanceBannerView.class))) {
+        b -> b.withViewPackages(MaintenanceBannerView.class)
+                .withSessionLockIsolation(true))) {
     var alice = app.newUser().newWindow();
     var bob = app.newUser().newWindow();
     alice.navigate(MaintenanceBannerView.class);
@@ -99,8 +101,11 @@ try (var app = SpringBrowserlessApplicationContext.create(applicationContext,
 This catches `ListSignal`-vs-`SharedListSignal` mistakes and other
 cross-session leaks at test time rather than in the second browser tab. Call
 `runPendingSignalsTasks()` on the window you assert on, right before the
-assertion: it runs the pending signal work and makes that window current. Use
-`createSecured(...)` and `app.newUser("alice", "USER")` when the view
+assertion: it runs the pending signal work and makes that window current. With
+lock isolation, a user's session is locked only while one of that user's
+windows is active, as in a real request. Code that changes another user's UI
+without `UI.access()` therefore fails the test instead of passing silently.
+Use `createSecured(...)` and `app.newUser("alice", "USER")` when the view
 needs a signed-in user.
 
 ## Lifecycle

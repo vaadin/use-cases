@@ -58,7 +58,8 @@ class DeliveryReceiptViewTest extends SpringBrowserlessTest {
     void aDeliveryInOneSessionIsVisibleInTheNext() {
         try (var app = SpringBrowserlessApplicationContext.create(
                 applicationContext,
-                b -> b.withViewPackages(DeliveryReceiptView.class))) {
+                b -> b.withViewPackages(DeliveryReceiptView.class)
+                        .withSessionLockIsolation(true))) {
             var alice = app.newUser().newWindow();
             var colleague = app.newUser().newWindow();
             alice.navigate(DeliveryReceiptView.class);

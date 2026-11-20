@@ -193,7 +193,8 @@ class MUC08ViewTest extends SpringBrowserlessTest {
 
     private SecuredBrowserlessApplicationContext<Authentication> createApp() {
         return SpringBrowserlessApplicationContext.createSecured(
-                applicationContext, b -> b.withViewPackages(MUC08View.class));
+                applicationContext, b -> b.withViewPackages(MUC08View.class)
+                        .withSessionLockIsolation(true));
     }
 
     private static void post(BrowserlessUIContext window, String text) {

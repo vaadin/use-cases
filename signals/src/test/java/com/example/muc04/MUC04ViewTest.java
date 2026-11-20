@@ -154,7 +154,8 @@ class MUC04ViewTest extends SpringBrowserlessTest {
 
     private BrowserlessApplicationContext createApp() {
         return SpringBrowserlessApplicationContext.create(applicationContext,
-                b -> b.withViewPackages(MUC04View.class));
+                b -> b.withViewPackages(MUC04View.class)
+                        .withSessionLockIsolation(true));
     }
 
     private static TextField field(BrowserlessUIContext window, String label) {
