@@ -17,8 +17,8 @@ class TelemetryTest {
     void chipsAndTimingsCarryTheirStyleClasses() {
         assertTrue(Telemetry.chip("vaadin.rpc.duration").getClassNames()
                 .contains("metric"));
-        assertTrue(Telemetry.timing("12 ms").getClassNames()
-                .contains("timing"));
+        assertTrue(
+                Telemetry.timing("12 ms").getClassNames().contains("timing"));
     }
 
     @Test

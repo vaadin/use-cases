@@ -43,9 +43,8 @@ class MeterTableTest {
     @Test
     void anUnmeasuredMeterReadsAsADashRatherThanZero() {
         MeterTable table = new MeterTable("Queries");
-        table.setRows(List.of(
-                new MeterTable.Row("vaadin.data.fetch.rows", "route=orders", 0,
-                        "", "items returned")));
+        table.setRows(List.of(new MeterTable.Row("vaadin.data.fetch.rows",
+                "route=orders", 0, "", "items returned")));
 
         assertEquals("—", cell(table.getBodyRows().get(0), 3));
     }
@@ -71,7 +70,6 @@ class MeterTableTest {
     }
 
     private static String cell(TableRow row, int index) {
-        return row.getDataCells().get(index).getElement()
-                .getTextRecursively();
+        return row.getDataCells().get(index).getElement().getTextRecursively();
     }
 }
