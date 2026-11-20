@@ -36,6 +36,14 @@ import com.example.usecase24.UseCase24View;
 import com.example.usecase25.UseCase25View;
 import com.example.usecase26.UseCase26View;
 import com.example.usecase27.UseCase27View;
+import com.example.usecase28.UseCase28View;
+import com.example.usecase29.UseCase29View;
+import com.example.usecase30.UseCase30View;
+import com.example.usecase31.UseCase31View;
+import com.example.usecase32.UseCase32View;
+import com.example.usecase33.UseCase33View;
+import com.example.usecase34.UseCase34View;
+import com.example.usecase35.UseCase35View;
 
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Anchor;
@@ -86,6 +94,11 @@ public class HomeView extends BaseHomeView {
                 List.of(UseCase13View.class, UseCase16View.class,
                         UseCase20View.class, UseCase21View.class,
                         UseCase27View.class));
+        addGroup("Advanced Signal API", VaadinIcon.FLASK, Accent.BLUE,
+                List.of(UseCase28View.class, UseCase29View.class,
+                        UseCase30View.class, UseCase31View.class,
+                        UseCase32View.class, UseCase33View.class,
+                        UseCase34View.class, UseCase35View.class));
         addGroup("Multi-user collaboration", VaadinIcon.USERS, Accent.YELLOW,
                 List.of(MUC01View.class, MUC02View.class, MUC03View.class,
                         MUC04View.class, MUC06View.class, MUC07View.class,

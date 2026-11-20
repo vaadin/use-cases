@@ -165,8 +165,8 @@ public class UseCase01View extends VerticalLayout {
 
                         Notification notification = Notification
                                 .show("Account created successfully!");
-                        notification.addThemeVariants(
-                                NotificationVariant.SUCCESS);
+                        notification
+                                .addThemeVariants(NotificationVariant.SUCCESS);
                         notification.setDuration(3000);
                     });
 
