@@ -103,6 +103,37 @@ and transitive dependencies, and explain the choice in the pull request. A
 dependency that lives outside Maven Central gets its repository declared in the
 module pom only, releases only.
 
+### Testing against a local Flow or browserless-test build
+
+To try a use case against a Flow or browserless-test change that exists only
+on your machine, keep the local build in its own Maven repository. A plain
+`mvn install` puts it in `~/.m2/repository` under the same snapshot version
+as the published one, so the next online build replaces it, and a build with
+`-o` alone fails on artifacts that were never downloaded.
+
+```bash
+# 1. Once, online: download everything the module needs into ~/.m2
+./mvnw -pl <module> -am test
+
+# 2. Install the upstream change into ~/m2-local, reading the rest from ~/.m2
+(cd ../flow && mvn -pl flow-server -am install -DskipTests \
+   -Dmaven.repo.local=$HOME/m2-local -Dmaven.repo.local.tail=$HOME/.m2/repository)
+
+# 3. Build the use case offline: the local build wins, nothing is replaced
+./mvnw -o -pl <module> -am test \
+   -Dmaven.repo.local=$HOME/m2-local -Dmaven.repo.local.tail=$HOME/.m2/repository
+```
+
+Step 2 needs Maven 3.9 or newer: older versions ignore
+`maven.repo.local.tail`. The upstream branch must have the version the parent
+pom pins (`flow.version`, `browserless-test.version`). Repeat steps 2 and 3
+after each upstream change, and delete `~/m2-local` when you are done.
+
+The Vaadin build can regenerate the module's `package.json` and
+`package-lock.json`. Restore them with `git checkout <module>/package.json
+<module>/package-lock.json` before committing (see
+[Generated files](#generated-files)).
+
 ## Generated files
 
 Never commit build output: `target/`, `node_modules/`, `src/main/bundles/`,
