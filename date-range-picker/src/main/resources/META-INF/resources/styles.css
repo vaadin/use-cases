@@ -1,0 +1,16 @@
+/* Date range picker use cases — shared styles */
+
+.app-title {
+    font-size: var(--aura-font-size-l);
+    margin: 0;
+}
+
+.api-gap {
+    max-width: 60rem;
+    color: var(--vaadin-text-color-secondary);
+    font-size: var(--aura-font-size-s);
+}
+
+.summary {
+    font-weight: 600;
+}
