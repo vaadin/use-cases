@@ -35,6 +35,7 @@
         <module>testing</module>
         <module>text-selection</module>
         <module>theming</module>
+        <module>walkthrough</module>
         <module>web-share</module>
         <module>screen-orientation</module>
         <module>observability</module>
