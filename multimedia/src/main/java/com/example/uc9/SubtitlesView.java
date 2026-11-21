@@ -83,7 +83,6 @@ public class SubtitlesView extends VerticalLayout
                 + "subtitles menu in the player. The subtitles start in "
                 + "your browser's language when one of the tracks matches."));
 
-        video.setControlsVisible(true);
         video.setPreload(Media.Preload.METADATA);
         video.setWidth("640px");
         video.setMaxWidth("100%");
