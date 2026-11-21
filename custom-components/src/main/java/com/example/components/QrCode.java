@@ -1,5 +1,7 @@
 package com.example.components;
 
+import org.jspecify.annotations.Nullable;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -43,7 +45,7 @@ public class QrCode extends Component implements HasStyle {
         getElement().setAttribute("role", "img");
     }
 
-    public String getData() {
+    public @Nullable String getData() {
         return getElement().getAttribute("data");
     }
 
