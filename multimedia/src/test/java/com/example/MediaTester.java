@@ -1,8 +1,6 @@
 package com.example;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.node.ObjectNode;
@@ -27,7 +25,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 public class MediaTester extends ComponentTester<Media> {
 
     private final @Nullable ExecutedJavaScript executed;
-    private final Set<ExecutedJavaScript.Execution> taken = new HashSet<>();
+    private int read;
 
     /**
      * Creates a tester that only fires media events.
@@ -110,11 +108,12 @@ public class MediaTester extends ComponentTester<Media> {
             throw new IllegalStateException(
                     "Create the tester with a capture to read its JavaScript");
         }
-        List<ExecutedJavaScript.Execution> sent = executed.getAll().stream()
-                .filter(execution -> execution.getElement()
+        List<ExecutedJavaScript.Execution> all = executed.getAll();
+        List<ExecutedJavaScript.Execution> sent = all.subList(read, all.size())
+                .stream().filter(execution -> execution.getElement()
                         .equals(getComponent().getElement()))
-                .filter(execution -> !taken.contains(execution)).toList();
-        taken.addAll(sent);
+                .toList();
+        read = all.size();
         return sent.stream().map(execution -> execution.getExpression() + " "
                 + execution.getParameters()).toList();
     }
