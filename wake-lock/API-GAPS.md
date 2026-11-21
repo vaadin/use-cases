@@ -13,9 +13,9 @@ page-level APIs in Flow.
 **Symptom:** browserless-test has no `WakeLockSimulator`. A test can not make
 the browser "grant" or "release" the lock, and has no API to check that a
 click sent `WakeLock#request()` or `release()` to the client.
-**Workaround used:** `WakeLockTestSupport.answerWakeLockCalls()` reads the
-pending JavaScript queue (`UIInternals#dumpPendingJavaScriptInvocations()`)
-for the `WakeLockJs` `request`/`release` calls, and answers them through the
+**Workaround used:** a `JavaScriptHandler`, `WakeLockTestSupport.Browser`,
+records the `WakeLockJs` `request`/`release` calls sent to the simulated
+browser. `WakeLockTestSupport.answerWakeLockCalls()` answers them through the
 public but framework-internal `UIInternals#setWakeLockActive(boolean)`
 (`setWakeLockAvailability` for the availability).
 **Suggested API:** a `WakeLockSimulator` like `GeolocationSimulator`, with

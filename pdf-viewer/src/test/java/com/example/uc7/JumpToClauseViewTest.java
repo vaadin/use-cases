@@ -7,6 +7,7 @@ import com.example.pdfviewer.PdfViewerTester;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@BrowserlessTestConfig(javaScriptHandlers = PdfViewerTester.Browser.class)
 @ViewPackages(classes = JumpToClauseView.class)
 class JumpToClauseViewTest extends SpringBrowserlessTest {
 

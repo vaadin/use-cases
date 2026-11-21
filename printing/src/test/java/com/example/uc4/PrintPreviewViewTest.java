@@ -4,6 +4,7 @@ import com.example.PrintTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@BrowserlessTestConfig(javaScriptHandlers = PrintTestSupport.Browser.class)
 @ViewPackages(classes = PrintPreviewView.class)
 class PrintPreviewViewTest extends SpringBrowserlessTest {
 
@@ -53,7 +55,7 @@ class PrintPreviewViewTest extends SpringBrowserlessTest {
 
         test(findInView(Button.class).id("print-button")).click();
 
-        assertTrue(PrintTestSupport.pendingJsContains("style.textContent"),
+        assertTrue(PrintTestSupport.sentJsContains("style.textContent"),
                 "@page can only be applied through a style element");
         assertTrue(PrintTestSupport.printRequested());
     }
@@ -62,13 +64,13 @@ class PrintPreviewViewTest extends SpringBrowserlessTest {
     void thePageRuleIsWrittenOnArrivalAndRemovedOnLeaving() {
         PrintPreviewView view = navigate(PrintPreviewView.class);
 
-        assertTrue(PrintTestSupport.pendingJsContains("style.textContent"),
+        assertTrue(PrintTestSupport.sentJsContains("style.textContent"),
                 "The document must carry the rule the preview advertises, "
                         + "not just show it");
 
         view.getElement().removeFromParent();
 
-        assertTrue(PrintTestSupport.pendingJsContains("?.remove()"),
+        assertTrue(PrintTestSupport.sentJsContains("?.remove()"),
                 "@page belongs to the document, so it must not follow the "
                         + "user to the next view");
     }

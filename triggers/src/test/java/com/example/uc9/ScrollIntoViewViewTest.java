@@ -5,13 +5,13 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.internal.StateNode;
+import com.vaadin.flow.dom.Element;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -36,23 +36,22 @@ class ScrollIntoViewViewTest extends SpringBrowserlessTest {
     @Test
     void onlyTheServerRowNeedsTheServerToScroll() {
         navigate(ScrollIntoViewView.class);
-        StateNode sectionB = findInView(Div.class).id("section-b").getElement()
-                .getNode();
+        Element sectionB = findInView(Div.class).id("section-b").getElement();
 
+        ExecutedJavaScript executed = ExecutedJavaScript.capture();
         test(findInView(Button.class).id("client-b")).click();
-        assertEquals(0, scrollCallsFor(sectionB),
+        assertEquals(0, scrollCallsFor(executed, sectionB),
                 "the client row scrolls in the browser, not from the server");
 
         test(findInView(Button.class).id("server-b")).click();
-        assertEquals(1, scrollCallsFor(sectionB));
+        assertEquals(1, scrollCallsFor(executed, sectionB));
     }
 
-    private static long scrollCallsFor(StateNode node) {
-        UI ui = UI.getCurrent();
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        return ui.getInternals().dumpPendingJavaScriptInvocations().stream()
-                .filter(pending -> pending.getOwner() == node)
-                .filter(pending -> pending.getInvocation().getExpression()
+    private static long scrollCallsFor(ExecutedJavaScript executed,
+            Element element) {
+        return executed.getAll().stream()
+                .filter(execution -> execution.getElement().equals(element))
+                .filter(execution -> execution.getExpression()
                         .contains("scrollIntoView"))
                 .count();
     }

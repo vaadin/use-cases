@@ -6,10 +6,11 @@ import java.util.List;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ArrayNode;
 
+import com.vaadin.browserless.BrowserlessTestConfig;
+import com.vaadin.browserless.ExecutedJavaScript;
+import com.vaadin.browserless.JavaScriptHandler;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.component.webnotification.WebNotification;
 import com.vaadin.flow.component.webnotification.WebNotificationError;
 import com.vaadin.flow.component.webnotification.WebNotificationOptions;
@@ -21,7 +22,9 @@ import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
  * Browserless tests never run the client JavaScript, so this helper plays the
  * browser: it reports a permission, picks up the notifications the server asked
  * the browser to show, and reports clicks, closes and failures back through the
- * return channel the notifications share.
+ * return channel the notifications share. A test class registers its
+ * {@link Browser} with
+ * {@code @BrowserlessTestConfig(javaScriptHandlers = WebNotificationSimulator.Browser.class)}.
  * <p>
  * Flow has no simulator for web notifications (compare
  * {@code GeolocationSimulator}), so this reaches into framework internals; see
@@ -39,6 +42,22 @@ public final class WebNotificationSimulator {
 
     private static final class State {
         private final List<ShownNotification> shown = new ArrayList<>();
+        private final List<ExecutedJavaScript.Execution> received = new ArrayList<>();
+    }
+
+    /**
+     * Records the JavaScript sent to the browser of each UI, so that
+     * {@link #shown()} can act on the notification calls. Register it with
+     * {@link BrowserlessTestConfig}.
+     */
+    public static final class Browser implements JavaScriptHandler {
+
+        @Override
+        public void handle(ExecutedJavaScript.Execution execution) {
+            if (execution.getExpression().contains("webNotification.")) {
+                state(execution.getUI()).received.add(execution);
+            }
+        }
     }
 
     private WebNotificationSimulator() {
@@ -58,14 +77,14 @@ public final class WebNotificationSimulator {
     public static List<ShownNotification> shown() {
         UI ui = UI.getCurrent();
         State state = state(ui);
-        // Calls through a JavaScript definition are queued only right before
-        // the response is written, which browserless tests never do.
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        for (PendingJavaScriptInvocation pending : ui.getInternals()
-                .dumpPendingJavaScriptInvocations()) {
-            JavaScriptInvocation invocation = pending.getInvocation();
-            String expression = invocation.getExpression();
-            List<Object> parameters = invocation.getParameters();
+        // Starting a capture sends whatever is still pending to the browser
+        ExecutedJavaScript.capture(ui).stop();
+        List<ExecutedJavaScript.Execution> received = List
+                .copyOf(state.received);
+        state.received.clear();
+        for (ExecutedJavaScript.Execution execution : received) {
+            String expression = execution.getExpression();
+            List<Object> parameters = execution.getParameters();
             if (expression.contains("webNotification.show(")) {
                 show(ui, state,
                         new ShownNotification((String) parameters.get(0),

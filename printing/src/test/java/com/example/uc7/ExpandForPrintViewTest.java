@@ -8,6 +8,7 @@ import com.example.data.Orders;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -22,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@BrowserlessTestConfig(javaScriptHandlers = PrintTestSupport.Browser.class)
 @ViewPackages(classes = ExpandForPrintView.class)
 class ExpandForPrintViewTest extends SpringBrowserlessTest {
 
@@ -49,11 +51,9 @@ class ExpandForPrintViewTest extends SpringBrowserlessTest {
     @Test
     void everySectionIsOpenedForPrintAndRestoredAfterwards() {
         navigate(ExpandForPrintView.class);
-        // Trigger listeners are only queued when the response is written.
-        roundTrip();
 
         Map<Element, List<List<Object>>> listeners = PrintTestSupport
-                .queuedListeners();
+                .sentListeners();
         for (Details section : findInView(Details.class).all()) {
             // Remember the state the user left the section in, open it for
             // the paper, and put that state back when the dialog closes —
@@ -73,11 +73,9 @@ class ExpandForPrintViewTest extends SpringBrowserlessTest {
     @Test
     void openedSectionsAreRenderedBeforeThePagesAreLaidOut() {
         navigate(ExpandForPrintView.class);
-        roundTrip();
 
         assertTrue(
-                PrintTestSupport.queuedJsMentions("performUpdate",
-                        "beforeprint"),
+                PrintTestSupport.sentJsMentions("performUpdate", "beforeprint"),
                 "A section opened by a Print button stays folded on paper "
                         + "unless it is rendered inside the event");
     }

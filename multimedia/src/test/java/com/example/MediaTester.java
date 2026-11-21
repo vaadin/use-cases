@@ -1,23 +1,44 @@
 package com.example;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import tools.jackson.databind.node.ObjectNode;
 
+import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.ComponentTester;
+import com.vaadin.browserless.ExecutedJavaScript;
+import com.vaadin.browserless.JavaScriptHandler;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Media;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.internal.JacksonUtils;
 
 /**
  * Stands in for the browser side of a {@code <video>} / {@code <audio>} in
  * browserless tests: fires the media events the browser would send and exposes
  * the JavaScript calls ({@code play()}, {@code load()}, seeking, ...) the
- * server queued for the element. There is no media simulator in the test kit;
- * see {@code API-GAPS.md #10}.
+ * server sent for the element. There is no media simulator in the test kit; see
+ * {@code API-GAPS.md #10}.
+ * <p>
+ * {@link #takeJavaScript()} needs the {@link Browser} recorder, registered with
+ * {@code @BrowserlessTestConfig(javaScriptHandlers = MediaTester.Browser.class)},
+ * so that it also sees the calls sent while the view was navigated to.
  */
 public class MediaTester extends ComponentTester<Media> {
+
+    /**
+     * Records the JavaScript sent to the browser of each UI, so that
+     * {@link #takeJavaScript()} can return it. Register it with
+     * {@link BrowserlessTestConfig}.
+     */
+    public static final class Browser implements JavaScriptHandler {
+
+        @Override
+        public void handle(ExecutedJavaScript.Execution execution) {
+            received(execution.getUI()).add(execution);
+        }
+    }
 
     public MediaTester(Media media) {
         super(media);
@@ -69,23 +90,34 @@ public class MediaTester extends ComponentTester<Media> {
     }
 
     /**
-     * Takes the JavaScript the server queued for this element since the last
+     * Takes the JavaScript the server sent for this element since the last
      * call, in order. Each entry is the expression followed by its parameters,
      * since {@code callJsFunction} passes the function name as a parameter.
      *
-     * @return the queued expressions with their parameters
+     * @return the sent expressions with their parameters
      */
     public List<String> takeJavaScript() {
         UI ui = UI.getCurrent();
-        // executeJs is queued before the response; run that step without
-        // the rest of the round trip, which would discard the calls.
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        return ui.getInternals().dumpPendingJavaScriptInvocations().stream()
-                .filter(invocation -> invocation.getOwner() == getComponent()
-                        .getElement().getNode())
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .map(invocation -> invocation.getExpression() + " "
-                        + invocation.getParameters())
+        // Starting a capture sends whatever is still pending to the browser
+        ExecutedJavaScript.capture(ui).stop();
+        List<ExecutedJavaScript.Execution> received = received(ui);
+        List<ExecutedJavaScript.Execution> taken = received.stream()
+                .filter(execution -> execution.getElement()
+                        .equals(getComponent().getElement()))
                 .toList();
+        received.removeAll(taken);
+        return taken.stream().map(execution -> execution.getExpression() + " "
+                + execution.getParameters()).toList();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<ExecutedJavaScript.Execution> received(UI ui) {
+        List<ExecutedJavaScript.Execution> received = (List<ExecutedJavaScript.Execution>) ComponentUtil
+                .getData(ui, Browser.class.getName());
+        if (received == null) {
+            received = new ArrayList<>();
+            ComponentUtil.setData(ui, Browser.class.getName(), received);
+        }
+        return received;
     }
 }

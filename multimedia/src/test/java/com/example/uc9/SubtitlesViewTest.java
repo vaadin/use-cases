@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.UI;
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@BrowserlessTestConfig(javaScriptHandlers = MediaTester.Browser.class)
 @ViewPackages(classes = SubtitlesView.class)
 class SubtitlesViewTest extends SpringBrowserlessTest {
 

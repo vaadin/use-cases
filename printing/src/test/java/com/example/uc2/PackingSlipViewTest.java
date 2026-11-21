@@ -6,6 +6,7 @@ import com.example.PrintTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.Div;
@@ -15,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@BrowserlessTestConfig(javaScriptHandlers = PrintTestSupport.Browser.class)
 @ViewPackages(classes = PackingSlipView.class)
 class PackingSlipViewTest extends SpringBrowserlessTest {
 
@@ -27,10 +29,10 @@ class PackingSlipViewTest extends SpringBrowserlessTest {
                 .contains("ORD-1003"));
         assertTrue(document.hasClassName("printable"));
 
-        assertTrue(PrintTestSupport.pendingJsContains("requestAnimationFrame"),
+        assertTrue(PrintTestSupport.sentJsContains("requestAnimationFrame"),
                 "The slip must wait for a painted frame before printing");
         assertTrue(PrintTestSupport.printRequested());
-        assertTrue(PrintTestSupport.pendingJsContains("afterprint"),
+        assertTrue(PrintTestSupport.sentJsContains("afterprint"),
                 "The print window should close itself again");
     }
 

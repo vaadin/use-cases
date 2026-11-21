@@ -4,6 +4,7 @@ import com.example.PrintTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@BrowserlessTestConfig(javaScriptHandlers = PrintTestSupport.Browser.class)
 @ViewPackages(classes = PrintDashboardView.class)
 class PrintDashboardViewTest extends SpringBrowserlessTest {
 
@@ -38,11 +40,9 @@ class PrintDashboardViewTest extends SpringBrowserlessTest {
     @Test
     void chartsAreReflowedWhenTheBrowserStartsPrinting() {
         navigate(PrintDashboardView.class);
-        // Trigger listeners are only queued when the response is written.
-        roundTrip();
 
         assertTrue(
-                PrintTestSupport.queuedJsMentions("beforeprint", "afterprint",
+                PrintTestSupport.sentJsMentions("beforeprint", "afterprint",
                         "reflow()", "removeEventListener"),
                 "A chart keeps its screen width unless it is told to reflow, "
                         + "and the listeners must go away with the view");
