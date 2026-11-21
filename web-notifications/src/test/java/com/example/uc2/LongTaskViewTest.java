@@ -5,12 +5,12 @@ import java.util.concurrent.ScheduledFuture;
 
 import com.example.WebNotificationSimulator;
 import com.example.home.HomeView;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.UI;
@@ -31,9 +31,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest
-@BrowserlessTestConfig(javaScriptHandlers = WebNotificationSimulator.Browser.class)
 @ViewPackages(classes = { LongTaskView.class, HomeView.class })
 class LongTaskViewTest extends SpringBrowserlessTest {
+
+    private WebNotificationSimulator browser;
+
+    @BeforeEach
+    void captureNotificationCalls() {
+        browser = WebNotificationSimulator.capture();
+    }
 
     // The tests finish the report by hand instead of waiting ten seconds.
     @MockitoBean
@@ -67,8 +73,7 @@ class LongTaskViewTest extends SpringBrowserlessTest {
         assertTrue(startButton().isEnabled());
         assertSpan("Report ready.");
         assertLogContains("→ OS notification");
-        assertEquals("Your report is ready",
-                WebNotificationSimulator.shown().get(0).title());
+        assertEquals("Your report is ready", browser.shown().get(0).title());
     }
 
     @Test
@@ -94,7 +99,7 @@ class LongTaskViewTest extends SpringBrowserlessTest {
         view.finish(UI.getCurrent());
         runPendingSignalsTasks();
         assertLogContains("→ in-app notification");
-        assertTrue(WebNotificationSimulator.shown().isEmpty());
+        assertTrue(browser.shown().isEmpty());
     }
 
     @Test
@@ -106,7 +111,7 @@ class LongTaskViewTest extends SpringBrowserlessTest {
 
         // e.g. Chrome on Android, which only shows notifications through a
         // service worker
-        WebNotificationSimulator.fail(WebNotificationSimulator.shown().get(0),
+        browser.fail(browser.shown().get(0),
                 WebNotificationError.Reason.UNKNOWN, "Illegal constructor");
         assertLogContains("OS notification refused (UNKNOWN) → in-app");
     }

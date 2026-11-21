@@ -1,15 +1,11 @@
 package com.example;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.ExecutedJavaScript;
-import com.vaadin.browserless.JavaScriptHandler;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.wakelock.WakeLock;
 import com.vaadin.flow.component.wakelock.WakeLockAvailability;
@@ -18,12 +14,11 @@ import com.vaadin.flow.component.wakelock.WakeLockAvailability;
  * Plays the browser's part of {@link WakeLock} in browserless tests, which have
  * no wake lock simulator (API-GAPS.md #1).
  * <p>
- * {@link Browser} records the {@code request} and {@code release} calls the
- * server sends to the browser, and {@link #answerWakeLockCalls()} answers them
- * the way a browser that grants every request would. A test therefore sees the
- * lock only when the view really asked for it. A test class registers the
- * recorder with
- * {@code @BrowserlessTestConfig(javaScriptHandlers = WakeLockTestSupport.Browser.class)}.
+ * A test starts one with {@link #capture()} before it navigates, typically in a
+ * {@code @BeforeEach} method. {@link #answerWakeLockCalls()} then answers the
+ * {@code request} and {@code release} calls sent to the browser the way a
+ * browser that grants every request would. A test therefore sees the lock only
+ * when the view really asked for it.
  */
 public final class WakeLockTestSupport {
 
@@ -32,23 +27,23 @@ public final class WakeLockTestSupport {
     /** A {@link WakeLock#release()} sent to the browser. */
     public static final String RELEASE = "release";
 
-    /**
-     * Records the wake lock calls sent to the browser of each UI, so that
-     * {@link #answerWakeLockCalls()} can answer them when the test decides the
-     * browser does. Register it with {@link BrowserlessTestConfig}.
-     */
-    public static final class Browser implements JavaScriptHandler {
+    private final UI ui;
+    private final ExecutedJavaScript executed;
+    private int answered;
 
-        @Override
-        public void handle(ExecutedJavaScript.Execution execution) {
-            String call = wakeLockCall(execution.getExpression());
-            if (call != null) {
-                received(execution.getUI()).add(call);
-            }
-        }
+    private WakeLockTestSupport(UI ui) {
+        this.ui = ui;
+        this.executed = ExecutedJavaScript.capture(ui);
     }
 
-    private WakeLockTestSupport() {
+    /**
+     * Starts watching the wake lock calls sent to the browser of the current
+     * UI.
+     *
+     * @return the browser side of the wake lock, not null
+     */
+    public static WakeLockTestSupport capture() {
+        return new WakeLockTestSupport(Objects.requireNonNull(UI.getCurrent()));
     }
 
     /**
@@ -59,13 +54,12 @@ public final class WakeLockTestSupport {
      *
      * @return the calls, each {@link #REQUEST} or {@link #RELEASE}
      */
-    public static List<String> answerWakeLockCalls() {
-        UI ui = Objects.requireNonNull(UI.getCurrent());
-        // Starting a capture sends whatever is still pending to the browser
-        ExecutedJavaScript.capture(ui).stop();
-        List<String> received = received(ui);
-        List<String> calls = List.copyOf(received);
-        received.clear();
+    public List<String> answerWakeLockCalls() {
+        List<ExecutedJavaScript.Execution> sent = executed.getAll();
+        List<String> calls = sent.subList(answered, sent.size()).stream()
+                .map(execution -> wakeLockCall(execution.getExpression()))
+                .filter(Objects::nonNull).toList();
+        answered = sent.size();
         if (!calls.isEmpty()) {
             ui.getInternals()
                     .setWakeLockActive(REQUEST.equals(calls.getLast()));
@@ -82,17 +76,6 @@ public final class WakeLockTestSupport {
     public static void simulateAvailability(WakeLockAvailability availability) {
         Objects.requireNonNull(UI.getCurrent()).getInternals()
                 .setWakeLockAvailability(availability);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static List<String> received(UI ui) {
-        List<String> received = (List<String>) ComponentUtil.getData(ui,
-                Browser.class.getName());
-        if (received == null) {
-            received = new ArrayList<>();
-            ComponentUtil.setData(ui, Browser.class.getName(), received);
-        }
-        return received;
     }
 
     private static @Nullable String wakeLockCall(String expression) {

@@ -1,14 +1,11 @@
 package com.example;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import tools.jackson.databind.node.ObjectNode;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.ExecutedJavaScript;
-import com.vaadin.browserless.JavaScriptHandler;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.screenorientation.ScreenOrientation;
 import com.vaadin.flow.component.screenorientation.ScreenOrientationLockErrorCode;
@@ -21,33 +18,29 @@ import com.vaadin.flow.internal.JacksonUtils;
  * <p>
  * {@link #setScreenOrientation} feeds
  * {@link ScreenOrientation#orientationSignal()} through the same public entry
- * point the client bridge uses. {@link Browser} records the lock requests a
- * view sends to the browser, and {@link #pendingLocks()} hands them out, so a
- * test can answer them as the browser would. A test class that answers locks
- * registers the recorder with
- * {@code @BrowserlessTestConfig(javaScriptHandlers = ScreenOrientationTestSupport.Browser.class)}.
+ * point the client bridge uses. A test that answers lock requests starts a
+ * capture with {@link #capture()} before it navigates, typically in a
+ * {@code @BeforeEach} method; {@link #pendingLocks()} then hands out the lock
+ * requests the view sent to the browser, so the test can answer them as the
+ * browser would.
  */
 public final class ScreenOrientationTestSupport {
 
-    /**
-     * Records the {@link ScreenOrientation#lock} requests sent to the browser
-     * of each UI, so that {@link #pendingLocks()} can hand them out. Register
-     * it with {@link BrowserlessTestConfig}.
-     */
-    public static final class Browser implements JavaScriptHandler {
+    private final ExecutedJavaScript executed;
+    private int read;
 
-        @Override
-        public void handle(ExecutedJavaScript.Execution execution) {
-            execution.getJsCall().filter(call -> call
-                    .definitionType() == ScreenOrientation.ScreenOrientationJs.class
-                    && call.methodName().equals("lock"))
-                    .ifPresent(call -> received(execution.getUI()).add(
-                            new PendingLock((String) call.arguments().get(0),
-                                    execution)));
-        }
+    private ScreenOrientationTestSupport(UI ui) {
+        this.executed = ExecutedJavaScript.capture(ui);
     }
 
-    private ScreenOrientationTestSupport() {
+    /**
+     * Starts watching the lock requests sent to the browser of the current UI.
+     *
+     * @return the browser side of the lock requests, not null
+     */
+    public static ScreenOrientationTestSupport capture() {
+        return new ScreenOrientationTestSupport(
+                Objects.requireNonNull(UI.getCurrent()));
     }
 
     public static void setScreenOrientation(ScreenOrientationType orientation,
@@ -85,24 +78,17 @@ public final class ScreenOrientationTestSupport {
      * Returns the lock requests sent to the browser since the last call, in the
      * order the view sent them.
      */
-    public static List<PendingLock> pendingLocks() {
-        UI ui = UI.getCurrent();
-        // Starting a capture sends whatever is still pending to the browser
-        ExecutedJavaScript.capture(ui).stop();
-        List<PendingLock> received = received(ui);
-        List<PendingLock> locks = List.copyOf(received);
-        received.clear();
+    public List<PendingLock> pendingLocks() {
+        List<ExecutedJavaScript.Execution> sent = executed.getAll();
+        List<PendingLock> locks = sent.subList(read, sent.size()).stream()
+                .flatMap(execution -> execution.getJsCall().filter(call -> call
+                        .definitionType() == ScreenOrientation.ScreenOrientationJs.class
+                        && call.methodName().equals("lock"))
+                        .map(call -> new PendingLock(
+                                (String) call.arguments().get(0), execution))
+                        .stream())
+                .toList();
+        read = sent.size();
         return locks;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static List<PendingLock> received(UI ui) {
-        List<PendingLock> received = (List<PendingLock>) ComponentUtil
-                .getData(ui, Browser.class.getName());
-        if (received == null) {
-            received = new ArrayList<>();
-            ComponentUtil.setData(ui, Browser.class.getName(), received);
-        }
-        return received;
     }
 }

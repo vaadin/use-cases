@@ -84,9 +84,9 @@ languages, picked from the UI's locale by the Flow component, with
 JavaScript call that changes nothing on the server.
 **Workaround used:** `PdfViewerTester` (test sources) fires the DOM events
 with the data the Flow component reads, and simulates the user's page change
-with `setPropertyAsUser`. A `JavaScriptHandler` registered with
-`@BrowserlessTestConfig` records the JavaScript sent to the simulated browser,
-and the tester reads the pages the view scrolled to from those calls.
+with `setPropertyAsUser`. The test starts an `ExecutedJavaScript` capture
+before it navigates, and the tester reads the pages the view scrolled to from
+the calls it holds.
 **Suggested API:** a `PdfViewerTester` in browserless-test, with
 `load(int pageCount, String title)`, `fail(DocumentErrorReason)` and
 `scrollTo(int page)`, that also applies `scrollToPage(int)` to `getPage()`.

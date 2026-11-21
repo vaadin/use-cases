@@ -3,10 +3,11 @@ package com.example.uc7;
 import java.util.List;
 
 import com.example.MediaTester;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.UI;
@@ -19,9 +20,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@BrowserlessTestConfig(javaScriptHandlers = MediaTester.Browser.class)
 @ViewPackages(classes = ChapterControlsView.class)
 class ChapterControlsViewTest extends SpringBrowserlessTest {
+
+    private ExecutedJavaScript executed;
+
+    @BeforeEach
+    void captureJavaScript() {
+        executed = ExecutedJavaScript.capture();
+    }
 
     @Test
     void usesOwnControlsInsteadOfTheBrowsers() {
@@ -38,7 +45,8 @@ class ChapterControlsViewTest extends SpringBrowserlessTest {
     void playButtonFollowsThePlayerState() {
         navigate(ChapterControlsView.class);
         runPendingSignalsTasks();
-        MediaTester media = new MediaTester(findInView(Video.class).single());
+        MediaTester media = new MediaTester(findInView(Video.class).single(),
+                executed);
         media.takeJavaScript();
         Button playPause = find(Button.class).withText("Play").single();
 
@@ -60,7 +68,8 @@ class ChapterControlsViewTest extends SpringBrowserlessTest {
     void timeUpdatesMoveTheChapterHighlight() {
         navigate(ChapterControlsView.class);
         runPendingSignalsTasks();
-        MediaTester media = new MediaTester(findInView(Video.class).single());
+        MediaTester media = new MediaTester(findInView(Video.class).single(),
+                executed);
 
         media.fire("loadedmetadata", "element.duration", 60);
         media.fire("timeupdate", "element.currentTime", 31.5);
@@ -75,7 +84,8 @@ class ChapterControlsViewTest extends SpringBrowserlessTest {
     void chapterButtonSeeksAndPlays() {
         navigate(ChapterControlsView.class);
         runPendingSignalsTasks();
-        MediaTester media = new MediaTester(findInView(Video.class).single());
+        MediaTester media = new MediaTester(findInView(Video.class).single(),
+                executed);
         media.takeJavaScript();
 
         chapterButtons().get(3).click();
@@ -102,7 +112,8 @@ class ChapterControlsViewTest extends SpringBrowserlessTest {
     void timeInTheUrlStartsPlaybackThere() {
         navigate("uc7?t=23", ChapterControlsView.class);
         runPendingSignalsTasks();
-        MediaTester media = new MediaTester(findInView(Video.class).single());
+        MediaTester media = new MediaTester(findInView(Video.class).single(),
+                executed);
 
         assertTrue(media.takeJavaScript().stream()
                 .anyMatch(js -> js.contains("currentTime")));

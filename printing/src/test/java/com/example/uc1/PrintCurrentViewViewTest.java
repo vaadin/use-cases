@@ -4,10 +4,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.example.PrintTestSupport;
 import com.example.print.PrintEvents;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
@@ -24,9 +24,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@BrowserlessTestConfig(javaScriptHandlers = PrintTestSupport.Browser.class)
 @ViewPackages(classes = PrintCurrentViewView.class)
 class PrintCurrentViewViewTest extends SpringBrowserlessTest {
+
+    private PrintTestSupport browser;
+
+    @BeforeEach
+    void captureJavaScript() {
+        browser = PrintTestSupport.capture();
+    }
 
     @Test
     void viewRendersTheDocumentAndTheControls() {
@@ -43,11 +49,11 @@ class PrintCurrentViewViewTest extends SpringBrowserlessTest {
     @Test
     void printButtonOpensThePrintDialog() {
         navigate(PrintCurrentViewView.class);
-        assertFalse(PrintTestSupport.printRequested());
+        assertFalse(browser.printRequested());
 
         test(findInView(Button.class).id("print-button")).click();
 
-        assertTrue(PrintTestSupport.printRequested(),
+        assertTrue(browser.printRequested(),
                 "Clicking Print should call window.print()");
     }
 

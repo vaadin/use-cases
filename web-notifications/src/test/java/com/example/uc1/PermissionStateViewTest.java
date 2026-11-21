@@ -1,10 +1,10 @@
 package com.example.uc1;
 
 import com.example.WebNotificationSimulator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -17,9 +17,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@BrowserlessTestConfig(javaScriptHandlers = WebNotificationSimulator.Browser.class)
 @ViewPackages(classes = PermissionStateView.class)
 class PermissionStateViewTest extends SpringBrowserlessTest {
+
+    private WebNotificationSimulator browser;
+
+    @BeforeEach
+    void captureNotificationCalls() {
+        browser = WebNotificationSimulator.capture();
+    }
 
     @Test
     void viewRendersHeadingAndButtons() {
@@ -67,9 +73,8 @@ class PermissionStateViewTest extends SpringBrowserlessTest {
 
         test(button("Send a test notification").get()).click();
 
-        assertEquals(1, WebNotificationSimulator.shown().size());
-        assertEquals("Hello from Vaadin",
-                WebNotificationSimulator.shown().get(0).title());
+        assertEquals(1, browser.shown().size());
+        assertEquals("Hello from Vaadin", browser.shown().get(0).title());
     }
 
     private java.util.Optional<Button> button(String text) {

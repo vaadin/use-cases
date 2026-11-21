@@ -3,10 +3,10 @@ package com.example.uc3;
 import java.util.List;
 
 import com.example.PrintTestSupport;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -19,9 +19,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@BrowserlessTestConfig(javaScriptHandlers = PrintTestSupport.Browser.class)
 @ViewPackages(classes = PrintableListView.class)
 class PrintableListViewTest extends SpringBrowserlessTest {
+
+    private PrintTestSupport browser;
+
+    @BeforeEach
+    void captureJavaScript() {
+        browser = PrintTestSupport.capture();
+    }
 
     @Test
     void theTableOnPaperHasEveryRowTheGridHas() {
@@ -72,7 +78,7 @@ class PrintableListViewTest extends SpringBrowserlessTest {
 
         test(findInView(Button.class).id("print-button")).click();
 
-        assertTrue(PrintTestSupport.printRequested());
+        assertTrue(browser.printRequested());
     }
 
     private Table findTable() {

@@ -4,10 +4,11 @@ import java.util.List;
 
 import com.example.documents.SampleDocuments;
 import com.example.pdfviewer.PdfViewerTester;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -18,15 +19,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@BrowserlessTestConfig(javaScriptHandlers = PdfViewerTester.Browser.class)
 @ViewPackages(classes = JumpToClauseView.class)
 class JumpToClauseViewTest extends SpringBrowserlessTest {
+
+    private ExecutedJavaScript executed;
+
+    @BeforeEach
+    void captureJavaScript() {
+        executed = ExecutedJavaScript.capture();
+    }
 
     @Test
     void eachQuestionOpensThePageOfItsAnswer() {
         navigate(JumpToClauseView.class);
         PdfViewerTester viewer = new PdfViewerTester(
-                findInView(PdfViewer.class).single());
+                findInView(PdfViewer.class).single(), executed);
         ClauseFinder finder = new ClauseFinder(
                 SampleDocuments.serviceAgreement().bytes());
 

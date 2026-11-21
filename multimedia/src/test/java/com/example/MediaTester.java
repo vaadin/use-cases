@@ -1,16 +1,14 @@
 package com.example;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.node.ObjectNode;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.ComponentTester;
 import com.vaadin.browserless.ExecutedJavaScript;
-import com.vaadin.browserless.JavaScriptHandler;
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Media;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -21,27 +19,38 @@ import com.vaadin.flow.internal.JacksonUtils;
  * server sent for the element. There is no media simulator in the test kit; see
  * {@code API-GAPS.md #10}.
  * <p>
- * {@link #takeJavaScript()} needs the {@link Browser} recorder, registered with
- * {@code @BrowserlessTestConfig(javaScriptHandlers = MediaTester.Browser.class)},
- * so that it also sees the calls sent while the view was navigated to.
+ * {@link #takeJavaScript()} reads the JavaScript from a capture passed to
+ * {@link #MediaTester(Media, ExecutedJavaScript)}. A test starts it before it
+ * navigates, typically in a {@code @BeforeEach} method, so that it also holds
+ * the calls sent while the view was navigated to.
  */
 public class MediaTester extends ComponentTester<Media> {
 
-    /**
-     * Records the JavaScript sent to the browser of each UI, so that
-     * {@link #takeJavaScript()} can return it. Register it with
-     * {@link BrowserlessTestConfig}.
-     */
-    public static final class Browser implements JavaScriptHandler {
+    private final @Nullable ExecutedJavaScript executed;
+    private final Set<ExecutedJavaScript.Execution> taken = new HashSet<>();
 
-        @Override
-        public void handle(ExecutedJavaScript.Execution execution) {
-            received(execution.getUI()).add(execution);
-        }
+    /**
+     * Creates a tester that only fires media events.
+     *
+     * @param media
+     *            the media component
+     */
+    public MediaTester(Media media) {
+        this(media, null);
     }
 
-    public MediaTester(Media media) {
+    /**
+     * Creates a tester that also reads what the server sent for the element.
+     *
+     * @param media
+     *            the media component
+     * @param executed
+     *            the capture of the JavaScript sent to the UI, or {@code null}
+     *            when the test does not read it
+     */
+    public MediaTester(Media media, @Nullable ExecutedJavaScript executed) {
         super(media);
+        this.executed = executed;
     }
 
     /**
@@ -97,27 +106,16 @@ public class MediaTester extends ComponentTester<Media> {
      * @return the sent expressions with their parameters
      */
     public List<String> takeJavaScript() {
-        UI ui = UI.getCurrent();
-        // Starting a capture sends whatever is still pending to the browser
-        ExecutedJavaScript.capture(ui).stop();
-        List<ExecutedJavaScript.Execution> received = received(ui);
-        List<ExecutedJavaScript.Execution> taken = received.stream()
+        if (executed == null) {
+            throw new IllegalStateException(
+                    "Create the tester with a capture to read its JavaScript");
+        }
+        List<ExecutedJavaScript.Execution> sent = executed.getAll().stream()
                 .filter(execution -> execution.getElement()
                         .equals(getComponent().getElement()))
-                .toList();
-        received.removeAll(taken);
-        return taken.stream().map(execution -> execution.getExpression() + " "
+                .filter(execution -> !taken.contains(execution)).toList();
+        taken.addAll(sent);
+        return sent.stream().map(execution -> execution.getExpression() + " "
                 + execution.getParameters()).toList();
-    }
-
-    @SuppressWarnings("unchecked")
-    private static List<ExecutedJavaScript.Execution> received(UI ui) {
-        List<ExecutedJavaScript.Execution> received = (List<ExecutedJavaScript.Execution>) ComponentUtil
-                .getData(ui, Browser.class.getName());
-        if (received == null) {
-            received = new ArrayList<>();
-            ComponentUtil.setData(ui, Browser.class.getName(), received);
-        }
-        return received;
     }
 }
