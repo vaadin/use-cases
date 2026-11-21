@@ -4,6 +4,7 @@ import com.example.TriggerCallbacks;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -27,11 +28,13 @@ class HiddenShareLinkViewTest extends SpringBrowserlessTest {
         assertEquals("UC3 — Hidden share link",
                 findInView(H1.class).single().getText());
 
+        ExecutedJavaScript executed = ExecutedJavaScript.capture();
         test(findInView(TextField.class).id("slug")).setValue("spring-sale");
         runPendingSignalsTasks();
 
         assertTrue(
-                TriggerCallbacks.pendingJavaScriptParameters().contains(LINK),
+                executed.getAll().stream().anyMatch(
+                        execution -> execution.getParameters().contains(LINK)),
                 "the link is mirrored to the button");
         assertFalse(
                 findInView(Span.class).all().stream()

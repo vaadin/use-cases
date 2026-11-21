@@ -13,6 +13,7 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.UI;
@@ -47,14 +48,12 @@ class MainLayoutTest extends SpringBrowserlessTest {
     @WithAnonymousUser
     void loginButtonReloadsCurrentPageWithLoginParameter() {
         navigate("?tab=2", HomeView.class);
-        UI.getCurrent().getInternals().dumpPendingJavaScriptInvocations();
+        ExecutedJavaScript executed = ExecutedJavaScript.capture();
 
         test($(Button.class).withText("Log in").single()).click();
 
-        String reload = UI.getCurrent().getInternals()
-                .dumpPendingJavaScriptInvocations().stream()
-                .flatMap(invocation -> invocation.getInvocation()
-                        .getParameters().stream())
+        String reload = executed.getAll().stream()
+                .flatMap(execution -> execution.getParameters().stream())
                 .map(String::valueOf).filter(p -> p.contains("tab=2"))
                 .findFirst().orElse("");
         assertTrue(

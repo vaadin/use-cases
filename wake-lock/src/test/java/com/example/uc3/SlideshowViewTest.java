@@ -2,10 +2,12 @@ package com.example.uc3;
 
 import java.util.List;
 
+import com.example.WakeLockTestSupport;
 import com.example.home.HomeView;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -20,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@BrowserlessTestConfig(javaScriptHandlers = WakeLockTestSupport.Browser.class)
 @ViewPackages(classes = { SlideshowView.class, HomeView.class })
 class SlideshowViewTest extends SpringBrowserlessTest {
 

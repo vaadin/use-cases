@@ -181,13 +181,12 @@ add-on would save every application from finding this out.
 **Symptom:** the browserless test kit has no tester for `Video` or `Audio`. A
 test cannot fire `play`, `timeupdate` or `ended` without a `ComponentTester`
 subclass, because `fireDomEvent` is protected. It also cannot see whether the
-server asked for `play()` or `load()`: `executeJs` calls are queued before the
-response and dropped by the mock round trip.
-**Workaround used:** `MediaTester` fires events through `fireDomEvent`. It
-reads the queued calls by running
-`StateTree#runExecutionsBeforeClientResponse()` itself and then
-`UIInternals#dumpPendingJavaScriptInvocations()`, which reaches into framework
-internals.
+server asked for `play()` or `load()` without matching JavaScript text.
+**Workaround used:** `MediaTester` fires events through `fireDomEvent`. A
+`JavaScriptHandler` registered with `@BrowserlessTestConfig` records the
+JavaScript sent to the simulated browser, also during navigation, and
+`takeJavaScript()` returns the calls for the element as expression strings,
+which breaks whenever Flow changes how the call is written.
 **Suggested API:** `VideoTester` / `AudioTester` in the browserless kit with
 `simulatePlay()`, `simulatePause(double position)`,
 `simulateTimeUpdate(double)`, `simulateEnded()`,

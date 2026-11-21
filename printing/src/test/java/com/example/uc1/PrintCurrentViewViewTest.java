@@ -7,6 +7,7 @@ import com.example.print.PrintEvents;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -22,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@BrowserlessTestConfig(javaScriptHandlers = PrintTestSupport.Browser.class)
 @ViewPackages(classes = PrintCurrentViewView.class)
 class PrintCurrentViewViewTest extends SpringBrowserlessTest {
 
@@ -107,7 +109,7 @@ class PrintCurrentViewViewTest extends SpringBrowserlessTest {
 
         view.remove(events);
 
-        assertTrue(PrintTestSupport.pendingJsContains("delete registry"),
+        assertTrue(PrintTestSupport.sentJsContains("delete registry"),
                 "Detaching must abort the window listeners, or every visit "
                         + "leaks another beforeprint/afterprint pair");
     }

@@ -7,6 +7,7 @@ import com.example.ScreenOrientationTestSupport.PendingLock;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.Component;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@BrowserlessTestConfig(javaScriptHandlers = ScreenOrientationTestSupport.Browser.class)
 @ViewPackages(classes = LockErrorView.class)
 class LockErrorViewTest extends SpringBrowserlessTest {
 

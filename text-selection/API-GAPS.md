@@ -30,8 +30,8 @@ nor to read the selection the server asked the browser to make. The
 through the testers.
 **Workaround used:** `TextSelectionTestSupport.selectInBrowser` fires the
 `selectionchange` DOM event that `MissingAPI` listens to, and
-`clickAndReadSelection` reads the pending `setSelectionRange` JavaScript
-calls before the response is sent.
+`clickAndReadSelection` clicks with the button tester and reads the
+`setSelectionRange` calls that `ExecutedJavaScript` captured.
 **Suggested API:** `select(start, end)` and `getSelection()` on the text
 field testers, working with the field's own selection API once it exists.
 

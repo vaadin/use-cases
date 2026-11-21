@@ -3,12 +3,14 @@ package com.example.uc4;
 import java.time.Duration;
 import java.util.List;
 
+import com.example.WakeLockTestSupport;
 import com.example.home.HomeView;
 import com.example.uc4.WorkoutTimerView.Countdown;
 import com.example.uc4.WorkoutTimerView.Phase;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -21,6 +23,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
+@BrowserlessTestConfig(javaScriptHandlers = WakeLockTestSupport.Browser.class)
 @ViewPackages(classes = { WorkoutTimerView.class, HomeView.class })
 class WorkoutTimerViewTest extends SpringBrowserlessTest {
 
