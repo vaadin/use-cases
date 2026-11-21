@@ -1,8 +1,6 @@
 package com.example.pdfviewer;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.node.ObjectNode;
@@ -30,7 +28,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 public class PdfViewerTester extends ComponentTester<PdfViewer> {
 
     private final @Nullable ExecutedJavaScript executed;
-    private final Set<ExecutedJavaScript.Execution> taken = new HashSet<>();
+    private int read;
 
     /**
      * Creates a tester that only simulates the browser side.
@@ -115,11 +113,12 @@ public class PdfViewerTester extends ComponentTester<PdfViewer> {
             throw new IllegalStateException(
                     "Create the tester with a capture to read its JavaScript");
         }
-        List<ExecutedJavaScript.Execution> sent = executed.getAll().stream()
-                .filter(execution -> execution.getElement()
+        List<ExecutedJavaScript.Execution> all = executed.getAll();
+        List<ExecutedJavaScript.Execution> sent = all.subList(read, all.size())
+                .stream().filter(execution -> execution.getElement()
                         .equals(getComponent().getElement()))
-                .filter(execution -> !taken.contains(execution)).toList();
-        taken.addAll(sent);
+                .toList();
+        read = all.size();
         return sent.stream().map(ExecutedJavaScript.Execution::getParameters)
                 .filter(parameters -> parameters.contains(function))
                 .map(parameters -> parameters.subList(
