@@ -1,10 +1,10 @@
 package com.example.uc6;
 
 import com.example.PrintTestSupport;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -17,9 +17,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@BrowserlessTestConfig(javaScriptHandlers = PrintTestSupport.Browser.class)
 @ViewPackages(classes = PrintDashboardView.class)
 class PrintDashboardViewTest extends SpringBrowserlessTest {
+
+    private PrintTestSupport browser;
+
+    @BeforeEach
+    void captureJavaScript() {
+        browser = PrintTestSupport.capture();
+    }
 
     @Test
     void reportHasThreeWidgetsThatStayWholeOnPaper() {
@@ -42,8 +48,8 @@ class PrintDashboardViewTest extends SpringBrowserlessTest {
         navigate(PrintDashboardView.class);
 
         assertTrue(
-                PrintTestSupport.sentJsMentions("beforeprint", "afterprint",
-                        "reflow()", "removeEventListener"),
+                browser.sentJsMentions("beforeprint", "afterprint", "reflow()",
+                        "removeEventListener"),
                 "A chart keeps its screen width unless it is told to reflow, "
                         + "and the listeners must go away with the view");
     }
@@ -54,6 +60,6 @@ class PrintDashboardViewTest extends SpringBrowserlessTest {
 
         test(findInView(Button.class).id("print-button")).click();
 
-        assertTrue(PrintTestSupport.printRequested());
+        assertTrue(browser.printRequested());
     }
 }

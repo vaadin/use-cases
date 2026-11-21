@@ -182,10 +182,9 @@ add-on would save every application from finding this out.
 test cannot fire `play`, `timeupdate` or `ended` without a `ComponentTester`
 subclass, because `fireDomEvent` is protected. It also cannot see whether the
 server asked for `play()` or `load()` without matching JavaScript text.
-**Workaround used:** `MediaTester` fires events through `fireDomEvent`. A
-`JavaScriptHandler` registered with `@BrowserlessTestConfig` records the
-JavaScript sent to the simulated browser, also during navigation, and
-`takeJavaScript()` returns the calls for the element as expression strings,
+**Workaround used:** `MediaTester` fires events through `fireDomEvent`. The
+test starts an `ExecutedJavaScript` capture before it navigates, and
+`takeJavaScript()` returns the calls sent for the element as expression strings,
 which breaks whenever Flow changes how the call is written.
 **Suggested API:** `VideoTester` / `AudioTester` in the browserless kit with
 `simulatePlay()`, `simulatePause(double position)`,

@@ -1,16 +1,14 @@
 package com.example.pdfviewer;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.node.ObjectNode;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.ComponentTester;
 import com.vaadin.browserless.ExecutedJavaScript;
-import com.vaadin.browserless.JavaScriptHandler;
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -23,28 +21,40 @@ import com.vaadin.flow.internal.JacksonUtils;
  * fires the same events the web component fires, with the data the Flow
  * component reads from them.
  * <p>
- * {@link #takeScrollToPage()} and {@link #takeDownloads()} need the
- * {@link Browser} recorder, registered with
- * {@code @BrowserlessTestConfig(javaScriptHandlers = PdfViewerTester.Browser.class)},
- * so that they also see the calls sent while the view was navigated to.
+ * {@link #takeScrollToPage()} and {@link #takeDownloads()} read the JavaScript
+ * from a capture passed to
+ * {@link #PdfViewerTester(PdfViewer, ExecutedJavaScript)}. A test starts it
+ * before it navigates, typically in a {@code @BeforeEach} method, so that it
+ * also holds the calls sent while the view was navigated to.
  */
 public class PdfViewerTester extends ComponentTester<PdfViewer> {
 
-    /**
-     * Records the JavaScript sent to the browser of each UI, so that the
-     * {@code take} methods can return it. Register it with
-     * {@link BrowserlessTestConfig}.
-     */
-    public static final class Browser implements JavaScriptHandler {
+    private final @Nullable ExecutedJavaScript executed;
+    private final Set<ExecutedJavaScript.Execution> taken = new HashSet<>();
 
-        @Override
-        public void handle(ExecutedJavaScript.Execution execution) {
-            received(execution.getUI()).add(execution);
-        }
+    /**
+     * Creates a tester that only simulates the browser side.
+     *
+     * @param viewer
+     *            the viewer
+     */
+    public PdfViewerTester(PdfViewer viewer) {
+        this(viewer, null);
     }
 
-    public PdfViewerTester(PdfViewer viewer) {
+    /**
+     * Creates a tester that also reads what the server sent to the viewer.
+     *
+     * @param viewer
+     *            the viewer
+     * @param executed
+     *            the capture of the JavaScript sent to the UI, or {@code null}
+     *            when the test does not read it
+     */
+    public PdfViewerTester(PdfViewer viewer,
+            @Nullable ExecutedJavaScript executed) {
         super(viewer);
+        this.executed = executed;
     }
 
     /** The document has loaded, as {@code document-load} reports it. */
@@ -101,30 +111,19 @@ public class PdfViewerTester extends ComponentTester<PdfViewer> {
      * viewer.
      */
     private List<List<Object>> takeCalls(String function) {
-        UI ui = UI.getCurrent();
-        // Starting a capture sends whatever is still pending to the browser
-        ExecutedJavaScript.capture(ui).stop();
-        List<ExecutedJavaScript.Execution> received = received(ui);
-        List<ExecutedJavaScript.Execution> taken = received.stream()
+        if (executed == null) {
+            throw new IllegalStateException(
+                    "Create the tester with a capture to read its JavaScript");
+        }
+        List<ExecutedJavaScript.Execution> sent = executed.getAll().stream()
                 .filter(execution -> execution.getElement()
                         .equals(getComponent().getElement()))
-                .toList();
-        received.removeAll(taken);
-        return taken.stream().map(ExecutedJavaScript.Execution::getParameters)
+                .filter(execution -> !taken.contains(execution)).toList();
+        taken.addAll(sent);
+        return sent.stream().map(ExecutedJavaScript.Execution::getParameters)
                 .filter(parameters -> parameters.contains(function))
                 .map(parameters -> parameters.subList(
                         parameters.indexOf(function) + 1, parameters.size()))
                 .toList();
-    }
-
-    @SuppressWarnings("unchecked")
-    private static List<ExecutedJavaScript.Execution> received(UI ui) {
-        List<ExecutedJavaScript.Execution> received = (List<ExecutedJavaScript.Execution>) ComponentUtil
-                .getData(ui, Browser.class.getName());
-        if (received == null) {
-            received = new ArrayList<>();
-            ComponentUtil.setData(ui, Browser.class.getName(), received);
-        }
-        return received;
     }
 }

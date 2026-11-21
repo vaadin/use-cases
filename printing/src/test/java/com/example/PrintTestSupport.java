@@ -1,6 +1,5 @@
 package com.example;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,10 +8,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.ExecutedJavaScript;
-import com.vaadin.browserless.JavaScriptHandler;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
@@ -23,30 +19,30 @@ import com.vaadin.flow.js.JsCall;
  * without a browser, but the JavaScript a view sends can — and since Flow has
  * no printing API, that JavaScript <em>is</em> the behaviour under test.
  * <p>
- * The checks look at everything sent to the browser of the current UI since it
- * was created, including what the navigation sent. They need the
- * {@link Browser} recorder, registered with
- * {@code @BrowserlessTestConfig(javaScriptHandlers = PrintTestSupport.Browser.class)}.
+ * A test starts one with {@link #capture()} before it navigates, typically in a
+ * {@code @BeforeEach} method. The checks look at everything sent to the browser
+ * of the UI since then, including what the navigation sent.
  */
 public final class PrintTestSupport {
 
-    /**
-     * Records the JavaScript sent to the browser of each UI. Register it with
-     * {@link BrowserlessTestConfig}.
-     */
-    public static final class Browser implements JavaScriptHandler {
+    private final ExecutedJavaScript executed;
 
-        @Override
-        public void handle(ExecutedJavaScript.Execution execution) {
-            received(execution.getUI()).add(execution);
-        }
+    private PrintTestSupport(ExecutedJavaScript executed) {
+        this.executed = executed;
     }
 
-    private PrintTestSupport() {
+    /**
+     * Starts watching the JavaScript sent to the browser of the current UI.
+     *
+     * @return the checks of what was sent, not null
+     */
+    public static PrintTestSupport capture() {
+        return new PrintTestSupport(ExecutedJavaScript
+                .capture(Objects.requireNonNull(UI.getCurrent())));
     }
 
     /** Whether something opened the browser's print dialog. */
-    public static boolean printRequested() {
+    public boolean printRequested() {
         return sentJsContains("window.print()");
     }
 
@@ -58,7 +54,7 @@ public final class PrintTestSupport {
      *            the fragment to look for
      * @return {@code true} when a sent expression contains it
      */
-    public static boolean sentJsContains(String fragment) {
+    public boolean sentJsContains(String fragment) {
         return sent().stream().anyMatch(
                 execution -> execution.getExpression().contains(fragment));
     }
@@ -74,7 +70,7 @@ public final class PrintTestSupport {
      *            the fragments to look for
      * @return {@code true} when each of them occurs somewhere in what was sent
      */
-    public static boolean sentJsMentions(String... fragments) {
+    public boolean sentJsMentions(String... fragments) {
         String sent = sent().stream()
                 .flatMap(execution -> Stream.concat(
                         Stream.of(execution.getExpression()),
@@ -93,7 +89,7 @@ public final class PrintTestSupport {
      *
      * @return the values of each sent listener, keyed by its owner
      */
-    public static Map<Element, List<List<Object>>> sentListeners() {
+    public Map<Element, List<List<Object>>> sentListeners() {
         return sent().stream()
                 .filter(execution -> execution.getParameters().stream()
                         .anyMatch(JsFunction.class::isInstance))
@@ -107,22 +103,8 @@ public final class PrintTestSupport {
                                 Collectors.toList())));
     }
 
-    private static List<ExecutedJavaScript.Execution> sent() {
-        UI ui = Objects.requireNonNull(UI.getCurrent());
-        // Starting a capture sends whatever is still pending to the browser
-        ExecutedJavaScript.capture(ui).stop();
-        return received(ui);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static List<ExecutedJavaScript.Execution> received(UI ui) {
-        List<ExecutedJavaScript.Execution> received = (List<ExecutedJavaScript.Execution>) ComponentUtil
-                .getData(ui, Browser.class.getName());
-        if (received == null) {
-            received = new ArrayList<>();
-            ComponentUtil.setData(ui, Browser.class.getName(), received);
-        }
-        return received;
+    private List<ExecutedJavaScript.Execution> sent() {
+        return executed.getAll();
     }
 
     private static Stream<Object> values(Object value) {

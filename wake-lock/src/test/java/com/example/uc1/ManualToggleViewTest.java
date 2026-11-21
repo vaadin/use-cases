@@ -4,10 +4,10 @@ import java.util.List;
 
 import com.example.WakeLockTestSupport;
 import com.example.home.HomeView;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -17,21 +17,26 @@ import com.vaadin.flow.dom.Element;
 
 import static com.example.WakeLockTestSupport.RELEASE;
 import static com.example.WakeLockTestSupport.REQUEST;
-import static com.example.WakeLockTestSupport.answerWakeLockCalls;
 import static com.example.WakeLockTestSupport.simulateAvailability;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@BrowserlessTestConfig(javaScriptHandlers = WakeLockTestSupport.Browser.class)
 @ViewPackages(classes = { ManualToggleView.class, HomeView.class })
 class ManualToggleViewTest extends SpringBrowserlessTest {
+
+    private WakeLockTestSupport browser;
+
+    @BeforeEach
+    void captureWakeLockCalls() {
+        browser = WakeLockTestSupport.capture();
+    }
 
     @Test
     void clickingRequestsTheLockAndClickingAgainReleasesIt() {
         navigate(ManualToggleView.class);
-        assertEquals(List.of(), answerWakeLockCalls(),
+        assertEquals(List.of(), browser.answerWakeLockCalls(),
                 "opening the view does not touch the lock");
         assertBadge("Released — the screen may sleep");
 
@@ -39,12 +44,12 @@ class ManualToggleViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
         assertBadge("Requested — waiting for the browser");
 
-        assertEquals(List.of(REQUEST), answerWakeLockCalls());
+        assertEquals(List.of(REQUEST), browser.answerWakeLockCalls());
         runPendingSignalsTasks();
         assertBadge("Holding the lock — the screen stays on");
 
         test(button("Allow screen to sleep")).click();
-        assertEquals(List.of(RELEASE), answerWakeLockCalls());
+        assertEquals(List.of(RELEASE), browser.answerWakeLockCalls());
         runPendingSignalsTasks();
         assertBadge("Released — the screen may sleep");
         button("Keep screen awake");
@@ -57,22 +62,22 @@ class ManualToggleViewTest extends SpringBrowserlessTest {
         int index = parent.indexOfChild(view.getElement());
         view.getElement().removeFromParent();
         parent.insertChild(index, view.getElement());
-        answerWakeLockCalls();
+        browser.answerWakeLockCalls();
 
         test(button("Keep screen awake")).click();
 
-        assertEquals(List.of(REQUEST), answerWakeLockCalls());
+        assertEquals(List.of(REQUEST), browser.answerWakeLockCalls());
     }
 
     @Test
     void leavingTheViewReleasesTheLock() {
         navigate(ManualToggleView.class);
         test(button("Keep screen awake")).click();
-        assertEquals(List.of(REQUEST), answerWakeLockCalls());
+        assertEquals(List.of(REQUEST), browser.answerWakeLockCalls());
 
         navigate(HomeView.class);
 
-        assertEquals(List.of(RELEASE), answerWakeLockCalls(),
+        assertEquals(List.of(RELEASE), browser.answerWakeLockCalls(),
                 "the lock must not stay on in the other views");
     }
 

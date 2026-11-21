@@ -1,10 +1,11 @@
 package com.example.uc5;
 
 import com.example.MediaTester;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -16,9 +17,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@BrowserlessTestConfig(javaScriptHandlers = MediaTester.Browser.class)
 @ViewPackages(classes = BackgroundVideoView.class)
 class BackgroundVideoViewTest extends SpringBrowserlessTest {
+
+    private ExecutedJavaScript executed;
+
+    @BeforeEach
+    void captureJavaScript() {
+        executed = ExecutedJavaScript.capture();
+    }
 
     @Test
     void clipAutoplaysMutedInALoopWithoutControls() {
@@ -39,7 +46,8 @@ class BackgroundVideoViewTest extends SpringBrowserlessTest {
     void pauseButtonTogglesPlayback() {
         navigate(BackgroundVideoView.class);
         runPendingSignalsTasks();
-        MediaTester media = new MediaTester(findInView(Video.class).single());
+        MediaTester media = new MediaTester(findInView(Video.class).single(),
+                executed);
         media.takeJavaScript();
 
         Button button = find(Button.class).withText("Pause background")
@@ -61,7 +69,7 @@ class BackgroundVideoViewTest extends SpringBrowserlessTest {
     void selectSwitchesAndReloadsTheClip() {
         navigate(BackgroundVideoView.class);
         Video video = findInView(Video.class).single();
-        MediaTester media = new MediaTester(video);
+        MediaTester media = new MediaTester(video, executed);
         media.takeJavaScript();
 
         var sunset = BackgroundVideoView.BACKGROUNDS.get(1);

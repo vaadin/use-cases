@@ -2,14 +2,12 @@ package com.example;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ArrayNode;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.ExecutedJavaScript;
-import com.vaadin.browserless.JavaScriptHandler;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.webnotification.WebNotification;
 import com.vaadin.flow.component.webnotification.WebNotificationError;
@@ -22,9 +20,9 @@ import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
  * Browserless tests never run the client JavaScript, so this helper plays the
  * browser: it reports a permission, picks up the notifications the server asked
  * the browser to show, and reports clicks, closes and failures back through the
- * return channel the notifications share. A test class registers its
- * {@link Browser} with
- * {@code @BrowserlessTestConfig(javaScriptHandlers = WebNotificationSimulator.Browser.class)}.
+ * return channel the notifications share. A test starts one with
+ * {@link #capture()} before it navigates, typically in a {@code @BeforeEach}
+ * method, so it sees every notification call the view sends.
  * <p>
  * Flow has no simulator for web notifications (compare
  * {@code GeolocationSimulator}), so this reaches into framework internals; see
@@ -40,27 +38,25 @@ public final class WebNotificationSimulator {
             ReturnChannelRegistration channel) {
     }
 
-    private static final class State {
-        private final List<ShownNotification> shown = new ArrayList<>();
-        private final List<ExecutedJavaScript.Execution> received = new ArrayList<>();
+    private final UI ui;
+    private final ExecutedJavaScript executed;
+    private final List<ShownNotification> shown = new ArrayList<>();
+    private int read;
+
+    private WebNotificationSimulator(UI ui) {
+        this.ui = ui;
+        this.executed = ExecutedJavaScript.capture(ui);
     }
 
     /**
-     * Records the JavaScript sent to the browser of each UI, so that
-     * {@link #shown()} can act on the notification calls. Register it with
-     * {@link BrowserlessTestConfig}.
+     * Starts watching the notification calls sent to the browser of the current
+     * UI.
+     *
+     * @return the browser side of the notifications, not null
      */
-    public static final class Browser implements JavaScriptHandler {
-
-        @Override
-        public void handle(ExecutedJavaScript.Execution execution) {
-            if (execution.getExpression().contains("webNotification.")) {
-                state(execution.getUI()).received.add(execution);
-            }
-        }
-    }
-
-    private WebNotificationSimulator() {
+    public static WebNotificationSimulator capture() {
+        return new WebNotificationSimulator(
+                Objects.requireNonNull(UI.getCurrent()));
     }
 
     /** Pretends the browser reported the given permission. */
@@ -74,56 +70,50 @@ public final class WebNotificationSimulator {
      * notification without permission and replaces a notification with the same
      * tag.
      */
-    public static List<ShownNotification> shown() {
-        UI ui = UI.getCurrent();
-        State state = state(ui);
-        // Starting a capture sends whatever is still pending to the browser
-        ExecutedJavaScript.capture(ui).stop();
+    public List<ShownNotification> shown() {
+        List<ExecutedJavaScript.Execution> sent = executed.getAll();
         List<ExecutedJavaScript.Execution> received = List
-                .copyOf(state.received);
-        state.received.clear();
+                .copyOf(sent.subList(read, sent.size()));
+        read = sent.size();
         for (ExecutedJavaScript.Execution execution : received) {
             String expression = execution.getExpression();
             List<Object> parameters = execution.getParameters();
             if (expression.contains("webNotification.show(")) {
-                show(ui, state,
-                        new ShownNotification((String) parameters.get(0),
-                                (WebNotificationOptions) parameters.get(1),
-                                (String) parameters.get(2),
-                                (ReturnChannelRegistration) parameters.get(3)));
+                show(new ShownNotification((String) parameters.get(0),
+                        (WebNotificationOptions) parameters.get(1),
+                        (String) parameters.get(2),
+                        (ReturnChannelRegistration) parameters.get(3)));
             } else if (expression.contains("webNotification.closeByTag(")) {
                 Object tag = parameters.get(0);
-                List.copyOf(state.shown).stream()
+                List.copyOf(shown).stream()
                         .filter(n -> tag.equals(n.options().tag()))
-                        .forEach(n -> close(state, n));
+                        .forEach(this::close);
             } else if (expression.contains("webNotification.close(")) {
                 Object key = parameters.get(0);
-                List.copyOf(state.shown).stream()
-                        .filter(n -> key.equals(n.key()))
-                        .forEach(n -> close(state, n));
+                List.copyOf(shown).stream().filter(n -> key.equals(n.key()))
+                        .forEach(this::close);
             }
         }
-        return List.copyOf(state.shown);
+        return List.copyOf(shown);
     }
 
     /**
      * Pretends the user clicked the notification: the browser reports the click
      * and then, because it closes the notification, the close.
      */
-    public static void click(ShownNotification notification) {
+    public void click(ShownNotification notification) {
         report(notification, "click");
-        close(state(UI.getCurrent()), notification);
+        close(notification);
     }
 
     /** Pretends the browser failed to show the notification. */
-    public static void fail(ShownNotification notification,
+    public void fail(ShownNotification notification,
             WebNotificationError.Reason reason, String message) {
-        state(UI.getCurrent()).shown.remove(notification);
+        shown.remove(notification);
         report(notification, "error", reason.name(), message);
     }
 
-    private static void show(UI ui, State state,
-            ShownNotification notification) {
+    private void show(ShownNotification notification) {
         if (WebNotification.permissionSignal(ui)
                 .peek() != WebNotificationPermission.GRANTED) {
             report(notification, "error",
@@ -133,15 +123,15 @@ public final class WebNotificationSimulator {
         }
         String tag = notification.options().tag();
         if (tag != null) {
-            List.copyOf(state.shown).stream()
+            List.copyOf(shown).stream()
                     .filter(n -> tag.equals(n.options().tag()))
-                    .forEach(n -> close(state, n));
+                    .forEach(this::close);
         }
-        state.shown.add(notification);
+        shown.add(notification);
     }
 
-    private static void close(State state, ShownNotification notification) {
-        if (state.shown.remove(notification)) {
+    private void close(ShownNotification notification) {
+        if (shown.remove(notification)) {
             report(notification, "close");
         }
     }
@@ -156,14 +146,5 @@ public final class WebNotificationSimulator {
             args.add(argument);
         }
         notification.channel().invoke(args);
-    }
-
-    private static State state(UI ui) {
-        State state = ComponentUtil.getData(ui, State.class);
-        if (state == null) {
-            state = new State();
-            ComponentUtil.setData(ui, State.class, state);
-        }
-        return state;
     }
 }

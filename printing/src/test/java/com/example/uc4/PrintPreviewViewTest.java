@@ -3,10 +3,10 @@ package com.example.uc4;
 import java.util.List;
 
 import com.example.PrintTestSupport;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
@@ -20,9 +20,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@BrowserlessTestConfig(javaScriptHandlers = PrintTestSupport.Browser.class)
 @ViewPackages(classes = PrintPreviewView.class)
 class PrintPreviewViewTest extends SpringBrowserlessTest {
+
+    private PrintTestSupport browser;
+
+    @BeforeEach
+    void captureJavaScript() {
+        browser = PrintTestSupport.capture();
+    }
 
     @Test
     void previewAndPageRuleStartFromA4Portrait() {
@@ -73,13 +79,13 @@ class PrintPreviewViewTest extends SpringBrowserlessTest {
     void thePageRuleIsWrittenOnArrivalAndRemovedOnLeaving() {
         PrintPreviewView view = navigate(PrintPreviewView.class);
 
-        assertTrue(PrintTestSupport.sentJsContains("style.textContent"),
+        assertTrue(browser.sentJsContains("style.textContent"),
                 "The document must carry the rule the preview advertises, "
                         + "not just show it");
 
         view.getElement().removeFromParent();
 
-        assertTrue(PrintTestSupport.sentJsContains("?.remove()"),
+        assertTrue(browser.sentJsContains("?.remove()"),
                 "@page belongs to the document, so it must not follow the "
                         + "user to the next view");
     }

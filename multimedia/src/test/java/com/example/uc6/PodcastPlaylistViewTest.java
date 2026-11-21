@@ -3,10 +3,11 @@ package com.example.uc6;
 import java.util.List;
 
 import com.example.MediaTester;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.UI;
@@ -19,9 +20,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@BrowserlessTestConfig(javaScriptHandlers = MediaTester.Browser.class)
 @ViewPackages(classes = PodcastPlaylistView.class)
 class PodcastPlaylistViewTest extends SpringBrowserlessTest {
+
+    private ExecutedJavaScript executed;
+
+    @BeforeEach
+    void captureJavaScript() {
+        executed = ExecutedJavaScript.capture();
+    }
 
     @Test
     void startsWithTheFirstEpisodeLoaded() {
@@ -41,7 +48,7 @@ class PodcastPlaylistViewTest extends SpringBrowserlessTest {
         navigate(PodcastPlaylistView.class);
         runPendingSignalsTasks();
         Audio audio = findInView(Audio.class).single();
-        MediaTester media = new MediaTester(audio);
+        MediaTester media = new MediaTester(audio, executed);
         media.takeJavaScript();
 
         episodeButtons().get(2).click();
@@ -63,7 +70,7 @@ class PodcastPlaylistViewTest extends SpringBrowserlessTest {
         navigate(PodcastPlaylistView.class);
         runPendingSignalsTasks();
         Audio audio = findInView(Audio.class).single();
-        MediaTester media = new MediaTester(audio);
+        MediaTester media = new MediaTester(audio, executed);
 
         media.fire("ended");
         runPendingSignalsTasks();
@@ -99,7 +106,7 @@ class PodcastPlaylistViewTest extends SpringBrowserlessTest {
                 audio.getSources().get(0).getSrc());
         assertTrue(episodeButtons().get(2).hasClassName("current"));
         // Browsers block autoplay on page load; the user presses play.
-        assertTrue(new MediaTester(audio).takeJavaScript().stream()
+        assertTrue(new MediaTester(audio, executed).takeJavaScript().stream()
                 .noneMatch(js -> js.contains("play()")));
     }
 

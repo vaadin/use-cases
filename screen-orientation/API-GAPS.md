@@ -24,9 +24,10 @@ gets an answer, so neither callback runs.
 **Workaround used:** `ScreenOrientationTestSupport` (in `src/test/java`)
 calls the public
 `UIInternals#setScreenOrientationFromClient(String type, String angle)` to
-set the orientation. To answer a lock, its `JavaScriptHandler` records the
-`ScreenOrientationJs.lock` calls sent to the simulated browser, and the test
-resolves them with the JSON the client bridge would send. The orientation
+set the orientation. To answer a lock, it reads the
+`ScreenOrientationJs.lock` calls from an `ExecutedJavaScript` capture the test
+starts before navigating, and the test resolves them with the JSON the client
+bridge would send. The orientation
 setter is a raw internal, not a typed testing helper, and the answer has to
 copy the bridge's JSON format.
 **Suggested API:** a `ScreenOrientationSimulator` next to

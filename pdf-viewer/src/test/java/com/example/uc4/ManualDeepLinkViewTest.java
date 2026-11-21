@@ -5,10 +5,11 @@ import java.util.Map;
 
 import com.example.documents.SampleDocuments;
 import com.example.pdfviewer.PdfViewerTester;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.Span;
@@ -18,15 +19,21 @@ import com.vaadin.flow.router.RouterLink;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-@BrowserlessTestConfig(javaScriptHandlers = PdfViewerTester.Browser.class)
 @ViewPackages(classes = ManualDeepLinkView.class)
 class ManualDeepLinkViewTest extends SpringBrowserlessTest {
+
+    private ExecutedJavaScript executed;
+
+    @BeforeEach
+    void captureJavaScript() {
+        executed = ExecutedJavaScript.capture();
+    }
 
     @Test
     void aLinkOpensTheGuideAtItsPage() {
         navigate("uc4?page=5", ManualDeepLinkView.class);
         PdfViewerTester viewer = new PdfViewerTester(
-                findInView(PdfViewer.class).single());
+                findInView(PdfViewer.class).single(), executed);
 
         assertEquals(List.of(5), viewer.takeScrollToPage());
         viewer.load(12, "");
@@ -51,7 +58,8 @@ class ManualDeepLinkViewTest extends SpringBrowserlessTest {
     @Test
     void scrollingWritesThePageBackIntoTheAddress() {
         navigate("uc4?page=2", ManualDeepLinkView.class);
-        new PdfViewerTester(findInView(PdfViewer.class).single()).scrollTo(7);
+        new PdfViewerTester(findInView(PdfViewer.class).single(), executed)
+                .scrollTo(7);
 
         assertEquals("uc4?page=7", address());
     }
@@ -60,7 +68,7 @@ class ManualDeepLinkViewTest extends SpringBrowserlessTest {
     void aLinkPastTheEndOpensTheLastPage() {
         navigate("uc4?page=99", ManualDeepLinkView.class);
         PdfViewerTester viewer = new PdfViewerTester(
-                findInView(PdfViewer.class).single());
+                findInView(PdfViewer.class).single(), executed);
         assertEquals(List.of(99), viewer.takeScrollToPage());
         viewer.load(12, "");
 

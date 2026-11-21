@@ -3,10 +3,10 @@ package com.example.uc2;
 import com.example.PrintTestSupport;
 import com.example.data.Order;
 import com.example.data.Orders;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -16,9 +16,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@BrowserlessTestConfig(javaScriptHandlers = PrintTestSupport.Browser.class)
 @ViewPackages(classes = PrintRouteView.class)
 class PrintRouteViewTest extends SpringBrowserlessTest {
+
+    private PrintTestSupport browser;
+
+    @BeforeEach
+    void captureJavaScript() {
+        browser = PrintTestSupport.capture();
+    }
 
     private static final int PRINT_COLUMN = 3;
 
@@ -39,7 +45,7 @@ class PrintRouteViewTest extends SpringBrowserlessTest {
 
         test(printButton(findInView(Grid.class).single(), 1)).click();
 
-        assertTrue(PrintTestSupport.sentJsContains("window.open"),
+        assertTrue(browser.sentJsContains("window.open"),
                 "The slip should open in a separate window");
     }
 
