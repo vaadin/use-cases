@@ -75,7 +75,6 @@ public class AdaptiveStreamingView extends VerticalLayout {
         add(new HorizontalLayout(badge));
 
         Video video = new Video();
-        video.setControlsVisible(true);
         video.setPreload(Media.Preload.METADATA);
         video.setWidth("640px");
         video.setMaxWidth("100%");

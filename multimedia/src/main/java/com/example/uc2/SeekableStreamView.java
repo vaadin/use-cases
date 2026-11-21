@@ -50,7 +50,6 @@ public class SeekableStreamView extends VerticalLayout {
                 + "waiting for everything before it to download."));
 
         Video video = new Video();
-        video.setControlsVisible(true);
         video.setPreload(Media.Preload.METADATA);
         video.setWidth("640px");
         video.setMaxWidth("100%");
