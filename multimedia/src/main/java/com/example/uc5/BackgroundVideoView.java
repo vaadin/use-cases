@@ -80,6 +80,7 @@ public class BackgroundVideoView extends VerticalLayout {
         // that already exists in the page, so autoplay would be blocked.
         MissingAPI.setMutedNow(video, true);
         video.setLoop(true);
+        video.setControlsVisible(false);
         video.setPreload(Media.Preload.AUTO);
         MissingAPI.setPlaysInline(video, true);
         video.getElement().setAttribute("aria-hidden", "true");
