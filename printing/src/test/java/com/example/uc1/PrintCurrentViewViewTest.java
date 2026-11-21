@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.BrowserlessTestConfig;
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -105,11 +106,14 @@ class PrintCurrentViewViewTest extends SpringBrowserlessTest {
     void leavingTheViewTakesTheWindowListenersWithIt() {
         PrintCurrentViewView view = navigate(PrintCurrentViewView.class);
         PrintEvents events = findInView(PrintEvents.class).single();
-        roundTrip();
+        ExecutedJavaScript executed = ExecutedJavaScript.capture();
 
         view.remove(events);
 
-        assertTrue(PrintTestSupport.sentJsContains("delete registry"),
+        assertTrue(
+                executed.getAll().stream()
+                        .anyMatch(execution -> execution.getExpression()
+                                .contains("delete registry")),
                 "Detaching must abort the window listeners, or every visit "
                         + "leaks another beforeprint/afterprint pair");
     }
