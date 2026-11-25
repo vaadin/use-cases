@@ -29,7 +29,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml', '.github/workflows/build.yml') }}
-          restore-keys: ${{ runner.os }}-maven-
+      # No restore-keys here: starting from an older entry would carry every
+      # replaced dependency version over into the new one.
       - run: mvn -B -DskipTests dependency:go-offline
         env:
           VAADIN_PRO_KEY: ${{ secrets.VAADIN_PRO_KEY }}

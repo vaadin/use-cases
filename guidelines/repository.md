@@ -77,7 +77,8 @@ module too when you merge `main` into a long-lived branch.
 - The `Prime Maven cache` job in `build.yml` fills the Maven repository cache
   that every module job only restores. A dependency or plugin that module jobs
   keep downloading belongs in that job, or the parallel downloads run into
-  Maven Central's rate limit.
+  Maven Central's rate limit. The job also builds and tests `common`, so a failing
+  `common` test fails it and no module job runs.
 - `fly-deploy.yml` deploys every directory holding a `fly.toml` when `main`
   changes, and every app when `common` or the parent pom changes.
 - `pr-preview.yml` deploys preview apps (`<app>-pr-<number>.fly.dev`) for a
