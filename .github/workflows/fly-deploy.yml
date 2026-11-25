@@ -117,6 +117,22 @@ jobs:
             flyctl secrets set --stage --app "$APP" \
               FEEDBACK_SLACK_WEBHOOK_URL="$FEEDBACK_SLACK_WEBHOOK_URL"
           fi
+      - name: Stage the AI provider keys
+        if: matrix.module == 'ai'
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          APP: ${{ steps.app.outputs.name }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          HEYGEN_API_KEY: ${{ secrets.HEYGEN_API_KEY }}
+        # The ai app's use cases call these services; each use case explains
+        # what is missing when its key is not set.
+        run: |
+          for key in OPENAI_API_KEY ELEVENLABS_API_KEY HEYGEN_API_KEY; do
+            if [ -n "${!key}" ]; then
+              flyctl secrets set --stage --app "$APP" "$key=${!key}"
+            fi
+          done
       - uses: docker/build-push-action@v5
         with:
           context: .
