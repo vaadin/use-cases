@@ -1,6 +1,5 @@
 package com.example.uc7;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.trigger.internal.Action;
@@ -35,7 +34,7 @@ public class BroadcastSendAction extends Action {
     }
 
     @JsDefinition
-    private interface BroadcastJs extends Serializable {
+    private interface BroadcastJs extends JsSnippets {
 
         @JsExpression("""
                 const channel = new BroadcastChannel($0);

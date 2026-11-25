@@ -1,6 +1,5 @@
 package com.example.uc10;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.IntStream;
@@ -161,7 +160,7 @@ public class VirtualScrollingView extends VerticalLayout {
     }
 
     @JsDefinition
-    private interface CardTemplates extends Serializable {
+    private interface CardTemplates extends JsSnippets {
 
         @JsExpression("""
                 return html`<div class="contact-card">

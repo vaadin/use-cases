@@ -1,6 +1,5 @@
 package com.example.uc2;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,6 +41,7 @@ import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -589,7 +589,7 @@ public class ApplicationHealthView extends VerticalLayout {
     }
 
     @JsDefinition
-    private interface CollectorJs extends Serializable {
+    private interface CollectorJs extends JsInvokers {
 
         @JsExpression("window.__vaadinMicrometer && "
                 + "window.__vaadinMicrometer.flush();")

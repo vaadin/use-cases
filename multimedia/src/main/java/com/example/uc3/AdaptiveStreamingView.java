@@ -1,7 +1,5 @@
 package com.example.uc3;
 
-import java.io.Serializable;
-
 import com.example.HlsDownloadHandler;
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
@@ -20,6 +18,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -91,7 +90,7 @@ public class AdaptiveStreamingView extends VerticalLayout {
     }
 
     @JsDefinition
-    private interface HlsJs extends Serializable {
+    private interface HlsJs extends JsInvokers {
 
         @JsExpression("return window.multimediaAttachHls(this)")
         PendingJavaScriptResult attachHls();

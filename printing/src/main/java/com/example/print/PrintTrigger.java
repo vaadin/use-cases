@@ -1,7 +1,5 @@
 package com.example.print;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
@@ -68,7 +66,7 @@ public final class PrintTrigger extends Trigger {
     }
 
     @JsDefinition
-    private interface PrintTriggerJs extends Serializable {
+    private interface PrintTriggerJs extends JsSnippets {
 
         @JsExpression("""
                 const listener = event => $0(event);

@@ -1,7 +1,5 @@
 package com.example.uc6;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
@@ -32,7 +30,7 @@ public class NetworkStatusTrigger extends Trigger {
     }
 
     @JsDefinition
-    private interface NetworkStatusJs extends Serializable {
+    private interface NetworkStatusJs extends JsSnippets {
 
         @JsExpression("""
                 const fire = () => $0(new Event('networkstatus'));

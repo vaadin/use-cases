@@ -1,7 +1,5 @@
 package com.example.uc11;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.MouseEventTrigger;
 import com.vaadin.flow.component.trigger.internal.Trigger;
@@ -34,7 +32,7 @@ public final class PointInput extends Action.Input<Point> {
     }
 
     @JsDefinition
-    private interface PointJs extends Serializable {
+    private interface PointJs extends JsSnippets {
 
         @JsExpression("return {x: event.clientX, y: event.clientY}")
         @JsFunctionParameterNames("event")

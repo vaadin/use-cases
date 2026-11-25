@@ -1,6 +1,5 @@
 package com.example.uc6;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -36,7 +35,7 @@ public class ApplyNetworkStatusAction extends Action {
     }
 
     @JsDefinition
-    private interface NetworkStatusJs extends Serializable {
+    private interface NetworkStatusJs extends JsSnippets {
 
         @JsExpression("""
                 const online = navigator.onLine;

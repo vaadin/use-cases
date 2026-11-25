@@ -1,6 +1,5 @@
 package com.example.uc5;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -46,6 +45,7 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -800,7 +800,7 @@ public class ConnectionInsightsView extends VerticalLayout {
     }
 
     @JsDefinition
-    private interface PickingJs extends Serializable {
+    private interface PickingJs extends JsInvokers {
 
         @JsExpression(SIMULATE)
         void simulate(String state, int millis);

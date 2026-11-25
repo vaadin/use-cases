@@ -1,6 +1,5 @@
 package com.example.uc19;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -56,7 +55,7 @@ public class ApplyResponsiveColorAction extends Action {
     }
 
     @JsDefinition
-    private interface ResponsiveColorJs extends Serializable {
+    private interface ResponsiveColorJs extends JsSnippets {
 
         @JsExpression("""
                 const w = (event && typeof event.width === 'number')

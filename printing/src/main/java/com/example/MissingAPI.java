@@ -1,10 +1,9 @@
 package com.example;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * The printing primitives Vaadin Flow does not have.
@@ -164,7 +163,7 @@ public final class MissingAPI {
             """;
 
     @JsDefinition
-    private interface PrintingJs extends Serializable {
+    private interface PrintingJs extends JsInvokers {
 
         @JsExpression("window.print()")
         void print();

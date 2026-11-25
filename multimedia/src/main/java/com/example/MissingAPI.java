@@ -1,7 +1,5 @@
 package com.example;
 
-import java.io.Serializable;
-
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.html.Media;
@@ -11,6 +9,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
@@ -295,7 +294,7 @@ public final class MissingAPI {
     }
 
     @JsDefinition
-    private interface MediaJs extends Serializable {
+    private interface MediaJs extends JsInvokers {
 
         @JsExpression("const p = this.play(); if (p) { p.catch(() => {}); }")
         void play();

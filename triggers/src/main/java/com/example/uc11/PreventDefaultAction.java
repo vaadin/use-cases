@@ -1,7 +1,5 @@
 package com.example.uc11;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
@@ -30,7 +28,7 @@ public final class PreventDefaultAction extends Action {
     }
 
     @JsDefinition
-    private interface PreventDefaultJs extends Serializable {
+    private interface PreventDefaultJs extends JsSnippets {
 
         @JsExpression("event.preventDefault()")
         @JsFunctionParameterNames("event")

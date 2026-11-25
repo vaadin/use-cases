@@ -1,6 +1,5 @@
 package com.example.print;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -13,6 +12,7 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -115,7 +115,7 @@ public class PrintEvents extends Div {
     }
 
     @JsDefinition
-    private interface PrintEventsJs extends Serializable {
+    private interface PrintEventsJs extends JsInvokers {
 
         @JsExpression(MissingAPI.PRINT_LISTENER_REGISTRY + """
                 window.addEventListener('beforeprint',

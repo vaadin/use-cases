@@ -2,7 +2,6 @@ package com.example.common;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -29,6 +28,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * Explains in the page how a use case is built: the technique in one line, a
@@ -238,7 +238,7 @@ public class BuiltWith extends Div {
     }
 
     @JsDefinition
-    private interface SourceJs extends Serializable {
+    private interface SourceJs extends JsInvokers {
 
         @JsExpression("window.highlightSource(this)")
         void highlight();
