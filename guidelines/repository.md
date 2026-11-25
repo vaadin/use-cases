@@ -71,7 +71,9 @@ module too when you merge `main` into a long-lived branch.
   install`. A change in `common` therefore has to keep every module building
   and passing its tests. It uses the Maven installed on the GitHub runner, not
   the wrapper: with the wrapper, every parallel job downloaded Maven from Maven
-  Central, and some of those downloads failed.
+  Central, and some of those downloads failed. CI's Maven version is
+  therefore the runner's, not the one `.mvn/wrapper/maven-wrapper.properties`
+  pins. The app images still build with `./mvnw` in each `Dockerfile`.
 - `fly-deploy.yml` deploys every directory holding a `fly.toml` when `main`
   changes, and every app when `common` or the parent pom changes.
 - `pr-preview.yml` deploys preview apps (`<app>-pr-<number>.fly.dev`) for a
