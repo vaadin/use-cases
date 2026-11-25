@@ -41,7 +41,9 @@ final class ViewerTexts {
                 .setLoading("Ladataan").setLink("Linkki")
                 .setGoToPage("Siirry sivulle {page}")
                 .setExternalLink("{text} (avautuu uuteen välilehteen)")
-                .setDownload("Lataa");
+                .setDownload("Lataa").setSidebar("Sivupalkki")
+                .setThumbnails("Sivujen pikkukuvat")
+                .setThumbnailLabel("Sivu {page}");
     }
 
     private static PdfViewerI18n german() {
@@ -54,6 +56,8 @@ final class ViewerTexts {
                 .setLoading("Wird geladen").setLink("Link")
                 .setGoToPage("Gehe zu Seite {page}")
                 .setExternalLink("{text} (öffnet in einem neuen Tab)")
-                .setDownload("Herunterladen");
+                .setDownload("Herunterladen").setSidebar("Seitenleiste")
+                .setThumbnails("Seitenminiaturen")
+                .setThumbnailLabel("Seite {page}");
     }
 }
