@@ -62,17 +62,15 @@ class ReportViewTest extends SpringBrowserlessTest {
         ReportView view = navigate(ReportView.class);
 
         test(view.buildButton()).click();
-        runPendingSignalsTasks();
 
         assertFalse(view.buildButton().isEnabled());
         assertTrue(view.progress().isVisible());
         assertEquals("Building…", view.result());
         assertEquals(1, EXECUTOR.pending());
 
-        // The background job finishes now and sets the signals; the
-        // bindings update the view when the pending signal tasks run.
+        // The background job finishes now, on the test thread, and sets the
+        // signals; the bindings update the view right away.
         EXECUTOR.runAll();
-        runPendingSignalsTasks();
 
         assertTrue(view.buildButton().isEnabled());
         assertFalse(view.progress().isVisible());
@@ -89,7 +87,6 @@ class ReportViewTest extends SpringBrowserlessTest {
 
         test(view.buildButton()).click();
         EXECUTOR.runAll();
-        runPendingSignalsTasks();
 
         assertTrue(view.buildButton().isEnabled());
         assertFalse(view.progress().isVisible());

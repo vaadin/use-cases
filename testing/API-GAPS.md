@@ -2,17 +2,9 @@
 
 Places where testing a Vaadin Flow application is harder than it should be, or needs knowledge of internals. Each entry names the use case and the test that surfaced it.
 
-The short version: **the testing tools are good one by one, but each stops at a different edge.** Browserless tests cover components and navigation well, but not background work through `UI.access` or most browser APIs. TestBench and Playwright both drive a real browser, but neither knows enough about Vaadin's web components to read a grid row or mask a screenshot without help. The load testing plugin turns an end-to-end test into a k6 script, but it asks the application to give up WebSocket push.
+The short version: **the testing tools are good one by one, but each stops at a different edge.** Browserless tests cover components and navigation well, but not most browser APIs. TestBench and Playwright both drive a real browser, but neither knows enough about Vaadin's web components to read a grid row or mask a screenshot without help. The load testing plugin turns an end-to-end test into a k6 script, but it asks the application to give up WebSocket push.
 
 ---
-
-## 1. Browserless: no public way to run queued `UI.access` tasks
-
-**Where it bites:** UC6 / ReportViewTest.java, before the view was moved to signals
-**Symptom:** a background job's result that reaches the UI through `UI.access` is queued until the queue runs, but the public `roundTrip()` does not run it. A test of a view that updates this way sees the old state.
-**Workaround used:** UC6 lets the background job set signals that the view is bound to, as `guidelines/views.md` recommends, and the test runs `runPendingSignalsTasks()`. A view that has to use `UI.access` needs the internal `com.vaadin.browserless.internal.MockVaadin.runUIQueue()`.
-**Suggested API:** a public `runPendingAccessTasks()` on `BaseBrowserlessTest` (or have `roundTrip()` run the access queue, as a real round trip would).
-Upstream: https://github.com/vaadin/browserless-test/issues/282
 
 ## 2. Browserless: most browser APIs have no simulator
 

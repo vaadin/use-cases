@@ -99,10 +99,9 @@ Upstream: https://github.com/vaadin/web-components/issues/1559
 **Workaround used:** a frame with the photo's `aspect-ratio`, a preview `Image` with a `data:` URL decoded from the photo's BlurHash, the average colour as the frame's background, and a `loaded` class bound to a signal that the `load` event sets.
 **Suggested API:** `Image#addLoadListener` / `addErrorListener`, and `Image#setPlaceholder(String src)` / `setPlaceholderColor(String)`, which the browser shows until the image has loaded and then fades out without a round trip. Optionally `Image#setBlurHash(String)`, decoded in the browser.
 
-## 14. Browserless tests cannot control time or background threads
+## 14. Browserless tests cannot control time
 
 **Where it bites:** every test in this module
-**Symptom:** a browserless test runs on its own thread and holds the session lock. Background answers queue up in `UI.access` and only run when the test calls `runPendingSignalsTasks()`. `BaseBrowserlessTest#roundTrip()`, the obvious choice, does not run them. There is no simulated clock and no way to complete a slow call on demand, so testing "the third widget answers first" or "the older search answers last" would be a timing race.
+**Symptom:** there is no simulated clock and no way to complete a slow call on demand, so testing "the third widget answers first" or "the older search answers last" would be a timing race.
 **Workaround used:** all slow calls go through the `SimulatedLatency` interface. The tests replace it with `ManualLatency` (a `@Primary` bean in the test sources), whose calls stay pending until the test completes them in any order. UC6 fires `BecameVisibleEvent` with `ComponentUtil.fireEvent`, because nothing in browserless testing can scroll.
-**Suggested API:** a browserless `runPendingAccessTasks()` / `awaitAsync()` with a clear name, and a test clock that `UI.accessLater` and scheduler-based helpers follow.
-Upstream: https://github.com/vaadin/browserless-test/issues/282 (the pending access tasks; there is no issue for the test clock)
+**Suggested API:** a test clock that `UI.accessLater` and scheduler-based helpers follow.
