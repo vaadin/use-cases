@@ -21,7 +21,7 @@ jobs:
           distribution: temurin
           java-version: 25
           cache: maven
-      - run: ./mvnw -B -DskipTests dependency:go-offline
+      - run: mvn -B -DskipTests dependency:go-offline
         env:
           VAADIN_PRO_KEY: ${{ secrets.VAADIN_PRO_KEY }}
       - id: find
@@ -49,7 +49,7 @@ jobs:
           distribution: temurin
           java-version: 25
           cache: maven
-      - run: ./mvnw -U -pl ${{ matrix.module }} -am install
+      - run: mvn -U -pl ${{ matrix.module }} -am install
         env:
           VAADIN_PRO_KEY: ${{ secrets.VAADIN_PRO_KEY }}
 
