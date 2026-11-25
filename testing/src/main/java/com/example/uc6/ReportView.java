@@ -29,7 +29,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * the button, progress bar and result are bound to them. Testing that without
  * {@code Thread.sleep} takes one seam: the job runs on an executor bean, which
  * the test replaces with one that queues tasks until the test runs them, so the
- * test decides when the job finishes, then lets the signal bindings run.
+ * test decides when the job finishes. The job then sets the signals on the test
+ * thread, and the bindings update the view right away.
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Async work and push")
