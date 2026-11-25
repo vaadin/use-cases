@@ -4,10 +4,12 @@
  *
  * Both live here, in a module of the application's own bundle, rather than in
  * a string of executeJs code, because that is where a real screen's broken
- * script lives: the error is a real TypeError from real code rather than one
- * thrown on purpose, and the frame the kit retains for it names this module.
- * executeJs code is compiled from a string in the browser at run time, so a
- * frame inside it names no file a developer could open.
+ * script lives, and because only code in the bundle is covered by the
+ * production sourcemaps: executeJs code is compiled in the browser at run
+ * time, so a frame inside it points at nothing a map can explain. A production
+ * build minifies this file into a chunk under /VAADIN/build/, and the
+ * client-error insight the kit retains names a column on the first line of
+ * that chunk; UC5 maps it back to this file.
  */
 
 /** One bin's stock level, as the warehouse API returns it. */
