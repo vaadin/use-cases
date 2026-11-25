@@ -106,7 +106,8 @@ needs a signed-in user.
 A user's session is locked only while one of that user's windows is active,
 as in a real request. Code that changes another user's UI without
 `UI.access()` therefore fails the test instead of passing silently. Fix the
-view rather than turning this off with the deprecated
+view, or call `activate()` on that user's window first when the test itself
+changes it, rather than turning this off with the deprecated
 `withSessionLockIsolation(false)`.
 
 ## Lifecycle
