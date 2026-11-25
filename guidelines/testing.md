@@ -103,6 +103,13 @@ assertion: it runs the pending signal work and makes that window current. Use
 `createSecured(...)` and `app.newUser("alice", "USER")` when the view
 needs a signed-in user.
 
+A user's session is locked only while one of that user's windows is active,
+as in a real request. Code that changes another user's UI without
+`UI.access()` therefore fails the test instead of passing silently. Fix the
+view, or call `activate()` on that user's window first when the test itself
+changes it, rather than turning this off with the deprecated
+`withSessionLockIsolation(false)`.
+
 ## Lifecycle
 
 When a view starts work on attach, test that detaching stops it (navigate
