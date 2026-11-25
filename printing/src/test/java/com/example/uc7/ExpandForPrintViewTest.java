@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.example.PrintTestSupport;
 import com.example.data.Orders;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -24,6 +25,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ViewPackages(classes = ExpandForPrintView.class)
 class ExpandForPrintViewTest extends SpringBrowserlessTest {
+
+    private PrintTestSupport browser;
+
+    @BeforeEach
+    void captureJavaScript() {
+        browser = PrintTestSupport.capture();
+    }
 
     @Test
     void theOrderIsSplitIntoFoldableSections() {
@@ -49,11 +57,8 @@ class ExpandForPrintViewTest extends SpringBrowserlessTest {
     @Test
     void everySectionIsOpenedForPrintAndRestoredAfterwards() {
         navigate(ExpandForPrintView.class);
-        // Trigger listeners are only queued when the response is written.
-        roundTrip();
 
-        Map<Element, List<List<Object>>> listeners = PrintTestSupport
-                .queuedListeners();
+        Map<Element, List<List<Object>>> listeners = browser.sentListeners();
         for (Details section : findInView(Details.class).all()) {
             // Remember the state the user left the section in, open it for
             // the paper, and put that state back when the dialog closes —
@@ -73,11 +78,8 @@ class ExpandForPrintViewTest extends SpringBrowserlessTest {
     @Test
     void openedSectionsAreRenderedBeforeThePagesAreLaidOut() {
         navigate(ExpandForPrintView.class);
-        roundTrip();
 
-        assertTrue(
-                PrintTestSupport.queuedJsMentions("performUpdate",
-                        "beforeprint"),
+        assertTrue(browser.sentJsMentions("performUpdate", "beforeprint"),
                 "A section opened by a Print button stays folded on paper "
                         + "unless it is rendered inside the event");
     }
@@ -85,10 +87,10 @@ class ExpandForPrintViewTest extends SpringBrowserlessTest {
     @Test
     void printButtonOpensThePrintDialog() {
         navigate(ExpandForPrintView.class);
-        assertFalse(PrintTestSupport.printRequested());
+        assertFalse(browser.printRequested());
 
         test(findInView(Button.class).id("print-button")).click();
 
-        assertTrue(PrintTestSupport.printRequested());
+        assertTrue(browser.printRequested());
     }
 }

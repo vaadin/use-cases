@@ -62,9 +62,10 @@ attribute for the initial HTML. Ideally the property is synced back, so that
 **Where it bites:** UC5 (pause button), UC6 (play the picked episode), UC7
 (own play/pause, ±10 s, chapter jumps), UC8 (start where the user left off).
 **Symptom:** `Media` has no `play()`, `pause()`, `load()` or `currentTime`.
-Each is a one-line `executeJs`, but every application has to know that
-`play()` returns a promise that rejects when autoplay is blocked, and that
-setting `currentTime` before `loadedmetadata` is ignored.
+Each is a line of JavaScript in a JavaScript definition, but every
+application has to know that `play()` returns a promise that rejects when
+autoplay is blocked, and that setting `currentTime` before `loadedmetadata`
+is ignored.
 **Workaround used:** `MissingAPI.play`, `pause`, `load`, `seek`, `seekBy` and
 `startAt`.
 **Suggested API:** `Media#play()` returning a `CompletableFuture<Void>` that
@@ -180,13 +181,11 @@ add-on would save every application from finding this out.
 **Symptom:** the browserless test kit has no tester for `Video` or `Audio`. A
 test cannot fire `play`, `timeupdate` or `ended` without a `ComponentTester`
 subclass, because `fireDomEvent` is protected. It also cannot see whether the
-server asked for `play()` or `load()`: `executeJs` calls are queued before the
-response and dropped by the mock round trip.
-**Workaround used:** `MediaTester` fires events through `fireDomEvent`. It
-reads the queued calls by running
-`StateTree#runExecutionsBeforeClientResponse()` itself and then
-`UIInternals#dumpPendingJavaScriptInvocations()`, which reaches into framework
-internals.
+server asked for `play()` or `load()` without matching JavaScript text.
+**Workaround used:** `MediaTester` fires events through `fireDomEvent`. The
+test starts an `ExecutedJavaScript` capture before it navigates, and
+`takeJavaScript()` returns the calls sent for the element as expression strings,
+which breaks whenever Flow changes how the call is written.
 **Suggested API:** `VideoTester` / `AudioTester` in the browserless kit with
 `simulatePlay()`, `simulatePause(double position)`,
 `simulateTimeUpdate(double)`, `simulateEnded()`,

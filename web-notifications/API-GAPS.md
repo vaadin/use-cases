@@ -39,13 +39,12 @@ permission prompt, no notification and no click. Flow has nothing like
 accessors for the title or options it was shown with. The JavaScript itself
 (gesture handling, `renotify`, the Android constructor failure) stays
 untested.
-**Workaround used:** `WebNotificationSimulator` plays the browser through
-framework internals. It sets the permission with
+**Workaround used:** `WebNotificationSimulator` plays the browser, partly
+through framework internals. It sets the permission with
 `UIInternals#setWebNotificationPermissionFromClient`. It reads the
-`webNotification.show` / `close` / `closeByTag` calls from
-`UIInternals#dumpPendingJavaScriptInvocations`, after running
-`StateTree#runExecutionsBeforeClientResponse` (calls through a JavaScript
-definition are queued only before a response). It reports clicks, closes and
+`webNotification.show` / `close` / `closeByTag` calls from an
+`ExecutedJavaScript` capture the test starts before navigating, and matches
+them on Flow's generated script text. It reports clicks, closes and
 failures through the `ReturnChannelRegistration` all notifications of a UI
 share, with the notification's key first, as the browser does. Like the
 browser, it refuses to show without permission and closes a notification

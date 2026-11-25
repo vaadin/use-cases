@@ -51,5 +51,5 @@ To build a use case against a local, unpublished Flow or browserless-test
 change, see "Testing against a local Flow or browserless-test build" in
 `guidelines/repository.md`.
 
-CI builds every module separately with `./mvnw -pl <module> -am install`, so a
+CI builds every module separately with `mvn -pl <module> -am install`, so a
 change to `common` must keep every module building.

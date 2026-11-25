@@ -18,7 +18,11 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.renderer.CompiledLitTemplate;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -77,13 +81,9 @@ public class VirtualScrollingView extends VerticalLayout {
                 + "them exist as components on the server. Then build "
                 + "2,000 cards the naive way on the right and compare."));
 
-        list.setRenderer(LitRenderer.<Contact> of("""
-                <div class="contact-card">
-                  <span class="avatar">${item.initials}</span>
-                  <span class="name">${item.name}</span>
-                  <span class="email">${item.email}</span>
-                  <span class="number">#${item.number}</span>
-                </div>""").withProperty("initials", Contact::initials)
+        list.setRenderer(LitRenderer
+                .<Contact> of(JsSnippets.of(CardTemplates.class).card())
+                .withProperty("initials", Contact::initials)
                 .withProperty("name", Contact::name)
                 .withProperty("email", Contact::email)
                 .withProperty("number", Contact::number));
@@ -157,5 +157,18 @@ public class VirtualScrollingView extends VerticalLayout {
 
     Div naiveCards() {
         return naive;
+    }
+
+    @JsDefinition
+    private interface CardTemplates extends JsSnippets {
+
+        @JsExpression("""
+                return html`<div class="contact-card">
+                  <span class="avatar">${item.initials}</span>
+                  <span class="name">${item.name}</span>
+                  <span class="email">${item.email}</span>
+                  <span class="number">#${item.number}</span>
+                </div>`;""")
+        CompiledLitTemplate card();
     }
 }

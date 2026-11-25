@@ -4,13 +4,11 @@ import java.util.Optional;
 
 import tools.jackson.databind.node.ObjectNode;
 
-import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.internal.UIInternals;
+import com.vaadin.flow.component.button.ButtonTester;
 import com.vaadin.flow.component.shared.HasTextSelection;
 import com.vaadin.flow.dom.DebouncePhase;
 import com.vaadin.flow.dom.DomEvent;
@@ -47,7 +45,7 @@ public final class TextSelectionTestSupport {
         ObjectNode data = JacksonUtils.createObjectNode();
         data.put(MissingAPI.START, start);
         data.put(MissingAPI.END, end);
-        data.put(MissingAPI.CONTENT, value.substring(start, end));
+        data.put(MissingAPI.VALUE, value);
         // The listener is debounced, so it only takes the event the browser
         // sends when the debounce timeout ends.
         data.put("for", DebouncePhase.TRAILING.getIdentifier());
@@ -60,31 +58,15 @@ public final class TextSelectionTestSupport {
     /**
      * Clicks the button and returns the last selection that the click asked the
      * browser to make in the field, if any.
-     * <p>
-     * The button tester also sends the response to the mocked browser, which
-     * drops the JavaScript calls before a test can read them. So the click
-     * event is fired directly, after the checks the tester makes, and the calls
-     * are read before anything is sent.
      */
     public static Optional<Requested> clickAndReadSelection(Button button,
             Component field) {
-        if (!button.isEnabled() || !button.isVisible()
-                || !button.isAttached()) {
-            throw new IllegalStateException(
-                    "Button '" + button.getText() + "' is not usable");
-        }
-        UIInternals internals = UI.getCurrent().getInternals();
-        // Drop the calls that are already queued, such as the navigation's.
-        internals.getStateTree().runExecutionsBeforeClientResponse();
-        internals.dumpPendingJavaScriptInvocations();
-
-        ComponentUtil.fireEvent(button, new ClickEvent<>(button));
-
-        // Element.executeJs queues its call until the response is written.
-        internals.getStateTree().runExecutionsBeforeClientResponse();
-        return internals.dumpPendingJavaScriptInvocations().stream()
-                .filter(call -> call.getOwner() == field.getElement().getNode())
-                .map(call -> call.getInvocation().getJsCall())
+        ExecutedJavaScript executed = ExecutedJavaScript.capture();
+        new ButtonTester<>(button).click();
+        return executed.getAll().stream()
+                .filter(execution -> execution.getElement()
+                        .equals(field.getElement()))
+                .flatMap(execution -> execution.getJsCall().stream())
                 .filter(TextSelectionTestSupport::isSetSelectionRange)
                 .map(call -> new Requested((Integer) call.arguments().get(0),
                         (Integer) call.arguments().get(1)))
@@ -92,9 +74,8 @@ public final class TextSelectionTestSupport {
     }
 
     private static boolean isSetSelectionRange(JsCall call) {
-        return call != null
-                && HasTextSelection.class
-                        .equals(call.definitionType().getEnclosingClass())
+        return HasTextSelection.class
+                .equals(call.definitionType().getEnclosingClass())
                 && call.methodName().equals("setSelectionRange");
     }
 }

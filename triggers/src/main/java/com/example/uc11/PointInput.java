@@ -4,6 +4,10 @@ import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.MouseEventTrigger;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsFunctionParameterNames;
+import com.vaadin.flow.js.JsSnippets;
 
 /**
  * Custom {@link Action.Input} that returns {@code {x, y}} read from the
@@ -24,7 +28,14 @@ public final class PointInput extends Action.Input<Point> {
                     "PointInput is scoped to MouseEventTrigger and cannot be used in a "
                             + trigger.getClass().getSimpleName() + " handler");
         }
-        return JsFunction.of("return {x: event.clientX, y: event.clientY}")
-                .withArguments("event");
+        return JsSnippets.of(PointJs.class).point();
+    }
+
+    @JsDefinition
+    private interface PointJs extends JsSnippets {
+
+        @JsExpression("return {x: event.clientX, y: event.clientY}")
+        @JsFunctionParameterNames("event")
+        JsFunction point();
     }
 }

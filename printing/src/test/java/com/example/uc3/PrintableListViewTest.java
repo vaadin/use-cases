@@ -3,6 +3,7 @@ package com.example.uc3;
 import java.util.List;
 
 import com.example.PrintTestSupport;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -20,6 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ViewPackages(classes = PrintableListView.class)
 class PrintableListViewTest extends SpringBrowserlessTest {
+
+    private PrintTestSupport browser;
+
+    @BeforeEach
+    void captureJavaScript() {
+        browser = PrintTestSupport.capture();
+    }
 
     @Test
     void theTableOnPaperHasEveryRowTheGridHas() {
@@ -70,7 +78,7 @@ class PrintableListViewTest extends SpringBrowserlessTest {
 
         test(findInView(Button.class).id("print-button")).click();
 
-        assertTrue(PrintTestSupport.printRequested());
+        assertTrue(browser.printRequested());
     }
 
     private Table findTable() {

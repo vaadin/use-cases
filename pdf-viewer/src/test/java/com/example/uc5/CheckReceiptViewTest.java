@@ -27,7 +27,7 @@ class CheckReceiptViewTest extends SpringBrowserlessTest {
         PdfViewer viewer = findInView(PdfViewer.class).single();
 
         assertEquals(Zoom.PAGE_FIT, viewer.getZoom());
-        assertTrue(viewer.getElement().getProperty("toolbarCollapsed", false));
+        assertTrue(viewer.isToolbarCollapsed());
         assertEquals("32.40 EUR", field("Claimed amount"));
         assertTrue(viewer.getElement().getAttribute("src")
                 .endsWith("receipt-EXP-118.pdf"));

@@ -1,10 +1,14 @@
 package com.example.uc13;
 
+import java.util.List;
+
 import com.example.documents.SampleDocuments;
 import com.example.pdfviewer.PdfViewerTester;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -17,6 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 @SpringBootTest
 @ViewPackages(classes = TurnScanView.class)
 class TurnScanViewTest extends SpringBrowserlessTest {
+
+    private ExecutedJavaScript executed;
+
+    @BeforeEach
+    void captureJavaScript() {
+        executed = ExecutedJavaScript.capture();
+    }
 
     @Test
     void theScanHasASidewaysSecondPage() {
@@ -34,7 +45,7 @@ class TurnScanViewTest extends SpringBrowserlessTest {
     void turningTheCurrentPageReloadsTheDocumentAtThatPage() {
         navigate(TurnScanView.class);
         PdfViewer viewer = findInView(PdfViewer.class).single();
-        PdfViewerTester tester = new PdfViewerTester(viewer);
+        PdfViewerTester tester = new PdfViewerTester(viewer, executed);
         tester.load(2, "Delivery Note DN-5521");
         tester.scrollTo(2);
         String src = viewer.getElement().getAttribute("src");
@@ -42,10 +53,9 @@ class TurnScanViewTest extends SpringBrowserlessTest {
         test(button("Turn left")).click();
 
         assertNotEquals(src, viewer.getElement().getAttribute("src"));
-        // The new document opens at page 1, then the view goes back to 2.
-        tester.scrollTo(1);
-        tester.load(2, "Delivery Note DN-5521");
-        assertEquals(2, viewer.getPage());
+        // The new document opens at page 1, then the viewer goes back to 2.
+        assertEquals(List.of(2), tester.takeScrollToPage());
+        tester.scrollTo(2);
         assertEquals("Page 2 is now stored upright.", status());
 
         test(button("Turn left")).click();

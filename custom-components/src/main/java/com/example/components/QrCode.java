@@ -1,5 +1,7 @@
 package com.example.components;
 
+import java.util.Objects;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -44,7 +46,7 @@ public class QrCode extends Component implements HasStyle {
     }
 
     public String getData() {
-        return getElement().getAttribute("data");
+        return Objects.requireNonNull(getElement().getAttribute("data"));
     }
 
     /** The size of one square of the code, in pixels. */

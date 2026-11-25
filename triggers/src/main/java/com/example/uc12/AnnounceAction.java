@@ -7,6 +7,9 @@ import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 
 /**
  * Custom {@link Action} that sets an aria-live region's {@code textContent} so
@@ -38,7 +41,13 @@ public class AnnounceAction extends Action {
     protected JsFunction toJs(Trigger trigger) {
         // Setting textContent to the same value back-to-back doesn't
         // re-announce; clear-then-set forces the screen reader to read.
-        return JsFunction.of("$0.textContent='';$0.textContent=$1", liveRegion,
-                message);
+        return JsSnippets.of(AnnounceJs.class).announce(liveRegion, message);
+    }
+
+    @JsDefinition
+    private interface AnnounceJs extends JsSnippets {
+
+        @JsExpression("$0.textContent='';$0.textContent=$1")
+        JsFunction announce(Element liveRegion, String message);
     }
 }

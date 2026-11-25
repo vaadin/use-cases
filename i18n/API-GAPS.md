@@ -50,7 +50,7 @@ Upstream: https://github.com/vaadin/flow-components/issues/1144
 
 **Where it bites:** UC2 / LanguageSwitcherView.java, `LanguagePreference.java`
 **Symptom:** Flow matches the browser's `Accept-Language` when the session starts, which is right for a first visit. But a language the user picks is lost when the session ends, and there is no hook to take it into account at session start. Writing a cookie from the server does not work either: with WebSocket push there is no HTTP response to put the `Set-Cookie` header in.
-**Workaround used:** a session init listener reads a `locale` cookie and overrides the matched locale. Picking a language writes the cookie through `executeJs("document.cookie = …")`.
+**Workaround used:** a session init listener reads a `locale` cookie and overrides the matched locale. Picking a language writes the cookie through a JavaScript definition (`@JsDefinition`) that sets `document.cookie`.
 **Suggested API:** a `LocaleResolver`-style SPI that Flow asks when a session starts and tells when the locale changes, with a cookie-based implementation built in.
 Upstream: https://github.com/vaadin/flow/issues/26382
 

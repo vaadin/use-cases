@@ -3,9 +3,11 @@ package com.example.uc4;
 import java.time.Duration;
 import java.util.List;
 
+import com.example.WakeLockTestSupport;
 import com.example.home.HomeView;
 import com.example.uc4.WorkoutTimerView.Countdown;
 import com.example.uc4.WorkoutTimerView.Phase;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -16,7 +18,6 @@ import com.vaadin.flow.component.html.Span;
 
 import static com.example.WakeLockTestSupport.RELEASE;
 import static com.example.WakeLockTestSupport.REQUEST;
-import static com.example.WakeLockTestSupport.answerWakeLockCalls;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -24,20 +25,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ViewPackages(classes = { WorkoutTimerView.class, HomeView.class })
 class WorkoutTimerViewTest extends SpringBrowserlessTest {
 
+    private WakeLockTestSupport browser;
+
+    @BeforeEach
+    void captureWakeLockCalls() {
+        browser = WakeLockTestSupport.capture();
+    }
+
     @Test
     void lockIsHeldWhileTheTimerRuns() {
         navigate(WorkoutTimerView.class);
-        answerWakeLockCalls();
+        browser.answerWakeLockCalls();
         runPendingSignalsTasks();
         assertBadge("Released");
 
         test(button("Start")).click();
-        assertEquals(List.of(REQUEST), answerWakeLockCalls());
+        assertEquals(List.of(REQUEST), browser.answerWakeLockCalls());
         runPendingSignalsTasks();
         assertBadge("Holding — the screen stays on between sets");
 
         test(button("Pause")).click();
-        assertEquals(List.of(RELEASE), answerWakeLockCalls());
+        assertEquals(List.of(RELEASE), browser.answerWakeLockCalls());
         runPendingSignalsTasks();
         assertBadge("Released");
     }
@@ -67,12 +75,12 @@ class WorkoutTimerViewTest extends SpringBrowserlessTest {
     void resetReturnsToTheStartOfAWorkPhase() {
         navigate(WorkoutTimerView.class);
         test(button("Start")).click();
-        answerWakeLockCalls();
+        browser.answerWakeLockCalls();
 
         test(button("Reset")).click();
         runPendingSignalsTasks();
 
-        assertEquals(List.of(RELEASE), answerWakeLockCalls());
+        assertEquals(List.of(RELEASE), browser.answerWakeLockCalls());
         button("Start");
         assertEquals("00:30", clock());
         assertEquals("WORK", findInView(Span.class).withClassName("uc4-phase")
@@ -82,13 +90,13 @@ class WorkoutTimerViewTest extends SpringBrowserlessTest {
     @Test
     void leavingWhileRunningReleasesTheLock() {
         navigate(WorkoutTimerView.class);
-        answerWakeLockCalls();
+        browser.answerWakeLockCalls();
         test(button("Start")).click();
-        assertEquals(List.of(REQUEST), answerWakeLockCalls());
+        assertEquals(List.of(REQUEST), browser.answerWakeLockCalls());
 
         navigate(HomeView.class);
 
-        assertEquals(List.of(RELEASE), answerWakeLockCalls());
+        assertEquals(List.of(RELEASE), browser.answerWakeLockCalls());
     }
 
     @Test

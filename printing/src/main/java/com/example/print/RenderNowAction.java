@@ -5,7 +5,11 @@ import java.util.Objects;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.Trigger;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 
 /**
  * Renders a web component's pending property changes right away.
@@ -39,6 +43,14 @@ public class RenderNowAction extends Action {
 
     @Override
     protected JsFunction toJs(Trigger trigger) {
-        return JsFunction.of("$0.performUpdate?.();", component.getElement());
+        return JsSnippets.of(RenderNowJs.class)
+                .renderNow(component.getElement());
+    }
+
+    @JsDefinition
+    private interface RenderNowJs extends JsSnippets {
+
+        @JsExpression("$0.performUpdate?.();")
+        JsFunction renderNow(Element element);
     }
 }

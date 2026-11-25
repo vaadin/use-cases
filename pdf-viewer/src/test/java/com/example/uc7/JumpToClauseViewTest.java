@@ -1,9 +1,14 @@
 package com.example.uc7;
 
+import java.util.List;
+
 import com.example.documents.SampleDocuments;
+import com.example.pdfviewer.PdfViewerTester;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -17,10 +22,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ViewPackages(classes = JumpToClauseView.class)
 class JumpToClauseViewTest extends SpringBrowserlessTest {
 
+    private ExecutedJavaScript executed;
+
+    @BeforeEach
+    void captureJavaScript() {
+        executed = ExecutedJavaScript.capture();
+    }
+
     @Test
     void eachQuestionOpensThePageOfItsAnswer() {
         navigate(JumpToClauseView.class);
-        PdfViewer viewer = findInView(PdfViewer.class).single();
+        PdfViewerTester viewer = new PdfViewerTester(
+                findInView(PdfViewer.class).single(), executed);
         ClauseFinder finder = new ClauseFinder(
                 SampleDocuments.serviceAgreement().bytes());
 
@@ -28,7 +41,8 @@ class JumpToClauseViewTest extends SpringBrowserlessTest {
             test(findInView(Button.class).withText(question.text()).single())
                     .click();
             int page = finder.pageOf(question.phrase()).orElseThrow();
-            assertEquals(page, viewer.getPage(), question.text());
+            assertEquals(List.of(page), viewer.takeScrollToPage(),
+                    question.text());
             assertEquals("Look for \"" + question.phrase() + "\" on page "
                     + page + ".", result());
         }

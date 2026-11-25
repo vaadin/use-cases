@@ -3,6 +3,9 @@ package com.example.uc6;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -22,7 +25,14 @@ public class NetworkStatusTrigger extends Trigger {
 
     @Override
     protected Registration install(JsFunction action) {
-        return getHost().addJsInitializer("""
+        return getHost().addJsInitializer(
+                JsSnippets.of(NetworkStatusJs.class).listenForStatus(action));
+    }
+
+    @JsDefinition
+    private interface NetworkStatusJs extends JsSnippets {
+
+        @JsExpression("""
                 const fire = () => $0(new Event('networkstatus'));
                 window.addEventListener('online', fire);
                 window.addEventListener('offline', fire);
@@ -30,6 +40,7 @@ public class NetworkStatusTrigger extends Trigger {
                 return () => {
                     window.removeEventListener('online', fire);
                     window.removeEventListener('offline', fire);
-                };""", action);
+                };""")
+        JsFunction listenForStatus(JsFunction action);
     }
 }

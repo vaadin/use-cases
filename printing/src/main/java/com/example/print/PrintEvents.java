@@ -10,6 +10,9 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -102,17 +105,24 @@ public class PrintEvents extends Div {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        getElement().executeJs(MissingAPI.withPrintListenerRegistry("""
-                window.addEventListener('beforeprint',
-                        () => self.$server.beforePrint(), { signal });
-                window.addEventListener('afterprint',
-                        () => self.$server.afterPrint(), { signal });
-                """), key);
+        getElement().executeJs(PrintEventsJs.class).listen(key);
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         MissingAPI.abortPrintListeners(detachEvent.getUI(), key);
         super.onDetach(detachEvent);
+    }
+
+    @JsDefinition
+    private interface PrintEventsJs extends JsInvokers {
+
+        @JsExpression(MissingAPI.PRINT_LISTENER_REGISTRY + """
+                window.addEventListener('beforeprint',
+                        () => self.$server.beforePrint(), { signal });
+                window.addEventListener('afterprint',
+                        () => self.$server.afterPrint(), { signal });
+                """)
+        void listen(String key);
     }
 }

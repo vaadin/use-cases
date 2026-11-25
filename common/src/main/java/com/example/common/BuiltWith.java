@@ -26,6 +26,9 @@ import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.UnorderedList;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 
 /**
  * Explains in the page how a use case is built: the technique in one line, a
@@ -149,7 +152,7 @@ public class BuiltWith extends Div {
             code.addClassName("language-" + language);
             // Flow recreates the element on re-attach; highlight it each time.
             code.whenAttached(ui -> {
-                code.getElement().executeJs("window.highlightSource(this)");
+                code.getElement().executeJs(SourceJs.class).highlight();
                 return null;
             });
         }
@@ -232,5 +235,12 @@ public class BuiltWith extends Div {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    @JsDefinition
+    private interface SourceJs extends JsInvokers {
+
+        @JsExpression("window.highlightSource(this)")
+        void highlight();
     }
 }

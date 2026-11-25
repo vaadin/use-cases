@@ -62,8 +62,8 @@ class InsightCardTest {
 
         List<String> chips = card.getElement().getChildren()
                 .filter(e -> e.getClassList().contains("verdict-evidence"))
-                .flatMap(e -> e.getChildren())
-                .map(e -> e.getTextRecursively()).toList();
+                .flatMap(e -> e.getChildren()).map(e -> e.getTextRecursively())
+                .toList();
         assertEquals(List.of("route=orders", "ComboBox", "3×"), chips);
     }
 }

@@ -67,9 +67,18 @@ module too when you merge `main` into a long-lived branch.
 
 ## CI and deployment
 
-- `build.yml` builds every module separately with `./mvnw -pl <module> -am
+- `build.yml` builds every module separately with `mvn -pl <module> -am
   install`. A change in `common` therefore has to keep every module building
-  and passing its tests.
+  and passing its tests. It uses the Maven installed on the GitHub runner, not
+  the wrapper: with the wrapper, every parallel job downloaded Maven from Maven
+  Central, and some of those downloads failed. CI's Maven version is
+  therefore the runner's, not the one `.mvn/wrapper/maven-wrapper.properties`
+  pins. The app images still build with `./mvnw` in each `Dockerfile`.
+- The `Prime Maven cache` job in `build.yml` fills the Maven repository cache
+  that every module job only restores. A dependency or plugin that module jobs
+  keep downloading belongs in that job, or the parallel downloads run into
+  Maven Central's rate limit. The job also builds and tests `common`, so a failing
+  `common` test fails it and no module job runs.
 - `fly-deploy.yml` deploys every directory holding a `fly.toml` when `main`
   changes, and every app when `common` or the parent pom changes.
 - `pr-preview.yml` deploys preview apps (`<app>-pr-<number>.fly.dev`) for a

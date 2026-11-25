@@ -13,7 +13,8 @@ cursor, show details about the selected text, or enable a button only while
 text is selected, without listening to the browser itself.
 **Workaround used:** `MissingAPI.selectionSignal(field)` adds a debounced DOM
 listener for `selectionchange` that sends `selectionStart`, `selectionEnd`
-and the selected text to the server, and keeps them in a read-only signal.
+and the field's value to the server, which cuts the selected text out of the
+value and keeps the result in a read-only signal.
 **Suggested API:** a read-only signal on the field, e.g.
 `Signal<SelectionRange> selectionSignal()` with
 `record SelectionRange(int start, int end, String content)`. It was
@@ -29,8 +30,8 @@ nor to read the selection the server asked the browser to make. The
 through the testers.
 **Workaround used:** `TextSelectionTestSupport.selectInBrowser` fires the
 `selectionchange` DOM event that `MissingAPI` listens to, and
-`clickAndReadSelection` reads the pending `setSelectionRange` JavaScript
-calls before the response is sent.
+`clickAndReadSelection` clicks with the button tester and reads the
+`setSelectionRange` calls that `ExecutedJavaScript` captured.
 **Suggested API:** `select(start, end)` and `getSelection()` on the text
 field testers, working with the field's own selection API once it exists.
 

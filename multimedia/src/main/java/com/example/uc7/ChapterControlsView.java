@@ -69,6 +69,7 @@ public class ChapterControlsView extends VerticalLayout
                 + "and the highlighted chapter follows the playback "
                 + "position reported by the browser."));
 
+        video.setControlsVisible(false);
         video.setPreload(Media.Preload.METADATA);
         video.setWidth("640px");
         video.setMaxWidth("100%");

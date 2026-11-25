@@ -20,10 +20,31 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
-          cache: maven
-      - run: ./mvnw -B -DskipTests dependency:go-offline
+      # The module jobs only restore this entry. The key includes this file so
+      # that changing what is resolved here saves a new entry: on an exact hit
+      # nothing is saved, and whatever the entry lacks is downloaded again by
+      # every module job, which Maven Central answers with 429.
+      - id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml', '.github/workflows/build.yml') }}
+      # No restore-keys here: starting from an older entry would carry every
+      # replaced dependency version over into the new one.
+      - run: mvn -B -DskipTests dependency:go-offline
         env:
           VAADIN_PRO_KEY: ${{ secrets.VAADIN_PRO_KEY }}
+      # go-offline skips the compiler's annotation processors (Error Prone,
+      # NullAway) and Surefire's JUnit provider, which only a real compile and
+      # test run resolve.
+      - run: mvn -B -pl common install
+        env:
+          VAADIN_PRO_KEY: ${{ secrets.VAADIN_PRO_KEY }}
+      - if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ steps.cache.outputs.cache-primary-key }}
       - id: find
         run: |
           modules=$(find . -mindepth 2 -maxdepth 2 -name pom.xml -printf '%h\n' \
@@ -48,8 +69,12 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
-          cache: maven
-      - run: ./mvnw -pl ${{ matrix.module }} -am install
+      - uses: actions/cache/restore@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml', '.github/workflows/build.yml') }}
+          restore-keys: ${{ runner.os }}-maven-
+      - run: mvn -U -pl ${{ matrix.module }} -am install
         env:
           VAADIN_PRO_KEY: ${{ secrets.VAADIN_PRO_KEY }}
 
