@@ -32,6 +32,13 @@ import static org.mockito.Mockito.verify;
 @ViewPackages(classes = { ClickToOpenView.class, HomeView.class })
 class ClickToOpenViewTest extends SpringBrowserlessTest {
 
+    private WebNotificationSimulator browser;
+
+    @BeforeEach
+    void captureNotificationCalls() {
+        browser = WebNotificationSimulator.capture();
+    }
+
     // The tests assign tickets by hand instead of waiting five seconds.
     @MockitoBean
     private TaskScheduler taskScheduler;
@@ -66,14 +73,14 @@ class ClickToOpenViewTest extends SpringBrowserlessTest {
         ClickToOpenView.Ticket ticket = view.assignTicket(UI.getCurrent());
         runPendingSignalsTasks();
 
-        assertEquals(1, WebNotificationSimulator.shown().size());
-        ShownNotification shown = WebNotificationSimulator.shown().get(0);
+        assertEquals(1, browser.shown().size());
+        ShownNotification shown = browser.shown().get(0);
         assertEquals("Ticket #" + ticket.number() + " assigned to you",
                 shown.title());
         // Not opened until the user clicks.
         assertTrue(findInView(H3.class).all().isEmpty());
 
-        WebNotificationSimulator.click(shown);
+        browser.click(shown);
         runPendingSignalsTasks();
 
         assertTrue(findInView(H3.class).all().stream().anyMatch(
@@ -82,7 +89,7 @@ class ClickToOpenViewTest extends SpringBrowserlessTest {
                 .anyMatch(s -> s.getText() != null && s.getText()
                         .startsWith("Opened from notification click")));
         // The browser closes the notification after the click.
-        assertTrue(WebNotificationSimulator.shown().isEmpty());
+        assertTrue(browser.shown().isEmpty());
     }
 
     @Test
@@ -93,7 +100,7 @@ class ClickToOpenViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         ClickToOpenView.Ticket ticket = view.assignTicket(UI.getCurrent());
-        assertTrue(WebNotificationSimulator.shown().isEmpty());
+        assertTrue(browser.shown().isEmpty());
 
         Button open = find(Button.class).all().stream()
                 .filter(b -> "Open".equals(b.getText())).findFirst()

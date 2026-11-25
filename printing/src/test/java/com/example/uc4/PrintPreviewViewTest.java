@@ -1,9 +1,13 @@
 package com.example.uc4;
 
+import java.util.List;
+
 import com.example.PrintTestSupport;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -18,6 +22,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ViewPackages(classes = PrintPreviewView.class)
 class PrintPreviewViewTest extends SpringBrowserlessTest {
+
+    private PrintTestSupport browser;
+
+    @BeforeEach
+    void captureJavaScript() {
+        browser = PrintTestSupport.capture();
+    }
 
     @Test
     void previewAndPageRuleStartFromA4Portrait() {
@@ -50,26 +61,41 @@ class PrintPreviewViewTest extends SpringBrowserlessTest {
     @Test
     void printingWritesThePageRuleIntoTheDocumentFirst() {
         navigate(PrintPreviewView.class);
+        ExecutedJavaScript executed = ExecutedJavaScript.capture();
 
         test(findInView(Button.class).id("print-button")).click();
 
-        assertTrue(PrintTestSupport.pendingJsContains("style.textContent"),
+        List<String> sent = executed.getAll().stream()
+                .map(ExecutedJavaScript.Execution::getExpression).toList();
+        int pageRule = indexOf(sent, "style.textContent");
+        int print = indexOf(sent, "window.print()");
+        assertTrue(pageRule >= 0,
                 "@page can only be applied through a style element");
-        assertTrue(PrintTestSupport.printRequested());
+        assertTrue(print > pageRule,
+                "The page rule must be in the document before printing");
     }
 
     @Test
     void thePageRuleIsWrittenOnArrivalAndRemovedOnLeaving() {
         PrintPreviewView view = navigate(PrintPreviewView.class);
 
-        assertTrue(PrintTestSupport.pendingJsContains("style.textContent"),
+        assertTrue(browser.sentJsContains("style.textContent"),
                 "The document must carry the rule the preview advertises, "
                         + "not just show it");
 
         view.getElement().removeFromParent();
 
-        assertTrue(PrintTestSupport.pendingJsContains("?.remove()"),
+        assertTrue(browser.sentJsContains("?.remove()"),
                 "@page belongs to the document, so it must not follow the "
                         + "user to the next view");
+    }
+
+    private static int indexOf(List<String> expressions, String fragment) {
+        for (int i = 0; i < expressions.size(); i++) {
+            if (expressions.get(i).contains(fragment)) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

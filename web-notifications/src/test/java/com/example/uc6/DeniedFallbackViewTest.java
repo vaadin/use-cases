@@ -1,6 +1,7 @@
 package com.example.uc6;
 
 import com.example.WebNotificationSimulator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -20,6 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ViewPackages(classes = DeniedFallbackView.class)
 class DeniedFallbackViewTest extends SpringBrowserlessTest {
+
+    private WebNotificationSimulator browser;
+
+    @BeforeEach
+    void captureNotificationCalls() {
+        browser = WebNotificationSimulator.capture();
+    }
 
     @Test
     void viewRendersHeadingAndHidesHelpUntilDenied() {
@@ -44,7 +52,7 @@ class DeniedFallbackViewTest extends SpringBrowserlessTest {
 
         test(button("Send me a notification")).click();
         assertLogContains("in-app fallback (permission denied)");
-        assertTrue(WebNotificationSimulator.shown().isEmpty());
+        assertTrue(browser.shown().isEmpty());
 
         // User re-enables notifications in site settings; the browser
         // reports the change and the view switches back.
@@ -55,7 +63,7 @@ class DeniedFallbackViewTest extends SpringBrowserlessTest {
 
         view.send(UI.getCurrent());
         assertLogContains("OS notification");
-        assertEquals(1, WebNotificationSimulator.shown().size());
+        assertEquals(1, browser.shown().size());
     }
 
     // findInView only returns visible components, so the heading inside the

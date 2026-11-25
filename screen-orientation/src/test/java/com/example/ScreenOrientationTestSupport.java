@@ -1,18 +1,16 @@
 package com.example;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import tools.jackson.databind.node.ObjectNode;
 
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.screenorientation.ScreenOrientation;
 import com.vaadin.flow.component.screenorientation.ScreenOrientationLockErrorCode;
 import com.vaadin.flow.component.screenorientation.ScreenOrientationType;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.js.JsCall;
 
 /**
  * Shared helper for browserless tests of the Screen Orientation API, which has
@@ -20,12 +18,29 @@ import com.vaadin.flow.js.JsCall;
  * <p>
  * {@link #setScreenOrientation} feeds
  * {@link ScreenOrientation#orientationSignal()} through the same public entry
- * point the client bridge uses. {@link #pendingLocks()} hands out the lock
- * requests a view sent, so a test can answer them as the browser would.
+ * point the client bridge uses. A test that answers lock requests starts a
+ * capture with {@link #capture()} before it navigates, typically in a
+ * {@code @BeforeEach} method; {@link #pendingLocks()} then hands out the lock
+ * requests the view sent to the browser, so the test can answer them as the
+ * browser would.
  */
 public final class ScreenOrientationTestSupport {
 
-    private ScreenOrientationTestSupport() {
+    private final ExecutedJavaScript executed;
+    private int read;
+
+    private ScreenOrientationTestSupport(UI ui) {
+        this.executed = ExecutedJavaScript.capture(ui);
+    }
+
+    /**
+     * Starts watching the lock requests sent to the browser of the current UI.
+     *
+     * @return the browser side of the lock requests, not null
+     */
+    public static ScreenOrientationTestSupport capture() {
+        return new ScreenOrientationTestSupport(
+                Objects.requireNonNull(UI.getCurrent()));
     }
 
     public static void setScreenOrientation(ScreenOrientationType orientation,
@@ -42,12 +57,12 @@ public final class ScreenOrientationTestSupport {
      *            the requested orientation, as the browser names it
      */
     public record PendingLock(String orientation,
-            PendingJavaScriptInvocation invocation) {
+            ExecutedJavaScript.Execution execution) {
 
         public void succeed() {
             ObjectNode result = JacksonUtils.createObjectNode();
             result.put("success", true);
-            invocation.complete(result);
+            execution.resolve(result);
         }
 
         public void fail(ScreenOrientationLockErrorCode code, String message) {
@@ -55,29 +70,25 @@ public final class ScreenOrientationTestSupport {
             result.put("success", false);
             result.put("code", code.name());
             result.put("message", message);
-            invocation.complete(result);
+            execution.resolve(result);
         }
     }
 
     /**
-     * Returns the lock requests sent since the last call, in the order the view
-     * sent them. Reading the queue empties it, so any other pending JavaScript
-     * is dropped too.
+     * Returns the lock requests sent to the browser since the last call, in the
+     * order the view sent them.
      */
-    public static List<PendingLock> pendingLocks() {
-        UIInternals internals = UI.getCurrent().getInternals();
-        internals.getStateTree().runExecutionsBeforeClientResponse();
-        List<PendingLock> locks = new ArrayList<>();
-        for (PendingJavaScriptInvocation invocation : internals
-                .dumpPendingJavaScriptInvocations()) {
-            JsCall call = invocation.getInvocation().getJsCall();
-            if (call != null && call
-                    .definitionType() == ScreenOrientation.ScreenOrientationJs.class
-                    && call.methodName().equals("lock")) {
-                locks.add(new PendingLock((String) call.arguments().get(0),
-                        invocation));
-            }
-        }
+    public List<PendingLock> pendingLocks() {
+        List<ExecutedJavaScript.Execution> sent = executed.getAll();
+        List<PendingLock> locks = sent.subList(read, sent.size()).stream()
+                .flatMap(execution -> execution.getJsCall().filter(call -> call
+                        .definitionType() == ScreenOrientation.ScreenOrientationJs.class
+                        && call.methodName().equals("lock"))
+                        .map(call -> new PendingLock(
+                                (String) call.arguments().get(0), execution))
+                        .stream())
+                .toList();
+        read = sent.size();
         return locks;
     }
 }

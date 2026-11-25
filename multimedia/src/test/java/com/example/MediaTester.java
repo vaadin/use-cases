@@ -2,25 +2,53 @@ package com.example;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.node.ObjectNode;
 
 import com.vaadin.browserless.ComponentTester;
-import com.vaadin.flow.component.UI;
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.flow.component.html.Media;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.internal.JacksonUtils;
 
 /**
  * Stands in for the browser side of a {@code <video>} / {@code <audio>} in
  * browserless tests: fires the media events the browser would send and exposes
  * the JavaScript calls ({@code play()}, {@code load()}, seeking, ...) the
- * server queued for the element. There is no media simulator in the test kit;
- * see {@code API-GAPS.md #10}.
+ * server sent for the element. There is no media simulator in the test kit; see
+ * {@code API-GAPS.md #10}.
+ * <p>
+ * {@link #takeJavaScript()} reads the JavaScript from a capture passed to
+ * {@link #MediaTester(Media, ExecutedJavaScript)}. A test starts it before it
+ * navigates, typically in a {@code @BeforeEach} method, so that it also holds
+ * the calls sent while the view was navigated to.
  */
 public class MediaTester extends ComponentTester<Media> {
 
+    private final @Nullable ExecutedJavaScript executed;
+    private int read;
+
+    /**
+     * Creates a tester that only fires media events.
+     *
+     * @param media
+     *            the media component
+     */
     public MediaTester(Media media) {
+        this(media, null);
+    }
+
+    /**
+     * Creates a tester that also reads what the server sent for the element.
+     *
+     * @param media
+     *            the media component
+     * @param executed
+     *            the capture of the JavaScript sent to the UI, or {@code null}
+     *            when the test does not read it
+     */
+    public MediaTester(Media media, @Nullable ExecutedJavaScript executed) {
         super(media);
+        this.executed = executed;
     }
 
     /**
@@ -69,23 +97,24 @@ public class MediaTester extends ComponentTester<Media> {
     }
 
     /**
-     * Takes the JavaScript the server queued for this element since the last
+     * Takes the JavaScript the server sent for this element since the last
      * call, in order. Each entry is the expression followed by its parameters,
      * since {@code callJsFunction} passes the function name as a parameter.
      *
-     * @return the queued expressions with their parameters
+     * @return the sent expressions with their parameters
      */
     public List<String> takeJavaScript() {
-        UI ui = UI.getCurrent();
-        // executeJs is queued before the response; run that step without
-        // the rest of the round trip, which would discard the calls.
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        return ui.getInternals().dumpPendingJavaScriptInvocations().stream()
-                .filter(invocation -> invocation.getOwner() == getComponent()
-                        .getElement().getNode())
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .map(invocation -> invocation.getExpression() + " "
-                        + invocation.getParameters())
+        if (executed == null) {
+            throw new IllegalStateException(
+                    "Create the tester with a capture to read its JavaScript");
+        }
+        List<ExecutedJavaScript.Execution> all = executed.getAll();
+        List<ExecutedJavaScript.Execution> sent = all.subList(read, all.size())
+                .stream().filter(execution -> execution.getElement()
+                        .equals(getComponent().getElement()))
                 .toList();
+        read = all.size();
+        return sent.stream().map(execution -> execution.getExpression() + " "
+                + execution.getParameters()).toList();
     }
 }

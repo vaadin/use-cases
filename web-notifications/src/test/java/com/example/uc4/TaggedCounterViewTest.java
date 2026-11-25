@@ -1,6 +1,7 @@
 package com.example.uc4;
 
 import com.example.WebNotificationSimulator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -20,6 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ViewPackages(classes = TaggedCounterView.class)
 class TaggedCounterViewTest extends SpringBrowserlessTest {
+
+    private WebNotificationSimulator browser;
+
+    @BeforeEach
+    void captureNotificationCalls() {
+        browser = WebNotificationSimulator.capture();
+    }
 
     @Test
     void viewRendersHeadingAndCounter() {
@@ -45,14 +53,13 @@ class TaggedCounterViewTest extends SpringBrowserlessTest {
         assertSpan("3 unread");
         assertLogContains("\"3 new messages\"  tag=inbox");
         // Same tag: only the latest notification is still live.
-        assertEquals(1, WebNotificationSimulator.shown().size());
-        assertEquals("3 new messages",
-                WebNotificationSimulator.shown().get(0).title());
+        assertEquals(1, browser.shown().size());
+        assertEquals("3 new messages", browser.shown().get(0).title());
 
         test(button("Mark all as read")).click();
         runPendingSignalsTasks();
         assertSpan("0 unread");
-        assertTrue(WebNotificationSimulator.shown().isEmpty());
+        assertTrue(browser.shown().isEmpty());
     }
 
     @Test
@@ -67,7 +74,7 @@ class TaggedCounterViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         assertLogContains("tag=(none)");
-        assertEquals(3, WebNotificationSimulator.shown().size());
+        assertEquals(3, browser.shown().size());
     }
 
     @Test
@@ -82,7 +89,7 @@ class TaggedCounterViewTest extends SpringBrowserlessTest {
 
         assertSpan("1 unread");
         assertLogContains("not shown — permission is prompt");
-        assertTrue(WebNotificationSimulator.shown().isEmpty());
+        assertTrue(browser.shown().isEmpty());
     }
 
     private Button button(String text) {

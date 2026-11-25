@@ -5,9 +5,11 @@ import java.util.Map;
 
 import com.example.documents.SampleDocuments;
 import com.example.pdfviewer.PdfViewerTester;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -20,13 +22,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ViewPackages(classes = ContentsPageView.class)
 class ContentsPageViewTest extends SpringBrowserlessTest {
 
+    private ExecutedJavaScript executed;
+
+    @BeforeEach
+    void captureJavaScript() {
+        executed = ExecutedJavaScript.capture();
+    }
+
     @Test
     void theBarShowsTheChapterOfTheCurrentPage() {
         Map<String, Integer> chapterPages = SampleDocuments.employeeHandbook()
                 .chapterPages();
         navigate(ContentsPageView.class);
         PdfViewerTester viewer = new PdfViewerTester(
-                findInView(PdfViewer.class).single());
+                findInView(PdfViewer.class).single(), executed);
         assertEquals("Contents", chapter());
 
         viewer.scrollTo(chapterPages.get("Travel"));
@@ -38,7 +47,7 @@ class ContentsPageViewTest extends SpringBrowserlessTest {
     void backToContentsOpensTheFirstPage() {
         navigate(ContentsPageView.class);
         PdfViewerTester viewer = new PdfViewerTester(
-                findInView(PdfViewer.class).single());
+                findInView(PdfViewer.class).single(), executed);
 
         test(findInView(Button.class).withText("Back to contents").single())
                 .click();

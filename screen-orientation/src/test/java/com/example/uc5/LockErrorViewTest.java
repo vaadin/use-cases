@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.example.ScreenOrientationTestSupport;
 import com.example.ScreenOrientationTestSupport.PendingLock;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -21,13 +22,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ViewPackages(classes = LockErrorView.class)
 class LockErrorViewTest extends SpringBrowserlessTest {
 
+    private ScreenOrientationTestSupport browser;
+
+    @BeforeEach
+    void captureLockRequests() {
+        browser = ScreenOrientationTestSupport.capture();
+    }
+
     @Test
     void aRejectedLockAddsOneLineWithTheCodeAndTheUserMessage() {
         navigate(LockErrorView.class);
         int before = logLines().size();
 
         test(button("Lock without fullscreen")).click();
-        List<PendingLock> locks = ScreenOrientationTestSupport.pendingLocks();
+        List<PendingLock> locks = browser.pendingLocks();
         assertEquals(1, locks.size());
         locks.get(0).fail(ScreenOrientationLockErrorCode.NOT_SUPPORTED,
                 "lock() is not available on this device.");
@@ -49,7 +57,7 @@ class LockErrorViewTest extends SpringBrowserlessTest {
         int before = logLines().size();
 
         test(button("Two locks in a row")).click();
-        List<PendingLock> locks = ScreenOrientationTestSupport.pendingLocks();
+        List<PendingLock> locks = browser.pendingLocks();
         assertEquals(List.of("landscape-primary", "portrait-primary"),
                 locks.stream().map(PendingLock::orientation).toList());
         locks.get(0).fail(ScreenOrientationLockErrorCode.ABORT, "Aborted");
