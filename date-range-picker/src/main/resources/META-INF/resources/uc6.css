@@ -1,0 +1,24 @@
+.uc6-phone {
+    width: 100%;
+    max-width: 360px;
+    border: 1px solid var(--vaadin-border-color);
+    border-radius: var(--vaadin-radius-l, 12px);
+    padding: var(--vaadin-padding-m, 0.75rem);
+    box-sizing: border-box;
+}
+
+.uc6-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vaadin-gap-s, 0.5rem);
+}
+
+.uc6-toolbar > * {
+    width: 100%;
+}
+
+.uc6-phone ul {
+    padding-left: 1.2em;
+    max-height: 20rem;
+    overflow: auto;
+}
