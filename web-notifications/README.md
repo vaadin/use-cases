@@ -9,7 +9,7 @@ click, exposes the permission as a signal and reports notification clicks back
 to the server.
 
 The API is not in the mainline snapshot yet, so this module builds against the
-`25.4.web-notification-api-SNAPSHOT` Flow build from
+`25.5.web-notification-api-SNAPSHOT` Flow build from
 [vaadin/flow#26495](https://github.com/vaadin/flow/pull/26495).
 
 | # | View | What it shows |
