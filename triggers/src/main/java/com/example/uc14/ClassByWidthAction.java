@@ -1,6 +1,5 @@
 package com.example.uc14;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -71,7 +70,7 @@ public class ClassByWidthAction extends Action {
     }
 
     @JsDefinition
-    private interface ClassByWidthJs extends Serializable {
+    private interface ClassByWidthJs extends JsSnippets {
 
         @JsExpression("""
                 const w = event.width;

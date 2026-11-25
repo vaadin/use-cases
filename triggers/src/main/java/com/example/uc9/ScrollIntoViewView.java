@@ -1,7 +1,5 @@
 package com.example.uc9;
 
-import java.io.Serializable;
-
 import com.example.common.UseCaseDescription;
 import com.example.views.MainLayout;
 
@@ -17,6 +15,7 @@ import com.vaadin.flow.component.trigger.internal.ClickTrigger;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -107,7 +106,7 @@ public class ScrollIntoViewView extends VerticalLayout {
     }
 
     @JsDefinition
-    private interface ScrollJs extends Serializable {
+    private interface ScrollJs extends JsInvokers {
 
         @JsExpression("this.scrollIntoView({behavior:'smooth',block:'center'})")
         void scrollIntoView();

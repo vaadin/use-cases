@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.example.ScreenOrientationTestSupport;
 import com.example.ScreenOrientationTestSupport.PendingLock;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -24,6 +25,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ViewPackages(classes = LockForVideoView.class)
 class LockForVideoViewTest extends SpringBrowserlessTest {
+
+    private ScreenOrientationTestSupport browser;
+
+    @BeforeEach
+    void captureLockRequests() {
+        browser = ScreenOrientationTestSupport.capture();
+    }
 
     @Test
     void playLocksToLandscapeAndStopReleasesIt() {
@@ -78,7 +86,7 @@ class LockForVideoViewTest extends SpringBrowserlessTest {
         // simulate; report it as the browser would.
         Fullscreen.setStateFromClient(UI.getCurrent(), "FULLSCREEN");
         test(button("Play")).click();
-        List<PendingLock> locks = ScreenOrientationTestSupport.pendingLocks();
+        List<PendingLock> locks = browser.pendingLocks();
         assertEquals(List.of("landscape-primary"),
                 locks.stream().map(PendingLock::orientation).toList());
         return locks.get(0);

@@ -1,7 +1,5 @@
 package com.example.uc8;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.JsFunction;
@@ -40,7 +38,7 @@ public class LongPressTrigger extends Trigger {
     }
 
     @JsDefinition
-    private interface LongPressJs extends Serializable {
+    private interface LongPressJs extends JsSnippets {
 
         @JsExpression("""
                 const ms = $1;

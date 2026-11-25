@@ -1,6 +1,5 @@
 package com.example.uc13;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -46,7 +45,7 @@ public class FilterListAction extends Action {
     }
 
     @JsDefinition
-    private interface FilterListJs extends Serializable {
+    private interface FilterListJs extends JsSnippets {
 
         @JsExpression("""
                 const q = ($1(event) || '').toLowerCase();

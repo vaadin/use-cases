@@ -1,6 +1,5 @@
 package com.example;
 
-import java.io.Serializable;
 import java.util.EnumSet;
 import java.util.Objects;
 
@@ -97,7 +96,7 @@ public class ShortcutTrigger extends Trigger {
     }
 
     @JsDefinition
-    private interface ShortcutJs extends Serializable {
+    private interface ShortcutJs extends JsSnippets {
 
         @JsExpression("""
                 const [keys, ctrl, shift, alt, meta] = [$1, $2, $3, $4, $5];

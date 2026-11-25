@@ -4,9 +4,11 @@ import java.util.List;
 
 import com.example.documents.SampleDocuments;
 import com.example.pdfviewer.PdfViewerTester;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -19,6 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 @SpringBootTest
 @ViewPackages(classes = TurnScanView.class)
 class TurnScanViewTest extends SpringBrowserlessTest {
+
+    private ExecutedJavaScript executed;
+
+    @BeforeEach
+    void captureJavaScript() {
+        executed = ExecutedJavaScript.capture();
+    }
 
     @Test
     void theScanHasASidewaysSecondPage() {
@@ -36,7 +45,7 @@ class TurnScanViewTest extends SpringBrowserlessTest {
     void turningTheCurrentPageReloadsTheDocumentAtThatPage() {
         navigate(TurnScanView.class);
         PdfViewer viewer = findInView(PdfViewer.class).single();
-        PdfViewerTester tester = new PdfViewerTester(viewer);
+        PdfViewerTester tester = new PdfViewerTester(viewer, executed);
         tester.load(2, "Delivery Note DN-5521");
         tester.scrollTo(2);
         String src = viewer.getElement().getAttribute("src");

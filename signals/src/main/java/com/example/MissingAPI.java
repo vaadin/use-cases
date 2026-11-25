@@ -10,6 +10,7 @@ import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -117,7 +118,7 @@ public class MissingAPI {
     }
 
     @JsDefinition
-    private interface ResizeObserverJs extends Serializable {
+    private interface ResizeObserverJs extends JsInvokers {
 
         @JsExpression("""
                 const resizeObserver = new ResizeObserver(entries => {

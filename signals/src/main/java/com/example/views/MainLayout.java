@@ -1,6 +1,5 @@
 package com.example.views;
 
-import java.io.Serializable;
 import java.util.Locale;
 import java.util.Map;
 
@@ -28,6 +27,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.Location;
 import com.vaadin.flow.router.PageTitle;
@@ -279,7 +279,7 @@ public class MainLayout extends BaseMainLayout {
     }
 
     @JsDefinition
-    private interface MainLayoutJs extends Serializable {
+    private interface MainLayoutJs extends JsInvokers {
 
         @JsExpression("const updateVisibility = () => {"
                 + "  const isVisible = document.visibilityState === 'visible';"

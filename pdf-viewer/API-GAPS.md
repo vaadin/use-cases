@@ -68,7 +68,7 @@ event that says whether it was wrong.
 
 **Where it bites:** UC8 / `LocalizedViewerView.java`, `ViewerTexts.java`
 **Symptom:** the viewer ships English only and does not follow the UI's
-locale, so an application has to supply all of `PdfViewerI18n`'s sixteen texts
+locale, so an application has to supply all of `PdfViewerI18n`'s nineteen texts
 for every language.
 **Workaround used:** `ViewerTexts` holds the Finnish and German texts, and the
 view sets them with `setI18n(...)` when the language changes.
@@ -84,8 +84,9 @@ languages, picked from the UI's locale by the Flow component, with
 JavaScript call that changes nothing on the server.
 **Workaround used:** `PdfViewerTester` (test sources) fires the DOM events
 with the data the Flow component reads, and simulates the user's page change
-with `setPropertyAsUser`. It reads the pages the view scrolled to from the
-queued JavaScript calls.
+with `setPropertyAsUser`. The test starts an `ExecutedJavaScript` capture
+before it navigates, and the tester reads the pages the view scrolled to from
+the calls it holds.
 **Suggested API:** a `PdfViewerTester` in browserless-test, with
 `load(int pageCount, String title)`, `fail(DocumentErrorReason)` and
 `scrollTo(int page)`, that also applies `scrollToPage(int)` to `getPage()`.
@@ -206,15 +207,16 @@ tooltip setters; they turn all pages, in the browser only.
 ## 14. No outline of the document's bookmarks
 
 **Where it bites:** UC4 / `ManualDeepLinkView.java`
-**Symptom:** the user guide has bookmarks for its chapters, but the viewer has
-no sidebar or outline to show them, and no thumbnails. A reader who opens a
-long guide can only page or scroll through it.
+**Symptom:** the user guide has bookmarks for its chapters, but the viewer
+does not show them. Its sidebar has page thumbnails only, so a reader who
+opens a long guide can page, scroll or pick a thumbnail, but can not jump to a
+chapter by name.
 **Workaround used:** the view lists help questions that link to the chapter
 pages, which the application knows because it generated the guide.
-**Suggested API:** an optional sidebar with the outline (and thumbnails), and
-an `outline` the server can read after `document-load`, so an application can
-build its own navigation for documents it did not write. The VCF add-on has a
-sidebar with an outline and thumbnails (`setSidebarOpened`).
+**Suggested API:** the outline in the sidebar next to the thumbnails, and an
+`outline` the server can read after `document-load`, so an application can
+build its own navigation for documents it did not write. The VCF add-on's
+sidebar has both an outline and thumbnails.
 
 ## 15. The toolbar can not be hidden
 

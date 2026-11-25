@@ -22,7 +22,7 @@
           transitively pulled by the components/vaadin BOMs. The
           flow-maven-plugin version follows the same property.
         -->
-        <flow.version>25.4.web-notification-api-SNAPSHOT</flow.version>
+        <flow.version>25.5.web-notification-api-SNAPSHOT</flow.version>
     </properties>
 
     <dependencies>

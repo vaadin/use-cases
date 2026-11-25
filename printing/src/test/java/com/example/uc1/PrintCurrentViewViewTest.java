@@ -4,9 +4,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.example.PrintTestSupport;
 import com.example.print.PrintEvents;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -25,6 +27,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ViewPackages(classes = PrintCurrentViewView.class)
 class PrintCurrentViewViewTest extends SpringBrowserlessTest {
 
+    private PrintTestSupport browser;
+
+    @BeforeEach
+    void captureJavaScript() {
+        browser = PrintTestSupport.capture();
+    }
+
     @Test
     void viewRendersTheDocumentAndTheControls() {
         navigate(PrintCurrentViewView.class);
@@ -40,11 +49,11 @@ class PrintCurrentViewViewTest extends SpringBrowserlessTest {
     @Test
     void printButtonOpensThePrintDialog() {
         navigate(PrintCurrentViewView.class);
-        assertFalse(PrintTestSupport.printRequested());
+        assertFalse(browser.printRequested());
 
         test(findInView(Button.class).id("print-button")).click();
 
-        assertTrue(PrintTestSupport.printRequested(),
+        assertTrue(browser.printRequested(),
                 "Clicking Print should call window.print()");
     }
 
@@ -103,11 +112,14 @@ class PrintCurrentViewViewTest extends SpringBrowserlessTest {
     void leavingTheViewTakesTheWindowListenersWithIt() {
         PrintCurrentViewView view = navigate(PrintCurrentViewView.class);
         PrintEvents events = findInView(PrintEvents.class).single();
-        roundTrip();
+        ExecutedJavaScript executed = ExecutedJavaScript.capture();
 
         view.remove(events);
 
-        assertTrue(PrintTestSupport.pendingJsContains("delete registry"),
+        assertTrue(
+                executed.getAll().stream()
+                        .anyMatch(execution -> execution.getExpression()
+                                .contains("delete registry")),
                 "Detaching must abort the window listeners, or every visit "
                         + "leaks another beforeprint/afterprint pair");
     }

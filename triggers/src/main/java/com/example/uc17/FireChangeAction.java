@@ -1,6 +1,5 @@
 package com.example.uc17;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -34,7 +33,7 @@ public class FireChangeAction extends Action {
     }
 
     @JsDefinition
-    private interface FireChangeJs extends Serializable {
+    private interface FireChangeJs extends JsSnippets {
 
         @JsExpression("$0.dispatchEvent(new Event('change'))")
         JsFunction fireChange(Element target);

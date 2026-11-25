@@ -2,7 +2,6 @@ package com.example;
 
 import jakarta.servlet.http.Cookie;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +13,7 @@ import org.jspecify.annotations.Nullable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.signals.Signal;
@@ -124,7 +124,7 @@ public final class LanguagePreference {
     }
 
     @JsDefinition
-    private interface CookieJs extends Serializable {
+    private interface CookieJs extends JsInvokers {
 
         @JsExpression("document.cookie = $0 + '=' + $1 + ';path=/;max-age=' + $2"
                 + " + ';SameSite=Lax'")

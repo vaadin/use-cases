@@ -1,7 +1,5 @@
 package com.example.uc5;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.HandlerInput;
@@ -47,7 +45,7 @@ public class IdleTrigger extends Trigger {
     }
 
     @JsDefinition
-    private interface IdleJs extends Serializable {
+    private interface IdleJs extends JsSnippets {
 
         @JsExpression("""
                 const ms = $1;

@@ -16,7 +16,7 @@ realistic situation where that scope, and not another, is the right fit.
 | UC7 | All of the above | Scope playground | Per-scope visit counters next to a table of what each scope is expected to survive: a reload, a new tab, a duplicated tab, another browser, or navigating away. |
 
 The browser tab scope is not released yet. The module overrides
-`flow.version` with the `25.4.browser-tab-scope-SNAPSHOT` build of
+`flow.version` with the `25.5.browser-tab-scope-SNAPSHOT` build of
 vaadin/flow#25901; switch back to the parent's version once `BrowserTab` and
 `@BrowserTabScope` are released.
 

@@ -1,6 +1,5 @@
 package com.example.uc10;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -48,7 +47,7 @@ public class HighlightAction extends Action {
     }
 
     @JsDefinition
-    private interface HighlightJs extends Serializable {
+    private interface HighlightJs extends JsSnippets {
 
         @JsExpression("""
                 const t=$0;

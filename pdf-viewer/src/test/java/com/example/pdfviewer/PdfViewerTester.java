@@ -2,10 +2,11 @@ package com.example.pdfviewer;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.node.ObjectNode;
 
 import com.vaadin.browserless.ComponentTester;
-import com.vaadin.flow.component.UI;
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -17,11 +18,41 @@ import com.vaadin.flow.internal.JacksonUtils;
  * Browserless tests have no tester for the viewer (API-GAPS.md #5). This one
  * fires the same events the web component fires, with the data the Flow
  * component reads from them.
+ * <p>
+ * {@link #takeScrollToPage()} and {@link #takeDownloads()} read the JavaScript
+ * from a capture passed to
+ * {@link #PdfViewerTester(PdfViewer, ExecutedJavaScript)}. A test starts it
+ * before it navigates, typically in a {@code @BeforeEach} method, so that it
+ * also holds the calls sent while the view was navigated to.
  */
 public class PdfViewerTester extends ComponentTester<PdfViewer> {
 
+    private final @Nullable ExecutedJavaScript executed;
+    private int read;
+
+    /**
+     * Creates a tester that only simulates the browser side.
+     *
+     * @param viewer
+     *            the viewer
+     */
     public PdfViewerTester(PdfViewer viewer) {
+        this(viewer, null);
+    }
+
+    /**
+     * Creates a tester that also reads what the server sent to the viewer.
+     *
+     * @param viewer
+     *            the viewer
+     * @param executed
+     *            the capture of the JavaScript sent to the UI, or {@code null}
+     *            when the test does not read it
+     */
+    public PdfViewerTester(PdfViewer viewer,
+            @Nullable ExecutedJavaScript executed) {
         super(viewer);
+        this.executed = executed;
     }
 
     /** The document has loaded, as {@code document-load} reports it. */
@@ -52,7 +83,7 @@ public class PdfViewerTester extends ComponentTester<PdfViewer> {
     /**
      * Takes the pages the server asked the viewer to scroll to with
      * {@link PdfViewer#scrollToPage(int)} since the last call, in order. Other
-     * calls queued for the viewer are dropped.
+     * calls sent to the viewer are dropped.
      *
      * @return the pages
      */
@@ -64,7 +95,7 @@ public class PdfViewerTester extends ComponentTester<PdfViewer> {
     /**
      * Takes the number of times the server asked the viewer to download the
      * document with {@link PdfViewer#download()} since the last call. Other
-     * calls queued for the viewer are dropped.
+     * calls sent to the viewer are dropped.
      *
      * @return the number of downloads
      */
@@ -73,18 +104,22 @@ public class PdfViewerTester extends ComponentTester<PdfViewer> {
     }
 
     /**
-     * Takes the arguments of each call of a function of the web component
-     * queued with {@code callJsFunction}, and drops the other calls.
+     * Takes the arguments of each call of a function of the web component sent
+     * with {@code callJsFunction}, and drops the other calls sent to the
+     * viewer.
      */
     private List<List<Object>> takeCalls(String function) {
-        UI ui = UI.getCurrent();
-        // callJsFunction is queued before the response; run that step without
-        // the rest of the round trip, which would discard the calls.
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        return ui.getInternals().dumpPendingJavaScriptInvocations().stream()
-                .filter(invocation -> invocation.getOwner() == getComponent()
-                        .getElement().getNode())
-                .map(invocation -> invocation.getInvocation().getParameters())
+        if (executed == null) {
+            throw new IllegalStateException(
+                    "Create the tester with a capture to read its JavaScript");
+        }
+        List<ExecutedJavaScript.Execution> all = executed.getAll();
+        List<ExecutedJavaScript.Execution> sent = all.subList(read, all.size())
+                .stream().filter(execution -> execution.getElement()
+                        .equals(getComponent().getElement()))
+                .toList();
+        read = all.size();
+        return sent.stream().map(ExecutedJavaScript.Execution::getParameters)
                 .filter(parameters -> parameters.contains(function))
                 .map(parameters -> parameters.subList(
                         parameters.indexOf(function) + 1, parameters.size()))

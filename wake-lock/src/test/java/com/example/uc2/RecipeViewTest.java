@@ -2,7 +2,9 @@ package com.example.uc2;
 
 import java.util.List;
 
+import com.example.WakeLockTestSupport;
 import com.example.home.HomeView;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -15,7 +17,6 @@ import com.vaadin.flow.component.wakelock.WakeLockAvailability;
 
 import static com.example.WakeLockTestSupport.RELEASE;
 import static com.example.WakeLockTestSupport.REQUEST;
-import static com.example.WakeLockTestSupport.answerWakeLockCalls;
 import static com.example.WakeLockTestSupport.simulateAvailability;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -23,18 +24,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ViewPackages(classes = { RecipeView.class, HomeView.class })
 class RecipeViewTest extends SpringBrowserlessTest {
 
+    private WakeLockTestSupport browser;
+
+    @BeforeEach
+    void captureWakeLockCalls() {
+        browser = WakeLockTestSupport.capture();
+    }
+
     @Test
     void openingRequestsTheLockAndLeavingReleasesIt() {
         navigate(RecipeView.class);
         runPendingSignalsTasks();
         assertBadge("Requested — waiting for the browser");
 
-        assertEquals(List.of(REQUEST), answerWakeLockCalls());
+        assertEquals(List.of(REQUEST), browser.answerWakeLockCalls());
         runPendingSignalsTasks();
         assertBadge("Holding — the screen stays on");
 
         navigate(HomeView.class);
-        assertEquals(List.of(RELEASE), answerWakeLockCalls());
+        assertEquals(List.of(RELEASE), browser.answerWakeLockCalls());
     }
 
     @Test

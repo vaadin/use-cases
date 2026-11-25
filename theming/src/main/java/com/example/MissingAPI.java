@@ -1,6 +1,5 @@
 package com.example;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +12,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -120,7 +120,7 @@ public final class MissingAPI {
     }
 
     @JsDefinition
-    private interface ThemingJs extends Serializable {
+    private interface ThemingJs extends JsInvokers {
 
         @JsExpression("""
                 const query = matchMedia($0);

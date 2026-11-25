@@ -1,6 +1,5 @@
 package com.example.uc9;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -38,7 +37,7 @@ public class ScrollIntoViewAction extends Action {
     }
 
     @JsDefinition
-    private interface ScrollJs extends Serializable {
+    private interface ScrollJs extends JsSnippets {
 
         @JsExpression("$0.scrollIntoView({behavior:'smooth',block:'center'})")
         JsFunction scrollIntoView(Element target);

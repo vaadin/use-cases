@@ -33,6 +33,13 @@ import static org.mockito.Mockito.verify;
 @ViewPackages(classes = { HiddenTabOnlyView.class, HomeView.class })
 class HiddenTabOnlyViewTest extends SpringBrowserlessTest {
 
+    private WebNotificationSimulator browser;
+
+    @BeforeEach
+    void captureNotificationCalls() {
+        browser = WebNotificationSimulator.capture();
+    }
+
     // The tests deliver messages by hand instead of waiting five seconds.
     @MockitoBean
     private TaskScheduler taskScheduler;
@@ -70,12 +77,12 @@ class HiddenTabOnlyViewTest extends SpringBrowserlessTest {
         setVisibility(PageVisibility.VISIBLE);
         view.deliver(UI.getCurrent());
         assertLogContains("tab=VISIBLE  →  in-app (user is looking)");
-        assertTrue(WebNotificationSimulator.shown().isEmpty());
+        assertTrue(browser.shown().isEmpty());
 
         setVisibility(PageVisibility.HIDDEN);
         view.deliver(UI.getCurrent());
         assertLogContains("tab=HIDDEN  →  OS notification (user is away)");
-        assertEquals(1, WebNotificationSimulator.shown().size());
+        assertEquals(1, browser.shown().size());
 
         setVisibility(PageVisibility.VISIBLE_NOT_FOCUSED);
         view.deliver(UI.getCurrent());
@@ -92,7 +99,7 @@ class HiddenTabOnlyViewTest extends SpringBrowserlessTest {
 
         view.deliver(UI.getCurrent());
         assertLogContains("in-app (user is away, but permission is denied)");
-        assertTrue(WebNotificationSimulator.shown().isEmpty());
+        assertTrue(browser.shown().isEmpty());
     }
 
     private void setVisibility(PageVisibility state) {

@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Locale;
 
 import com.example.MediaTester;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.UI;
@@ -36,6 +38,13 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @ViewPackages(classes = SubtitlesView.class)
 class SubtitlesViewTest extends SpringBrowserlessTest {
+
+    private ExecutedJavaScript executed;
+
+    @BeforeEach
+    void captureJavaScript() {
+        executed = ExecutedJavaScript.capture();
+    }
 
     @Test
     void addsOneServedTrackPerLanguage() throws IOException {
@@ -61,7 +70,8 @@ class SubtitlesViewTest extends SpringBrowserlessTest {
     @Test
     void pickerSwitchesTheShowingTrack() {
         navigate(SubtitlesView.class);
-        MediaTester media = new MediaTester(findInView(Video.class).single());
+        MediaTester media = new MediaTester(findInView(Video.class).single(),
+                executed);
         media.takeJavaScript();
 
         @SuppressWarnings("unchecked")

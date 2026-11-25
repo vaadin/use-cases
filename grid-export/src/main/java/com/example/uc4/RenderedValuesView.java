@@ -1,6 +1,5 @@
 package com.example.uc4;
 
-import java.io.Serializable;
 import java.util.Locale;
 
 import com.example.common.UseCaseDescription;
@@ -194,7 +193,7 @@ public class RenderedValuesView extends VerticalLayout {
     }
 
     @JsDefinition
-    private interface ColumnTemplates extends Serializable {
+    private interface ColumnTemplates extends JsSnippets {
 
         @JsExpression("return html`<span>${item.country}</span>`;")
         CompiledLitTemplate country();

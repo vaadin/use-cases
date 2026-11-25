@@ -1,7 +1,5 @@
 package com.example.uc22;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.trigger.internal.Action;
 import com.vaadin.flow.component.trigger.internal.HandlerInput;
@@ -38,7 +36,7 @@ public class KeyboardEventTrigger extends Trigger {
     }
 
     @JsDefinition
-    private interface KeyboardJs extends Serializable {
+    private interface KeyboardJs extends JsSnippets {
 
         @JsExpression("""
                 const listener = (e) => $0(e);

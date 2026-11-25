@@ -3,7 +3,6 @@ package com.example;
 import java.util.List;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelMap;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
@@ -47,15 +46,5 @@ public final class TriggerCallbacks {
     public static void resolve(Component host, Object value) {
         fire(host, JacksonUtils.getMapper().createObjectNode().put("ok", true)
                 .set("value", JacksonUtils.getMapper().valueToTree(value)));
-    }
-
-    /** The parameters of the JavaScript calls queued for the browser. */
-    public static List<Object> pendingJavaScriptParameters() {
-        UI ui = UI.getCurrent();
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        return ui.getInternals().dumpPendingJavaScriptInvocations().stream()
-                .flatMap(pending -> pending.getInvocation().getParameters()
-                        .stream())
-                .toList();
     }
 }

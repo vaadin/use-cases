@@ -3,9 +3,11 @@ package com.example.uc14;
 import java.util.List;
 
 import com.example.pdfviewer.PdfViewerTester;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.vaadin.browserless.ExecutedJavaScript;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -20,6 +22,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ViewPackages(classes = PresentResultsView.class)
 class PresentResultsViewTest extends SpringBrowserlessTest {
+
+    private ExecutedJavaScript executed;
+
+    @BeforeEach
+    void captureJavaScript() {
+        executed = ExecutedJavaScript.capture();
+    }
 
     @Test
     void theViewerShowsTheSlidesFittedWithoutItsHeader() {
@@ -36,7 +45,7 @@ class PresentResultsViewTest extends SpringBrowserlessTest {
     void theAppsButtonsMoveBetweenSlidesAndFollowThePage() {
         navigate(PresentResultsView.class);
         PdfViewerTester viewer = new PdfViewerTester(
-                findInView(PdfViewer.class).single());
+                findInView(PdfViewer.class).single(), executed);
         assertEquals("Loading…", position());
         assertFalse(button("Next").isEnabled());
 
@@ -62,7 +71,7 @@ class PresentResultsViewTest extends SpringBrowserlessTest {
     void theAppsDownloadButtonDownloadsTheLoadedSlides() {
         navigate(PresentResultsView.class);
         PdfViewerTester viewer = new PdfViewerTester(
-                findInView(PdfViewer.class).single());
+                findInView(PdfViewer.class).single(), executed);
         assertFalse(downloadButton().isEnabled());
 
         viewer.load(5, "Q3 2026 Results");

@@ -3,6 +3,7 @@ package com.example.uc2;
 import java.util.Map;
 
 import com.example.PrintTestSupport;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -18,6 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ViewPackages(classes = PackingSlipView.class)
 class PackingSlipViewTest extends SpringBrowserlessTest {
 
+    private PrintTestSupport browser;
+
+    @BeforeEach
+    void captureJavaScript() {
+        browser = PrintTestSupport.capture();
+    }
+
     @Test
     void slipRendersTheOrderAndPrintsItselfWithoutAnyChrome() {
         navigate(PackingSlipView.class, Map.of("orderId", "ORD-1003"));
@@ -27,10 +35,10 @@ class PackingSlipViewTest extends SpringBrowserlessTest {
                 .contains("ORD-1003"));
         assertTrue(document.hasClassName("printable"));
 
-        assertTrue(PrintTestSupport.pendingJsContains("requestAnimationFrame"),
+        assertTrue(browser.sentJsContains("requestAnimationFrame"),
                 "The slip must wait for a painted frame before printing");
-        assertTrue(PrintTestSupport.printRequested());
-        assertTrue(PrintTestSupport.pendingJsContains("afterprint"),
+        assertTrue(browser.printRequested());
+        assertTrue(browser.sentJsContains("afterprint"),
                 "The print window should close itself again");
     }
 
@@ -40,7 +48,7 @@ class PackingSlipViewTest extends SpringBrowserlessTest {
 
         assertTrue(findInView(Paragraph.class).all().stream()
                 .anyMatch(p -> p.getText().contains("No order ORD-9999")));
-        assertFalse(PrintTestSupport.printRequested(),
+        assertFalse(browser.printRequested(),
                 "An empty page should not open the print dialog");
     }
 }
