@@ -1,9 +1,16 @@
 /* The value and its copy button share the cell; the button stays out of the
    way until the row is worth acting on. */
 .uc8-copy-cell {
-    padding: 0;
+    display: flex;
+    align-items: center;
     gap: var(--vaadin-gap-s);
     width: 100%;
+}
+
+/* Keeps the buttons in a column of their own instead of trailing behind each
+   address. */
+.uc8-copy-cell > span {
+    flex-grow: 1;
 }
 
 .uc8-copy-cell vaadin-button {
