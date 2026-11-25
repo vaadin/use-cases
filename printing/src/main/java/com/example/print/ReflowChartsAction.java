@@ -1,6 +1,5 @@
 package com.example.print;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -44,7 +43,7 @@ public class ReflowChartsAction extends Action {
     }
 
     @JsDefinition
-    private interface ReflowChartsJs extends Serializable {
+    private interface ReflowChartsJs extends JsSnippets {
 
         @JsExpression("""
                 for (const chart of $0.querySelectorAll('vaadin-chart')) {

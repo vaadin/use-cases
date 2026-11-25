@@ -1,7 +1,5 @@
 package com.example;
 
-import java.io.Serializable;
-
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
@@ -12,6 +10,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -114,7 +113,7 @@ public final class MissingAPI {
     }
 
     @JsDefinition
-    private interface UploadJs extends Serializable {
+    private interface UploadJs extends JsInvokers {
 
         @JsExpression("""
                 this.files.filter(file => file.uploading).forEach(file =>

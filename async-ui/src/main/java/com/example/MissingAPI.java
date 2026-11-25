@@ -1,6 +1,5 @@
 package com.example;
 
-import java.io.Serializable;
 import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -15,6 +14,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -142,7 +142,7 @@ public final class MissingAPI {
     }
 
     @JsDefinition
-    private interface VisibilityJs extends Serializable {
+    private interface VisibilityJs extends JsInvokers {
 
         @JsExpression("""
                 const element = this;

@@ -1,6 +1,5 @@
 package com.example.uc23;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -63,7 +62,7 @@ public class SequenceTrigger extends Trigger {
     }
 
     @JsDefinition
-    private interface SequenceJs extends Serializable {
+    private interface SequenceJs extends JsSnippets {
 
         @JsExpression("""
                 const seq = $1;

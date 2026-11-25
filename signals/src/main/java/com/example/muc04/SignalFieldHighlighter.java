@@ -1,6 +1,5 @@
 package com.example.muc04;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
@@ -16,6 +15,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
 
@@ -157,7 +157,7 @@ public class SignalFieldHighlighter extends FieldHighlighterInitializer {
     }
 
     @JsDefinition
-    private interface FieldHighlighterJs extends Serializable {
+    private interface FieldHighlighterJs extends JsInvokers {
 
         @JsExpression(FH_CLASS + ".setUsers(this, $0)")
         void setUsers(ArrayNode users);

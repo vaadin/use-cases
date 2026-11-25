@@ -1,6 +1,5 @@
 package com.example.print;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -49,7 +48,7 @@ public class RenderNowAction extends Action {
     }
 
     @JsDefinition
-    private interface RenderNowJs extends Serializable {
+    private interface RenderNowJs extends JsSnippets {
 
         @JsExpression("$0.performUpdate?.();")
         JsFunction renderNow(Element element);

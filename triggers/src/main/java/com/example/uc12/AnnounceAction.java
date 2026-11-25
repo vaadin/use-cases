@@ -1,6 +1,5 @@
 package com.example.uc12;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -46,7 +45,7 @@ public class AnnounceAction extends Action {
     }
 
     @JsDefinition
-    private interface AnnounceJs extends Serializable {
+    private interface AnnounceJs extends JsSnippets {
 
         @JsExpression("$0.textContent='';$0.textContent=$1")
         JsFunction announce(Element liveRegion, String message);

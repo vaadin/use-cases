@@ -1,6 +1,5 @@
 package com.example.usecase10;
 
-import java.io.Serializable;
 import java.util.UUID;
 
 import com.example.common.UseCaseDescription;
@@ -22,6 +21,7 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.js.JsInvokers;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -303,7 +303,7 @@ public class UseCase10View extends VerticalLayout {
     }
 
     @JsDefinition
-    private interface UseCase10Js extends Serializable {
+    private interface UseCase10Js extends JsInvokers {
 
         @JsExpression("""
                     const mq = window.matchMedia('(prefers-color-scheme: dark)');
