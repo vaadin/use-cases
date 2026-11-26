@@ -117,7 +117,7 @@ class PrintCurrentViewViewTest extends SpringBrowserlessTest {
         view.remove(events);
 
         assertTrue(
-                executed.getAll().stream()
+                executed.getExecutions().stream()
                         .anyMatch(execution -> execution.getExpression()
                                 .contains("delete registry")),
                 "Detaching must abort the window listeners, or every visit "

@@ -33,7 +33,7 @@ class HiddenShareLinkViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         assertTrue(
-                executed.getAll().stream().anyMatch(
+                executed.getExecutions().stream().anyMatch(
                         execution -> execution.getParameters().contains(LINK)),
                 "the link is mirrored to the button");
         assertFalse(

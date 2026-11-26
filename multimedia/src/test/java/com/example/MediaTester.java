@@ -108,7 +108,7 @@ public class MediaTester extends ComponentTester<Media> {
             throw new IllegalStateException(
                     "Create the tester with a capture to read its JavaScript");
         }
-        List<ExecutedJavaScript.Execution> all = executed.getAll();
+        List<ExecutedJavaScript.Execution> all = executed.getExecutions();
         List<ExecutedJavaScript.Execution> sent = all.subList(read, all.size())
                 .stream().filter(execution -> execution.getElement()
                         .equals(getComponent().getElement()))

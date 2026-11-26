@@ -63,7 +63,7 @@ public final class TextSelectionTestSupport {
             Component field) {
         ExecutedJavaScript executed = ExecutedJavaScript.capture();
         new ButtonTester<>(button).click();
-        return executed.getAll().stream()
+        return executed.getExecutions().stream()
                 .filter(execution -> execution.getElement()
                         .equals(field.getElement()))
                 .flatMap(execution -> execution.getJsCall().stream())

@@ -65,7 +65,7 @@ class PrintPreviewViewTest extends SpringBrowserlessTest {
 
         test(findInView(Button.class).id("print-button")).click();
 
-        List<String> sent = executed.getAll().stream()
+        List<String> sent = executed.getExecutions().stream()
                 .map(ExecutedJavaScript.Execution::getExpression).toList();
         int pageRule = indexOf(sent, "style.textContent");
         int print = indexOf(sent, "window.print()");

@@ -79,7 +79,7 @@ public final class ScreenOrientationTestSupport {
      * order the view sent them.
      */
     public List<PendingLock> pendingLocks() {
-        List<ExecutedJavaScript.Execution> sent = executed.getAll();
+        List<ExecutedJavaScript.Execution> sent = executed.getExecutions();
         List<PendingLock> locks = sent.subList(read, sent.size()).stream()
                 .flatMap(execution -> execution.getJsCall().filter(call -> call
                         .definitionType() == ScreenOrientation.ScreenOrientationJs.class
