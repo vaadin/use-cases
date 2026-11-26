@@ -71,7 +71,7 @@ public final class WebNotificationSimulator {
      * tag.
      */
     public List<ShownNotification> shown() {
-        List<ExecutedJavaScript.Execution> sent = executed.getAll();
+        List<ExecutedJavaScript.Execution> sent = executed.getExecutions();
         List<ExecutedJavaScript.Execution> received = List
                 .copyOf(sent.subList(read, sent.size()));
         read = sent.size();

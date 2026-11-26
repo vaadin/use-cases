@@ -104,7 +104,7 @@ public final class PrintTestSupport {
     }
 
     private List<ExecutedJavaScript.Execution> sent() {
-        return executed.getAll();
+        return executed.getExecutions();
     }
 
     private static Stream<Object> values(Object value) {

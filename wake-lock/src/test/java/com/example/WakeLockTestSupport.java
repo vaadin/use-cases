@@ -55,7 +55,7 @@ public final class WakeLockTestSupport {
      * @return the calls, each {@link #REQUEST} or {@link #RELEASE}
      */
     public List<String> answerWakeLockCalls() {
-        List<ExecutedJavaScript.Execution> sent = executed.getAll();
+        List<ExecutedJavaScript.Execution> sent = executed.getExecutions();
         List<String> calls = sent.subList(answered, sent.size()).stream()
                 .map(execution -> wakeLockCall(execution.getExpression()))
                 .filter(Objects::nonNull).toList();

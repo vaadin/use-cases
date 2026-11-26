@@ -52,7 +52,7 @@ class MainLayoutTest extends SpringBrowserlessTest {
 
         test($(Button.class).withText("Log in").single()).click();
 
-        String reload = executed.getAll().stream()
+        String reload = executed.getExecutions().stream()
                 .flatMap(execution -> execution.getParameters().stream())
                 .map(String::valueOf).filter(p -> p.contains("tab=2"))
                 .findFirst().orElse("");

@@ -49,7 +49,7 @@ class ScrollIntoViewViewTest extends SpringBrowserlessTest {
 
     private static long scrollCallsFor(ExecutedJavaScript executed,
             Element element) {
-        return executed.getAll().stream()
+        return executed.getExecutions().stream()
                 .filter(execution -> execution.getElement().equals(element))
                 .filter(execution -> execution.getExpression()
                         .contains("scrollIntoView"))
